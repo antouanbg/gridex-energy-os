@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://technosun-energy-os.sites.openai.com"),
+  metadataBase: new URL("https://technosun-energy-os.novacom-grou-6812.chatgpt.site"),
   title: "TechnoSun Energy OS",
   description: "Интелигентна EMS платформа за енергийни обекти, батерии, пазари и SCADA управление.",
   openGraph: {
