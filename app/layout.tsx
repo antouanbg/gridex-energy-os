@@ -14,16 +14,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://technosun-energy-os.novacom-grou-6812.chatgpt.site"),
-  title: "TechnoSun Energy OS",
+  title: "GrideX Energy OS",
   description: "Интелигентна EMS платформа за енергийни обекти, батерии, пазари и SCADA управление.",
   openGraph: {
-    title: "TechnoSun Energy OS",
+    title: "GrideX Energy OS",
     description: "Smart control for every watt",
-    images: [{ url: "/og.png", width: 1672, height: 941, alt: "TechnoSun Energy OS" }],
+    images: [{ url: "/og.png", width: 1672, height: 941, alt: "GrideX Energy OS" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TechnoSun Energy OS",
+    title: "GrideX Energy OS",
     description: "Smart control for every watt",
     images: ["/og.png"],
   },
