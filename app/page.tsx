@@ -45,6 +45,30 @@ const scheduleValues = [-20, -28, -34, -30, -18, 0, 18, 30, 22, 8, 0, 0, -12, -2
 
 type UiLanguage = "bg" | "en";
 
+type BatteryCostSettings = {
+  capex:number;
+  years:number;
+  residual:number;
+  maintenance:number;
+  annualThroughput:number;
+  warrantedCycles:number;
+  todayCycles:number;
+  method:"usage"|"straight";
+  included:boolean;
+};
+
+const initialBatteryCost:BatteryCostSettings = {
+  capex:420000,
+  years:10,
+  residual:10,
+  maintenance:0.8,
+  annualThroughput:720,
+  warrantedCycles:8000,
+  todayCycles:0.78,
+  method:"usage",
+  included:true,
+};
+
 const englishPhrases: [string, string][] = [
   ["Фотоволтаици", "Solar PV"],
   ["Към мрежата", "To grid"],
@@ -718,6 +742,7 @@ export default function Home() {
   const [role, setRole] = useState("Администратор");
   const [lang,setLang] = useState<"bg"|"en">("bg");
   const [batteryNotice,setBatteryNotice] = useState(true);
+  const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
   const [toast, setToast] = useState("");
   usePageLanguage(lang);
 
@@ -766,11 +791,11 @@ export default function Home() {
         {view === "customers" && <Customers navigate={navigate} notify={notify}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate}/>} 
         {view === "assets" && <Assets navigate={navigate} notify={notify}/>}
-        {view === "battery" && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)}/>}
+        {view === "battery" && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "schedule" && <Schedule notify={notify}/>} 
         {view === "market" && <Market lang={lang} notify={notify}/>}
         {view === "settlement" && <Settlement notify={notify}/>}
-        {view === "automation" && <Automation notify={notify} site={site} lang={lang}/>}
+        {view === "automation" && <Automation notify={notify} site={site} lang={lang} batteryCost={batteryCost}/>}
         {view === "balance" && <Balance/>} 
         {view === "gateway" && <Gateway notify={notify}/>}
         {view === "devices" && <Devices notify={notify}/>} 
@@ -871,44 +896,56 @@ function Customers({navigate,notify}:{navigate:(v:string)=>void;notify:(v:string
   </>;
 }
 
-function Battery({auto,setAuto,notify,lang,resolveNotice}:{auto:boolean;setAuto:(v:boolean)=>void;notify:(v:string)=>void;lang:UiLanguage;resolveNotice:()=>void}) {
+function Battery({auto,setAuto,notify,lang,resolveNotice,batteryCost,setBatteryCost}:{auto:boolean;setAuto:(v:boolean)=>void;notify:(v:string)=>void;lang:UiLanguage;resolveNotice:()=>void;batteryCost:BatteryCostSettings;setBatteryCost:React.Dispatch<React.SetStateAction<BatteryCostSettings>>}) {
   const [strategy,setStrategy] = useState("Ценови арбитраж");
   const [soc,setSoc] = useState(20);
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const applyRecommendation=()=>{setAuto(true);setSoc(35);setStrategy("Интелигентен хибрид");resolveNotice();notify(t("Препоръката е приложена: резерв 35% и автоматичен режим","Recommendation applied: 35% reserve and automatic mode"));};
-  return <><div className="battery-hero card"><div className="battery-gauge"><div className="gauge-ring"><strong>72%</strong><span>SOC</span></div><p>1.44 MWh налични</p></div><div className="battery-main"><PanelTitle eyebrow="BESS / TESVOLT TPS-E" title="2.0 MWh · 500 kW" action={<span className="pill green">● Отлично състояние</span>}/><div className="battery-values"><div><span>Мощност</span><strong>+41.1 kW</strong><small>Зареждане</small></div><div><span>SOH</span><strong>98.2%</strong><small>Здраве на клетките</small></div><div><span>Температура</span><strong>24.6°C</strong><small>В норма</small></div><div><span>Цикли</span><strong>384</strong><small>от 8 000</small></div></div></div></div><section className="section-message warning" data-no-translate><i>!</i><div><small>{t("1 СЪОБЩЕНИЕ · НУЖДА ОТ ПРЕГЛЕД","1 MESSAGE · REVIEW NEEDED")}</small><strong>{t("Минималният SOC не съответства на утрешната прогноза","Minimum SOC does not match tomorrow’s forecast")}</strong><p>{t("Зададени са 20%, но при слаб PV ден и вечерен ценови пик автоматичният режим препоръчва резерв 35% и покупка само под ценовия праг.","The current target is 20%, but with a low-PV day and an evening price peak, automatic mode recommends a 35% reserve and grid charging only below the price threshold.")}</p></div><button onClick={applyRecommendation}>{t("Приложи препоръката","Apply recommendation")}</button></section><section className="settings-grid"><article className="card settings-panel"><PanelTitle eyebrow="РЕЖИМ НА РАБОТА" title="Стратегия за оптимизация"/><div className="switch-row"><span><strong>Автоматично управление</strong><small>EMS изпълнява оптималния график</small></span><button className={auto?"toggle on":"toggle"} onClick={()=>setAuto(!auto)} aria-label="Автоматично управление"/></div><div className="strategy-list">{["Интелигентен хибрид","Ценови арбитраж","Максимална собствена консумация","Zero export","Peak shaving"].map(s=><button key={s} className={strategy===s?"selected":""} onClick={()=>setStrategy(s)}><i>{strategy===s?"●":"○"}</i><span><strong>{s}</strong><small>{s === "Интелигентен хибрид" ? "Цена + поток + PV и товарова прогноза" : s === "Ценови арбитраж" ? "Купува при ниска и продава при висока цена" : s === "Peak shaving" ? "Ограничава върховото потребление" : "Автоматично управление на енергийния поток"}</small></span></button>)}</div></article><article className="card settings-panel"><PanelTitle eyebrow="ГРАНИЦИ И ЗАЩИТИ" title="Оперативни настройки"/><label className="range-label"><span>Минимален SOC<strong>{soc}%</strong></span><input type="range" min="10" max="50" value={soc} onChange={e=>setSoc(Number(e.target.value))}/><small>Запазен резерв: {(2*soc/100).toFixed(2)} MWh</small></label><div className="setting-row"><span>Максимална мощност заряд</span><b>450 kW</b></div><div className="setting-row"><span>Максимална мощност разряд</span><b>500 kW</b></div><div className="setting-row"><span>Софтуерен предпазител</span><b>780 kW</b></div><button className="primary-btn" onClick={()=>notify("Настройките на батерията са запазени")}>Запази настройките</button></article></section><BatteryAssetCost lang={lang} notify={notify}/><article className="card command-log"><PanelTitle eyebrow="ИСТОРИЯ НА КОМАНДИТЕ" title="Последни автоматични действия"/><DataTable headers={["Час","Команда","Мощност","Причина","Резултат"]} rows={[["14:31","Продажба","83.2 kW","Висока цена + пик на товара","Изпълнена"],["13:58","Ограничаване","41.1 kW","SOC цел 72%","Изпълнена"],["12:45","Зареждане","126.0 kW","PV излишък + ниска цена","Изпълнена"],["10:15","Zero export","0 kW","Мрежов лимит","Изпълнена"]]}/></article></>;
+  return <><div className="battery-hero card"><div className="battery-gauge"><div className="gauge-ring"><strong>72%</strong><span>SOC</span></div><p>1.44 MWh налични</p></div><div className="battery-main"><PanelTitle eyebrow="BESS / TESVOLT TPS-E" title="2.0 MWh · 500 kW" action={<span className="pill green">● Отлично състояние</span>}/><div className="battery-values"><div><span>Мощност</span><strong>+41.1 kW</strong><small>Зареждане</small></div><div><span>SOH</span><strong>98.2%</strong><small>Здраве на клетките</small></div><div><span>Температура</span><strong>24.6°C</strong><small>В норма</small></div><div><span>FEC днес</span><strong>{batteryCost.todayCycles.toFixed(2)}</strong><small>от {batteryCost.warrantedCycles.toLocaleString("bg-BG")} гарантирани</small></div></div></div></div><section className="section-message warning" data-no-translate><i>!</i><div><small>{t("1 СЪОБЩЕНИЕ · НУЖДА ОТ ПРЕГЛЕД","1 MESSAGE · REVIEW NEEDED")}</small><strong>{t("Минималният SOC не съответства на утрешната прогноза","Minimum SOC does not match tomorrow’s forecast")}</strong><p>{t("Зададени са 20%, но при слаб PV ден и вечерен ценови пик автоматичният режим препоръчва резерв 35% и покупка само под ценовия праг.","The current target is 20%, but with a low-PV day and an evening price peak, automatic mode recommends a 35% reserve and grid charging only below the price threshold.")}</p></div><button onClick={applyRecommendation}>{t("Приложи препоръката","Apply recommendation")}</button></section><section className="settings-grid"><article className="card settings-panel"><PanelTitle eyebrow="РЕЖИМ НА РАБОТА" title="Стратегия за оптимизация"/><div className="switch-row"><span><strong>Автоматично управление</strong><small>EMS изпълнява оптималния график</small></span><button className={auto?"toggle on":"toggle"} onClick={()=>setAuto(!auto)} aria-label="Автоматично управление"/></div><div className="strategy-list">{["Интелигентен хибрид","Ценови арбитраж","Максимална собствена консумация","Zero export","Peak shaving"].map(s=><button key={s} className={strategy===s?"selected":""} onClick={()=>setStrategy(s)}><i>{strategy===s?"●":"○"}</i><span><strong>{s}</strong><small>{s === "Интелигентен хибрид" ? "Цена + поток + PV и товарова прогноза" : s === "Ценови арбитраж" ? "Купува при ниска и продава при висока цена" : s === "Peak shaving" ? "Ограничава върховото потребление" : "Автоматично управление на енергийния поток"}</small></span></button>)}</div></article><article className="card settings-panel"><PanelTitle eyebrow="ГРАНИЦИ И ЗАЩИТИ" title="Оперативни настройки"/><label className="range-label"><span>Минимален SOC<strong>{soc}%</strong></span><input type="range" min="10" max="50" value={soc} onChange={e=>setSoc(Number(e.target.value))}/><small>Запазен резерв: {(2*soc/100).toFixed(2)} MWh</small></label><div className="setting-row"><span>Максимална мощност заряд</span><b>450 kW</b></div><div className="setting-row"><span>Максимална мощност разряд</span><b>500 kW</b></div><div className="setting-row"><span>Софтуерен предпазител</span><b>780 kW</b></div><button className="primary-btn" onClick={()=>notify("Настройките на батерията са запазени")}>Запази настройките</button></article></section><BatteryAssetCost lang={lang} notify={notify} settings={batteryCost} setSettings={setBatteryCost}/><article className="card command-log"><PanelTitle eyebrow="ИСТОРИЯ НА КОМАНДИТЕ" title="Последни автоматични действия"/><DataTable headers={["Час","Команда","Мощност","Причина","Резултат"]} rows={[["14:31","Продажба","83.2 kW","Висока цена + пик на товара","Изпълнена"],["13:58","Ограничаване","41.1 kW","SOC цел 72%","Изпълнена"],["12:45","Зареждане","126.0 kW","PV излишък + ниска цена","Изпълнена"],["10:15","Zero export","0 kW","Мрежов лимит","Изпълнена"]]}/></article></>;
 }
 
-function BatteryAssetCost({lang,notify}:{lang:UiLanguage;notify:(v:string)=>void}) {
+function BatteryAssetCost({lang,notify,settings,setSettings}:{lang:UiLanguage;notify:(v:string)=>void;settings:BatteryCostSettings;setSettings:React.Dispatch<React.SetStateAction<BatteryCostSettings>>}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
-  const [capex,setCapex]=useState(420000);
-  const [years,setYears]=useState(10);
-  const [residual,setResidual]=useState(10);
-  const [maintenance,setMaintenance]=useState(0.8);
-  const [throughput,setThroughput]=useState(720);
-  const [included,setIncluded]=useState(true);
-  const monthlyDepreciation=capex*(1-residual/100)/Math.max(1,years*12);
-  const monthlyMaintenance=capex*maintenance/100/12;
-  const monthlyAssetCost=monthlyDepreciation+monthlyMaintenance;
-  const costPerMWh=monthlyAssetCost/Math.max(1,throughput/12);
-  const lossesAndTariffs=24.8;
-  const profitableSpread=included?costPerMWh+lossesAndTariffs:lossesAndTariffs;
-  const money=(value:number)=>new Intl.NumberFormat(lang==="en"?"en-GB":"bg-BG",{maximumFractionDigits:0}).format(value);
+  const set=<K extends keyof BatteryCostSettings>(key:K,value:BatteryCostSettings[K])=>setSettings(current=>({...current,[key]:value}));
+  const {capex,years,residual,maintenance,annualThroughput,warrantedCycles,todayCycles,method,included}=settings;
+  const nominalCapacity=2;
+  const depreciableBase=capex*(1-residual/100);
+  const costPerCycle=depreciableBase/Math.max(1,warrantedCycles);
+  const straightDailyDepreciation=depreciableBase/Math.max(1,years*365);
+  const usageDailyDepreciation=costPerCycle*todayCycles;
+  const dailyDepreciation=method==="usage"?usageDailyDepreciation:straightDailyDepreciation;
+  const dailyMaintenance=capex*maintenance/100/365;
+  const energyToday=todayCycles*nominalCapacity;
+  const lossesAndTariffsPerMWh=24.8;
+  const dailyEnergyCost=energyToday*lossesAndTariffsPerMWh;
+  const totalDailyCost=dailyDepreciation+dailyMaintenance+dailyEnergyCost;
+  const projectedMonthlyCost=totalDailyCost*30.44;
+  const usageCostPerMWh=costPerCycle/nominalCapacity;
+  const straightCostPerMWh=(straightDailyDepreciation+dailyMaintenance)/Math.max(1,annualThroughput/365);
+  const assetCostPerMWh=method==="usage"?usageCostPerMWh:straightCostPerMWh;
+  const profitableSpread=included?assetCostPerMWh+lossesAndTariffsPerMWh:lossesAndTariffsPerMWh;
+  const money=(value:number,digits=0)=>new Intl.NumberFormat(lang==="en"?"en-GB":"bg-BG",{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(value);
   return <section className="card asset-cost" data-no-translate>
-    <div className="asset-cost-head"><div><p>{t("ДМА И ЦЕНА НА ЦИКЪЛА","FIXED ASSET & CYCLE COST")}</p><h2>{t("Месечен разход на батерийната система","Monthly battery system cost")}</h2><span>{t("Амортизацията, поддръжката и реалният енергиен поток участват в оценката дали един цикъл е печеливш.","Depreciation, maintenance and actual energy throughput are included when deciding whether a cycle is profitable.")}</span></div><div className="switch-row"><span><strong>{t("Включи в оптимизатора","Include in optimiser")}</strong><small>{included?t("Активно","Active"):t("Само информационно","Information only")}</small></span><button className={included?"toggle on":"toggle"} onClick={()=>setIncluded(v=>!v)} aria-label={t("Включи ДМА в оптимизатора","Include fixed-asset cost in optimiser")}/></div></div>
+    <div className="asset-cost-head"><div><p>{t("БАТЕРИЯ → СТОЙНОСТ НА АКТИВА И ДМА","BATTERY → ASSET VALUE & DEPRECIATION")}</p><h2>{t("Стойност, цикли и дневен разход","Asset value, cycles and daily cost")}</h2><span>{t("ДМА на ден се променя с реално използваните еквивалентни пълни цикли (FEC). Повече цикли означават по-висок дневен амортизационен разход.","Daily depreciation changes with the actual full equivalent cycles (FEC). More cycles produce a higher daily depreciation expense.")}</span></div><div className="switch-row"><span><strong>{t("Включи ДМА в режимите","Include depreciation in modes")}</strong><small>{included?t("Активно в оптимизатора","Active in optimiser"):t("Само информационно","Information only")}</small></span><button className={included?"toggle on":"toggle"} onClick={()=>set("included",!included)} aria-label={t("Включи ДМА в оптимизатора","Include depreciation in optimiser")}/></div></div>
+    <div className="depreciation-method"><span>{t("Метод на калкулация","Calculation method")}</span><div><button className={method==="usage"?"active":""} onClick={()=>set("method","usage")}>{t("По използвани цикли","Usage-based cycles")}</button><button className={method==="straight"?"active":""} onClick={()=>set("method","straight")}>{t("Линеен по години","Straight-line by years")}</button></div><small>{method==="usage"?t("Препоръчан за EMS: разходът следва реалното натоварване на батерията.","Recommended for EMS: expense follows actual battery utilisation."):t("Фиксиран дневен ДМА, независимо от броя цикли.","Fixed daily depreciation regardless of cycle count.")}</small></div>
     <div className="asset-cost-body"><div className="asset-inputs">
-      <label><span>{t("Стойност на придобиване","Acquisition value")} <b>BGN</b></span><input type="number" min="0" step="1000" value={capex} onChange={e=>setCapex(Number(e.target.value))}/></label>
-      <label><span>{t("Срок на използване","Useful life")} <b>{t("години","years")}</b></span><input type="number" min="1" max="30" value={years} onChange={e=>setYears(Number(e.target.value))}/></label>
-      <label><span>{t("Остатъчна стойност","Residual value")} <b>%</b></span><input type="number" min="0" max="80" value={residual} onChange={e=>setResidual(Number(e.target.value))}/></label>
-      <label><span>{t("Поддръжка годишно","Annual maintenance")} <b>%</b></span><input type="number" min="0" max="20" step="0.1" value={maintenance} onChange={e=>setMaintenance(Number(e.target.value))}/></label>
-      <label><span>{t("Очакван годишен поток","Expected annual throughput")} <b>MWh</b></span><input type="number" min="1" step="10" value={throughput} onChange={e=>setThroughput(Number(e.target.value))}/></label>
+      <label><span>{t("Стойност на придобиване","Acquisition value")} <b>BGN</b></span><input type="number" min="0" step="1000" value={capex} onChange={e=>set("capex",Number(e.target.value))}/></label>
+      <label><span>{t("Гарантирани пълни цикли","Warranted full cycles")} <b>FEC</b></span><input type="number" min="1" step="100" value={warrantedCycles} onChange={e=>set("warrantedCycles",Number(e.target.value))}/></label>
+      <label><span>{t("Срок на използване","Useful life")} <b>{t("години","years")}</b></span><input type="number" min="1" max="30" value={years} onChange={e=>set("years",Number(e.target.value))}/></label>
+      <label><span>{t("Остатъчна стойност","Residual value")} <b>%</b></span><input type="number" min="0" max="80" value={residual} onChange={e=>set("residual",Number(e.target.value))}/></label>
+      <label><span>{t("Поддръжка годишно","Annual maintenance")} <b>%</b></span><input type="number" min="0" max="20" step="0.1" value={maintenance} onChange={e=>set("maintenance",Number(e.target.value))}/></label>
+      <label><span>{t("Очакван годишен поток","Expected annual throughput")} <b>MWh</b></span><input type="number" min="1" step="10" value={annualThroughput} onChange={e=>set("annualThroughput",Number(e.target.value))}/></label>
     </div><div className="asset-results">
-      <div><small>{t("Амортизация / месец","Depreciation / month")}</small><strong>{money(monthlyDepreciation)} <b>BGN</b></strong></div>
-      <div><small>{t("Поддръжка / месец","Maintenance / month")}</small><strong>{money(monthlyMaintenance)} <b>BGN</b></strong></div>
-      <div className="asset-total"><small>{t("Общ ДМА разход / месец","Total fixed-asset cost / month")}</small><strong>{money(monthlyAssetCost)} <b>BGN</b></strong></div>
-      <div><small>{t("Вътрешна цена на поток","Allocated asset cost")}</small><strong>{costPerMWh.toFixed(1)} <b>BGN/MWh</b></strong></div>
+      <div><small>{t("Цена на 1 пълен цикъл","Cost per full cycle")}</small><strong>{money(costPerCycle,2)} <b>BGN/FEC</b></strong></div>
+      <div><small>{t("Енергиен поток днес","Energy throughput today")}</small><strong>{money(energyToday,2)} <b>MWh</b></strong></div>
+      <div><small>{t("ДМА днес","Depreciation today")}</small><strong>{money(dailyDepreciation,2)} <b>BGN</b></strong></div>
+      <div><small>{t("Поддръжка днес","Maintenance today")}</small><strong>{money(dailyMaintenance,2)} <b>BGN</b></strong></div>
+      <div className="asset-total"><small>{t("Общ разход на батерията днес","Total battery cost today")}</small><strong>{money(totalDailyCost,2)} <b>BGN</b></strong></div>
+      <div><small>{t("Прогноза за месеца","Monthly run-rate")}</small><strong>{money(projectedMonthlyCost)} <b>BGN</b></strong></div>
     </div></div>
-    <div className="profit-guard"><i>↗</i><span><small>{t("ЗАЩИТА НА РЕНТАБИЛНОСТТА","PROFITABILITY GUARD")}</small><strong>{t("Минимална прогнозна ценова разлика", "Minimum forecast price spread")}: {profitableSpread.toFixed(1)} BGN/MWh</strong><em>{t(`ДМА ${included?costPerMWh.toFixed(1):"0.0"} + загуби и тарифи ${lossesAndTariffs.toFixed(1)} BGN/MWh`,`Fixed asset ${included?costPerMWh.toFixed(1):"0.0"} + losses and tariffs ${lossesAndTariffs.toFixed(1)} BGN/MWh`)}</em></span><button className="secondary-btn" onClick={()=>notify(t("ДМА калкулацията е запазена и подадена към оптимизатора","The fixed-asset calculation was saved and sent to the optimiser"))}>{t("Запази калкулацията","Save calculation")}</button></div>
+    <label className="cycle-slider"><span><small>{t("ЕКВИВАЛЕНТНИ ПЪЛНИ ЦИКЛИ ДНЕС","FULL EQUIVALENT CYCLES TODAY")}</small><strong>{todayCycles.toFixed(2)} FEC</strong></span><input type="range" min="0" max="3" step="0.05" value={todayCycles} onChange={e=>set("todayCycles",Number(e.target.value))}/><em>{t("Променете циклите: ДМА и общият дневен разход се преизчисляват веднага.","Change the cycles: depreciation and total daily cost recalculate immediately.")}</em></label>
+    <div className="daily-cost-formula"><span><small>{t("ДМА","DEPRECIATION")}</small><b>{money(dailyDepreciation,2)} BGN</b><em>{method==="usage"?`${todayCycles.toFixed(2)} FEC × ${money(costPerCycle,2)}`:t("линеен дневен план","straight-line daily plan")}</em></span><i>+</i><span><small>{t("ПОДДРЪЖКА","MAINTENANCE")}</small><b>{money(dailyMaintenance,2)} BGN</b><em>{maintenance}% / {t("година","year")}</em></span><i>+</i><span><small>{t("ЗАГУБИ И ТАРИФИ","LOSSES & TARIFFS")}</small><b>{money(dailyEnergyCost,2)} BGN</b><em>{money(energyToday,2)} MWh × {lossesAndTariffsPerMWh}</em></span><i>=</i><span className="formula-total"><small>{t("ОБЩО ДНЕС","TOTAL TODAY")}</small><b>{money(totalDailyCost,2)} BGN</b><em>{money(totalDailyCost/Math.max(.01,todayCycles),2)} BGN/FEC</em></span></div>
+    <div className="profit-guard"><i>↗</i><span><small>{t("ЗАЩИТА НА РЕНТАБИЛНОСТТА","PROFITABILITY GUARD")}</small><strong>{t("Минимална прогнозна ценова разлика", "Minimum forecast price spread")}: {profitableSpread.toFixed(1)} BGN/MWh</strong><em>{t(`ДМА ${included?assetCostPerMWh.toFixed(1):"0.0"} + загуби и тарифи ${lossesAndTariffsPerMWh.toFixed(1)} BGN/MWh`,`Depreciation ${included?assetCostPerMWh.toFixed(1):"0.0"} + losses and tariffs ${lossesAndTariffsPerMWh.toFixed(1)} BGN/MWh`)}</em></span><button className="secondary-btn" onClick={()=>notify(t("Стойността на актива и ДМА калкулацията са запазени за всички режими","Asset value and depreciation calculation saved for all modes"))}>{t("Запази за режимите","Save for modes")}</button></div>
     <p className="asset-note">{t("Управленска калкулация за EMS решения. Счетоводният и данъчният амортизационен план се определят отделно според приложимата политика.","Management calculation for EMS decisions. The accounting and tax depreciation schedule is determined separately under the applicable policy.")}</p>
   </section>;
 }
@@ -1066,7 +1103,37 @@ function MeterTopology({notify}:{notify:(v:string)=>void}) {
   return <article className="card meter-topology"><PanelTitle eyebrow="SMART METER ASSETS" title="Къде са свързани измервателните точки?" action={<div className="meter-count">{[1,2,3,5].map(x=><button key={x} className={meterCount===x?"active":""} onClick={()=>setMeterCount(x)}>{x} meter{x>1?"s":""}</button>)}</div>}/><div className="single-line"><div className="grid-source"><i>⌁</i><strong>Мрежа</strong></div><b>→</b><div className="meter-node primary"><i>M1</i><strong>PCC meter</strong><small>Import / export</small></div><b>→</b><div className="ac-bus"><strong>AC BUS</strong><span>{meterCount>1&&<em><i>M2</i> PV</em>}{meterCount>2&&<em><i>M3</i> Load</em>}{meterCount>3&&<em><i>M4</i> BESS</em>}{meterCount>4&&<em><i>M5</i> EV / Process</em>}</span></div></div><section className="meter-layout"><div className="meter-cards">{active.map(m=><article key={m.id}><div><i>{m.id}</i><span><strong>{m.name}</strong><small>{m.role}</small></span></div><p>{m.place}</p><b>{m.measures}</b><em>OpenRemote parent: {m.parent}</em></article>)}</div><aside className="meter-model"><p>OPENREMOTE МОДЕЛ</p><h3>Всеки измервател е отделен MeterAsset</h3><div><span><small>parentId</small><strong>Физическо местоположение</strong></span><span><small>measurementPoint</small><strong>PCC / PV / LOAD / BESS / EV</strong></span><span><small>measuresAssetId</small><strong>Логически измерван актив</strong></span><span><small>direction</small><strong>Import / Export / Bidirectional</strong></span><span><small>ctRatio / phaseOrder</small><strong>Монтажна конфигурация</strong></span></div><p className="meter-note">Ако smart meter е в All-in-one шкафа, той остава отделен MeterAsset, но неговият parent е BESS assembly. Така може да се смени уредът без промяна на модела на PCS/BMS.</p><button className="primary-btn" onClick={()=>notify(`Топологията с ${meterCount} smart meter-а е записана`)}>Запази измервателната топология</button></aside></section></article>;
 }
 
-function Automation({notify,site,lang}:{notify:(v:string)=>void;site:string;lang:UiLanguage}) {
+function ModeCostAccounting({mode,lang,settings}:{mode:string;lang:UiLanguage;settings:BatteryCostSettings}) {
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const nominalCapacity=2;
+  const depreciableBase=settings.capex*(1-settings.residual/100);
+  const costPerCycle=depreciableBase/Math.max(1,settings.warrantedCycles);
+  const straightDaily=depreciableBase/Math.max(1,settings.years*365);
+  const maintenanceDaily=settings.capex*settings.maintenance/100/365;
+  const profiles=[
+    {bg:"Интелигентен хибрид",en:"Smart hybrid",fec:.78,income:186},
+    {bg:"Ценови арбитраж",en:"Price arbitrage",fec:1.24,income:268},
+    {bg:"Самоконсумация",en:"Self-consumption",fec:.56,income:132},
+    {bg:"Zero export",en:"Zero export",fec:.32,income:74},
+    {bg:"Peak shaving",en:"Peak shaving",fec:.68,income:164},
+  ].map(item=>{
+    const depreciation=settings.method==="usage"?costPerCycle*item.fec:straightDaily;
+    const variableCost=item.fec*nominalCapacity*24.8;
+    const total=depreciation+maintenanceDaily+variableCost;
+    return {...item,depreciation,variableCost,total,net:item.income-total};
+  });
+  const selected=profiles.find(item=>item.bg===mode)??profiles[0];
+  const money=(value:number)=>new Intl.NumberFormat(lang==="en"?"en-GB":"bg-BG",{minimumFractionDigits:2,maximumFractionDigits:2}).format(value);
+  return <section className="card mode-cost-accounting" data-no-translate>
+    <div className="mode-cost-head"><div><p>{t("РЕЖИМ → ЦИКЛИ → ДМА → НЕТЕН РЕЗУЛТАТ","MODE → CYCLES → DEPRECIATION → NET RESULT")}</p><h2>{t("Дневен разход на батерията по режими","Daily battery cost by operating mode")}</h2><span>{t("Всеки режим прогнозира различен брой еквивалентни цикли. При повече цикли ДМА и променливият разход се увеличават автоматично.","Each mode forecasts a different number of equivalent cycles. More cycles automatically increase depreciation and variable cost.")}</span></div><span className={settings.included?"cost-status active":"cost-status"}><i>{settings.included?"✓":"i"}</i><b>{settings.included?t("ДМА участва в решенията","Depreciation included in decisions"):t("ДМА е само информационно","Depreciation is informational")}</b></span></div>
+    <div className="mode-cost-kpis"><span><small>{t("Стойност на актива","Asset value")}</small><strong>{settings.capex.toLocaleString(lang==="en"?"en-GB":"bg-BG")} BGN</strong></span><span><small>{t("Цена на 1 FEC","Cost per FEC")}</small><strong>{money(costPerCycle)} BGN</strong></span><span><small>{t("Прогноза за активния режим","Active-mode forecast")}</small><strong>{selected.fec.toFixed(2)} FEC/{t("ден","day")}</strong></span><span><small>{t("ДМА за деня","Daily depreciation")}</small><strong>{money(selected.depreciation)} BGN</strong></span><span className="mode-cost-total"><small>{t("Общ разход за деня","Total daily cost")}</small><strong>{money(selected.total)} BGN</strong></span></div>
+    <div className="mode-cost-formula"><span><small>{t("АКТИВЕН РЕЖИМ","ACTIVE MODE")}</small><strong>{t(selected.bg,selected.en)}</strong></span><b>→</b><span><small>{t("ПРОГНОЗНИ ЦИКЛИ","FORECAST CYCLES")}</small><strong>{selected.fec.toFixed(2)} FEC</strong></span><b>×</b><span><small>{t("ЦЕНА НА ЦИКЪЛ","COST PER CYCLE")}</small><strong>{money(costPerCycle)} BGN</strong></span><b>=</b><span className="mode-dma"><small>{t("ДМА ЗА ДЕНЯ","DAILY DEPRECIATION")}</small><strong>{money(selected.depreciation)} BGN</strong></span></div>
+    <div className="mode-cost-table"><div className="mode-cost-row head"><span>{t("Режим","Mode")}</span><span>FEC/{t("ден","day")}</span><span>{t("ДМА","Depreciation")}</span><span>{t("Загуби + тарифи","Losses + tariffs")}</span><span>{t("Общ разход","Total cost")}</span><span>{t("Очаквана полза","Expected benefit")}</span><span>{t("Нетен резултат","Net result")}</span></div>{profiles.map(item=><div key={item.bg} className={item.bg===mode?"mode-cost-row selected":"mode-cost-row"}><span><i>{item.bg===mode?"●":"○"}</i><b>{t(item.bg,item.en)}</b></span><span>{item.fec.toFixed(2)}</span><span>{money(item.depreciation)} BGN</span><span>{money(item.variableCost)} BGN</span><span>{money(item.total)} BGN</span><span>+{money(item.income)} BGN</span><span className={item.net>=0?"positive":"negative"}>{item.net>=0?"+":""}{money(item.net)} BGN</span></div>)}</div>
+    <p className="mode-cost-note">{t(`Пример: при ${selected.fec.toFixed(2)} FEC режимът начислява ${money(selected.depreciation)} BGN ДМА. Ако прогнозните цикли се удвоят, usage-based ДМА също се удвоява. Реално отчетените ${settings.todayCycles.toFixed(2)} FEC се използват в дневния отчет на батерията.`,`Example: at ${selected.fec.toFixed(2)} FEC the mode allocates ${money(selected.depreciation)} BGN depreciation. If forecast cycles double, usage-based depreciation doubles as well. The actual ${settings.todayCycles.toFixed(2)} FEC is used in the battery daily report.`)}</p>
+  </section>;
+}
+
+function Automation({notify,site,lang,batteryCost}:{notify:(v:string)=>void;site:string;lang:UiLanguage;batteryCost:BatteryCostSettings}) {
   const [mode,setMode] = useState("Интелигентен хибрид");
   const [optimised,setOptimised] = useState(false);
   const [buy,setBuy] = useState(105);
@@ -1109,6 +1176,7 @@ function Automation({notify,site,lang}:{notify:(v:string)=>void;site:string;lang
         <article className="mode-settings"><h3>Настройки за „{mode}“</h3>{mode==="Интелигентен хибрид"&&<><ModeRange label="Хоризонт на прогнозата" value={forecastHorizon} unit="ч." min={1} max={24} onChange={setForecastHorizon}/><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><ModeRange label="Целеви SOC преди пик" value={targetSoc} unit="%" min={50} max={100} onChange={setTargetSoc}/></>}{mode==="Ценови арбитраж"&&<><ModeRange label="Зареждай под" value={buy} unit="лв./MWh" min={40} max={180} onChange={setBuy}/><ModeRange label="Продавай над" value={sell} unit="лв./MWh" min={120} max={300} onChange={setSell}/><ModeRange label="Цел след зареждане" value={targetSoc} unit="% SOC" min={50} max={100} onChange={setTargetSoc}/><div className="price-window"><span>Нетен ценови прозорец</span><strong>{sell-buy} лв./MWh</strong></div></>}{mode==="Самоконсумация"&&<><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><ModeRange label="Допустим внос" value={gridImport} unit="kW" min={0} max={200} onChange={setGridImport}/><ModeRange label="Цел след PV заряд" value={targetSoc} unit="% SOC" min={60} max={100} onChange={setTargetSoc}/></>}{mode==="Zero export"&&<><ModeRange label="Допустим износ" value={exportLimit} unit="kW" min={0} max={50} onChange={setExportLimit}/><ModeRange label="Резерв за компенсация" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><div className="setting-choice"><span>При пълна батерия</span><div><button className="active">Ограничи PV</button><button>EV товар</button></div></div></>}{mode==="Peak shaving"&&<><ModeRange label="Целеви товарен пик" value={peakTarget} unit="kW" min={300} max={780} onChange={setPeakTarget}/><ModeRange label="Хоризонт за предзаряд" value={forecastHorizon} unit="ч." min={1} max={12} onChange={setForecastHorizon}/><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={60} onChange={setReserve}/></>}<button className="primary-btn" onClick={()=>notify(`Настройките за „${mode}“ са запазени`)}>Запази този режим</button></article>
       </div>
     </section>
+    <ModeCostAccounting mode={mode} lang={lang} settings={batteryCost}/>
     <WeatherLogic notify={notify} site={site}/>
     <article className="card rule-engine"><PanelTitle eyebrow="RULE ENGINE" title="Активни правила" action={<button className="primary-btn" onClick={()=>notify("Логиката и ценовите прагове са запазени")}>Запази логиката</button>}/><div className="rule-list">{ruleData.map((r,i)=><div className={rules[i]?"rule-row":"rule-row disabled"} key={r[0]}><button className={rules[i]?"toggle on":"toggle"} onClick={()=>toggleRule(i)} aria-label={`${r[0]} – ${rules[i]?"изключи":"включи"}`}/><span><strong>{r[0]}</strong><small>{r[1]}</small></span><i>→</i><b>{r[2]}</b></div>)}</div></article>
     <section className="safety-band"><div><i>✓</i><span><strong>Safety constraints винаги имат приоритет</strong><small>BMS граници · минимален SOC · мрежова защита · ramp rate · комуникационен watchdog</small></span></div><button onClick={()=>notify("Всички защити са активни")}>5 / 5 активни</button></section>
