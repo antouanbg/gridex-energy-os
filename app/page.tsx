@@ -19,6 +19,7 @@ const navItems = [
   { id: "alarms", label: "Аларми", labelEn:"Alarms", icon: "△" },
   { id: "reports", label: "Отчети и икономика", labelEn:"Reports & economics", icon: "▥" },
   { id: "settings", label: "Настройки", labelEn:"Settings", icon: "⚙" },
+  { id: "plans", label: "Планове и абонамент", labelEn:"Plans & subscription", icon: "★" },
   { id: "about", label: "За нас", labelEn:"About us", icon: "○" },
 ];
 
@@ -39,11 +40,12 @@ const titles: Record<string, [string, string]> = {
   alarms: ["Аларми и събития", "ПОРТФОЛИО / АКТИВНИ"],
   reports: ["Отчети и икономика", "SOLAR PARK EAST / АНАЛИЗ"],
   settings: ["Настройки", "SOLAR PARK EAST / КОНФИГУРАЦИЯ"],
+  plans: ["Планове и абонамент", "GRIDEX / ЛИЦЕНЗИ"],
   about: ["За нас", "GRIDEX / SUNSTORAGE PRO"],
 };
 
 const titlesEn: Record<string, [string, string]> = {
-  overview:["Solar Park East","PORTFOLIO / SOFIA"], customers:["Customers & contracts","PORTFOLIO / CRM"], sites:["My sites","PORTFOLIO / 6 SITES"], assets:["Energy assets","SOLAR PARK EAST / ASSETS"], battery:["Battery & optimisation","SOLAR PARK EAST / BESS"], schedule:["Energy schedule","SOLAR PARK EAST / 21 AUGUST"], market:["Market & forecasts","BULGARIA / IBEX DAY-AHEAD"], settlement:["Tariffs & settlement","PORTFOLIO / VEM"], automation:["Logic & operating modes","EMS / AUTOMATION"], loads:["Flexible loads","EMS / FLEXIBLE LOADS"], balance:["Balancing group","GRIDEX / 21 AUGUST"], gateway:["Edge gateway","HARDWARE / LOCAL CONTROL"], devices:["Devices & SCADA","SOLAR PARK EAST / 12 DEVICES"], alarms:["Alarms & events","PORTFOLIO / ACTIVE"], reports:["Reports & economics","SOLAR PARK EAST / ANALYTICS"], settings:["Settings","SOLAR PARK EAST / CONFIGURATION"], about:["About us","GRIDEX / SUNSTORAGE PRO"],
+  overview:["Solar Park East","PORTFOLIO / SOFIA"], customers:["Customers & contracts","PORTFOLIO / CRM"], sites:["My sites","PORTFOLIO / 6 SITES"], assets:["Energy assets","SOLAR PARK EAST / ASSETS"], battery:["Battery & optimisation","SOLAR PARK EAST / BESS"], schedule:["Energy schedule","SOLAR PARK EAST / 21 AUGUST"], market:["Market & forecasts","BULGARIA / IBEX DAY-AHEAD"], settlement:["Tariffs & settlement","PORTFOLIO / VEM"], automation:["Logic & operating modes","EMS / AUTOMATION"], loads:["Flexible loads","EMS / FLEXIBLE LOADS"], balance:["Balancing group","GRIDEX / 21 AUGUST"], gateway:["Edge gateway","HARDWARE / LOCAL CONTROL"], devices:["Devices & SCADA","SOLAR PARK EAST / 12 DEVICES"], alarms:["Alarms & events","PORTFOLIO / ACTIVE"], reports:["Reports & economics","SOLAR PARK EAST / ANALYTICS"], settings:["Settings","SOLAR PARK EAST / CONFIGURATION"], plans:["Plans & subscription","GRIDEX / LICENSING"], about:["About us","GRIDEX / SUNSTORAGE PRO"],
 };
 
 const marketValues = [116, 104, 96, 88, 93, 118, 162, 188, 174, 148, 132, 126, 119, 128, 147, 176, 215, 242, 228, 204, 187, 164, 143, 126];
@@ -809,6 +811,7 @@ export default function Home() {
         {view === "alarms" && <Alarms notify={notify}/>}
         {view === "reports" && <ReportsCenter notify={notify} lang={lang} batteryCost={batteryCost}/>}
         {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
+        {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify}/>}
       </section>
       {toast && <div className="toast"><i>✓</i>{toast}</div>}
@@ -1048,7 +1051,7 @@ function Settlement({notify}:{notify:(v:string)=>void}) {
 
 function FlexibleLoads({notify,lang}:{notify:(v:string)=>void;lang:UiLanguage}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
-  const [tab,setTab]=useState<"assets"|"rules"|"thermal">("assets");
+  const [tab,setTab]=useState<"assets"|"rules"|"erp"|"thermal">("assets");
   const [maxPrice,setMaxPrice]=useState(142);
   const [reserve,setReserve]=useState(18);
   const [occupancy,setOccupancy]=useState(64);
@@ -1062,11 +1065,59 @@ function FlexibleLoads({notify,lang}:{notify:(v:string)=>void;lang:UiLanguage}) 
   ];
   return <div className="loads-page" data-no-translate>
     <section className="loads-hero card"><div><p>{t("FLEXIBLE LOAD ORCHESTRATION","FLEXIBLE LOAD ORCHESTRATION")}</p><h2>{t("Ценово управление на всеки управляем консуматор","Price-aware control for every controllable load")}</h2><span>{t("Бойлери, нагреватели, HVAC, EV, компресори и производствени линии участват в общия график, software fuse и прогнозата за небаланс.","Boilers, heaters, HVAC, EV, compressors and production lines participate in the shared schedule, software fuse and imbalance forecast.")}</span></div><div className="loads-live"><small>{t("УПРАВЛЯЕМ КАПАЦИТЕТ","CONTROLLABLE CAPACITY")}</small><strong>540 kW</strong><span>5 {t("актива · 4 онлайн","assets · 4 online")}</span></div></section>
-    <div className="subnav loads-tabs">{[["assets",t("Активи и график","Assets & schedule")],["rules",t("Правила за покупка","Purchase rules")],["thermal",t("Термичен модел","Thermal model")]].map(x=><button key={x[0]} className={tab===x[0]?"active":""} onClick={()=>setTab(x[0] as typeof tab)}>{x[1]}</button>)}</div>
+    <div className="subnav loads-tabs">{[["assets",t("Активи и график","Assets & schedule")],["rules",t("Правила за покупка","Purchase rules")],["erp",t("ERP производствен план","ERP production plan")],["thermal",t("Термичен модел","Thermal model")]].map(x=><button key={x[0]} className={tab===x[0]?"active":""} onClick={()=>setTab(x[0] as typeof tab)}>{x[1]}</button>)}</div>
     {tab==="assets"&&<><section className="load-kpis"><article className="card"><small>{t("ТЕКУЩ ТОВАР","CURRENT LOAD")}</small><strong>168 kW</strong><span>31% {t("от наличния","of available")}</span></article><article className="card"><small>{t("ПРЕМЕСТЕН КЪМ ЕВТИНИ ЧАСОВЕ","SHIFTED TO LOW-PRICE HOURS")}</small><strong>1.42 MWh</strong><span className="positive">+286 BGN</span></article><article className="card"><small>{t("PV ИЗЛИШЪК УСВОЕН","PV SURPLUS ABSORBED")}</small><strong>86%</strong><span>1.18 MWh</span></article><article className="card"><small>SOFTWARE FUSE</small><strong>{softwareFuse} kW</strong><span>{t("общ лимит","shared limit")}</span></article></section><section className="load-grid">{loads.map((item,i)=><article className="card load-card" key={item.name}><i>{item.icon}</i><span className={i===1?"load-state amber-pill":"load-state"}>● {item.state}</span><h3>{item.name}</h3><p>{item.type}</p><div><span>{t("Мощност","Power")}<b>{item.power}</b></span><span>{t("Оптимален прозорец","Optimal window")}<b>{item.plan}</b></span></div><button className="secondary-btn" onClick={()=>notify(t(`Отворен е графикът за ${item.name}`,`Schedule opened for ${item.name}`))}>{t("Отвори график","Open schedule")}</button></article>)}</section><article className="card load-fuse"><PanelTitle eyebrow="SHARED SOFTWARE FUSE" title={t("Обща отпусната мощност за гъвкави товари","Shared capacity for flexible loads")}/><ModeRange label={t("Лимит за всички управляеми товари","Limit for all controllable loads")} value={softwareFuse} unit="kW" min={60} max={360} onChange={setSoftwareFuse}/><div><span><i style={{width:"64%"}}/><b>Site 412 kW</b></span><span><i style={{width:"26%"}}/><b>{t("Гъвкави товари","Flexible loads")} 168 kW</b></span><span><i style={{width:"10%"}}/><b>{t("Резерв","Reserve")} 65 kW</b></span></div></article></>}
     {tab==="rules"&&<section className="load-rules-layout"><article className="card load-rule-config"><PanelTitle eyebrow={t("ПОЛИТИКА ЗА ПОКУПКА","PURCHASE POLICY")} title={t("Цена, PV излишък и оперативна нужда","Price, PV surplus and operational demand")}/><ModeRange label={t("Максимална пълна цена","Maximum all-in price")} value={maxPrice} unit="BGN/MWh" min={40} max={260} onChange={setMaxPrice}/><ModeRange label={t("Оперативен резерв","Operational reserve")} value={reserve} unit="%" min={0} max={40} onChange={setReserve}/><div className="load-rule-types"><button className="active"><i>¤</i><span><strong>{t("Максимална цена","Maximum price")}</strong><small>{t("Работи под зададения праг","Run below the threshold")}</small></span></button><button><i>↓</i><span><strong>{t("Най-евтин час","Cheapest hour")}</strong><small>{t("Избира най-ниската цена за деня","Select the day’s lowest price")}</small></span></button><button><i>☀</i><span><strong>{t("Само PV излишък","PV surplus only")}</strong><small>{t("Без покупка от мрежата","No grid import")}</small></span></button><button><i>0</i><span><strong>{t("Без продажба","No export")}</strong><small>{t("Усвоява целия локален излишък","Absorb all local surplus")}</small></span></button></div><button className="primary-btn" onClick={()=>notify(t("Правилата за управляемите товари са запазени","Flexible-load rules saved"))}>{t("Запази политиката","Save policy")}</button></article><article className="card occupancy-card"><PanelTitle eyebrow={t("ВЪНШЕН ОПЕРАТИВЕН СИГНАЛ","EXTERNAL OPERATING SIGNAL")} title={t("Резервации, смени и производствен план","Bookings, shifts and production plan")}/><div className="occupancy-value"><strong>{occupancy}%</strong><span>{t("очаквано натоварване утре","expected utilisation tomorrow")}</span></div><ModeRange label={t("Симулация на заетостта","Utilisation simulation")} value={occupancy} unit="%" min={0} max={100} onChange={setOccupancy}/><div className="occupancy-source"><span><i>API</i><b>{t("Резервационна / ERP система","Booking / ERP system")}</b><small>{t("Обновено преди 6 мин.","Updated 6 min ago")}</small></span><span><i>↗</i><b>{t("Прогнозен товар","Forecast load")}</b><small>{Math.round(260+occupancy*2.8)} kWh</small></span></div><p>{t("Сигналът променя нужния термичен резерв, EV капацитета и допустимото отлагане на процесните товари.","The signal changes required thermal reserve, EV capacity and allowable deferral of process loads.")}</p></article></section>}
+    {tab==="erp"&&<ErpProductionPlan notify={notify} lang={lang}/>}
     {tab==="thermal"&&<section className="thermal-layout"><article className="card thermal-tank"><div className="tank-visual"><span style={{height:"68%"}}/><strong>68°C</strong><small>4.2 MWhth</small></div><div><PanelTitle eyebrow={t("ТЕРМИЧЕН БУФЕР","THERMAL STORAGE")} title={t("Индустриален бойлерен каскад","Industrial boiler cascade")}/><div className="thermal-stats"><span>{t("Минимум","Minimum")}<b>48°C</b></span><span>{t("Максимум","Maximum")}<b>78°C</b></span><span>{t("Хистерезис","Hysteresis")}<b>3°C</b></span><span>{t("Загуби","Losses")}<b>0.006 / h</b></span></div><div className="thermal-flow"><span><i>☀</i>{t("PV излишък","PV surplus")}</span><b>+</b><span><i>¤</i>{t("Евтин ток","Low-cost power")}</span><b>→</b><span><i>♨</i>{t("Топлинен запас","Thermal reserve")}</span></div></div></article><article className="card thermal-sensors"><PanelTitle eyebrow={t("СЕНЗОРИ И САМООБУЧЕНИЕ","SENSORS & SELF-LEARNING")} title={t("Загуби срещу реална консумация","Losses versus actual demand")}/><div><span><i>●</i><b>{t("Топла вода","Hot water")}</b><strong>68.2°C</strong></span><span><i>●</i><b>{t("Студена вода","Cold water")}</b><strong>14.6°C</strong></span><span><i>●</i><b>{t("Помещение","Plant room")}</b><strong>25.1°C</strong></span><span><i>AI</i><b>{t("Модел на загубите","Loss model")}</b><strong>96.4%</strong></span></div><button className="primary-btn" onClick={()=>notify(t("Коефициентът на топлинни загуби е преизчислен","Thermal-loss coefficient recalculated"))}>{t("Преизчисли коефициента","Recalculate coefficient")}</button></article></section>}
   </div>;
+}
+
+function ErpProductionPlan({notify,lang}:{notify:(v:string)=>void;lang:UiLanguage}) {
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const [reserve,setReserve]=useState(12);
+  const forecast=[38,32,29,31,46,68,92,118,146,172,188,196,184,169,158,174,205,228,214,182,136,98,71,52];
+  const orders=[
+    ["PO-4821",t("Линия A · партида 14","Line A · batch 14"),"08:00–11:30","412 kWh",t("Висок","High")],
+    ["PO-4827",t("Линия B · термообработка","Line B · thermal process"),"12:15–16:00","684 kWh",t("Задължителен","Mandatory")],
+    ["PO-4830",t("Компресори · партида 9","Compressors · batch 9"),"22:00–01:00","188 kWh",t("Гъвкав","Flexible")],
+    ["PO-4834",t("Опаковъчна линия","Packaging line"),"05:30–07:30","126 kWh",t("Среден","Medium")],
+  ];
+  return <section className="erp-plan" data-no-translate>
+    <div className="erp-status card">
+      <div><span className="plan-chip enterprise">ENTERPRISE</span><p>{t("ERP / MES ВХОДЕН СИГНАЛ","ERP / MES INPUT SIGNAL")}</p><h2>{t("Производственият план става прогноза за електрическия товар","The production plan becomes an electrical-load forecast")}</h2><small>{t("Поръчки, смени, партиди и крайни срокове се преобразуват в 15-минутен товар и се оптимизират спрямо PV, батерията, цената и отпуснатата мощност.","Orders, shifts, batches and deadlines are converted into a 15-minute load forecast and optimised against PV, battery, price and contracted capacity.")}</small></div>
+      <div className="erp-connection"><i>API</i><span><b>SAP S/4HANA</b><small>Online · 14:32:08</small></span></div>
+    </div>
+    <div className="erp-kpis">
+      <article className="card"><small>{t("ХОРИЗОНТ","HORIZON")}</small><strong>72 h</strong><span>{t("обновяване на 15 мин.","15-minute refresh")}</span></article>
+      <article className="card"><small>{t("АКТИВНИ ПОРЪЧКИ","ACTIVE ORDERS")}</small><strong>18</strong><span>4 {t("линии","lines")}</span></article>
+      <article className="card"><small>{t("ОЧАКВАНА ЕНЕРГИЯ УТРЕ","EXPECTED ENERGY TOMORROW")}</small><strong>3.84 MWh</strong><span>+12% vs baseline</span></article>
+      <article className="card"><small>{t("ДОВЕРИЕ НА МОДЕЛА","MODEL CONFIDENCE")}</small><strong>94.2%</strong><span>MAE 18.6 kW</span></article>
+    </div>
+    <div className="erp-main">
+      <article className="card erp-orders">
+        <PanelTitle eyebrow={t("ПОРЪЧКИ И ЕНЕРГИЕН ОТПЕЧАТЪК","ORDERS & ENERGY SIGNATURE")} title={t("План за следващите 24 часа","Next 24-hour plan")} action={<button className="secondary-btn" onClick={()=>notify(t("ERP планът е синхронизиран","ERP plan synchronised"))}>{t("Синхронизирай","Synchronise")}</button>}/>
+        <DataTable headers={["ERP ID",t("Процес","Process"),t("Прозорец","Window"),t("Енергия","Energy"),t("Приоритет","Priority")]} rows={orders}/>
+      </article>
+      <article className="card erp-forecast">
+        <PanelTitle eyebrow={t("ПРОГНОЗА ОТ ERP","ERP-DRIVEN FORECAST")} title={t("Очакван товар по часове","Expected hourly load")}/>
+        <div className="erp-bars">{forecast.map((value,i)=><span key={i}><i style={{height:`${value/2.4}px`}} className={i>=7&&i<=18?"peak":""}/><small>{String(i).padStart(2,"0")}</small></span>)}</div>
+        <div className="erp-legend"><span><i/>ERP baseline</span><span><i className="peak"/>Production orders</span></div>
+      </article>
+    </div>
+    <div className="erp-bottom">
+      <article className="card erp-flow">
+        <PanelTitle eyebrow={t("ИНДУСТРИАЛНА ЛОГИКА","INDUSTRIAL LOGIC")} title={t("От поръчка до безопасна команда","From production order to safe command")}/>
+        <div><span><i>ERP</i><b>{t("Поръчки и смени","Orders & shifts")}</b></span><em>→</em><span><i>AI</i><b>{t("Прогноза на товара","Load forecast")}</b></span><em>→</em><span><i>¤</i><b>{t("Цена + PV + BESS","Price + PV + BESS")}</b></span><em>→</em><span><i>GX</i><b>{t("Безопасен график","Safe schedule")}</b></span></div>
+      </article>
+      <article className="card erp-policy">
+        <PanelTitle eyebrow={t("ОПЕРАТИВЕН РЕЗЕРВ","OPERATING RESERVE")} title={t("Защита на производството","Production protection")}/>
+        <ModeRange label={t("Резерв над ERP прогнозата","Reserve above ERP forecast")} value={reserve} unit="%" min={0} max={30} onChange={setReserve}/>
+        <div className="setting-row"><span>{t("При липса на ERP сигнал","When ERP signal is unavailable")}</span><b>{t("Последен план + 18%","Last plan + 18%")}</b></div>
+        <div className="setting-row"><span>{t("Крайните срокове","Production deadlines")}</span><b>{t("Никога не се нарушават","Never violated")}</b></div>
+      </article>
+    </div>
+  </section>;
 }
 
 function BalancingPolicy({notify,lang}:{notify:(v:string)=>void;lang:UiLanguage}) {
@@ -1373,6 +1424,53 @@ function SettingsHub({notify,lang,batteryCost,setBatteryCost}:{notify:(v:string)
   {tab==="bess"&&<section className="settings-two"><article className="card config-card"><PanelTitle eyebrow={t("РАЗРЕШЕНИЯ И ДОГОВОРНИ ЛИМИТИ","PERMISSIONS & CONTRACT LIMITS")} title={t("Мрежа, PV и батерия","Grid, PV and battery")}/><div className="switch-row"><span><strong>{t("Зареждане от мрежата","Grid charging")}</strong><small>{t("Разрешено по договор","Permitted by contract")}</small></span><button className={gridCharge?"toggle on":"toggle"} onClick={()=>setGridCharge(v=>!v)}/></div><div className="switch-row"><span><strong>{t("Разреждане към мрежата","Grid export")}</strong><small>{t("Разрешено по договор","Permitted by contract")}</small></span><button className={gridDischarge?"toggle on":"toggle"} onClick={()=>setGridDischarge(v=>!v)}/></div><ModeRange label={t("Максимално отдаване по договор","Contract export limit")} value={exportLimit} unit="kW" min={0} max={780} onChange={setExportLimit}/><div className="setting-row"><span>{t("Минимална скорост на разреждане","Minimum discharge power")}</span><b>32 kW</b></div><div className="setting-row"><span>{t("PV + BESS общ export guard","Combined PV + BESS export guard")}</span><b>90%</b></div></article><article className="card config-card"><PanelTitle eyebrow={t("САМООБУЧЕНИЕ НА ЗАГУБИТЕ","LOSS SELF-LEARNING")} title={t("Отделни модели по режим и мощност","Separate models by mode and power")}/><ModeRange label={t("Исторически период","Historical period")} value={lossDays} unit={t("дни","days")} min={7} max={180} onChange={setLossDays}/><div className="loss-models"><span><small>{t("Зареждане","Charging")}</small><strong>8.1%</strong><em>100–450 kW</em></span><span><small>{t("Разреждане","Discharging")}</small><strong>7.4%</strong><em>80–500 kW</em></span><span><small>{t("Самоконсумация","Self-consumption")}</small><strong>11.8%</strong><em>20–140 kW</em></span></div><div className="switch-row"><span><strong>{t("Включи ДМА в решенията","Include depreciation in decisions")}</strong><small>{batteryCost.included?t("Активно","Active"):t("Изключено","Disabled")}</small></span><button className={batteryCost.included?"toggle on":"toggle"} onClick={()=>setBatteryCost(v=>({...v,included:!v.included}))}/></div><button className="primary-btn" onClick={()=>notify(t("BESS политиката е записана","BESS policy saved"))}>{t("Запази BESS политиката","Save BESS policy")}</button></article></section>}
   {tab==="ev"&&<section className="settings-two"><article className="card config-card"><PanelTitle eyebrow={t("ДИНАМИЧНА EV ТАРИФА","DYNAMIC EV TARIFF")} title={t("Пазарна цена + гарантиран марж","Market price + guaranteed margin")}/><ModeRange label={t("Надбавка","Markup")} value={evMargin} unit="BGN/MWh" min={0} max={500} onChange={setEvMargin}/><ModeRange label={t("Минимална клиентска цена","Minimum customer price")} value={evMin} unit="BGN/MWh" min={100} max={900} onChange={setEvMin}/><ModeRange label={t("Хоризонт за максимална цена","Maximum-price horizon")} value={evHorizon} unit="h" min={1} max={8} onChange={setEvHorizon}/><div className="ev-price-result"><span><small>{t("IBEX + тарифи","IBEX + tariffs")}</small><strong>241.60</strong></span><b>+</b><span><small>{t("Надбавка","Markup")}</small><strong>{evMargin}</strong></span><b>=</b><span><small>{t("Клиентска цена","Customer price")}</small><strong>{Math.max(evMin,241.6+evMargin).toFixed(2)} BGN/MWh</strong></span></div></article><article className="card config-card"><PanelTitle eyebrow="EV POWER CONTROL" title={t("Мощност според свободния капацитет","Power from available site capacity")}/><div className="setting-row"><span>{t("Максимална мощност станция","Charger maximum power")}</span><b>132 kW</b></div><div className="setting-row"><span>Software fuse</span><b>180 kW</b></div><div className="setting-row"><span>{t("PV излишък в цената","PV surplus in tariff")}</span><b>{t("Да","Yes")}</b></div><div className="setting-row"><span>{t("Последно обновяване","Last update")}</span><b>14:31:08</b></div><button className="primary-btn" onClick={()=>notify(t("EV тарифата и мощностният лимит са обновени","EV tariff and power limit updated"))}>{t("Публикувай EV тарифа","Publish EV tariff")}</button></article></section>}
   {tab==="notify"&&<section className="settings-two"><article className="card config-card"><PanelTitle eyebrow={t("ПОЛУЧАТЕЛИ И КАНАЛИ","RECIPIENTS & CHANNELS")} title={t("Оперативни известия","Operational notifications")}/><label className="notify-email"><span>{t("Допълнителен получател","Additional recipient")}</span><input value={notifyEmail} onChange={e=>setNotifyEmail(e.target.value)}/></label><div className="notification-channels"><button className="active">Push</button><button className="active">Email</button><button>SMS</button><button>Webhook</button></div><div className="setting-row"><span>{t("Повторение при непотвърдена аларма","Repeat unacknowledged alarm")}</span><b>30 min</b></div><div className="setting-row"><span>{t("Месечен управленски отчет","Monthly management report")}</span><b>{t("1-во число · 08:00","1st day · 08:00")}</b></div></article><article className="card notification-matrix"><PanelTitle eyebrow={t("МАТРИЦА НА СЪБИТИЯТА","EVENT MATRIX")} title={t("Какво наблюдава системата","What the system monitors")}/>{[[t("Загуба на интернет / gateway","Internet / gateway loss"),"Critical"],[t("PV, BESS или EV не изпълнява команда","PV, BESS or EV command not executed"),"Critical"],[t("Температура, SOC или мрежов лимит","Temperature, SOC or grid limit"),"Warning"],[t("Необичайна консумация / забравен товар","Abnormal consumption / forgotten load"),"Warning"],[t("График, прогноза и месечен отчет","Schedule, forecast and monthly report"),"Info"]].map(x=><span key={x[0]}><i className={x[1]==="Critical"?"critical":x[1]==="Warning"?"warning":"info"}/><b>{x[0]}</b><small>{x[1]} · Push + Email</small></span>)}<button className="primary-btn" onClick={()=>notify(t("Настройките за известия са записани","Notification settings saved"))}>{t("Запази известията","Save notifications")}</button></article></section>}
+  </div>;
+}
+
+function SubscriptionPlans({notify,lang}:{notify:(v:string)=>void;lang:UiLanguage}) {
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const [annual,setAnnual]=useState(true);
+  const [selected,setSelected]=useState<"free"|"pro"|"enterprise">("enterprise");
+  const plans=[
+    {id:"free" as const,name:"GrideX Free",label:t("БЕЗПЛАТЕН ЗАВИНАГИ","FREE FOREVER"),price:t("0 лв.","BGN 0"),suffix:t("със SunStorage Pro 261","with SunStorage Pro 261"),description:t("Наблюдение, защита и основно управление на един обект.","Monitoring, protection and basic control for one site."),features:[t("1 обект и до 12 устройства","1 site and up to 12 devices"),t("Live PV, BESS, мрежа и товари","Live PV, BESS, grid and loads"),t("Edge failsafe и Software Fuse","Edge failsafe and Software Fuse"),t("Ръчни команди и базов график","Manual commands and basic schedule"),t("Аларми и 30 дни история","Alerts and 30-day history"),t("Дневна енергия, цикли и ДМА","Daily energy, cycles and depreciation")]},
+    {id:"pro" as const,name:"GrideX Pro",label:t("АБОНАМЕНТ НА ОБЕКТ","SUBSCRIPTION PER SITE"),price:t("Месечен план","Monthly plan"),suffix:annual?t("2 месеца бонус при годишно плащане","2 months included with annual billing"):t("без дългосрочен договор","no long-term commitment"),description:t("Автоматична икономическа оптимизация на един енергиен обект.","Automated economic optimisation for one energy site."),features:[t("Всичко от Free","Everything in Free"),t("IBEX и пълна покупна/продажна цена","IBEX and all-in import/export price"),t("3-дневна прогноза за време, PV и товар","3-day weather, PV and load forecast"),t("AI режими и ценови арбитраж","AI modes and price arbitrage"),t("96 × 15 min график към търговеца","96 × 15 min trader schedule"),t("Разширени отчети, тарифи и сетълмент","Advanced reports, tariffs and settlement")]},
+    {id:"enterprise" as const,name:"GrideX Enterprise",label:t("ИНДУСТРИАЛЕН АБОНАМЕНТ","INDUSTRIAL SUBSCRIPTION"),price:t("Индивидуална оферта","Custom quote"),suffix:t("според мощност, обекти и интеграции","by capacity, sites and integrations"),description:t("Индустриално управление, ERP интеграция и портфолио от обекти.","Industrial control, ERP integration and multi-site portfolio."),features:[t("Всичко от Pro","Everything in Pro"),t("ERP / MES / WMS входни сигнали","ERP / MES / WMS input signals"),t("Товар по поръчки, смени и партиди","Load by orders, shifts and batches"),t("Управляеми индустриални товари","Controllable industrial loads"),t("15-минутно балансиране и VPP","15-minute balancing and VPP"),t("Custom драйвери, API, SLA и audit log","Custom drivers, API, SLA and audit log")]},
+  ];
+  const rows=[
+    [t("Live мониторинг и основни KPI","Live monitoring and core KPIs"),"✓","✓","✓"],
+    [t("Edge защити, heartbeat и safe mode","Edge protection, heartbeat and safe mode"),"✓","✓","✓"],
+    [t("Software Fuse и BMS ограничения","Software Fuse and BMS limits"),"✓","✓","✓"],
+    [t("Дневен разход и ДМА на батерията","Daily battery cost and depreciation"),"✓","✓","✓"],
+    [t("IBEX, 3-дневна прогноза и AI режими","IBEX, 3-day forecast and AI modes"),"—","✓","✓"],
+    [t("Автоматичен график към търговец","Automated trader schedule"),"—","✓","✓"],
+    [t("Тарифи, сетълмент и управленски отчети","Tariffs, settlement and management reports"),"—","✓","✓"],
+    [t("ERP / MES прогнозно натоварване","ERP / MES load forecast"),"—","—","✓"],
+    [t("Индустриални товари и термичен буфер","Industrial loads and thermal storage"),"—","—","✓"],
+    [t("Балансиране, VPP и multi-site dispatch","Balancing, VPP and multi-site dispatch"),"—","—","✓"],
+  ];
+  return <div className="plans-page" data-no-translate>
+    <section className="plans-hero card">
+      <div><p>{t("ПРОЗРАЧНО РАЗДЕЛЕНИЕ НА ФУНКЦИИТЕ","TRANSPARENT FEATURE TIERS")}</p><h2>{t("Безплатна безопасност. Платена оптимизация. Индустриална интеграция.","Free safety. Paid optimisation. Industrial integration.")}</h2><span>{t("Критичните защити никога не зависят от абонамент. Платените планове добавят прогнози, автоматизация и измерима икономическа стойност.","Critical protection never depends on a subscription. Paid plans add forecasts, automation and measurable economic value.")}</span></div>
+      <div className="billing-toggle"><button className={!annual?"active":""} onClick={()=>setAnnual(false)}>{t("Месечно","Monthly")}</button><button className={annual?"active":""} onClick={()=>setAnnual(true)}>{t("Годишно","Annual")} <em>−16%</em></button></div>
+    </section>
+    <div className="plan-safety">
+      <i>✓</i><div><strong>{t("Защитите остават активни дори без абонамент","Protection remains active even without a subscription")}</strong><span>{t("Edge failsafe, BMS лимити, heartbeat, аварийно нулиране и Software Fuse са част от GrideX Free.","Edge failsafe, BMS limits, heartbeat, emergency zeroing and Software Fuse are part of GrideX Free.")}</span></div>
+    </div>
+    <section className="plan-grid">{plans.map(plan=><article className={`card plan-card ${plan.id==="pro"?"featured":""} ${selected===plan.id?"selected":""}`} key={plan.id}>
+      {plan.id==="pro"&&<span className="recommended">{t("ПРЕПОРЪЧАН","RECOMMENDED")}</span>}
+      <span className={`plan-chip ${plan.id}`}>{plan.label}</span><h3>{plan.name}</h3><p>{plan.description}</p>
+      <div className="plan-price"><strong>{plan.price}</strong><small>{plan.suffix}</small></div>
+      <ul>{plan.features.map(feature=><li key={feature}><i>✓</i>{feature}</li>)}</ul>
+      <button className={plan.id==="pro"?"primary-btn":"secondary-btn"} onClick={()=>{setSelected(plan.id);notify(plan.id==="free"?t("GrideX Free е включен завинаги","GrideX Free is included forever"):t(`Избран е ${plan.name} за търговска оферта`,`${plan.name} selected for a commercial quote`));}}>{selected===plan.id?t("Текущ избор","Current selection"):plan.id==="free"?t("Включен","Included"):t("Избери план","Select plan")}</button>
+    </article>)}</section>
+    <article className="card plan-matrix">
+      <PanelTitle eyebrow={t("СРАВНЕНИЕ НА ВЪЗМОЖНОСТИТЕ","CAPABILITY COMPARISON")} title={t("Какво получава клиентът във всеки план","What the customer receives in each plan")}/>
+      <DataTable headers={[t("Функционалност","Capability"),"Free","Pro","Enterprise"]} rows={rows}/>
+    </article>
+    <section className="commercial-note card">
+      <div><span className="plan-chip free">FREE FOREVER</span><h3>SunStorage Pro 261</h3><p>{t("Включва GrideX Free лиценз за целия живот на системата и безплатен електропроект. Няма такса за основното наблюдение и защитите.","Includes a lifetime GrideX Free licence and a complimentary electrical design. There is no fee for core monitoring and protection.")}</p></div>
+      <div><span className="plan-chip enterprise">ENTERPRISE</span><h3>{t("ERP интеграцията е проектна услуга","ERP integration is a project service")}</h3><p>{t("Включва анализ на данните, mapping на поръчки към енергиен профил, API конектор, тестове и договорен SLA.","Includes data analysis, mapping orders to energy profiles, an API connector, testing and a contractual SLA.")}</p></div>
+    </section>
   </div>;
 }
 
