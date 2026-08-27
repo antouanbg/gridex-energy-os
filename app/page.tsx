@@ -23,6 +23,8 @@ const navItems = [
   { id: "about", label: "За нас", labelEn:"About us", icon: "○" },
 ];
 
+const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
+
 const titles: Record<string, [string, string]> = {
   overview: ["Solar Park East", "ПОРТФОЛИО / СОФИЯ"],
   customers: ["Клиенти и договори", "ПОРТФОЛИО / CRM"],
@@ -744,6 +746,7 @@ function usePageLanguage(lang: UiLanguage) {
 
 export default function Home() {
   const [view, setView] = useState("overview");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [auto, setAuto] = useState(true);
   const [period, setPeriod] = useState("Днес");
   const [site, setSite] = useState("Solar Park East");
@@ -761,24 +764,30 @@ export default function Home() {
 
   const navigate = (id: string) => {
     setView(id);
+    setMobileNavOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <main className="app-shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
         <button className="brand" onClick={() => navigate("overview")} aria-label="GrideX Energy OS – начало">
           <span>GX</span><div>GRIDEX<small>ENERGY OS</small></div>
         </button>
-        <nav aria-label="Основна навигация">
+        <nav id="main-navigation" aria-label="Основна навигация">
           {navItems.map((item) => {
             const badge=item.id==="battery"?(batteryNotice?"1":""):item.id==="automation"?"2":item.id==="alarms"?"3":"";
             const tone=item.id==="battery"?"amber":item.id==="automation"?"green":"red";
-            return <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => navigate(item.id)}>
+            const mobilePrimary=mobilePrimaryNav.has(item.id);
+            return <button key={item.id} className={`${view === item.id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""}`} onClick={() => navigate(item.id)}>
               <i>{item.icon}</i><span>{lang==="en"?item.labelEn:item.label}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </button>;
           })}
         </nav>
+        {mobileNavOpen&&<button className="mobile-nav-scrim" aria-label={lang==="en"?"Close menu":"Затвори меню"} onClick={()=>setMobileNavOpen(false)}/>}
+        <button className="mobile-menu-toggle" aria-controls="main-navigation" aria-expanded={mobileNavOpen} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>
+          <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
+        </button>
         <div className="gateway"><span className="live-dot"/><div><strong>Edge Gateway</strong><small>Онлайн · преди 8 сек.</small></div></div>
         <div className="profile"><span>АК</span><div><strong>Антон Колев</strong><small>{role}</small></div><b>⋮</b></div>
       </aside>
