@@ -787,6 +787,7 @@ export default function Home() {
         <header>
           <div><p className="eyebrow">{(lang==="en"?titlesEn:titles)[view][1]}</p><h1>{view === "overview" ? site : (lang==="en"?titlesEn:titles)[view][0]}</h1></div>
           <div className="header-actions">
+            <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
             <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
             <select value={role} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label="Работна роля"><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>
             {view !== "sites" && <select value={site} onChange={(e) => setSite(e.target.value)} aria-label="Избран обект"><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></select>}
