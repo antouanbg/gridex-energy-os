@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   root: "github-pages",
-  base: "/gridex-energy-os/",
+  base: "/",
   publicDir: "../public",
   plugins: [react()],
   build: {

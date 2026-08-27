@@ -8,7 +8,7 @@ GrideX Energy OS is a bilingual Bulgarian/English product demonstration of an in
 
 The public GitHub Pages demo is deployed automatically from the `main` branch:
 
-**https://antouanbg.github.io/gridex-energy-os/**
+**https://gridex.tech/**
 
 The interface uses representative demonstration data. It is not connected to a live power installation and must not be used as a production control system without project-specific engineering, testing and safety validation.
 
