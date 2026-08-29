@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getGridexRuntimeConfig, GridexApiClient } from "./lib/gridex-api";
 
 const navItems = [
   { id: "overview", label: "Преглед", labelEn:"Overview", icon: "⌂" },
@@ -755,7 +756,19 @@ export default function Home() {
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
   const [toast, setToast] = useState("");
+  const [backendState, setBackendState] = useState<"demo" | "checking" | "online" | "offline">(
+    () => getGridexRuntimeConfig().mode === "demo" ? "demo" : "checking",
+  );
   usePageLanguage(lang);
+
+  useEffect(() => {
+    const config = getGridexRuntimeConfig();
+    if (config.mode === "demo") return;
+    const controller = new AbortController();
+    const client = new GridexApiClient(config);
+    client.health(controller.signal).then(() => setBackendState("online")).catch(() => setBackendState("offline"));
+    return () => controller.abort();
+  }, []);
 
   const notify = (message: string) => {
     setToast(message);
@@ -796,6 +809,9 @@ export default function Home() {
         <header>
           <div><p className="eyebrow">{(lang==="en"?titlesEn:titles)[view][1]}</p><h1>{view === "overview" ? site : (lang==="en"?titlesEn:titles)[view][0]}</h1></div>
           <div className="header-actions">
+            <span className={`backend-badge ${backendState}`} data-no-translate>
+              <i/>{backendState === "demo" ? "DEMO DATA" : backendState === "online" ? "OPENREMOTE LIVE" : backendState === "offline" ? "API OFFLINE" : "CONNECTING"}
+            </span>
             <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
             <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
             <select value={role} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label="Работна роля"><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>

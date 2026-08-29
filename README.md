@@ -12,6 +12,8 @@ The public GitHub Pages demo is deployed automatically from the `main` branch:
 
 The interface uses representative demonstration data. It is not connected to a live power installation and must not be used as a production control system without project-specific engineering, testing and safety validation.
 
+The same build is prepared for a protected live mode. `public/gridex-config.js` selects `demo` or `live`; live data and commands go through `api.gridex.tech`, never directly from the browser to OpenRemote or a field device.
+
 ## Product scope
 
 - PV, BESS, grid, load and EV charging dashboards
