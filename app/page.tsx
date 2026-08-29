@@ -688,12 +688,188 @@ const englishPhrases: [string, string][] = [
   ["сек.", "sec"],
   ["лв./MWh", "BGN/MWh"],
   ["лв.", "BGN"],
+  ["Edge концентратор", "Edge gateway"],
+  ["Отчети и икономика", "Reports & economics"],
+  ["Настройки", "Settings"],
+  ["Планове и абонамент", "Plans & subscription"],
+  ["Оптимално", "Optimal"],
+  ["Организации", "Organisations"],
+  ["Нов клиент", "New customer"],
+  ["2 обекта · 17 актива", "2 sites · 17 assets"],
+  ["1 обекта · 12 актива", "1 site · 12 assets"],
+  ["2 обекта · 21 актива", "2 sites · 21 assets"],
+  ["1 обекта · 9 актива", "1 site · 9 assets"],
+  ["За подновяване", "Renewal due"],
+  ["Отвори договор", "Open contract"],
+  ["Сетълмент", "Settlement"],
+  ["PV инвертори", "PV inverters"],
+  ["20 от 21 онлайн", "20 of 21 online"],
+  ["PV масив", "PV array"],
+  ["EV парк", "EV fleet"],
+  ["Нови марки и модели се добавят като драйвери, без промяна на EMS логиката.", "New brands and models are added as drivers without changing the EMS logic."],
+  ["Каталог", "Catalogue"],
+  ["Нов драйвер", "New driver"],
+  ["PV инвертор", "PV inverter"],
+  ["Hybrid инвертор", "Hybrid inverter"],
+  ["Съдържа", "Includes"],
+  ["Локален контролер / EMS", "Local controller / EMS"],
+  ["Телеметрия", "Telemetry"],
+  ["Driver package = тип + производител + модел + firmware/register-map версия", "Driver package = type + manufacturer + model + firmware/register-map version"],
+  ["„All-in-one“ не е един черен блок. PCS, Battery/BMS, smart meter и помощните системи се виждат като отделни child assets под общ assembly.", "“All-in-one” is not a black box. PCS, Battery/BMS, smart meter and auxiliary systems are shown as separate child assets under one assembly."],
+  ["OPENREMOTE МОДЕЛ", "OPENREMOTE MODEL"],
+  ["Запази измервателната топология", "Save metering topology"],
+  ["Разпределение според свободната мощност", "Allocation based on available capacity"],
+  ["Зареждане по цена", "Price-based charging"],
+  ["Отлагане при скъпа енергия", "Postpone during expensive energy"],
+  ["Приоритет на собственото PV производство", "Prioritise own PV generation"],
+  ["OCPP контрол", "OCPP control"],
+  ["Сесии, тарифи, лимити и статус", "Sessions, tariffs, limits and status"],
+  ["Отлично състояние", "Excellent condition"],
+  ["FEC днес", "FEC today"],
+  ["от 8000 гарантирани", "of 8,000 warranted"],
+  ["Интелигентен хибрид", "Intelligent hybrid"],
+  ["Оперативни настройки", "Operating settings"],
+  ["Запазен резерв", "Reserved capacity"],
+  ["Продажба", "Export"],
+  ["Ограничаване", "Curtailment"],
+  ["SOC цел", "SOC target"],
+  ["Очакван SOC в 24:00", "Expected SOC at 24:00"],
+  ["Запази и изпрати", "Save and submit"],
+  ["ПРОГНОЗА", "FORECAST"],
+  ["Мрежови лимит 780 kW", "Grid limit 780 kW"],
+  ["Бизнес Flex 2026", "Business Flex 2026"],
+  ["Нова версия", "New version"],
+  ["Купува от мрежата", "Imports from grid"],
+  ["Продава към мрежата", "Exports to grid"],
+  ["Генерирай виртуална фактура", "Generate virtual invoice"],
+  ["УЧАСТНИК", "PARTICIPANT"],
+  ["БАЛАНС", "BALANCE"],
+  ["За преглед", "Review required"],
+  ["Текущо решение", "Current decision"],
+  ["Увереност", "Confidence"],
+  ["Логика в реално време", "Real-time logic"],
+  ["PV излишък", "PV surplus"],
+  ["Има свободна енергия", "Available surplus energy"],
+  ["Прогноза 3 дни", "3-day forecast"],
+  ["лимит 32 kW", "limit 32 kW"],
+  ["Инвертори", "Inverters"],
+  ["без лимит", "no limit"],
+  ["IBEX цена", "IBEX price"],
+  ["PV + товар", "PV + load"],
+  ["Оптимизирай целия хоризонт", "Optimise entire horizon"],
+  ["Поток 20%", "Power flow 20%"],
+  ["Резерв 15%", "Reserve 15%"],
+  ["6 ч.", "6 h"],
+  ["сб,", "Sat,"],
+  ["нд,", "Sun,"],
+  ["пн,", "Mon,"],
+  ["Моделът използва 500 kWp и PR 82%; обновява се на 30 мин.", "The model uses 500 kWp and PR 82%; updated every 30 min."],
+  ["Логика за утрешния ден · 96 × 15 минути", "Next-day control logic · 96 × 15-minute intervals"],
+  ["Купувай от мрежата под", "Import from grid below"],
+  ["Продавай над", "Export above"],
+  ["Зареждане от външната мрежа", "Charging from the external grid"],
+  ["Покупка от мрежата", "Grid import"],
+  ["PV заряд", "PV charging"],
+  ["Добра PV прогноза: зареди от слънцето и допускай арбитраж над", "Good PV forecast: charge from solar and allow arbitrage above"],
+  ["Запази логиката", "Save logic"],
+  ["Цена ≤ праг за покупка", "Price ≤ import threshold"],
+  ["Зареждай батерията до 85%", "Charge battery to 85%"],
+  ["Цена ≥ праг за продажба", "Price ≥ export threshold"],
+  ["Разреждай до минималния SOC", "Discharge to minimum SOC"],
+  ["Прогнозиран PV излишък", "Forecast PV surplus"],
+  ["PV − товар > 80 kW за следващите 2 ч.", "PV − load > 80 kW for the next 2 h"],
+  ["Освободи капацитет в батерията", "Free battery capacity"],
+  ["Прогнозиран товарен пик", "Forecast load peak"],
+  ["Товар > 620 kW в следващите 60 мин.", "Load > 620 kW in the next 60 min"],
+  ["Запази енергия за peak shaving", "Reserve energy for peak shaving"],
+  ["Ограничение на мрежата", "Grid constraint"],
+  ["Поток към мрежата > 780 kW", "Grid export > 780 kW"],
+  ["Ограничи PV или зареди BESS", "Curtail PV or charge BESS"],
+  ["PV прогноза за утре < 60% или валеж > 55%", "Tomorrow's PV forecast < 60% or rain > 55%"],
+  ["Коригирай SOC целта и day-ahead графика", "Adjust SOC target and day-ahead schedule"],
+  ["BMS граници · минимален SOC · мрежова защита · ramp rate · комуникационен watchdog", "BMS limits · minimum SOC · grid protection · ramp rate · communication watchdog"],
+  ["Текущи позиции", "Current positions"],
+  ["ГРАФИК", "SCHEDULE"],
+  ["локално · рег. 5301", "local · reg. 5301"],
+  ["Архитектура", "Architecture"],
+  ["Firmware и safety", "Firmware & safety"],
+  ["Локално автономна", "Locally autonomous"],
+  ["PCC електромер", "PCC meter"],
+  ["Shelly контролери", "Shelly controllers"],
+  ["Ethernet · локална LAN", "Ethernet · local LAN"],
+  ["Положителен/отрицателен знак", "Positive/negative sign"],
+  ["Мащабиране ×10 / ×100", "Scaling ×10 / ×100"],
+  ["0-based PDU и +1 offset", "0-based PDU and +1 offset"],
+  ["Word и byte order", "Word and byte order"],
+  ["Quality и timeout логика", "Quality and timeout logic"],
+  ["SCADA / КОМУНИКАЦИЯ", "SCADA / COMMUNICATION"],
+  ["Всички", "All"],
+  ["Данните не са обновени от 24 мин.", "Data has not been updated for 24 min"],
+  ["Графикът е актуализиран", "Schedule updated"],
+  ["Автоматична корекция спрямо PV прогнозата", "Automatic adjustment based on the PV forecast"],
+  ["Онлайн · преди 8 сек.", "Online · 8 sec ago"],
+  ["и PR 82%; обновява се на 30 мин.", "and PR 82%; updated every 30 min."],
+  ["от 24 мин.", "for 24 min"],
+  ["обекта", "sites"],
+  ["актива", "assets"],
+  ["Локален", "Local"],
+  ["Продаваме", "Exporting"],
+  ["Участник", "Participant"],
+  ["Баланс", "Balance"],
+  ["График", "Schedule"],
+  ["DIN-rail индустриален контролер", "DIN-rail industrial controller"],
+  ["Адресите са визуален работен шаблон, не финална спецификация.", "The addresses are a visual working template, not a final specification."],
+  ["Финалната карта ще се заключи след получаване на Sinexcel PCS, BAU/BMS, Huawei SmartLogger и northbound спецификациите.", "The final map will be locked after the Sinexcel PCS, BAU/BMS, Huawei SmartLogger and northbound specifications are received."],
+  ["Унифицирана карта, quality flags, timestamps", "Unified map, quality flags and timestamps"],
+  ["Канонични единици, знак, scale, offset, byte order", "Canonical units, sign, scale, offset and byte order"],
+  ["на 60 kW.", "to 60 kW."],
+  ["Име", "Name"],
+  ["Изход", "Output"],
+  ["EV мощностен лимит", "EV power limit"],
+  ["String или central", "String or central"],
+  ["Firmware и register map", "Firmware and register map"],
+  ["DC/AC преобразувател", "DC/AC converter"],
+  ["контролер", "controller"],
+  ["Поддържана батерия/BMS", "Supported battery/BMS"],
+  ["PV, battery и grid power", "PV, battery and grid power"],
+  ["SOC от външен/вграден BMS", "SOC from external/integrated BMS"],
+  ["Номинални kW и kVA", "Rated kW and kVA"],
+  ["Знакова конвенция", "Sign convention"],
+  ["Battery DC power и SOC", "Battery DC power and SOC"],
+  ["Независим измервателен Asset, поставен в конкретна електрическа точка. Ролята се задава чрез measurement point, не само чрез името на уреда.", "An independent metering asset placed at a specific electrical point. Its role is defined by the measurement point, not only by the meter name."],
+  ["Разряд над", "Discharge above"],
+  ["Зареждай под", "Charge below"],
+  ["Следвай локалния баланс", "Follow the local balance"],
+  ["Ограничи вноса до", "Limit import to"],
+  ["PV мощност", "PV power"],
+  ["Компенсирай за секунди", "Compensate within seconds"],
+  ["Износ ≤", "Export ≤"],
+  ["PCC поток 60%", "PCC flow 60%"],
+  ["EV товар", "EV load"],
+  ["Прогноза за пик", "Peak forecast"],
+  ["Договорен лимит", "Contract limit"],
+  ["Разреждай над лимита", "Discharge above the limit"],
+  ["Целеви пик", "Target peak"],
+  ["Метрика → условие → известяване", "Metric → condition → notification"],
+  ["SOC на батерия", "Battery SOC"],
+  ["Запази и активирай", "Save and enable"],
+  ["Търсене на устройство...", "Search for a device..."],
+  ["Търсене на устройство", "Search for a device"],
+  ["Обнови прогнозата", "Refresh forecast"],
+  ["Тарифен план", "Tariff plan"],
+  ["изключи", "disable"],
+  ["включи", "enable"],
+  ["за", "for"],
+  ["ч.", "h"],
 ];
 
+const sortedEnglishPhrases = [...englishPhrases].sort(([left], [right]) => right.length - left.length);
+
 const originalText = new WeakMap<Text, string>();
+const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 function translateText(value: string) {
-  return englishPhrases.reduce((result, [bg, en]) => {
+  return sortedEnglishPhrases.reduce((result, [bg, en]) => {
     const escaped = bg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     return result.replace(new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "gu"), en);
   }, value);
@@ -720,10 +896,35 @@ function usePageLanguage(lang: UiLanguage) {
       if (current !== next) node.nodeValue = next;
     };
 
+    const translateElement = (element: Element) => {
+      if (element.closest("[data-no-translate]")) return;
+      const names = ["aria-label", "placeholder", "title"];
+      let sources = originalAttributes.get(element);
+      if (!sources) {
+        sources = new Map<string, string>();
+        originalAttributes.set(element, sources);
+      }
+      names.forEach((name) => {
+        const current = element.getAttribute(name);
+        if (current === null) return;
+        let source = sources!.get(name);
+        if (source === undefined || (lang === "en" && /[А-Яа-я]/.test(current) && current !== translateText(source))) {
+          source = current;
+          sources!.set(name, source);
+        }
+        const next = lang === "en" ? translateText(source) : source;
+        if (current !== next) element.setAttribute(name, next);
+      });
+    };
+
     const translateTree = (target: Node) => {
       if (target.nodeType === Node.TEXT_NODE) {
         translateNode(target as Text);
         return;
+      }
+      if (target.nodeType === Node.ELEMENT_NODE) {
+        translateElement(target as Element);
+        (target as Element).querySelectorAll("[aria-label], [placeholder], [title]").forEach(translateElement);
       }
       const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
       let node = walker.nextNode();
@@ -737,10 +938,11 @@ function usePageLanguage(lang: UiLanguage) {
     const observer = new MutationObserver((records) => {
       records.forEach((record) => {
         if (record.type === "characterData") translateNode(record.target as Text);
+        if (record.type === "attributes") translateElement(record.target as Element);
         record.addedNodes.forEach(translateTree);
       });
     });
-    observer.observe(root, { childList: true, characterData: true, subtree: true });
+    observer.observe(root, { childList: true, characterData: true, attributes: true, attributeFilter: ["aria-label", "placeholder", "title"], subtree: true });
     return () => observer.disconnect();
   }, [lang]);
 }
@@ -784,10 +986,10 @@ export default function Home() {
   return (
     <main className="app-shell">
       <aside className={`sidebar ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
-        <button className="brand" onClick={() => navigate("overview")} aria-label="GrideX Energy OS – начало">
+        <button className="brand" onClick={() => navigate("overview")} aria-label={lang==="en"?"GrideX Energy OS – home":"GrideX Energy OS – начало"}>
           <span>GX</span><div>GRIDEX<small>ENERGY OS</small></div>
         </button>
-        <nav id="main-navigation" aria-label="Основна навигация">
+        <nav id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
           {navItems.map((item) => {
             const badge=item.id==="battery"?(batteryNotice?"1":""):item.id==="automation"?"2":item.id==="alarms"?"3":"";
             const tone=item.id==="battery"?"amber":item.id==="automation"?"green":"red";
@@ -798,11 +1000,11 @@ export default function Home() {
           })}
         </nav>
         {mobileNavOpen&&<button className="mobile-nav-scrim" aria-label={lang==="en"?"Close menu":"Затвори меню"} onClick={()=>setMobileNavOpen(false)}/>}
-        <button className="mobile-menu-toggle" aria-controls="main-navigation" aria-expanded={mobileNavOpen} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>
+        <button className="mobile-menu-toggle" data-no-translate aria-controls="main-navigation" aria-expanded={mobileNavOpen} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
         <div className="gateway"><span className="live-dot"/><div><strong>Edge Gateway</strong><small>Онлайн · преди 8 сек.</small></div></div>
-        <div className="profile"><span>АК</span><div><strong>Антон Колев</strong><small>{role}</small></div><b>⋮</b></div>
+        <div className="profile" data-no-translate><span>{lang==="en"?"AK":"АК"}</span><div><strong>{lang==="en"?"Anton Kolev":"Антон Колев"}</strong><small>{lang==="en"?translateText(role):role}</small></div><b>⋮</b></div>
       </aside>
 
       <section className="content">
@@ -814,10 +1016,10 @@ export default function Home() {
             </span>
             <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
             <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
-            <select value={role} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label="Работна роля"><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>
-            {view !== "sites" && <select value={site} onChange={(e) => setSite(e.target.value)} aria-label="Избран обект"><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></select>}
-            <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label="Период"><option>Днес</option><option>Тази седмица</option><option>Този месец</option></select>
-            <button className="icon-btn" aria-label="Известия" onClick={() => navigate("alarms")}>△<em>3</em></button>
+            <select value={role} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>
+            {view !== "sites" && <select value={site} onChange={(e) => setSite(e.target.value)} aria-label={lang==="en"?"Selected site":"Избран обект"}><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></select>}
+            <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label={lang==="en"?"Period":"Период"}><option>Днес</option><option>Тази седмица</option><option>Този месец</option></select>
+            <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△<em>3</em></button>
           </div>
         </header>
 
@@ -893,8 +1095,8 @@ function Overview({ auto, setAuto, navigate, notify }: { auto: boolean; setAuto:
   </>;
 }
 
-function Metric({label,value,unit,badge,type}:{label:string;value:string;unit:string;badge:string;type:string}) {
-  return <article className="card metric"><p>{label}<span>{badge}</span></p><strong>{value} <small>{unit}</small></strong>{type === "charge" ? <div className="charge"><i style={{width:"72%"}}/></div> : type === "price" ? <div className="price-note">Продаваме към мрежата</div> : <div className={type}/>}</article>;
+function Metric({label,value,unit,badge,type,priceNote="Продаваме към мрежата"}:{label:string;value:string;unit:string;badge:string;type:string;priceNote?:string}) {
+  return <article className="card metric"><p>{label}<span>{badge}</span></p><strong>{value} <small>{unit}</small></strong>{type === "charge" ? <div className="charge"><i style={{width:"72%"}}/></div> : type === "price" ? <div className="price-note">{priceNote}</div> : <div className={type}/>}</article>;
 }
 
 function AreaChart() {
@@ -939,7 +1141,7 @@ function Battery({auto,setAuto,notify,lang,resolveNotice,batteryCost,setBatteryC
   const [soc,setSoc] = useState(20);
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const applyRecommendation=()=>{setAuto(true);setSoc(35);setStrategy("Интелигентен хибрид");resolveNotice();notify(t("Препоръката е приложена: резерв 35% и автоматичен режим","Recommendation applied: 35% reserve and automatic mode"));};
-  return <><div className="battery-hero card"><div className="battery-gauge"><div className="gauge-ring"><strong>72%</strong><span>SOC</span></div><p>1.44 MWh налични</p></div><div className="battery-main"><PanelTitle eyebrow="BESS / TESVOLT TPS-E" title="2.0 MWh · 500 kW" action={<span className="pill green">● Отлично състояние</span>}/><div className="battery-values"><div><span>Мощност</span><strong>+41.1 kW</strong><small>Зареждане</small></div><div><span>SOH</span><strong>98.2%</strong><small>Здраве на клетките</small></div><div><span>Температура</span><strong>24.6°C</strong><small>В норма</small></div><div><span>FEC днес</span><strong>{batteryCost.todayCycles.toFixed(2)}</strong><small>от {batteryCost.warrantedCycles.toLocaleString("bg-BG")} гарантирани</small></div></div></div></div><section className="section-message warning" data-no-translate><i>!</i><div><small>{t("1 СЪОБЩЕНИЕ · НУЖДА ОТ ПРЕГЛЕД","1 MESSAGE · REVIEW NEEDED")}</small><strong>{t("Минималният SOC не съответства на утрешната прогноза","Minimum SOC does not match tomorrow’s forecast")}</strong><p>{t("Зададени са 20%, но при слаб PV ден и вечерен ценови пик автоматичният режим препоръчва резерв 35% и покупка само под ценовия праг.","The current target is 20%, but with a low-PV day and an evening price peak, automatic mode recommends a 35% reserve and grid charging only below the price threshold.")}</p></div><button onClick={applyRecommendation}>{t("Приложи препоръката","Apply recommendation")}</button></section><section className="settings-grid"><article className="card settings-panel"><PanelTitle eyebrow="РЕЖИМ НА РАБОТА" title="Стратегия за оптимизация"/><div className="switch-row"><span><strong>Автоматично управление</strong><small>EMS изпълнява оптималния график</small></span><button className={auto?"toggle on":"toggle"} onClick={()=>setAuto(!auto)} aria-label="Автоматично управление"/></div><div className="strategy-list">{["Интелигентен хибрид","Ценови арбитраж","Максимална собствена консумация","Zero export","Peak shaving"].map(s=><button key={s} className={strategy===s?"selected":""} onClick={()=>setStrategy(s)}><i>{strategy===s?"●":"○"}</i><span><strong>{s}</strong><small>{s === "Интелигентен хибрид" ? "Цена + поток + PV и товарова прогноза" : s === "Ценови арбитраж" ? "Купува при ниска и продава при висока цена" : s === "Peak shaving" ? "Ограничава върховото потребление" : "Автоматично управление на енергийния поток"}</small></span></button>)}</div></article><article className="card settings-panel"><PanelTitle eyebrow="ГРАНИЦИ И ЗАЩИТИ" title="Оперативни настройки"/><label className="range-label"><span>Минимален SOC<strong>{soc}%</strong></span><input type="range" min="10" max="50" value={soc} onChange={e=>setSoc(Number(e.target.value))}/><small>Запазен резерв: {(2*soc/100).toFixed(2)} MWh</small></label><div className="setting-row"><span>Максимална мощност заряд</span><b>450 kW</b></div><div className="setting-row"><span>Максимална мощност разряд</span><b>500 kW</b></div><div className="setting-row"><span>Софтуерен предпазител</span><b>780 kW</b></div><button className="primary-btn" onClick={()=>notify("Настройките на батерията са запазени")}>Запази настройките</button></article></section><BatteryAssetCost lang={lang} notify={notify} settings={batteryCost} setSettings={setBatteryCost}/><article className="card command-log"><PanelTitle eyebrow="ИСТОРИЯ НА КОМАНДИТЕ" title="Последни автоматични действия"/><DataTable headers={["Час","Команда","Мощност","Причина","Резултат"]} rows={[["14:31","Продажба","83.2 kW","Висока цена + пик на товара","Изпълнена"],["13:58","Ограничаване","41.1 kW","SOC цел 72%","Изпълнена"],["12:45","Зареждане","126.0 kW","PV излишък + ниска цена","Изпълнена"],["10:15","Zero export","0 kW","Мрежов лимит","Изпълнена"]]}/></article></>;
+  return <><div className="battery-hero card"><div className="battery-gauge"><div className="gauge-ring"><strong>72%</strong><span>SOC</span></div><p>1.44 MWh налични</p></div><div className="battery-main"><PanelTitle eyebrow="BESS / TESVOLT TPS-E" title="2.0 MWh · 500 kW" action={<span className="pill green">● Отлично състояние</span>}/><div className="battery-values"><div><span>Мощност</span><strong>+41.1 kW</strong><small>Зареждане</small></div><div><span>SOH</span><strong>98.2%</strong><small>Здраве на клетките</small></div><div><span>Температура</span><strong>24.6°C</strong><small>В норма</small></div><div><span>FEC днес</span><strong>{batteryCost.todayCycles.toFixed(2)}</strong><small data-no-translate>{lang==="en"?"of ":"от "}{batteryCost.warrantedCycles.toLocaleString(lang==="en"?"en-US":"bg-BG")}{lang==="en"?" warranted":" гарантирани"}</small></div></div></div></div><section className="section-message warning" data-no-translate><i>!</i><div><small>{t("1 СЪОБЩЕНИЕ · НУЖДА ОТ ПРЕГЛЕД","1 MESSAGE · REVIEW NEEDED")}</small><strong>{t("Минималният SOC не съответства на утрешната прогноза","Minimum SOC does not match tomorrow’s forecast")}</strong><p>{t("Зададени са 20%, но при слаб PV ден и вечерен ценови пик автоматичният режим препоръчва резерв 35% и покупка само под ценовия праг.","The current target is 20%, but with a low-PV day and an evening price peak, automatic mode recommends a 35% reserve and grid charging only below the price threshold.")}</p></div><button onClick={applyRecommendation}>{t("Приложи препоръката","Apply recommendation")}</button></section><section className="settings-grid"><article className="card settings-panel"><PanelTitle eyebrow="РЕЖИМ НА РАБОТА" title="Стратегия за оптимизация"/><div className="switch-row"><span><strong>Автоматично управление</strong><small>EMS изпълнява оптималния график</small></span><button className={auto?"toggle on":"toggle"} onClick={()=>setAuto(!auto)} aria-label="Автоматично управление"/></div><div className="strategy-list">{["Интелигентен хибрид","Ценови арбитраж","Максимална собствена консумация","Zero export","Peak shaving"].map(s=><button key={s} className={strategy===s?"selected":""} onClick={()=>setStrategy(s)}><i>{strategy===s?"●":"○"}</i><span><strong>{s}</strong><small>{s === "Интелигентен хибрид" ? "Цена + поток + PV и товарова прогноза" : s === "Ценови арбитраж" ? "Купува при ниска и продава при висока цена" : s === "Peak shaving" ? "Ограничава върховото потребление" : "Автоматично управление на енергийния поток"}</small></span></button>)}</div></article><article className="card settings-panel"><PanelTitle eyebrow="ГРАНИЦИ И ЗАЩИТИ" title="Оперативни настройки"/><label className="range-label"><span>Минимален SOC<strong>{soc}%</strong></span><input type="range" min="10" max="50" value={soc} onChange={e=>setSoc(Number(e.target.value))}/><small>Запазен резерв: {(2*soc/100).toFixed(2)} MWh</small></label><div className="setting-row"><span>Максимална мощност заряд</span><b>450 kW</b></div><div className="setting-row"><span>Максимална мощност разряд</span><b>500 kW</b></div><div className="setting-row"><span>Софтуерен предпазител</span><b>780 kW</b></div><button className="primary-btn" onClick={()=>notify("Настройките на батерията са запазени")}>Запази настройките</button></article></section><BatteryAssetCost lang={lang} notify={notify} settings={batteryCost} setSettings={setBatteryCost}/><article className="card command-log"><PanelTitle eyebrow="ИСТОРИЯ НА КОМАНДИТЕ" title="Последни автоматични действия"/><DataTable headers={["Час","Команда","Мощност","Причина","Резултат"]} rows={[["14:31","Продажба","83.2 kW","Висока цена + пик на товара","Изпълнена"],["13:58","Ограничаване","41.1 kW","SOC цел 72%","Изпълнена"],["12:45","Зареждане","126.0 kW","PV излишък + ниска цена","Изпълнена"],["10:15","Zero export","0 kW","Мрежов лимит","Изпълнена"]]}/></article></>;
 }
 
 function BatteryAssetCost({lang,notify,settings,setSettings}:{lang:UiLanguage;notify:(v:string)=>void;settings:BatteryCostSettings;setSettings:React.Dispatch<React.SetStateAction<BatteryCostSettings>>}) {
@@ -1047,7 +1249,7 @@ function Market({lang,notify}:{lang:UiLanguage;notify:(v:string)=>void}) {
       <span>{t("Демо набор · не е официален IBEX архив","Demo dataset · not an official IBEX archive")}</span>
     </div>
 
-    {tab==="live"&&<><section className="kpis market-kpis"><Metric label={t("IBEX в момента","Current IBEX price")} value="214.62" unit="BGN/MWh" badge="↑ 12.8%" type="price"/><Metric label={t("Цена купува","Import price")} value="229.40" unit="BGN/MWh" badge={t("с тарифи","incl. tariffs")} type="spark solar-spark"/><Metric label={t("Цена продава","Export price")} value="207.80" unit="BGN/MWh" badge={t("нетна","net")} type="spark load-spark"/><Metric label={t("Небаланс","Imbalance")} value="−18.42" unit="BGN/MWh" badge={t("прогноза","forecast")} type="charge"/></section><article className="card market-chart-card"><PanelTitle eyebrow={t("IBEX ДЕН НАПРЕД","IBEX DAY-AHEAD")} title={t("Пазарна цена по часове","Hourly market price")} action={<div className="legend"><span className="green-key">{t("Цена","Price")}</span><span className="amber-key">{t("Прогноза","Forecast")}</span></div>}/><div className="market-chart">{marketValues.map((v,i)=><div key={i} className={i>=15?"forecast":""}><span style={{height:`${v*.66}px`}}/><em>{i%3===0?`${String(i).padStart(2,"0")}:00`:""}</em><b>{i===16?`${v}`:""}</b></div>)}</div></article><section className="triple-grid"><article className="card weather-card"><PanelTitle eyebrow={t("ВРЕМЕТО","WEATHER")} title={t("София · днес","Sofia · today")}/><div className="weather-main"><span>☀</span><strong>29°</strong><small>{t("Ясно","Clear")}</small></div><div className="weather-hours"><span>{t("Сега","Now")}<b>29°</b></span><span>16:00<b>30°</b></span><span>18:00<b>27°</b></span><span>20:00<b>23°</b></span></div></article><article className="card settings-panel"><PanelTitle eyebrow={t("PV ПРОГНОЗА","PV FORECAST")} title="4.18 MWh"/><div className="forecast-bars">{[18,26,42,66,88,100,94,76,48,22].map((v,i)=><i key={i} style={{height:`${v}px`}}/>)}</div><p className="confidence">{t("Точност на прогнозата","Forecast accuracy")} <b>94.2%</b></p></article><article className="card settings-panel"><PanelTitle eyebrow={t("ПАЗАРЕН СИГНАЛ","MARKET SIGNAL")} title={t("Препоръчано действие","Recommended action")}/><div className="signal"><i>↗</i><strong>{t("Продавай","Export")}</strong><span>{t("до 18:45","until 18:45")}</span></div><p className="signal-note">{t("Очакван ценови пик","Expected price peak")}: <b>242 BGN/MWh</b> {t("в 17:00","at 17:00")}</p></article></section></>}
+    {tab==="live"&&<><section className="kpis market-kpis"><Metric label={t("IBEX в момента","Current IBEX price")} value="214.62" unit="BGN/MWh" badge="↑ 12.8%" type="price" priceNote={t("Продаваме към мрежата","Exporting to the grid")}/><Metric label={t("Цена купува","Import price")} value="229.40" unit="BGN/MWh" badge={t("с тарифи","incl. tariffs")} type="spark solar-spark"/><Metric label={t("Цена продава","Export price")} value="207.80" unit="BGN/MWh" badge={t("нетна","net")} type="spark load-spark"/><Metric label={t("Небаланс","Imbalance")} value="−18.42" unit="BGN/MWh" badge={t("прогноза","forecast")} type="charge"/></section><article className="card market-chart-card"><PanelTitle eyebrow={t("IBEX ДЕН НАПРЕД","IBEX DAY-AHEAD")} title={t("Пазарна цена по часове","Hourly market price")} action={<div className="legend"><span className="green-key">{t("Цена","Price")}</span><span className="amber-key">{t("Прогноза","Forecast")}</span></div>}/><div className="market-chart">{marketValues.map((v,i)=><div key={i} className={i>=15?"forecast":""}><span style={{height:`${v*.66}px`}}/><em>{i%3===0?`${String(i).padStart(2,"0")}:00`:""}</em><b>{i===16?`${v}`:""}</b></div>)}</div></article><section className="triple-grid"><article className="card weather-card"><PanelTitle eyebrow={t("ВРЕМЕТО","WEATHER")} title={t("София · днес","Sofia · today")}/><div className="weather-main"><span>☀</span><strong>29°</strong><small>{t("Ясно","Clear")}</small></div><div className="weather-hours"><span>{t("Сега","Now")}<b>29°</b></span><span>16:00<b>30°</b></span><span>18:00<b>27°</b></span><span>20:00<b>23°</b></span></div></article><article className="card settings-panel"><PanelTitle eyebrow={t("PV ПРОГНОЗА","PV FORECAST")} title="4.18 MWh"/><div className="forecast-bars">{[18,26,42,66,88,100,94,76,48,22].map((v,i)=><i key={i} style={{height:`${v}px`}}/>)}</div><p className="confidence">{t("Точност на прогнозата","Forecast accuracy")} <b>94.2%</b></p></article><article className="card settings-panel"><PanelTitle eyebrow={t("ПАЗАРЕН СИГНАЛ","MARKET SIGNAL")} title={t("Препоръчано действие","Recommended action")}/><div className="signal"><i>↗</i><strong>{t("Продавай","Export")}</strong><span>{t("до 18:45","until 18:45")}</span></div><p className="signal-note">{t("Очакван ценови пик","Expected price peak")}: <b>242 BGN/MWh</b> {t("в 17:00","at 17:00")}</p></article></section></>}
 
     {tab==="live"&&<ForwardRevenueChart lang={lang}/>}
 
