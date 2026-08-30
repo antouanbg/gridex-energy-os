@@ -37,6 +37,10 @@ The production concept separates strategy from safety:
 3. The safety layer clamps every command to current BMS and site limits.
 4. The local edge gateway normalises vendor-specific Modbus maps and maintains time-critical behaviour even when the cloud connection is unavailable.
 
+The optional Waveshare 2-CH CAN TO ETH transport and the protocol-reference
+validation rules are documented in
+[WAVESHARE_AND_PROTOCOL_REFERENCES.md](docs/edge/WAVESHARE_AND_PROTOCOL_REFERENCES.md).
+
 ## Development
 
 Requirements: Node.js 22.13 or newer.
@@ -61,6 +65,11 @@ npm run build:pages
 ## Open source
 
 This repository is open source under the [MIT License](LICENSE). Contributions and technical discussion are welcome. Product names and trademarks remain the property of their respective owners.
+
+External protocol projects are references, not bundled dependencies. In
+particular, `ai-republic/bms-to-inverter` uses CC BY-NC-SA 4.0; its source code
+is not copied into GrideX. Commercial driver implementations require original
+code based on manufacturer specifications and validated laboratory traces.
 
 ## Author
 
