@@ -45,10 +45,32 @@ const titles: Record<string, [string, string]> = {
   settings: ["Настройки", "SOLAR PARK EAST / КОНФИГУРАЦИЯ"],
   plans: ["Планове и абонамент", "GRIDEX / ЛИЦЕНЗИ"],
   about: ["За нас", "GRIDEX / SUNSTORAGE PRO"],
+  profile: ["Потребителски профил", "GRIDEX / МОЯТ ПРОФИЛ"],
+  login: ["Вход в портала", "GRIDEX / СИГУРЕН ДОСТЪП"],
 };
 
 const titlesEn: Record<string, [string, string]> = {
-  overview:["Solar Park East","PORTFOLIO / SOFIA"], customers:["Customers & contracts","PORTFOLIO / CRM"], sites:["My sites","PORTFOLIO / 6 SITES"], assets:["Energy assets","SOLAR PARK EAST / ASSETS"], battery:["Battery & optimisation","SOLAR PARK EAST / BESS"], schedule:["Energy schedule","SOLAR PARK EAST / 21 AUGUST"], market:["Market & forecasts","BULGARIA / IBEX DAY-AHEAD"], settlement:["Tariffs & settlement","PORTFOLIO / VEM"], automation:["Logic & operating modes","EMS / AUTOMATION"], loads:["Flexible loads","EMS / FLEXIBLE LOADS"], balance:["Balancing group","GRIDEX / 21 AUGUST"], gateway:["Edge gateway","HARDWARE / LOCAL CONTROL"], devices:["Devices & SCADA","SOLAR PARK EAST / 12 DEVICES"], alarms:["Alarms & events","PORTFOLIO / ACTIVE"], reports:["Reports & economics","SOLAR PARK EAST / ANALYTICS"], settings:["Settings","SOLAR PARK EAST / CONFIGURATION"], plans:["Plans & subscription","GRIDEX / LICENSING"], about:["About us","GRIDEX / SUNSTORAGE PRO"],
+  overview:["Solar Park East","PORTFOLIO / SOFIA"], customers:["Customers & contracts","PORTFOLIO / CRM"], sites:["My sites","PORTFOLIO / 6 SITES"], assets:["Energy assets","SOLAR PARK EAST / ASSETS"], battery:["Battery & optimisation","SOLAR PARK EAST / BESS"], schedule:["Energy schedule","SOLAR PARK EAST / 21 AUGUST"], market:["Market & forecasts","BULGARIA / IBEX DAY-AHEAD"], settlement:["Tariffs & settlement","PORTFOLIO / VEM"], automation:["Logic & operating modes","EMS / AUTOMATION"], loads:["Flexible loads","EMS / FLEXIBLE LOADS"], balance:["Balancing group","GRIDEX / 21 AUGUST"], gateway:["Edge gateway","HARDWARE / LOCAL CONTROL"], devices:["Devices & SCADA","SOLAR PARK EAST / 12 DEVICES"], alarms:["Alarms & events","PORTFOLIO / ACTIVE"], reports:["Reports & economics","SOLAR PARK EAST / ANALYTICS"], settings:["Settings","SOLAR PARK EAST / CONFIGURATION"], plans:["Plans & subscription","GRIDEX / LICENSING"], about:["About us","GRIDEX / SUNSTORAGE PRO"], profile:["User profile","GRIDEX / MY PROFILE"], login:["Sign in","GRIDEX / SECURE ACCESS"],
+};
+
+type DemoUser = {
+  nameBg:string;
+  nameEn:string;
+  initialsBg:string;
+  initialsEn:string;
+  email:string;
+  roleBg:string;
+  roleEn:string;
+};
+
+const demoUser:DemoUser = {
+  nameBg:"Антон Колев",
+  nameEn:"Anton Kolev",
+  initialsBg:"АК",
+  initialsEn:"AK",
+  email:"anton.kolev@gridex.tech",
+  roleBg:"Администратор",
+  roleEn:"Administrator",
 };
 
 const marketValues = [116, 104, 96, 88, 93, 118, 162, 188, 174, 148, 132, 126, 119, 128, 147, 176, 215, 242, 228, 204, 187, 164, 143, 126];
@@ -958,6 +980,8 @@ export default function Home() {
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
   const [toast, setToast] = useState("");
+  const [sessionUser,setSessionUser] = useState<DemoUser|null>(demoUser);
+  const [accountMenuOpen,setAccountMenuOpen] = useState(false);
   const [backendState, setBackendState] = useState<"demo" | "checking" | "online" | "offline">(
     () => getGridexRuntimeConfig().mode === "demo" ? "demo" : "checking",
   );
@@ -972,6 +996,14 @@ export default function Home() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    const closeOnEscape = (event:KeyboardEvent) => {
+      if (event.key === "Escape") setAccountMenuOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, []);
+
   const notify = (message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 2600);
@@ -980,7 +1012,30 @@ export default function Home() {
   const navigate = (id: string) => {
     setView(id);
     setMobileNavOpen(false);
+    setAccountMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const signOut = () => {
+    setSessionUser(null);
+    setRole("Администратор");
+    navigate("login");
+    notify(lang==="en"?"You have signed out safely":"Излязохте успешно от профила");
+  };
+
+  const signIn = (email:string) => {
+    const nextUser = email.toLowerCase() === demoUser.email ? demoUser : {
+      ...demoUser,
+      email,
+      nameBg:"Демо потребител",
+      nameEn:"Demo User",
+      initialsBg:"ДП",
+      initialsEn:"DU",
+    };
+    setSessionUser(nextUser);
+    setRole(nextUser.roleBg);
+    navigate("overview");
+    notify(lang==="en"?"Welcome to GrideX Energy OS":"Добре дошли в GrideX Energy OS");
   };
 
   return (
@@ -1004,8 +1059,25 @@ export default function Home() {
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
         <div className="gateway"><span className="live-dot"/><div><strong>Edge Gateway</strong><small>Онлайн · преди 8 сек.</small></div></div>
-        <div className="profile" data-no-translate><span>{lang==="en"?"AK":"АК"}</span><div><strong>{lang==="en"?"Anton Kolev":"Антон Колев"}</strong><small>{lang==="en"?translateText(role):role}</small></div><b>⋮</b></div>
+        <div className="profile-wrap" data-no-translate>
+          <button className={`profile ${accountMenuOpen?"open":""}`} onClick={()=>setAccountMenuOpen(!accountMenuOpen)} aria-haspopup="menu" aria-expanded={accountMenuOpen}>
+            <span>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</span>
+            <div><strong>{sessionUser?(lang==="en"?sessionUser.nameEn:sessionUser.nameBg):(lang==="en"?"Sign in":"Вход")}</strong><small>{sessionUser?(lang==="en"?sessionUser.roleEn:sessionUser.roleBg):(lang==="en"?"No active session":"Няма активна сесия")}</small></div><b>⋮</b>
+          </button>
+        </div>
       </aside>
+
+      {accountMenuOpen&&<>
+        <button className="account-menu-scrim" aria-label={lang==="en"?"Close account menu":"Затвори потребителското меню"} onClick={()=>setAccountMenuOpen(false)}/>
+        <div className="account-menu" role="menu" data-no-translate>
+          {sessionUser?<>
+            <div className="account-menu-head"><span>{lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg}</span><div><strong>{lang==="en"?sessionUser.nameEn:sessionUser.nameBg}</strong><small>{sessionUser.email}</small></div></div>
+            <button role="menuitem" onClick={()=>navigate("profile")}><i>◎</i><span><strong>{lang==="en"?"Profile & statistics":"Профил и статистика"}</strong><small>{lang==="en"?"Activity, permissions and sessions":"Активност, права и сесии"}</small></span><b>›</b></button>
+            <button role="menuitem" onClick={()=>navigate("login")}><i>⇄</i><span><strong>{lang==="en"?"Switch account":"Смяна на профил"}</strong><small>{lang==="en"?"Open the sign-in page":"Отвори страницата за вход"}</small></span><b>›</b></button>
+            <button className="account-menu-logout" role="menuitem" onClick={signOut}><i>↪</i><span><strong>{lang==="en"?"Sign out":"Изход"}</strong><small>{lang==="en"?"End this portal session":"Прекрати тази сесия"}</small></span></button>
+          </>:<button role="menuitem" onClick={()=>navigate("login")}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open the secure-access page":"Отвори страницата за достъп"}</small></span><b>›</b></button>}
+        </div>
+      </>}
 
       <section className="content">
         <header>
@@ -1020,6 +1092,7 @@ export default function Home() {
             {view !== "sites" && <select value={site} onChange={(e) => setSite(e.target.value)} aria-label={lang==="en"?"Selected site":"Избран обект"}><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></select>}
             <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label={lang==="en"?"Period":"Период"}><option>Днес</option><option>Тази седмица</option><option>Този месец</option></select>
             <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△<em>3</em></button>
+            <button className="mobile-account-button" data-no-translate aria-label={lang==="en"?"Account menu":"Потребителско меню"} aria-expanded={accountMenuOpen} onClick={()=>setAccountMenuOpen(!accountMenuOpen)}>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</button>
           </div>
         </header>
 
@@ -1041,10 +1114,104 @@ export default function Home() {
         {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify}/>}
+        {view === "profile" && <UserProfile lang={lang} user={sessionUser} navigate={navigate} signOut={signOut} notify={notify}/>}
+        {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate}/>}
       </section>
       {toast && <div className="toast"><i>✓</i>{toast}</div>}
     </main>
   );
+}
+
+function LoginPage({lang,user,onSignIn,onSignOut,navigate}:{lang:UiLanguage;user:DemoUser|null;onSignIn:(email:string)=>void;onSignOut:()=>void;navigate:(id:string)=>void}) {
+  const [email,setEmail] = useState(user?.email??demoUser.email);
+  const [password,setPassword] = useState("");
+  const [showPassword,setShowPassword] = useState(false);
+  const [error,setError] = useState("");
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const submit=(event:React.FormEvent<HTMLFormElement>)=>{
+    event.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setError(t("Въведете валиден имейл адрес.","Enter a valid email address."));
+      return;
+    }
+    if (password.length < 6) {
+      setError(t("Паролата трябва да съдържа поне 6 знака.","Password must contain at least 6 characters."));
+      return;
+    }
+    setError("");
+    onSignIn(email);
+  };
+  return <div className="login-layout" data-no-translate>
+    <section className="login-brand-panel">
+      <div className="login-brand-mark">GX</div>
+      <p>GRIDEX ENERGY OS</p>
+      <h2>{t("Енергийното управление започва с ясен контрол.","Energy management starts with clear control.")}</h2>
+      <span>{t("Един портал за портфолио, пазари, батерии, прогнози, индустриални товари и Edge устройства.","One portal for portfolios, markets, batteries, forecasts, industrial loads and Edge devices.")}</span>
+      <div className="login-trust-list">
+        <span><i>✓</i>{t("Разделени потребителски роли","Separated user roles")}</span>
+        <span><i>✓</i>{t("Одит на команди и промени","Audit trail for commands and changes")}</span>
+        <span><i>✓</i>{t("Подготовка за OpenRemote / Keycloak","Ready for OpenRemote / Keycloak")}</span>
+      </div>
+    </section>
+    <form className="login-card" onSubmit={submit} autoComplete="off">
+      <div className="login-demo-chip">{t("ДЕМО ДОСТЪП","DEMO ACCESS")}</div>
+      <p>{t("ДОБРЕ ДОШЛИ","WELCOME BACK")}</p>
+      <h2>{t("Вход в портала","Sign in to the portal")}</h2>
+      <span className="login-intro">{t("Използвайте профила си за достъп до управляваните обекти.","Use your account to access your managed sites.")}</span>
+      {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
+      <label><span>{t("Служебен имейл","Work email")}</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="off" placeholder="name@company.com"/></label>
+      <label><span>{t("Парола","Password")}</span><div className="password-field"><input type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password" placeholder="••••••••"/><button type="button" onClick={()=>setShowPassword(!showPassword)} aria-label={showPassword?t("Скрий паролата","Hide password"):t("Покажи паролата","Show password")}>{showPassword?"○":"◉"}</button></div></label>
+      <div className="login-options"><label><input type="checkbox" defaultChecked/>{t("Запомни това устройство","Remember this device")}</label><button type="button" onClick={()=>setError(t("В демо режима възстановяването на парола не изпраща имейл.","Password recovery does not send email in demo mode."))}>{t("Забравена парола?","Forgot password?")}</button></div>
+      {error&&<div className="login-error" role="alert">{error}</div>}
+      <button className="login-submit" type="submit">{t("Вход в GrideX","Sign in to GrideX")} <b>→</b></button>
+      {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
+      <small className="login-disclaimer">{t("Това е функционален демо вход. При продукционното внедряване удостоверяването и ролите се поемат от OpenRemote / Keycloak чрез OIDC; паролата не се записва от тази страница.","This is a functional demo sign-in. In production, authentication and roles will be handled by OpenRemote / Keycloak over OIDC; this page does not store the password.")}</small>
+    </form>
+  </div>;
+}
+
+function UserProfile({lang,user,navigate,signOut,notify}:{lang:UiLanguage;user:DemoUser|null;navigate:(id:string)=>void;signOut:()=>void;notify:(message:string)=>void}) {
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  if (!user) return <section className="empty-profile card" data-no-translate><span>↪</span><h2>{t("Няма активна сесия","No active session")}</h2><p>{t("Влезте, за да видите потребителската статистика, правата и историята на действията.","Sign in to view user statistics, permissions and activity history.")}</p><button className="primary-btn" onClick={()=>navigate("login")}>{t("Към входа","Go to sign in")}</button></section>;
+  const activity = [
+    ["14:28",t("Потвърдена аларма","Alarm acknowledged"),t("BESS температура · Solar Park East","BESS temperature · Solar Park East")],
+    ["13:45",t("Експортиран отчет","Report exported"),t("Дневна икономика · PDF","Daily economics · PDF")],
+    ["11:12",t("Променена стратегия","Strategy changed"),t("Ценови арбитраж · автоматичен режим","Price arbitrage · automatic mode")],
+    ["09:04",t("Прегледан график","Schedule reviewed"),t("IBEX ден напред · 96 интервала","IBEX day-ahead · 96 intervals")],
+  ];
+  return <div className="user-profile-page" data-no-translate>
+    <section className="user-hero card">
+      <div className="user-avatar-large">{lang==="en"?user.initialsEn:user.initialsBg}<i/></div>
+      <div><p>{t("АКТИВЕН ПОТРЕБИТЕЛ","ACTIVE USER")}</p><h2>{lang==="en"?user.nameEn:user.nameBg}</h2><span>{user.email}</span><div><b>{lang==="en"?user.roleEn:user.roleBg}</b><b>GrideX Ltd.</b><b>{t("Pro план","Pro plan")}</b></div></div>
+      <div className="user-hero-actions"><button className="secondary-btn" onClick={()=>notify(t("Редакцията на профила ще се свърже с OpenRemote identity provider.","Profile editing will connect to the OpenRemote identity provider."))}>{t("Редакция на профил","Edit profile")}</button><button className="logout-btn" onClick={signOut}>{t("Изход","Sign out")} ↪</button></div>
+    </section>
+
+    <section className="user-kpis">
+      <article className="card"><i>◇</i><small>{t("Управлявани обекти","Managed sites")}</small><strong>6</strong><span>{t("5 онлайн · 1 в сервиз","5 online · 1 in service")}</span></article>
+      <article className="card"><i>▦</i><small>{t("Енергийни активи","Energy assets")}</small><strong>59</strong><span>{t("12 под директен контрол","12 under direct control")}</span></article>
+      <article className="card"><i>⌘</i><small>{t("Действия днес","Actions today")}</small><strong>24</strong><span>{t("0 неуспешни команди","0 failed commands")}</span></article>
+      <article className="card"><i>✓</i><small>{t("Изпълнен график","Schedule fulfilment")}</small><strong>99.2%</strong><span>{t("Средно за последните 30 дни","30-day average")}</span></article>
+    </section>
+
+    <section className="user-profile-grid">
+      <article className="card user-activity-card">
+        <PanelTitle eyebrow={t("ОДИТ И АКТИВНОСТ","AUDIT & ACTIVITY")} title={t("Последни действия","Recent actions")} action={<button className="text-action" onClick={()=>notify(t("Пълният одит ще се зарежда от OpenRemote.","The full audit trail will load from OpenRemote."))}>{t("Виж всички","View all")}</button>}/>
+        <div className="user-activity-list">{activity.map(([time,title,note])=><div key={time}><time>{time}</time><i/><span><strong>{title}</strong><small>{note}</small></span></div>)}</div>
+      </article>
+      <article className="card user-access-card">
+        <PanelTitle eyebrow={t("ДОСТЪП","ACCESS")} title={t("Роля и права","Role & permissions")}/>
+        <div className="permission-role"><i>◎</i><span><strong>{lang==="en"?user.roleEn:user.roleBg}</strong><small>{t("Пълен достъп до организацията","Full organisation access")}</small></span><b>{t("АКТИВНА","ACTIVE")}</b></div>
+        {[t("Мониторинг и телеметрия","Monitoring & telemetry"),t("Графици и прогнози","Schedules & forecasts"),t("Команди към активи","Asset commands"),t("Настройки и потребители","Settings & users")].map(item=><div className="permission-item" key={item}><i>✓</i><span>{item}</span><b>{t("Разрешено","Allowed")}</b></div>)}
+      </article>
+      <article className="card user-session-card">
+        <PanelTitle eyebrow={t("СИГУРНОСТ","SECURITY")} title={t("Текуща сесия","Current session")}/>
+        <div className="session-status"><i>●</i><span><strong>{t("Активна сега","Active now")}</strong><small>{t("Последен вход: днес, 08:42","Last sign-in: today, 08:42")}</small></span></div>
+        <dl><div><dt>{t("Устройство","Device")}</dt><dd>Mac · Safari</dd></div><div><dt>{t("Местоположение","Location")}</dt><dd>Sofia, BG</dd></div><div><dt>{t("Двуфакторна защита","Two-factor authentication")}</dt><dd>{t("При продукционен вход","With production sign-in")}</dd></div></dl>
+        <button className="secondary-btn" onClick={()=>notify(t("Настройките за сигурност ще се управляват от Keycloak.","Security settings will be managed by Keycloak."))}>{t("Настройки за сигурност","Security settings")}</button>
+      </article>
+    </section>
+    <div className="identity-note"><i>i</i><span><strong>{t("Архитектура за продукционен достъп","Production access architecture")}</strong><small>{t("GrideX Frontend → OpenID Connect → OpenRemote / Keycloak. Ролите и разрешенията се прилагат и от backend API, не само от интерфейса.","GrideX Frontend → OpenID Connect → OpenRemote / Keycloak. Roles and permissions are enforced by the backend API, not only by the interface.")}</small></span></div>
+  </div>;
 }
 
 function PanelTitle({ eyebrow, title, action }: { eyebrow: string; title: string; action?: React.ReactNode }) {
