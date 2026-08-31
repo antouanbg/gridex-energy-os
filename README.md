@@ -41,6 +41,10 @@ The optional Waveshare 2-CH CAN TO ETH transport and the protocol-reference
 validation rules are documented in
 [WAVESHARE_AND_PROTOCOL_REFERENCES.md](docs/edge/WAVESHARE_AND_PROTOCOL_REFERENCES.md).
 
+The manufacturer-confirmed Suntech STE-261L / SunStorage Pro 261 Modbus profile
+is documented in [SUNTECH_STE261L_MODBUS.md](docs/edge/SUNTECH_STE261L_MODBUS.md).
+Its standard-library C++ driver and tests live in [edge/rock-pi-e](edge/rock-pi-e).
+
 ## Forecasting and scenario economics
 
 The independent [forecasting service](services/forecasting/README.md) contains
