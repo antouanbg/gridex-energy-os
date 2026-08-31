@@ -1960,89 +1960,32 @@ function SubscriptionPlans({notify,lang}:{notify:(v:string)=>void;lang:UiLanguag
 
 function About({lang,notify}:{lang:UiLanguage;notify:(v:string)=>void}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
-  const included=[
-    ["⌁",t("Драйвер и унифициран asset модел","Driver and unified asset model")],
-    ["▦",t("Табла, телеметрия, аларми и отчети","Dashboards, telemetry, alarms and reports")],
-    ["⌘",t("IBEX, времева прогноза и day-ahead логика","IBEX, weather forecast and day-ahead logic")],
-    ["✓",t("Safety envelope, BMS лимити и software fuse","Safety envelope, BMS limits and software fuse")],
-  ];
-  const telemetry=["SOC / SOH",t("Зарядни и разрядни лимити","Charge and discharge limits"),t("Клетъчни температури и напрежения","Cell temperatures and voltages"),t("Аларми, contactors и availability","Alarms, contactors and availability")];
-  return <div className="about-page" data-no-translate>
-    <section className="about-hero card">
-      <div className="about-copy">
-        <div className="sponsor-mark">SPONSORED BY <strong>SUNTECH</strong></div>
-        <p className="about-kicker">SUNSTORAGE PRO SERIES</p>
-        <h2>SunStorage Pro 261</h2>
-        <p className="about-lead">{t("Индустриална батерийна система от 261 kWh клас, готова за интелигентно управление с GrideX Energy OS.","A 261 kWh-class industrial battery storage system, ready for intelligent control with GrideX Energy OS.")}</p>
-        <div className="lifetime-offer"><i>∞</i><span><small>{t("ВКЛЮЧЕНО В ДОСТАВКАТА","INCLUDED WITH THE SYSTEM")}</small><strong>{t("Безплатна интеграция + безсрочен GrideX лиценз","Free integration + perpetual GrideX licence")}</strong><em>{t("за целия жизнен цикъл на доставената система","for the full service life of the supplied system")}</em></span></div>
-        <div className="about-actions"><button className="primary-btn" onClick={()=>notify(t("Запитването за SunStorage Pro 261 е подготвено","Your SunStorage Pro 261 enquiry is ready"))}>{t("Поискай оферта","Request an offer")}</button><button className="secondary-btn" onClick={()=>notify(t("Техническата конфигурация е отворена за проектно уточнение","The technical configuration is ready for project review"))}>{t("Проектна конфигурация","Project configuration")}</button></div>
-      </div>
-      <div className="storage-product" aria-label="SunStorage Pro 261 battery cabinet">
-        <div className="storage-halo"/><div className="storage-cabinet"><span>SUNTECH</span><strong>SunStorage</strong><small>PRO 261</small><div className="cabinet-screen"><i/><b>READY</b></div><div className="cabinet-vents">••••••••••••</div></div><div className="storage-floor"/>
+  return <div className="about-page about-clean" data-no-translate>
+    <section className="card suntech-advert">
+      <img className="suntech-banner" src="/suntech-banner.jpg" alt="Suntech — Stand the Test of Time"/>
+      <div className="suntech-advert-body">
+        <div className="suntech-advert-copy">
+          <img className="suntech-logo" src="/suntech-logo.jpg" alt="Suntech"/>
+          <p>SUNSTORAGE PRO SERIES</p>
+          <h2>SunStorage Pro 261</h2>
+          <span>{t("Индустриална BESS система от 261 kWh клас с готова интеграция към GrideX Energy OS.","A 261 kWh-class industrial BESS with ready integration to GrideX Energy OS.")}</span>
+          <div className="suntech-offer-points">
+            <strong><i>261</i><small>kWh BESS</small></strong>
+            <strong><i>∞</i><small>{t("GrideX лиценз","GrideX licence")}</small></strong>
+            <strong><i>✓</i><small>{t("Безплатен електропроект","Complimentary electrical design")}</small></strong>
+          </div>
+          <div className="suntech-advert-actions"><button onClick={()=>notify(t("Запитването за SunStorage Pro 261 е подготвено","Your SunStorage Pro 261 enquiry is ready"))}>{t("Поискай оферта","Request an offer")}</button><button onClick={()=>notify(t("Техническата конфигурация е отворена","The technical configuration is open"))}>{t("Техническа конфигурация","Technical configuration")}</button></div>
+        </div>
+        <div className="storage-product suntech-storage" aria-label="SunStorage Pro 261 battery cabinet"><div className="storage-halo"/><div className="storage-cabinet"><span>SUNTECH</span><strong>SunStorage</strong><small>PRO 261</small><div className="cabinet-screen"><i/><b>READY</b></div><div className="cabinet-vents">••••••••••••</div></div><div className="storage-floor"/></div>
       </div>
     </section>
 
-    <section className="about-specs">
-      <article className="card"><span>01</span><small>{t("Енергиен клас","ENERGY CLASS")}</small><strong>261 kWh</strong><p>{t("Кабинетна BESS система","Cabinet BESS")}</p></article>
-      <article className="card"><span>02</span><small>{t("Батериен контрол","BATTERY CONTROL")}</small><strong>BAU / BMS</strong><p>Modbus RTU · RS485</p></article>
-      <article className="card"><span>03</span><small>{t("Силова част","POWER CONVERSION")}</small><strong>{t("PCS по проект","Project PCS")}</strong><p>{t("AC coupling конфигурация","AC-coupled configuration")}</p></article>
-      <article className="card"><span>04</span><small>{t("EMS интеграция","EMS INTEGRATION")}</small><strong>OpenRemote ready</strong><p>GrideX Edge · Modbus TCP</p></article>
+    <section className="card github-project-card">
+      <div className="github-project-mark">&lt;/&gt;</div>
+      <div className="github-project-copy"><p>OPEN SOURCE · MIT LICENSE</p><h2>GrideX Energy OS</h2><span>{t("Публичен open-source EMS проект, създаден от д-р инж. Антоан Ангелов. Кодът и техническата архитектура са достъпни в GitHub за преглед, развитие и нови интеграции.","A public open-source EMS project created by Dr. Eng. Antouan Anguelov. The code and technical architecture are available on GitHub for review, development and new integrations.")}</span></div>
+      <div className="github-project-points"><span>✓ {t("Публичен изходен код","Public source code")}</span><span>✓ OpenRemote + GrideX Edge</span><span>✓ {t("Отворен за драйвери","Open to new drivers")}</span></div>
+      <div className="github-project-actions"><a href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer">GitHub repository ↗</a><a href="https://github.com/antouanbg/gridex-energy-os/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License ↗</a></div>
     </section>
-
-    <section className="about-product-grid">
-      <article className="card about-included"><PanelTitle eyebrow={t("ИНТЕГРАЦИОНЕН ПАКЕТ","INTEGRATION PACKAGE")} title={t("Какво получава клиентът","What the customer receives")}/><div>{included.map(item=><span key={item[1]}><i>{item[0]}</i><strong>{item[1]}</strong></span>)}</div><div className="product-flow"><b>SunStorage Pro 261</b><i>→</i><b>GrideX Edge</b><i>→</i><b>OpenRemote</b><i>→</i><b>Energy OS</b></div></article>
-      <article className="card about-telemetry"><PanelTitle eyebrow={t("BMS ДАННИ","BMS DATA")} title={t("Наблюдавани параметри","Monitored parameters")}/><div>{telemetry.map(x=><span key={x}>✓ {x}</span>)}</div><p>{t("Командите към PCS се изпълняват само след проверка на валидните фабрични BMS граници.","PCS commands are executed only after the valid manufacturer-defined BMS limits have been checked.")}</p></article>
-    </section>
-
-    <section className="card licence-card">
-      <div><p>{t("GRIDEX FOREVER LIFE","GRIDEX FOREVER LIFE")}</p><h2>{t("Една система. Един безсрочен лиценз.","One system. One perpetual licence.")}</h2><span>{t("Лицензът е включен без годишна софтуерна такса за конкретната доставена SunStorage Pro 261 система.","The licence is included without an annual software fee for the specific supplied SunStorage Pro 261 system.")}</span></div>
-      <div className="licence-points"><span><i>✓</i>{t("Достъп до EMS таблата","Access to EMS dashboards")}</span><span><i>✓</i>{t("Оптимизационни режими","Optimisation modes")}</span><span><i>✓</i>{t("Драйвер за модела","Model driver")}</span><span><i>✓</i>{t("Актуализации на базовата интеграция","Core integration updates")}</span></div>
-    </section>
-
-    <section className="card project-offer">
-      <div className="project-offer-icon">⌁</div>
-      <div className="project-offer-copy"><p>{t("СПЕЦИАЛНА ОФЕРТА","SPECIAL OFFER")}</p><h2>{t("Безплатен електротехнически проект","Complimentary electrical engineering design")}</h2><strong>{t("с всяка закупена SunStorage Pro 261 система","with every purchased SunStorage Pro 261 system")}</strong><span>{t("Еднолинейна схема, оразмеряване на кабели и защити, AC coupling архитектура, измервателни точки и интерфейси към GrideX Edge.","Single-line diagram, cable and protection sizing, AC-coupling architecture, metering points and GrideX Edge interfaces.")}</span></div>
-      <div className="project-offer-points"><span><i>✓</i>{t("Еднолинейна схема","Single-line diagram")}</span><span><i>✓</i>{t("Кабели и защити","Cables and protection")}</span><span><i>✓</i>{t("PCS, BMS и Smart Meter точки","PCS, BMS and smart-meter points")}</span><span><i>✓</i>{t("EMS комуникационна схема","EMS communications diagram")}</span></div>
-      <button className="primary-btn" onClick={()=>notify(t("Запитването за безплатен електротехнически проект е подготвено","Your complimentary electrical design enquiry is ready"))}>{t("Заяви проект","Request design")}</button>
-      <small className="project-scope">{t("Обхватът се уточнява за конкретния обект и търговска оферта. Такси за съгласуване, разрешителни и строителен надзор не са включени, освен ако не са изрично договорени.","Scope is confirmed for the individual site and commercial offer. Permitting, utility fees and construction supervision are excluded unless expressly agreed.")}</small>
-    </section>
-
-    <section className="card opensource-card">
-      <div className="opensource-mark">&lt;/&gt;</div>
-      <div className="opensource-copy"><p>OPEN SOURCE · MIT LICENSE</p><h2>{t("GrideX Energy OS е отворен проект","GrideX Energy OS is an open-source project")}</h2><span>{t("Изходният код на демонстрационната платформа е публичен. Архитектурата може да бъде преглеждана, развивана и адаптирана за нови устройства, пазари и енергийни сценарии при условията на MIT лиценза.","The demonstration platform source code is public. Its architecture can be reviewed, extended and adapted for new devices, markets and energy scenarios under the MIT License.")}</span></div>
-      <div className="opensource-points"><span><i>✓</i>{t("Публичен изходен код","Public source code")}</span><span><i>✓</i>{t("Прозрачна EMS архитектура","Transparent EMS architecture")}</span><span><i>✓</i>{t("Отворен за драйвери и интеграции","Open to drivers and integrations")}</span><span><i>✓</i>{t("Подходящ за научно и индустриално развитие","Ready for research and industrial development")}</span></div>
-      <div className="opensource-actions"><a href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer">GitHub repository ↗</a><a href="https://github.com/antouanbg/gridex-energy-os/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License ↗</a></div>
-    </section>
-
-    <section className="card founder-profile">
-      <header className="founder-head">
-        <div className="developer-avatar">AA</div>
-        <div className="founder-title"><p>{t("ОСНОВАТЕЛ · АРХИТЕКТ И РАЗРАБОТЧИК НА СИСТЕМАТА","FOUNDER · SYSTEM ARCHITECT & DEVELOPER")}</p><h2>{t("Д-р инж. Антоан Христов Ангелов","Dr. Eng. Antouan Hristov Anguelov")}</h2><strong>{t("Технологичен предприемач, инвеститор и преподавател | Експерт по Изкуствен интелект, Телекомуникации и Системи за възобновяема енергия (BESS)","Technology entrepreneur, investor and lecturer | Expert in Artificial Intelligence, Telecommunications and Renewable Energy Systems (BESS)")}</strong></div>
-        <div className="developer-links"><a href="https://linkmy.cards/en/antouan-anguelov/" target="_blank" rel="noreferrer">Digital profile ↗</a><a href="https://www.linkedin.com/in/antouan/" target="_blank" rel="noreferrer">LinkedIn ↗</a></div>
-      </header>
-
-      <p className="founder-lead">{t("Утвърден визионер с над 25 години професионален опит на пресечната точка между бизнеса, иновациите и академичната наука. Съчетава дълбока техническа експертиза в изкуствения интелект и софтуерната интеграция с практически решения за енергийния сектор и телекомуникациите. Основател и мениджър на технологични компании в България, създател на патенти и активен изследовател.","An established technology visionary with more than 25 years of experience at the intersection of business, innovation and academic research. He combines deep expertise in artificial intelligence and software integration with practical solutions for energy and telecommunications. He is the founder and manager of Bulgarian technology companies, an inventor and an active researcher.")}</p>
-
-      <div className="founder-grid">
-        <article className="profile-column"><div className="profile-icon">01</div><p>{t("АКАДЕМИЧНА ДЕЙНОСТ","ACADEMIC WORK")}</p><h3>{t("Преподавател и изследовател","Lecturer and researcher")}</h3><ul><li>{t("Главен асистент в Техническия университет – София; води дисциплината „Интелигентни системи“.","Assistant Professor at the Technical University of Sofia, teaching Intelligent Systems.")}</li><li>{t("Ключов член на Лабораторията за възобновяеми енергийни източници към ТУ-София.","Core member of the university's Renewable Energy Sources Laboratory.")}</li><li>{t("PhD по „Системи с изкуствен интелект“ с фокус върху роевия интелект; магистър по маркетинг и мениджмънт и инженер по роботика.","PhD in Artificial Intelligence Systems with a focus on swarm intelligence; Master's degree in Marketing and Management and an engineering background in Robotics.")}</li></ul></article>
-
-        <article className="profile-column"><div className="profile-icon">02</div><p>{t("БИЗНЕС И ПРЕДПРИЕМАЧЕСТВО","BUSINESS & ENTREPRENEURSHIP")}</p><h3>{t("От телекомуникации до енергиен SaaS","From telecommunications to energy SaaS")}</h3><ul><li>{t("Основател, съосновател и мениджър на Novacom Group, GridEx Ltd. и Lancom; бивш Country Manager за България на Tornado Systems.","Founder, co-founder and manager of Novacom Group, GridEx Ltd. and Lancom; former Country Manager for Bulgaria at Tornado Systems.")}</li><li>{t("Основател и изпълнителен директор на eHub — интеграционна SaaS платформа, отличена със Seal of Excellence по Horizon 2020.","Founder and CEO of eHub, an integration SaaS platform awarded the Horizon 2020 Seal of Excellence.")}</li><li>{t("Съосновател и бивш CTO и изпълнителен директор на локален интернет доставчик и телекомуникационен оператор в София.","Co-founder and former CTO and CEO of a local internet service provider and telecommunications operator in Sofia.")}</li></ul></article>
-      </div>
-
-      <article className="research-highlight">
-        <div className="research-number">2×</div>
-        <div><p>{t("ИЗСЛЕДОВАТЕЛСКИ АКЦЕНТ","RESEARCH HIGHLIGHT")}</p><h3>{t("Индустриален PV + BESS диспечинг на българския пазар „ден напред“","Industrial PV + BESS dispatch in the Bulgarian day-ahead market")}</h3><span>{t("Най-новата публикация в Electronics (MDPI), базирана на реални данни от оборудване на Suntech, изследва как BESS може да удвои приходите на съществуващи PV централи и да трансформира енергийните общности от нетни платци в нетни получатели.","The latest publication in Electronics (MDPI), based on real operational data from Suntech equipment, examines how BESS can double the revenue of existing PV plants and transform energy communities from net payers into net beneficiaries.")}</span></div>
-      </article>
-
-      <div className="innovation-row">
-        <div><p>{t("ПАТЕНТИ И ПРИЛОЖНИ ИНОВАЦИИ","PATENTS & APPLIED INNOVATION")}</p><h3>{t("Решения за реални индустриални проблеми","Solutions for real industrial challenges")}</h3></div>
-        <span><i>01</i><b>{t("Телекомуникации","Telecommunications")}</b><small>{t("Техники за интеграция и комуникация на данни","Data integration and communication techniques")}</small></span>
-        <span><i>02</i><b>{t("Възобновяема енергия","Renewable energy")}</b><small>{t("Системи за генериране и разпределение, оптимизиращи PV мрежи","Generation and distribution systems optimising PV grids")}</small></span>
-        <div className="developer-focus"><span>AI / SWARM</span><span>OPENREMOTE</span><span>EDGE / MODBUS</span><span>PV + BESS</span><span>IBEX / EMS</span><span>TELECOM</span></div>
-      </div>
-    </section>
-
-    <p className="product-disclaimer">{t("Бележка: означението 261 kWh е продуктовият клас в настоящата проектна конфигурация. Окончателните електрически параметри, изборът на PCS, степента на защита, гаранцията и сертификатите се определят от подписаната спецификация на производителя и конкретния проект.","Note: the 261 kWh designation is the product class used in this project configuration. Final electrical parameters, PCS selection, enclosure rating, warranty and certifications are governed by the signed manufacturer specification and the individual project.")}</p>
   </div>;
 }
 
