@@ -1096,7 +1096,7 @@ export default function Home() {
           </div>
         </header>
 
-        {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify}/>} 
+        {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate}/>} 
         {view === "assets" && (
@@ -1222,7 +1222,59 @@ function PanelTitle({ eyebrow, title, action }: { eyebrow: string; title: string
   return <div className="card-title"><div><p>{eyebrow}</p><h2>{title}</h2></div>{action}</div>;
 }
 
-function Overview({ auto, setAuto, navigate, notify }: { auto: boolean; setAuto: (v:boolean)=>void; navigate:(v:string)=>void; notify:(v:string)=>void }) {
+function FlowAsset({className,icon,label,value,unit,note,state,active=true}:{className:string;icon:string;label:string;value:string;unit:string;note:string;state:string;active?:boolean}) {
+  return <div className={`energy-asset ${className} ${active?"active":"inactive"}`}>
+    <i>{icon}</i>
+    <span><small>{label}</small><strong>{value} <b>{unit}</b></strong><em>{note}</em></span>
+    <mark>{state}</mark>
+  </div>;
+}
+
+function FlowLane({className,value,tone,active=true}:{className:string;value:string;tone:"solar"|"grid"|"load"|"battery";active?:boolean}) {
+  return <div className={`energy-lane ${className} ${tone} ${active?"active":"inactive"}`} aria-hidden="true">
+    <span>{value}</span><div><i/><i/><i/></div>
+  </div>;
+}
+
+function EnergyFlowVisual({lang}:{lang:UiLanguage}) {
+  const [scenario,setScenario]=useState<"solar-surplus"|"grid-charge">("solar-surplus");
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const gridCharge=scenario==="grid-charge";
+  const values=gridCharge
+    ? {pv:"18.4",gridIn:"126.0",load:"96.0",battery:"48.4",gridOut:"0.0"}
+    : {pv:"248.6",gridIn:"0.0",load:"124.3",battery:"41.1",gridOut:"83.2"};
+  return <div className={`energy-flow-visual ${gridCharge?"grid-charge":"solar-surplus"}`} data-no-translate>
+    <div className="energy-flow-toolbar">
+      <div className="flow-scenario-tabs" role="group" aria-label={t("Сценарий на енергийния поток","Energy flow scenario")}>
+        <button className={!gridCharge?"active":""} onClick={()=>setScenario("solar-surplus")}><i>☀</i><span>{t("PV излишък","PV surplus")}</span></button>
+        <button className={gridCharge?"active":""} onClick={()=>setScenario("grid-charge")}><i>⌁</i><span>{t("Заряд от мрежата","Grid charging")}</span></button>
+      </div>
+      <div className="flow-balance"><i>✓</i><span><small>{t("Енергиен баланс","Energy balance")}</small><strong>0.0 kW</strong></span></div>
+    </div>
+    <div className="energy-flow-map">
+      <FlowAsset className="flow-pv" icon="☀" label={t("Фотоволтаици","Solar PV")} value={values.pv} unit="kW" note={gridCharge?t("Ниско производство","Low production"):t("Активно производство","Active generation")} state={gridCharge?t("НИСКО","LOW"):t("ИЗТОЧНИК","SOURCE")}/>
+      <FlowLane className="lane-pv" value={`${values.pv} kW`} tone="solar"/>
+
+      <FlowAsset className="flow-grid-in" icon="⌁" label={t("Електрическа мрежа","Utility grid")} value={values.gridIn} unit="kW" note={gridCharge?t("Внос при ниска цена","Import at low price"):t("Без внос","No import")} state={gridCharge?t("ИЗТОЧНИК","SOURCE"):t("ГОТОВА","STANDBY")} active={gridCharge}/>
+      <FlowLane className="lane-grid-in" value={`${values.gridIn} kW`} tone="grid" active={gridCharge}/>
+
+      <div className="energy-flow-hub"><i>GX</i><small>GRIDEX EMS</small><strong>{gridCharge?t("Заряд от мрежата","Grid charging"):t("PV излишък","PV surplus")}</strong><span><b/> {t("Автоматично балансиране","Automatic balancing")}</span></div>
+
+      <FlowLane className="lane-load" value={`${values.load} kW`} tone="load"/>
+      <FlowAsset className="flow-load" icon="⌂" label={t("Консумация","Site load")} value={values.load} unit="kW" note={t("Текущ товар на обекта","Current site demand")} state={t("КОНСУМАТОР","LOAD")}/>
+
+      <FlowLane className="lane-battery" value={`${values.battery} kW`} tone="battery"/>
+      <FlowAsset className="flow-battery" icon="▣" label={t("Батерия","Battery")} value="72%" unit="SOC" note={gridCharge?t("Заряд от мрежата · ниска цена","Grid charge · low price"):t("Заряд от PV излишък","Charging from PV surplus")} state={t("ЗАРЕЖДА","CHARGING")}/>
+
+      <FlowLane className="lane-grid-out" value={`${values.gridOut} kW`} tone="grid" active={!gridCharge}/>
+      <FlowAsset className="flow-grid-out" icon="↗" label={t("Износ към мрежата","Grid export")} value={values.gridOut} unit="kW" note={gridCharge?t("Износът е спрян","Export disabled"):t("Продажба на излишъка","Selling surplus")} state={gridCharge?t("ИЗКЛЮЧЕН","OFF"):t("ИЗНОС","EXPORT")} active={!gridCharge}/>
+    </div>
+    <div className="flow-scenario-note"><i>{gridCharge?"¤":"☀"}</i><span><strong>{gridCharge?t("Защо зареждаме от мрежата?","Why are we charging from the grid?"):t("Оптимално използване на PV излишъка","Optimal use of PV surplus")}</strong><small>{gridCharge?t("Прогнозата е за слабо слънце, а текущата пазарна цена е под зададения праг. EMS запазва енергия за следващите скъпи часове.","Low solar output is forecast and the current market price is below the configured threshold. EMS stores energy for the next expensive hours."):t("Първо се покрива товарът, след това се зарежда батерията, а останалата енергия се продава към мрежата.","Site demand is covered first, then the battery is charged and the remaining energy is exported to the grid.")}</small></span></div>
+  </div>;
+}
+
+function Overview({ auto, setAuto, navigate, notify, lang }: { auto: boolean; setAuto: (v:boolean)=>void; navigate:(v:string)=>void; notify:(v:string)=>void; lang:UiLanguage }) {
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
   return <>
     <div className="status-strip">
       <span><i className="live-dot"/>Всички системи работят нормално</span>
@@ -1230,19 +1282,9 @@ function Overview({ auto, setAuto, navigate, notify }: { auto: boolean; setAuto:
       <button onClick={() => setAuto(!auto)}><i className={auto ? "toggle on" : "toggle"}/><span><strong>{auto ? "Автоматичен режим" : "Ръчен режим"}</strong><small>Оптимизация по пазарна цена</small></span></button>
     </div>
     <section className="hero-grid">
-      <article className="flow-card card">
-        <PanelTitle eyebrow="ЕНЕРГИЕН ПОТОК" title="В реално време" action={<span className="pill green">● Оптимално</span>}/>
-        <div className="flow">
-          <div className="flow-node solar"><i>☀</i><strong>248.6 <small>kW</small></strong><span>Фотоволтаици</span></div>
-          <div className="flow-line horizontal left"><b>248.6 kW</b></div>
-          <div className="flow-center"><i>⚡</i><span>EMS</span></div>
-          <div className="flow-line horizontal right"><b>83.2 kW</b></div>
-          <div className="flow-node grid"><i>⌁</i><strong>83.2 <small>kW</small></strong><span>Към мрежата</span></div>
-          <div className="flow-line down"><b>41.1 kW</b></div>
-          <div className="flow-node battery"><i>▯</i><strong>72%</strong><span>Батерия · зарежда</span></div>
-          <div className="flow-line down right-down"><b>124.3 kW</b></div>
-          <div className="flow-node load"><i>⌂</i><strong>124.3 <small>kW</small></strong><span>Консумация</span></div>
-        </div>
+      <article className="flow-card card" data-no-translate>
+        <PanelTitle eyebrow={t("ЕНЕРГИЕН ПОТОК","ENERGY FLOW")} title={t("В реално време","Real-time energy flow")} action={<span className="pill green">● {t("На живо","Live")}</span>}/>
+        <EnergyFlowVisual lang={lang}/>
       </article>
       <aside className="summary card">
         <PanelTitle eyebrow="ДНЕШЕН РЕЗУЛТАТ" title="21 август 2026" action={<button onClick={() => notify("Отчетът е подготвен за изтегляне")}>•••</button>}/>
