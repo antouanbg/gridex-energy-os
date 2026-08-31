@@ -51,10 +51,15 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .energy-flow-visual { margin-top:17px; }
 .energy-flow-toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:10px; border:1px solid #e3eae6; border-radius:14px; background:#f7f9f8; }
 .flow-scenario-tabs { display:flex; gap:5px; }
-.flow-scenario-tabs button { display:flex; align-items:center; gap:7px; min-height:39px; padding:7px 12px; border:1px solid transparent; border-radius:10px; background:transparent; color:#65736c; font-size:14px; font-weight:700; cursor:pointer; transition:.2s ease; }
+.flow-scenario-tabs button { display:flex; align-items:center; gap:8px; min-height:51px; padding:7px 12px; border:1px solid transparent; border-radius:10px; background:transparent; color:#65736c; font-size:14px; font-weight:700; text-align:left; cursor:pointer; transition:.2s ease; }
 .flow-scenario-tabs button i { font-size:16px; font-style:normal; }
+.flow-scenario-tabs button span>* { display:block; }.flow-scenario-tabs button span>b { font-size:13px; }.flow-scenario-tabs button span>small { margin-top:2px; color:#75837b; font-size:11px; font-weight:700; white-space:nowrap; }
 .flow-scenario-tabs button:hover { background:#fff; color:#173e30; }
 .flow-scenario-tabs button.active { border-color:#b9dcca; background:#fff; color:#106a42; box-shadow:0 4px 12px rgba(21,76,55,.08); }
+.flow-scenario-tabs button.active span>small { color:#237a51; }
+.flow-toolbar-kpis { display:flex; align-items:center; gap:10px; }
+.flow-profit-forecast { min-width:168px; padding:5px 11px; border-left:1px solid #dde5e1; }
+.flow-profit-forecast>* { display:block; }.flow-profit-forecast>small { color:#74827a; font-size:11px; font-weight:700; }.flow-profit-forecast>strong { margin-top:1px; color:#116e43; font-size:17px; }.flow-profit-forecast>em { margin-top:1px; color:#74827a; font-size:11px; font-style:normal; }
 .flow-balance { display:flex; align-items:center; gap:8px; padding:0 5px; }
 .flow-balance>i { width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:#dff5e8; color:#178452; font-size:14px; font-style:normal; font-weight:900; }
 .flow-balance span>* { display:block; }.flow-balance small { color:#849189; font-size:12px; }.flow-balance strong { color:#176f47; font-size:14px; }
@@ -93,7 +98,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 @keyframes energy-particle { from { transform:translateX(-8px); } to { transform:translateX(calc(100% + 92px)); } }
 .flow-scenario-note { display:grid; grid-template-columns:38px 1fr; gap:10px; align-items:center; margin-top:14px; padding:11px 13px; border:1px solid #d9e8df; border-radius:12px; background:#f2f8f4; }
 .flow-scenario-note>i { width:36px; height:36px; display:grid; place-items:center; border-radius:11px; background:#dff2e7; color:#177a4b; font-size:17px; font-style:normal; }
-.flow-scenario-note span>* { display:block; }.flow-scenario-note strong { color:#24453a; font-size:13px; }.flow-scenario-note small { margin-top:2px; color:#718078; font-size:12px; line-height:1.45; }
+.flow-scenario-note span>* { display:block; }.flow-scenario-note strong { color:#24453a; font-size:13px; }.flow-scenario-note small { margin-top:2px; color:#718078; font-size:12px; line-height:1.45; }.flow-scenario-note span>em { margin-top:5px; color:#26774f; font-size:11px; font-style:normal; font-weight:800; letter-spacing:.2px; }
 .energy-flow-visual.grid-charge .flow-scenario-note { border-color:#d9e2f1; background:#f2f6fc; }.energy-flow-visual.grid-charge .flow-scenario-note>i { background:#e3edfb; color:#3269ba; }
 @media(prefers-reduced-motion:reduce){.energy-lane i{animation:none}.energy-asset{transition:none}}
 .profit { background:#103d2e; color:white; border-radius:13px; padding:17px; margin:18px 0 10px; }.profit span { color:#a6c3b6; display:block; font-size:14px; }.profit strong { display:block; margin:7px 0 5px; font-size:25px; color:#d7f57e; }.profit small { font-size:14px; color:#84d7aa; }
@@ -550,7 +555,9 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .card-title h2 { font-size:19px; }
   .energy-flow-toolbar { align-items:stretch; flex-direction:column; }
   .flow-scenario-tabs { display:grid; grid-template-columns:1fr 1fr; }
-  .flow-scenario-tabs button { justify-content:center; padding:7px; }
+  .flow-scenario-tabs button { justify-content:flex-start; padding:7px; }
+  .flow-toolbar-kpis { display:grid; grid-template-columns:1fr auto; }
+  .flow-profit-forecast { min-width:0; border-left:0; padding:4px 7px; }
   .flow-balance { justify-content:center; }
   .energy-flow-map { grid-template-columns:1fr 1fr; grid-template-rows:auto; gap:9px; margin-top:13px; }
   .energy-lane { display:none; }

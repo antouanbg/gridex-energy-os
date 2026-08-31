@@ -41,6 +41,15 @@ The optional Waveshare 2-CH CAN TO ETH transport and the protocol-reference
 validation rules are documented in
 [WAVESHARE_AND_PROTOCOL_REFERENCES.md](docs/edge/WAVESHARE_AND_PROTOCOL_REFERENCES.md).
 
+## Forecasting and scenario economics
+
+The independent [forecasting service](services/forecasting/README.md) contains
+the first implementation contract for 72-hour PV, load and IBEX price forecasts.
+It uses LightGBM for the tabular time-series model and a transparent scenario
+calculator for import cost, export revenue, battery degradation and imbalance.
+Forecasting remains in the cloud strategy layer; safety enforcement remains on
+the edge gateway.
+
 ## Development
 
 Requirements: Node.js 22.13 or newer.

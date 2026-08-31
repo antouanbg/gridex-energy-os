@@ -1243,13 +1243,19 @@ function EnergyFlowVisual({lang}:{lang:UiLanguage}) {
   const values=gridCharge
     ? {pv:"18.4",gridIn:"126.0",load:"96.0",battery:"48.4",gridOut:"0.0"}
     : {pv:"248.6",gridIn:"0.0",load:"124.3",battery:"41.1",gridOut:"83.2"};
+  const forecast=gridCharge
+    ? {profit:t("+2 384.20 лв.","+BGN 2,384.20"),uplift:t("+237.40 лв. спрямо PV сценария","+BGN 237.40 vs. the PV scenario")}
+    : {profit:t("+2 146.80 лв.","+BGN 2,146.80"),uplift:t("Базов оптимизиран сценарий","Optimised baseline scenario")};
   return <div className={`energy-flow-visual ${gridCharge?"grid-charge":"solar-surplus"}`} data-no-translate>
     <div className="energy-flow-toolbar">
       <div className="flow-scenario-tabs" role="group" aria-label={t("Сценарий на енергийния поток","Energy flow scenario")}>
-        <button className={!gridCharge?"active":""} onClick={()=>setScenario("solar-surplus")}><i>☀</i><span>{t("PV излишък","PV surplus")}</span></button>
-        <button className={gridCharge?"active":""} onClick={()=>setScenario("grid-charge")}><i>⌁</i><span>{t("Заряд от мрежата","Grid charging")}</span></button>
+        <button className={!gridCharge?"active":""} onClick={()=>setScenario("solar-surplus")}><i>☀</i><span><b>{t("PV излишък","PV surplus")}</b><small>{t("+2 146.80 лв. / 24 ч.","+BGN 2,146.80 / 24 h")}</small></span></button>
+        <button className={gridCharge?"active":""} onClick={()=>setScenario("grid-charge")}><i>⌁</i><span><b>{t("Заряд от мрежата","Grid charging")}</b><small>{t("+2 384.20 лв. / 24 ч.","+BGN 2,384.20 / 24 h")}</small></span></button>
       </div>
-      <div className="flow-balance"><i>✓</i><span><small>{t("Енергиен баланс","Energy balance")}</small><strong>0.0 kW</strong></span></div>
+      <div className="flow-toolbar-kpis">
+        <div className="flow-profit-forecast"><small>{t("Прогнозна печалба · 24 ч.","Forecast profit · 24 h")}</small><strong>{forecast.profit}</strong><em>{forecast.uplift}</em></div>
+        <div className="flow-balance"><i>✓</i><span><small>{t("Баланс","Balance")}</small><strong>0.0 kW</strong></span></div>
+      </div>
     </div>
     <div className="energy-flow-map">
       <FlowAsset className="flow-pv" icon="☀" label={t("Фотоволтаици","Solar PV")} value={values.pv} unit="kW" note={gridCharge?t("Ниско производство","Low production"):t("Активно производство","Active generation")} state={gridCharge?t("НИСКО","LOW"):t("ИЗТОЧНИК","SOURCE")}/>
@@ -1269,7 +1275,7 @@ function EnergyFlowVisual({lang}:{lang:UiLanguage}) {
       <FlowLane className="lane-grid-out" value={`${values.gridOut} kW`} tone="grid" active={!gridCharge}/>
       <FlowAsset className="flow-grid-out" icon="↗" label={t("Износ към мрежата","Grid export")} value={values.gridOut} unit="kW" note={gridCharge?t("Износът е спрян","Export disabled"):t("Продажба на излишъка","Selling surplus")} state={gridCharge?t("ИЗКЛЮЧЕН","OFF"):t("ИЗНОС","EXPORT")} active={!gridCharge}/>
     </div>
-    <div className="flow-scenario-note"><i>{gridCharge?"¤":"☀"}</i><span><strong>{gridCharge?t("Защо зареждаме от мрежата?","Why are we charging from the grid?"):t("Оптимално използване на PV излишъка","Optimal use of PV surplus")}</strong><small>{gridCharge?t("Прогнозата е за слабо слънце, а текущата пазарна цена е под зададения праг. EMS запазва енергия за следващите скъпи часове.","Low solar output is forecast and the current market price is below the configured threshold. EMS stores energy for the next expensive hours."):t("Първо се покрива товарът, след това се зарежда батерията, а останалата енергия се продава към мрежата.","Site demand is covered first, then the battery is charged and the remaining energy is exported to the grid.")}</small></span></div>
+    <div className="flow-scenario-note"><i>{gridCharge?"¤":"☀"}</i><span><strong>{gridCharge?t("Защо зареждаме от мрежата?","Why are we charging from the grid?"):t("Оптимално използване на PV излишъка","Optimal use of PV surplus")}</strong><small>{gridCharge?t("Прогнозата е за слабо слънце, а текущата пазарна цена е под зададения праг. EMS запазва енергия за следващите скъпи часове.","Low solar output is forecast and the current market price is below the configured threshold. EMS stores energy for the next expensive hours."):t("Първо се покрива товарът, след това се зарежда батерията, а останалата енергия се продава към мрежата.","Site demand is covered first, then the battery is charged and the remaining energy is exported to the grid.")}</small><em>LightGBM · {t("достоверност 87% · обновено 14:30","87% confidence · updated 14:30")}</em></span></div>
   </div>;
 }
 
