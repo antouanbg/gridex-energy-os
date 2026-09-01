@@ -519,6 +519,19 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 @media(max-width:1100px){.load-grid{grid-template-columns:repeat(3,1fr)}.load-fuse{grid-template-columns:1fr 1fr}.load-fuse>div:last-child{grid-column:1/-1}.load-rules-layout,.thermal-layout,.settings-two,.report-bottom{grid-template-columns:1fr}.balancing-policy{grid-template-columns:1fr}.balancing-policy>.primary-btn{grid-column:1}.mode-cost-row{min-width:780px}.report-kpis,.load-kpis{grid-template-columns:1fr 1fr}}
 @media(max-width:680px){.loads-hero,.reports-head,.settings-overview{align-items:flex-start;flex-direction:column}.loads-live,.settings-health{width:100%;min-width:0}.load-kpis,.report-kpis,.load-grid{grid-template-columns:1fr}.load-fuse{grid-template-columns:1fr}.load-rule-types,.occupancy-source,.thermal-stats,.config-form,.trader-card>div,.loss-models{grid-template-columns:1fr}.thermal-tank{grid-template-columns:1fr}.thermal-flow{align-items:stretch;flex-direction:column}.thermal-flow b{display:none}.balancing-sliders,.eligibility-checks{grid-template-columns:1fr}.reports-head>div:last-child{width:100%}.reports-head>div:last-child button{flex:1}.report-table{overflow-x:auto}.report-table .data-table{min-width:620px}.savings-waterfall>div{overflow-x:auto}.savings-waterfall>div span{min-width:62px}.notification-channels{display:grid;grid-template-columns:1fr 1fr}.notification-matrix>span{grid-template-columns:10px 1fr}.notification-matrix>span small{grid-column:2}}
 
+@media(max-width:680px){
+  /* Keep every report card inside the phone viewport; charts and tables scroll inside their own cards. */
+  .report-bottom,.report-bottom>* { min-width:0; max-width:100%; }
+  .savings-waterfall>div { width:100%; max-width:100%; }
+
+  .flow-scenario-tabs button,.flow-scenario-tabs button span { min-width:0; }
+  .flow-scenario-tabs button span>* { overflow-wrap:anywhere; white-space:normal; }
+
+  /* Supporting copy must remain readable on a real phone, not only when zoomed. */
+  .content small,.content em { font-size:12px!important; line-height:1.4; }
+  .sidebar nav button span,.mobile-menu-toggle span { font-size:12px; }
+}
+
 .erp-status,.plans-hero { display:flex; align-items:center; justify-content:space-between; gap:28px; padding:25px 27px; color:white; border:0; background:radial-gradient(circle at 82% 20%,rgba(205,239,112,.18),transparent 30%),linear-gradient(120deg,#0b3628,#17543c); }
 .erp-status>div:first-child { max-width:710px; }.erp-status p,.plans-hero p { margin:8px 0 6px; color:#cdeb75; font-size:12px; font-weight:800; letter-spacing:1px; }.erp-status h2,.plans-hero h2 { margin:0 0 7px; color:white; font-size:18px; }.erp-status small,.plans-hero>div>span { color:#a8c1b5; font-size:13px; line-height:1.55; }.erp-connection { min-width:210px; display:flex; align-items:center; gap:12px; padding:14px 16px; border:1px solid rgba(205,239,112,.25); border-radius:12px; background:rgba(2,26,18,.28); }.erp-connection>i { width:42px; height:42px; display:grid; place-items:center; border-radius:10px; color:#173f30; background:#d2ef77; font-size:14px; font-style:normal; font-weight:900; }.erp-connection b,.erp-connection small { display:block; }.erp-connection b { color:white; font-size:14px; }.erp-connection small { margin-top:4px; color:#9db9ab; font-size:12px; }
 .erp-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:11px; margin:14px 0; }.erp-kpis article { padding:15px 17px; }.erp-kpis small,.erp-kpis strong,.erp-kpis span { display:block; }.erp-kpis small { color:#7c8b83; font-size:11px; }.erp-kpis strong { margin:7px 0 4px; color:#203e32; font-size:16px; }.erp-kpis span { color:#75847c; font-size:12px; }

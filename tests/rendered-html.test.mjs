@@ -57,6 +57,19 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css, /max-height:calc\(100vh - 110px\)/);
   assert.match(css, /\.header-actions select\s*\{\s*display:none!important;/);
+  assert.match(css, /\.content small,\.content em\s*\{\s*font-size:12px!important;/);
+  assert.match(css, /\.sidebar nav button span,\.mobile-menu-toggle span\s*\{\s*font-size:12px;/);
+});
+
+test("keeps mobile reports within the viewport and scrolls wide data internally", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.report-bottom,\.report-bottom>\*\s*\{\s*min-width:0;\s*max-width:100%;/);
+  assert.match(css, /\.savings-waterfall>div\s*\{\s*width:100%;\s*max-width:100%;/);
+  assert.match(css, /\.flow-scenario-tabs button,\.flow-scenario-tabs button span\s*\{\s*min-width:0;/);
+  assert.match(css, /\.flow-scenario-tabs button span>\*\s*\{\s*overflow-wrap:anywhere;\s*white-space:normal;/);
+  assert.match(css, /\.report-table\s*\{\s*overflow-x:auto/);
+  assert.match(css, /\.subnav\s*\{\s*overflow-x:auto/);
 });
 
 test("keeps energy-flow status badges in their own grid row", async () => {

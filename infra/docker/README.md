@@ -1,5 +1,7 @@
 # GrideX cloud Docker stack
 
+## English
+
 This stack defines the private backend boundary for the public static portal.
 
 - OpenRemote Manager owns live assets, telemetry, rules and its MQTT API.
@@ -17,3 +19,19 @@ is enabled in the portal.
 The OpenRemote Manager already provides the MQTT broker/API. Edge gateways use
 MQTTS on port 8883 with a restricted Keycloak service user, so a second
 Mosquitto broker is not required for the first deployment.
+
+---
+
+## Български
+
+Този stack дефинира частната backend граница зад публичния статичен портал.
+
+- OpenRemote Manager управлява живите Assets, телеметрията, правилата и MQTT API.
+- OpenRemote Keycloak предоставя OIDC вход.
+- PostgreSQL образът на OpenRemote остава отделен за поддържания OpenRemote stack.
+- Отделен официален PostgreSQL контейнер съхранява търговските и workflow данните на GrideX.
+- GrideX API валидира Keycloak токените и е единствената услуга с достъп до GrideX базата.
+
+Копирайте `.env.example` като частен `.env` на сървъра и заменете всички примерни тайни. Файлът не трябва да се commit-ва. Порт 5432 умишлено не се публикува. API първоначално слуша само на localhost порт 8088 и трябва да бъде маршрутизиран през production TLS proxy като `https://api.gridex.tech`, преди порталът да премине в live режим.
+
+OpenRemote Manager вече предоставя MQTT broker/API. Edge Gateway устройствата използват MQTTS на порт 8883 с ограничен Keycloak service user, затова за първата инсталация не е необходим отделен Mosquitto broker.

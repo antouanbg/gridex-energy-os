@@ -1,5 +1,7 @@
 # GrideX Forecasting Service
 
+## English
+
 This directory is the independent forecasting and scenario-economics module for
 GrideX Energy OS. It is separated from the web portal and from the safety-critical
 edge controller.
@@ -88,3 +90,75 @@ acceptance are required before live dispatch.
 - [LightGBM paper, NeurIPS 2017](https://papers.nips.cc/paper/2017/hash/6449f44a102fde848669bdd9eb6b76fa-Abstract.html)
 - [TimeSeriesSplit documentation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html)
 
+---
+
+## Български
+
+Тази директория съдържа самостоятелния модул за прогнози и икономическа оценка на сценариите в GrideX Energy OS. Той е отделен от уеб портала и от критичния за безопасността Edge контролер.
+
+### Препоръчан модел: LightGBM
+
+Първият production модел използва **LightGBM gradient-boosted decision trees**. Той е подходящ за 15-минутни EMS данни, защото моделира нелинейните зависимости между историческите PV/товар/ценови стойности, метеорологичните прогнози и календарните признаци, обучава се бързо върху таблични данни и предоставя feature importance за оперативен преглед.
+
+Моделът прогнозира три независими времеви реда за следващите 72 часа:
+
+- `pv_kw` — фотоволтаично производство на обекта;
+- `load_kw` — товар на обекта, включително ERP/MES производствени признаци;
+- `price_bgn_mwh` — IBEX цена „ден напред“ или intraday цена.
+
+Прогнозите не се изпращат директно към оборудването. Те захранват отделен 15-минутен оптимизатор. OpenRemote получава избрания график и прогнозните KPI, а Edge safety envelope продължава да ограничава всяка заявена мощност спрямо текущите BMS и обектови лимити.
+
+### Договор за входните признаци
+
+Всеки ред представя бъдещ 15-минутен интервал и съдържа:
+
+- време: `timestamp`, `horizon_steps` и циклични час/ден/месец признаци;
+- време и климат: прогнози за радиация, облачност, температура и вятър;
+- история: PV, товар и ценови lag стойности за 15 min, 1 h, 24 h и 7 дни;
+- rolling контекст: средни стойности за 1 h и 24 h;
+- обектов контекст: текущ SOC, достъпни лимити за заряд/разряд и ERP план.
+
+`model.py` валидира договора и обучава по един възпроизводим LightGBM regressor за всяка цел. Production валидирането трябва да използва само walk-forward разделяне; случайно train/test разделяне би допуснало информация от бъдещето в миналото.
+
+### Изчисляване на печалбата
+
+`profit.py` изчислява очакваната стойност на всеки dispatch сценарий:
+
+```text
+базов разход за енергия
+- планиран разход за внос
++ приход от износ
+- разход за деградация на батерията
+- очакван разход за небаланс
+= прогнозна печалба на сценария
+```
+
+Разходът за деградация е throughput стойността в BGN/kWh, изведена от стойността на актива, остатъчната стойност, очаквания lifetime throughput и избрания метод за амортизация. Така арбитраж не се избира, когато привидната печалба не покрива износването на батерията.
+
+### Интеграционен договор
+
+Бъдещата облачна услуга предоставя:
+
+- `POST /api/v1/forecast/run` — генериране на 72-часова PV/товар/ценова прогноза;
+- `GET /api/v1/sites/{siteId}/forecast` — прогнозни редове и confidence bands;
+- `GET /api/v1/sites/{siteId}/forecast/economics` — сравнение на печалбата по сценарии;
+- `POST /api/v1/sites/{siteId}/schedule/select` — одобряване на предложен график.
+
+OpenRemote Asset атрибутите получават `forecastPvKw`, `forecastLoadKw`, `forecastPriceBgnMwh`, `forecastProfit24hBgn`, `forecastConfidencePct`, `forecastModelVersion` и `selectedScenario`. MQTT пренася телеметрията от обекта, а удостоверен HTTPS се използва за прогнозните и графиковите API.
+
+### Локална разработка
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+pip install -e .
+python -m unittest discover -s tests
+```
+
+Модулът е основа за реализация, а не калибриран production модел. Преди live dispatch са задължителни обектови данни за обучение, walk-forward backtesting, мониторинг и приемане на безопасността.
+
+### Основни източници
+
+- [LightGBM documentation](https://lightgbm.readthedocs.io/en/stable/)
+- [LightGBM paper, NeurIPS 2017](https://papers.nips.cc/paper/2017/hash/6449f44a102fde848669bdd9eb6b76fa-Abstract.html)
+- [TimeSeriesSplit documentation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html)

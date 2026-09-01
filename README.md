@@ -1,5 +1,7 @@
 # GrideX Energy OS
 
+## English
+
 **Open-source EMS demonstration for industrial PV, battery storage and flexible loads.**
 
 GrideX Energy OS is a bilingual Bulgarian/English product demonstration of an industrial Energy Management System. It presents portfolio monitoring, BESS control, day-ahead scheduling, IBEX price logic, weather and production forecasting, imbalance reduction, industrial load planning, SCADA/device integration and edge safety.
@@ -96,3 +98,84 @@ code based on manufacturer specifications and validated laboratory traces.
 
 Concept and system architecture: **Antouan Anguelov**
 [Digital profile](https://linkmy.cards/en/antouan-anguelov/) · [LinkedIn](https://www.linkedin.com/in/antouan/)
+
+---
+
+## Български
+
+**Open-source EMS демонстрация за индустриални фотоволтаици, батерийни системи и управляеми товари.**
+
+GrideX Energy OS е двуезична продуктова демонстрация на индустриална система за енергиен мениджмънт. Тя включва наблюдение на портфолио, управление на BESS, графици „ден напред“, логика по цени на IBEX, прогнози за времето и производството, намаляване на небаланса, планиране на индустриални товари, SCADA интеграция и Edge защити.
+
+### Демонстрация
+
+Публичната GitHub Pages версия се публикува автоматично от клона `main`:
+
+**https://gridex.tech/**
+
+Интерфейсът използва представителни демонстрационни данни. Той не е свързан с реална енергийна инсталация и не трябва да се използва за производствено управление без специфично инженерно проектиране, тестове и валидиране на безопасността.
+
+Същият build е подготвен за защитен live режим. `public/gridex-config.js` избира `demo` или `live`; реалните данни и команди преминават през `api.gridex.tech`, никога директно от браузъра към OpenRemote или полево устройство.
+
+### Функционален обхват
+
+- табла за PV, BESS, мрежа, товари и EV зарядни станции;
+- SOC, SOH, лимити, цикли и дневна амортизация на батерията;
+- IBEX цени „ден напред“, исторически данни и прогнозни сценарии;
+- тридневни прогнози за PV и товар, свързани с времето;
+- режими за арбитраж, собствено потребление, zero export и peak shaving;
+- графици към търговец, 15-минутен небаланс и сетълмент;
+- ERP/MES входове и управление на гъвкави индустриални товари;
+- каталог на устройства и драйвери за Deye, Sungrow, Huawei, Growatt и други;
+- OpenRemote Asset архитектура и локален Modbus Edge Gateway;
+- safety envelope, BMS лимити, software fuse, heartbeat и safe mode;
+- Free, Pro и Enterprise функционални планове.
+
+### Архитектура
+
+Производствената концепция разделя стратегията от безопасността:
+
+1. Оптимизационният слой изчислява графици и желана мощност.
+2. OpenRemote представя обектите и устройствата като Assets и координира телеметрията и командите.
+3. Защитният слой ограничава всяка команда спрямо текущите BMS и обектови лимити.
+4. Локалният Edge Gateway нормализира различните Modbus карти и поддържа времекритичните функции при отпадане на облака.
+
+Облачната част работи като Docker услуги. OpenRemote Manager, Keycloak и поддържаната PostgreSQL услуга остават един оперативен stack. GrideX добавя частен API и отделна open-source PostgreSQL база за организации, тарифи, конфигурации, инциденти и одит. За Edge комуникация се използва вграденият MQTTS API на OpenRemote, без втори MQTT broker в първата версия. Подробностите са в [DOCKER_CLOUD_TOPOLOGY.md](docs/architecture/DOCKER_CLOUD_TOPOLOGY.md).
+
+Опционалният Waveshare 2-CH CAN TO ETH транспорт и правилата за валидиране са описани в [WAVESHARE_AND_PROTOCOL_REFERENCES.md](docs/edge/WAVESHARE_AND_PROTOCOL_REFERENCES.md). Потвърденият от производителя Suntech STE-261L / SunStorage Pro 261 профил е в [SUNTECH_STE261L_MODBUS.md](docs/edge/SUNTECH_STE261L_MODBUS.md), а C++ драйверът и тестовете са в [edge/rock-pi-e](edge/rock-pi-e).
+
+### Прогнози и икономика на сценариите
+
+Самостоятелната [услуга за прогнозиране](services/forecasting/README.md) дефинира 72-часови прогнози за PV, товар и IBEX цени. Използва LightGBM и прозрачен калкулатор за разход за внос, приход от износ, деградация на батерията и небаланс. Прогнозирането остава в облачния стратегически слой, а защитите се изпълняват в Edge Gateway.
+
+### Разработка
+
+Изисква се Node.js 22.13 или по-нова версия.
+
+```bash
+npm ci
+npm run dev
+```
+
+Build за Sites/Cloudflare:
+
+```bash
+npm run build
+```
+
+Статичен build за GitHub Pages:
+
+```bash
+npm run build:pages
+```
+
+### Open source
+
+Хранилището е open source под [MIT License](LICENSE). Приносът и техническите дискусии са добре дошли. Имената на продукти и търговските марки са собственост на съответните им притежатели.
+
+Външните протоколни проекти са само референции. Кодът на `ai-republic/bms-to-inverter`, лицензиран под CC BY-NC-SA 4.0, не се копира в GrideX. Комерсиалните драйвери трябва да са оригинални реализации по производителски спецификации и валидирани лабораторни записи.
+
+### Автор
+
+Концепция и системна архитектура: **Антоан Ангелов**
+[Дигитален профил](https://linkmy.cards/en/antouan-anguelov/) · [LinkedIn](https://www.linkedin.com/in/antouan/)
