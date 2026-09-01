@@ -58,3 +58,11 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(css, /max-height:calc\(100vh - 110px\)/);
   assert.match(css, /\.header-actions select\s*\{\s*display:none!important;/);
 });
+
+test("keeps energy-flow status badges in their own grid row", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.energy-asset\s*\{[^}]*grid-template-rows:auto 1fr;/);
+  assert.match(css, /\.energy-asset mark\s*\{[^}]*grid-column:2;[^}]*grid-row:1;/);
+  assert.doesNotMatch(css, /\.energy-asset mark\s*\{[^}]*position:absolute;/);
+});
