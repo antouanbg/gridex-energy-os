@@ -1,0 +1,115 @@
+name: gridex-cloud
+
+volumes:
+  openremote-proxy-data:
+  openremote-manager-data:
+  openremote-postgresql-data:
+  gridex-postgresql-data:
+
+networks:
+  frontend:
+  backend:
+    internal: true
+
+services:
+  proxy:
+    image: openremote/proxy:${OPENREMOTE_PROXY_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      manager:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8883:8883"
+    volumes:
+      - openremote-proxy-data:/deployment
+    environment:
+      LE_EMAIL: ${TLS_EMAIL}
+      DOMAINNAME: ${OR_HOSTNAME}
+      DOMAINNAMES: ${OR_ADDITIONAL_HOSTNAMES:-}
+    networks:
+      - frontend
+      - backend
+
+  postgresql:
+    image: openremote/postgresql:${OPENREMOTE_POSTGRESQL_VERSION:-latest-slim}
+    restart: unless-stopped
+    shm_size: 128mb
+    volumes:
+      - openremote-postgresql-data:/var/lib/postgresql/data
+      - openremote-manager-data:/storage
+    networks:
+      - backend
+
+  keycloak:
+    image: openremote/keycloak:${OPENREMOTE_KEYCLOAK_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      KEYCLOAK_ADMIN_PASSWORD: ${OR_ADMIN_PASSWORD}
+      KC_HOSTNAME: ${OR_HOSTNAME}
+      KC_HOSTNAME_PORT: -1
+    networks:
+      - backend
+
+  manager:
+    image: openremote/manager:${OPENREMOTE_MANAGER_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      OR_HOSTNAME: ${OR_HOSTNAME}
+      OR_ADMIN_PASSWORD: ${OR_ADMIN_PASSWORD}
+      OR_SETUP_TYPE: ${OR_SETUP_TYPE:-}
+      OR_SETUP_RUN_ON_RESTART: ${OR_SETUP_RUN_ON_RESTART:-false}
+      OR_METRICS_ENABLED: ${OR_METRICS_ENABLED:-true}
+      OR_DEV_MODE: "false"
+    volumes:
+      - openremote-manager-data:/storage
+    networks:
+      - backend
+
+  gridex-postgresql:
+    image: postgres:${GRIDEX_POSTGRES_VERSION:-17-alpine}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${GRIDEX_POSTGRES_DB}
+      POSTGRES_USER: ${GRIDEX_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${GRIDEX_POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${GRIDEX_POSTGRES_USER} -d ${GRIDEX_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - gridex-postgresql-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  gridex-api:
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      gridex-postgresql:
+        condition: service_healthy
+      manager:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://${GRIDEX_POSTGRES_USER}:${GRIDEX_POSTGRES_PASSWORD}@gridex-postgresql:5432/${GRIDEX_POSTGRES_DB}
+      DATABASE_POOL_SIZE: ${GRIDEX_DATABASE_POOL_SIZE:-10}
+      OIDC_ISSUER: https://${OR_HOSTNAME}/auth/realms/${GRIDEX_REALM}
+      OIDC_AUDIENCE: ${GRIDEX_OIDC_AUDIENCE:-gridex-api}
+      OPENREMOTE_BASE_URL: https://${OR_HOSTNAME}
+      CORS_ALLOWED_ORIGINS: https://gridex.tech,https://www.gridex.tech
+    ports:
+      - "127.0.0.1:8088:8080"
+    networks:
+      - frontend
+      - backend

@@ -37,6 +37,14 @@ The production concept separates strategy from safety:
 3. The safety layer clamps every command to current BMS and site limits.
 4. The local edge gateway normalises vendor-specific Modbus maps and maintains time-critical behaviour even when the cloud connection is unavailable.
 
+The production cloud runs as Docker services. OpenRemote Manager, its Keycloak
+image and its supported PostgreSQL service remain one operational stack.
+GrideX adds a private API and a separate open-source PostgreSQL database for
+organisations, tariffs, configurations, incidents and audit data. OpenRemote's
+built-in MQTTS API is used for Edge communication, so the first deployment does
+not add a second MQTT broker. The complete boundary is documented in
+[DOCKER_CLOUD_TOPOLOGY.md](docs/architecture/DOCKER_CLOUD_TOPOLOGY.md).
+
 The optional Waveshare 2-CH CAN TO ETH transport and the protocol-reference
 validation rules are documented in
 [WAVESHARE_AND_PROTOCOL_REFERENCES.md](docs/edge/WAVESHARE_AND_PROTOCOL_REFERENCES.md).

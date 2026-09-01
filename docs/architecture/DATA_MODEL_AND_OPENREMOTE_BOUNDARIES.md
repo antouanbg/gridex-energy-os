@@ -74,7 +74,8 @@ Tariffs are effective-dated. Editing an active tariff creates a new version;
 past versions remain immutable so invoices, settlement and optimiser backtests
 can always reproduce the price components used at that time.
 
-The first relational implementation is defined in `db/schema.ts`. D1 can be
-enabled when the hosted GrideX application starts persisting these workflows;
-until then the public portal remains an illustrative frontend and OpenRemote
-integration contract.
+The first relational implementation is defined in `db/schema.ts` and targets
+open-source PostgreSQL. It is deployed with the private GrideX API backend,
+never inside the public GitHub Pages frontend. Until that API is connected, the
+public portal remains an illustrative frontend and OpenRemote integration
+contract.
