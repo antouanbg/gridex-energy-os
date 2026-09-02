@@ -1,5 +1,5 @@
-export type SupportedDeviceCategory = "aio" | "pcs" | "inverter" | "bms";
-export type SupportedDeviceStatus = "manufacturer-confirmed" | "documented" | "external-reference";
+export type SupportedDeviceCategory = "aio" | "pcs" | "inverter" | "bms" | "bridge";
+export type SupportedDeviceStatus = "manufacturer-confirmed" | "documented" | "external-reference" | "design-reference";
 
 export type SupportedDeviceDriver = {
   id: string;
@@ -18,6 +18,7 @@ export type SupportedDeviceDriver = {
 
 const gridexRepository = "https://github.com/antouanbg/gridex-energy-os";
 const referenceRepository = "https://github.com/ai-republic/bms-to-inverter/tree/main";
+const openGivBridgeDocument = "https://github.com/open-giv/bms-analysis/blob/main/docs/08-bridge-implementation.md";
 
 const referenceDriver = (
   module: string,
@@ -88,6 +89,91 @@ export const supportedDeviceDrivers: SupportedDeviceDriver[] = [
     modelsBg: "Регистровата карта е налична; остава commissioning проверка с реалния кабинет и firmware.",
     modelsEn: "The register map is available; commissioning validation with the physical cabinet and firmware remains required.",
     sourceUrl: `${gridexRepository}/tree/main/edge/rock-pi-e/src`,
+  },
+
+  {
+    id: "open-giv-givenergy-lv-source",
+    brand: "GivEnergy",
+    profile: "Gen 2 LV battery · bridge source",
+    category: "bms",
+    interfaces: ["RS485", "Modbus"],
+    module: "open-giv.bridge.givenergy-lv-source",
+    status: "design-reference",
+    scopeBg: "Документирана southbound страна на bridge: polling на GivEnergy BMS, декодиране на HR/IR блокове, динамични лимити, SOC, температури и клетки.",
+    scopeEn: "Documented bridge southbound side: GivEnergy BMS polling, HR/IR block decoding, dynamic limits, SOC, temperatures and cell data.",
+    modelsBg: "Обхватът е GivEnergy classic Gen 2 LV 9.5 kWh. HV и All-in-one семействата не са включени.",
+    modelsEn: "Scope covers the GivEnergy classic Gen 2 LV 9.5 kWh battery. HV and All-in-one families are excluded.",
+    sourceUrl: openGivBridgeDocument,
+  },
+  {
+    id: "open-giv-pylontech-can-target",
+    brand: "Pylontech-compatible",
+    profile: "Pylontech CAN · bridge target",
+    category: "bridge",
+    interfaces: ["CAN"],
+    module: "open-giv.bridge.pylontech-can-target",
+    status: "design-reference",
+    scopeBg: "Northbound battery-emulation профил с 11-bit CAN кадри около 1 Hz за лимити, SOC/SOH, pack telemetry, manufacturer и protection flags.",
+    scopeEn: "Northbound battery-emulation profile using 11-bit CAN frames at about 1 Hz for limits, SOC/SOH, pack telemetry, manufacturer and protection flags.",
+    modelsBg: "Посочени цели: Victron Cerbo GX/Multi RS, Deye SUN-xK-SG, GoodWe ET/EH/EM, Sungrow SH-RS/SH-RT, Sofar HYD-ES/ME-3000SP, Growatt SPH/MIN/MAX и SolaX X1/X3.",
+    modelsEn: "Named targets: Victron Cerbo GX/Multi RS, Deye SUN-xK-SG, GoodWe ET/EH/EM, Sungrow SH-RS/SH-RT, Sofar HYD-ES/ME-3000SP, Growatt SPH/MIN/MAX and SolaX X1/X3.",
+    sourceUrl: openGivBridgeDocument,
+  },
+  {
+    id: "open-giv-victron-native-target",
+    brand: "Victron",
+    profile: "VE.Can / VE.Bus · bridge target",
+    category: "bridge",
+    interfaces: ["CAN"],
+    module: "open-giv.bridge.victron-native-target",
+    status: "design-reference",
+    scopeBg: "Нативна Victron target концепция; документът препоръчва Pylontech compatibility mode като по-лесен първи път за Cerbo GX.",
+    scopeEn: "Native Victron target concept; the document recommends Pylontech compatibility mode as the easier initial route for Cerbo GX.",
+    modelsBg: "Архитектурна референция, не готов драйвер. Необходима е официална Victron спецификация и bench validation.",
+    modelsEn: "Architecture reference, not an implemented driver. Official Victron specifications and bench validation are required.",
+    sourceUrl: openGivBridgeDocument,
+  },
+  {
+    id: "open-giv-byd-can-target",
+    brand: "BYD-compatible",
+    profile: "BYD CAN · bridge target",
+    category: "bridge",
+    interfaces: ["CAN"],
+    module: "open-giv.bridge.byd-can-target",
+    status: "design-reference",
+    scopeBg: "Алтернативен battery-emulation target с различен CAN field layout от Pylontech и приблизително 1 Hz broadcast cadence.",
+    scopeEn: "Alternative battery-emulation target with a CAN field layout different from Pylontech and an approximately 1 Hz broadcast cadence.",
+    modelsBg: "Документиран за BYD Premium HV/LV protocol family; конкретната inverter compatibility трябва да се потвърди.",
+    modelsEn: "Documented for the BYD Premium HV/LV protocol family; exact inverter compatibility must be confirmed.",
+    sourceUrl: openGivBridgeDocument,
+  },
+  {
+    id: "open-giv-pylontech-rs485-target",
+    brand: "Pylontech-compatible",
+    profile: "Pylontech RS485 / Modbus · bridge target",
+    category: "bridge",
+    interfaces: ["RS485", "Modbus"],
+    module: "open-giv.bridge.pylontech-rs485-target",
+    status: "design-reference",
+    scopeBg: "Алтернативен northbound target за инвертори, които комуникират с Pylontech батерии по RS485 вместо CAN.",
+    scopeEn: "Alternative northbound target for inverters that communicate with Pylontech batteries over RS485 instead of CAN.",
+    modelsBg: "По-рядко използван от CAN; изисква точната serial конфигурация, framing и model-specific timeout тест.",
+    modelsEn: "Less common than CAN; exact serial settings, framing and model-specific timeout testing are required.",
+    sourceUrl: openGivBridgeDocument,
+  },
+  {
+    id: "open-giv-sunspec-modbus-target",
+    brand: "SunSpec Alliance",
+    profile: "SunSpec Modbus · future bridge target",
+    category: "bridge",
+    interfaces: ["Modbus"],
+    module: "open-giv.bridge.sunspec-modbus-target",
+    status: "design-reference",
+    scopeBg: "Стандартен Modbus target за бъдеща interoperable battery bridge реализация; документът го определя като перспективна, но по-слабо разпространена опция.",
+    scopeEn: "Standard Modbus target for a future interoperable battery bridge; the document identifies it as promising but less widely adopted.",
+    modelsBg: "Бъдеща опция. Преди реализация трябва да се изберат точните SunSpec модели и control semantics.",
+    modelsEn: "Future option. Exact SunSpec models and control semantics must be selected before implementation.",
+    sourceUrl: openGivBridgeDocument,
   },
 
   referenceDriver("inverter-byd-can", "BYD", "BYD CAN inverter binding", "inverter", ["CAN"]),

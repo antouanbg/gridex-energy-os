@@ -405,6 +405,25 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .mode-cost-table{max-width:100%;overscroll-behavior-inline:contain}
 }
 
+/* Additional open-giv bridge protocol states */
+.supported-devices-hero-stats { grid-template-columns:repeat(4,1fr); }
+.supported-status-legend i.design { background:#8b65c7; }
+.supported-driver-card.status-design-reference:before { background:#8b65c7; }
+.supported-driver-card.status-design-reference header>em { color:#67469d; background:#f0eafa; }
+.status-design-reference .supported-driver-state { background:#f3eef9; }
+.status-design-reference .supported-driver-state>i { background:#8b65c7; }
+.status-design-reference .supported-driver-state strong { color:#67499a; }
+.status-design-reference .supported-driver-state small { color:#7e6c98; }
+.supported-source-links { display:flex; gap:8px; }
+.supported-source-links>a { padding:7px 9px; border:1px solid #cfe0d6; border-radius:8px; color:#19784c; background:white; font-size:12px; font-weight:800; text-decoration:none; white-space:nowrap; }
+
+@media(max-width:680px){
+  .supported-devices-hero-stats>span:last-child { grid-column:auto; }
+  .supported-devices-hero-stats>span:nth-child(even) { border-right:0; }
+  .supported-devices-hero-stats>span:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.12); }
+  .supported-source-links { grid-column:2; flex-wrap:wrap; }
+}
+
 /* Account, sign-in and user statistics */
 .profile-wrap { position:relative; }
 .profile { width:100%; border:0; color:inherit; background:transparent; text-align:left; cursor:pointer; border-radius:11px; transition:background .18s ease; }
@@ -631,4 +650,13 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .energy-asset mark { width:max-content; max-width:100%; grid-column:2; grid-row:1; justify-self:start; }
   .energy-asset span>strong { font-size:16px; }.energy-asset span>em { line-height:1.25; }
   .flow-scenario-note { align-items:start; }
+}
+
+/* Keep the extended bridge catalogue layout after the base catalogue rules. */
+.supported-devices-hero-stats { grid-template-columns:repeat(4,1fr); }
+@media(max-width:680px){
+  .supported-devices-hero-stats>span:last-child { grid-column:auto; }
+  .supported-devices-hero-stats>span:nth-child(even) { border-right:0; }
+  .supported-devices-hero-stats>span:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.12); }
+  .supported-source-links { grid-column:2; flex-wrap:wrap; }
 }

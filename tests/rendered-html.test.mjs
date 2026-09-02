@@ -115,6 +115,10 @@ test("publishes a traceable supported-device catalogue", async () => {
   assert.match(catalogue, /bms-pylon-hv-can/);
   assert.match(catalogue, /bms-zte-modbus/);
   assert.match(catalogue, /external-reference/);
+  assert.match(catalogue, /open-giv-givenergy-lv-source/);
+  assert.match(catalogue, /open-giv-pylontech-can-target/);
+  assert.match(catalogue, /open-giv-sunspec-modbus-target/);
+  assert.match(catalogue, /design-reference/);
   assert.match(css, /\.supported-driver-grid\s*\{/);
   assert.match(css, /@media\(max-width:680px\).*\.supported-driver-grid\{grid-template-columns:1fr\}/s);
 });
