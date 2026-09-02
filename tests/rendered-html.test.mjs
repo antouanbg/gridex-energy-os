@@ -97,3 +97,24 @@ test("provides a one-device-per-gateway hardware configurator", async () => {
   assert.match(css, /\.gateway-config-fields\s*\{/);
   assert.match(css, /@media\(max-width:680px\).*\.gateway-config-fields\{grid-template-columns:1fr\}/s);
 });
+
+test("publishes a traceable supported-device catalogue", async () => {
+  const [page, catalogue, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/data/supported-devices.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /function SupportedDevices/);
+  assert.match(page, /Supported devices/);
+  assert.match(page, /GROUP-CONTROL READINESS/);
+  assert.match(catalogue, /gridex-suntech-ste261l/);
+  assert.match(catalogue, /manufacturer-confirmed/);
+  assert.match(catalogue, /inverter-deye-can/);
+  assert.match(catalogue, /inverter-growatt-rs485/);
+  assert.match(catalogue, /bms-pylon-hv-can/);
+  assert.match(catalogue, /bms-zte-modbus/);
+  assert.match(catalogue, /external-reference/);
+  assert.match(css, /\.supported-driver-grid\s*\{/);
+  assert.match(css, /@media\(max-width:680px\).*\.supported-driver-grid\{grid-template-columns:1fr\}/s);
+});

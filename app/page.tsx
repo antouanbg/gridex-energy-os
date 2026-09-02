@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getGridexRuntimeConfig, GridexApiClient } from "./lib/gridex-api";
+import { supportedDeviceDrivers } from "./data/supported-devices";
 
 const navItems = [
   { id: "overview", label: "Преглед", labelEn:"Overview", icon: "⌂" },
@@ -16,6 +17,7 @@ const navItems = [
   { id: "loads", label: "Управляеми товари", labelEn:"Flexible loads", icon: "ϟ" },
   { id: "balance", label: "Балансиране", labelEn:"Balancing", icon: "≋" },
   { id: "gateway", label: "Edge концентратор", labelEn:"Edge gateway", icon: "⌗" },
+  { id: "supported", label: "Поддържани устройства", labelEn:"Supported devices", icon: "✓" },
   { id: "devices", label: "Устройства", labelEn:"Devices", icon: "⊞" },
   { id: "alarms", label: "Аларми", labelEn:"Alarms", icon: "△" },
   { id: "reports", label: "Отчети и икономика", labelEn:"Reports & economics", icon: "▥" },
@@ -39,6 +41,7 @@ const titles: Record<string, [string, string]> = {
   loads: ["Управляеми товари", "EMS / FLEXIBLE LOADS"],
   balance: ["Балансираща група", "GRIDEX / 21 АВГУСТ"],
   gateway: ["Edge концентратор", "ХАРДУЕР / ЛОКАЛЕН КОНТРОЛ"],
+  supported: ["Поддържани устройства", "GRIDEX / ДРАЙВЕРИ И ПРОТОКОЛИ"],
   devices: ["Устройства и SCADA", "SOLAR PARK EAST / 12 УСТРОЙСТВА"],
   alarms: ["Аларми и събития", "ПОРТФОЛИО / АКТИВНИ"],
   reports: ["Отчети и икономика", "SOLAR PARK EAST / АНАЛИЗ"],
@@ -50,7 +53,7 @@ const titles: Record<string, [string, string]> = {
 };
 
 const titlesEn: Record<string, [string, string]> = {
-  overview:["Solar Park East","PORTFOLIO / SOFIA"], customers:["Customers & contracts","PORTFOLIO / CRM"], sites:["My sites","PORTFOLIO / 6 SITES"], assets:["Energy assets","SOLAR PARK EAST / ASSETS"], battery:["Battery & optimisation","SOLAR PARK EAST / BESS"], schedule:["Energy schedule","SOLAR PARK EAST / 21 AUGUST"], market:["Market & forecasts","BULGARIA / IBEX DAY-AHEAD"], settlement:["Tariffs & settlement","PORTFOLIO / VEM"], automation:["Logic & operating modes","EMS / AUTOMATION"], loads:["Flexible loads","EMS / FLEXIBLE LOADS"], balance:["Balancing group","GRIDEX / 21 AUGUST"], gateway:["Edge gateway","HARDWARE / LOCAL CONTROL"], devices:["Devices & SCADA","SOLAR PARK EAST / 12 DEVICES"], alarms:["Alarms & events","PORTFOLIO / ACTIVE"], reports:["Reports & economics","SOLAR PARK EAST / ANALYTICS"], settings:["Settings","SOLAR PARK EAST / CONFIGURATION"], plans:["Plans & subscription","GRIDEX / LICENSING"], about:["About us","GRIDEX / SUNSTORAGE PRO"], profile:["User profile","GRIDEX / MY PROFILE"], login:["Sign in","GRIDEX / SECURE ACCESS"],
+  overview:["Solar Park East","PORTFOLIO / SOFIA"], customers:["Customers & contracts","PORTFOLIO / CRM"], sites:["My sites","PORTFOLIO / 6 SITES"], assets:["Energy assets","SOLAR PARK EAST / ASSETS"], battery:["Battery & optimisation","SOLAR PARK EAST / BESS"], schedule:["Energy schedule","SOLAR PARK EAST / 21 AUGUST"], market:["Market & forecasts","BULGARIA / IBEX DAY-AHEAD"], settlement:["Tariffs & settlement","PORTFOLIO / VEM"], automation:["Logic & operating modes","EMS / AUTOMATION"], loads:["Flexible loads","EMS / FLEXIBLE LOADS"], balance:["Balancing group","GRIDEX / 21 AUGUST"], gateway:["Edge gateway","HARDWARE / LOCAL CONTROL"], supported:["Supported devices","GRIDEX / DRIVERS & PROTOCOLS"], devices:["Devices & SCADA","SOLAR PARK EAST / 12 DEVICES"], alarms:["Alarms & events","PORTFOLIO / ACTIVE"], reports:["Reports & economics","SOLAR PARK EAST / ANALYTICS"], settings:["Settings","SOLAR PARK EAST / CONFIGURATION"], plans:["Plans & subscription","GRIDEX / LICENSING"], about:["About us","GRIDEX / SUNSTORAGE PRO"], profile:["User profile","GRIDEX / MY PROFILE"], login:["Sign in","GRIDEX / SECURE ACCESS"],
 };
 
 type DemoUser = {
@@ -1112,6 +1115,7 @@ export default function Home() {
         {view === "gateway" && (
           <Gateway notify={notify} lang={lang}/>
         )}
+        {view === "supported" && <SupportedDevices lang={lang}/>}
         {view === "devices" && <Devices notify={notify} lang={lang}/>}
         {view === "alarms" && <Alarms notify={notify} lang={lang}/>}
         {view === "reports" && <ReportsCenter notify={notify} lang={lang} batteryCost={batteryCost}/>}
@@ -1579,6 +1583,66 @@ function Balance({notify,lang}:{notify:(v:string)=>void;lang:UiLanguage}) { retu
 
 function BalanceCore() {
   return <><section className="portfolio-summary"><div><span>Участници</span><strong>24</strong></div><div><span>Обща позиция</span><strong className="positive">+186 kWh</strong></div><div><span>Прогнозен резултат</span><strong>+3 428 лв.</strong></div><div><span>Точност</span><strong>96.8%</strong></div></section><article className="card balance-chart"><PanelTitle eyebrow="ГРАФИК СПРЯМО ИЗМЕРВАНЕ" title="Позиция на групата" action={<span className="pill amber-pill">Обновено 14:30</span>}/><div className="deviation-chart"><div className="deviation-line"/>{[22,18,24,16,12,-8,-12,4,18,26,14,-5,-16,-24,-8,6,18,22,16,8,-4,-10,-6,2].map((v,i)=><div key={i}><i className={v>=0?"surplus":"shortage"} style={{height:`${Math.abs(v)*3}px`}}/><span>{i%4===0?`${i}:00`:""}</span></div>)}</div></article><article className="card table-card"><PanelTitle eyebrow="УЧАСТНИЦИ" title="Текущи позиции"/><DataTable headers={["Обект","График","Измерено","Отклонение","Цена небаланс","Резултат"]} rows={[["Solar Park East","2.46 MWh","2.51 MWh","+2.0%","−18.42 лв.","+1 842 лв."],["Logistics Hub Plovdiv","1.18 MWh","1.12 MWh","−5.1%","−24.18 лв.","+638 лв."],["Factory Varna","1.86 MWh","1.83 MWh","−1.6%","−18.42 лв.","+1 104 лв."],["Retail Park Burgas","0.82 MWh","0.91 MWh","+11.0%","−31.24 лв.","+386 лв."] , ["Warehouse Ruse","0.42 MWh","0.41 MWh","−2.4%","−18.42 лв.","+214 лв."]]}/></article></>;
+}
+
+function SupportedDevices({lang}:{lang:UiLanguage}) {
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const [query,setQuery]=useState("");
+  const [category,setCategory]=useState<"all"|"verified"|"inverter"|"bms"|"aio">("all");
+  const [protocol,setProtocol]=useState<"all"|"CAN"|"Modbus"|"RS485"|"RS232/UART">("all");
+  const statusCopy={
+    "manufacturer-confirmed":{label:t("Потвърдено от производителя","Manufacturer-confirmed"),detail:t("GrideX production профил","GrideX production profile")},
+    documented:{label:t("Карта налична","Map available"),detail:t("Изисква commissioning тест","Commissioning test required")},
+    "external-reference":{label:t("Външна R&D референция","External R&D reference"),detail:t("Не е production GrideX драйвер","Not a production GrideX driver")},
+  } as const;
+  const categoryCopy={aio:t("All-in-one BESS","All-in-one BESS"),pcs:"PCS",inverter:t("Инвертор","Inverter"),bms:"Battery / BMS"};
+  const normalizedQuery=query.trim().toLowerCase();
+  const matches=supportedDeviceDrivers.filter(driver=>{
+    const categoryMatch=category==="all"
+      || (category==="verified"&&driver.status!=="external-reference")
+      || (category==="inverter"&&(driver.category==="inverter"||driver.category==="pcs"))
+      || driver.category===category;
+    const protocolMatch=protocol==="all"||driver.interfaces.some(item=>protocol==="Modbus"?item.includes("Modbus"):item===protocol);
+    const searchMatch=!normalizedQuery||[driver.brand,driver.profile,driver.module,...driver.interfaces].join(" ").toLowerCase().includes(normalizedQuery);
+    return categoryMatch&&protocolMatch&&searchMatch;
+  });
+  const projectProfiles=supportedDeviceDrivers.filter(driver=>driver.status!=="external-reference").length;
+  const inverterReferences=supportedDeviceDrivers.filter(driver=>driver.status==="external-reference"&&driver.category==="inverter").length;
+  const bmsReferences=supportedDeviceDrivers.filter(driver=>driver.status==="external-reference"&&driver.category==="bms").length;
+  const categories:[typeof category,string,string][]=[
+    ["all",t("Всички","All"),String(supportedDeviceDrivers.length)],
+    ["verified",t("GrideX проверени","GrideX verified"),String(projectProfiles)],
+    ["inverter",t("Инвертори / PCS","Inverters / PCS"),String(inverterReferences+1)],
+    ["bms","Battery / BMS",String(bmsReferences+1)],
+    ["aio","All-in-one",String(supportedDeviceDrivers.filter(driver=>driver.category==="aio").length)],
+  ];
+  const protocols:[typeof protocol,string][]=[["all",t("Всички интерфейси","All interfaces")],["CAN","CAN"],["Modbus","Modbus"],["RS485","RS485"],["RS232/UART","RS232 / UART"]];
+  return <section className="supported-devices-page" data-no-translate>
+    <article className="card supported-devices-hero">
+      <div><p>SUPPORTED DEVICES</p><h2>{t("Проверим каталог на драйвери и комуникационни карти","Traceable driver and communication-map catalogue")}</h2><span>{t("Статусът показва какво действително е налично: потвърден GrideX профил, документ за commissioning или външна R&D реализация, която още трябва да бъде независимо внедрена и изпитана.","Each status states what actually exists: a confirmed GrideX profile, a commissioning document, or an external R&D implementation that still requires independent implementation and validation.")}</span></div>
+      <div className="supported-devices-hero-stats"><span><small>{t("КАТАЛОЖНИ ЗАПИСИ","CATALOGUE ENTRIES")}</small><strong>{supportedDeviceDrivers.length}</strong></span><span><small>{t("ПРОЕКТНИ ПРОФИЛИ","PROJECT PROFILES")}</small><strong>{projectProfiles}</strong></span><span><small>{t("ВЪНШНИ МОДУЛИ","EXTERNAL MODULES")}</small><strong>{inverterReferences+bmsReferences}</strong></span></div>
+    </article>
+    <article className="card supported-filter-panel">
+      <label className="supported-search"><span>{t("Търсене по марка, модел или модул","Search by brand, model or module")}</span><div><i>⌕</i><input value={query} onChange={event=>setQuery(event.target.value)} placeholder={t("Напр. Suntech, Growatt, PylonTech…","E.g. Suntech, Growatt, PylonTech…")}/>{query&&<button onClick={()=>setQuery("")} aria-label={t("Изчисти търсенето","Clear search")}>×</button>}</div></label>
+      <div className="supported-filter-group"><span>{t("Тип и статус","Type and status")}</span><div>{categories.map(([id,label,count])=><button key={id} className={category===id?"active":""} onClick={()=>setCategory(id)}>{label}<b>{count}</b></button>)}</div></div>
+      <div className="supported-filter-group"><span>{t("Комуникационен интерфейс","Communication interface")}</span><div>{protocols.map(([id,label])=><button key={id} className={protocol===id?"active":""} onClick={()=>setProtocol(id)}>{label}</button>)}</div></div>
+    </article>
+    <div className="supported-results-head"><span><strong>{matches.length}</strong> {t("показани профила","profiles shown")}</span><div className="supported-status-legend"><i className="confirmed"/>{t("Потвърден","Confirmed")}<i className="documented"/>{t("Документиран","Documented")}<i className="reference"/>R&amp;D</div></div>
+    {matches.length?<div className="supported-driver-grid">{matches.map(driver=>{
+      const status=statusCopy[driver.status];
+      return <article className={`card supported-driver-card status-${driver.status}`} key={driver.id}>
+        <header><div><span>{driver.brand.slice(0,2).toUpperCase()}</span><p><small>{categoryCopy[driver.category]}</small><strong>{driver.brand}</strong></p></div><em>{status.label}</em></header>
+        <h3>{driver.profile}</h3>
+        <div className="supported-interface-list">{driver.interfaces.map(item=><span key={item}>{item}</span>)}</div>
+        <p>{lang==="en"?driver.scopeEn:driver.scopeBg}</p>
+        <div className="supported-model-note"><small>{t("МОДЕЛИ И ВАЛИДАЦИЯ","MODELS & VALIDATION")}</small><span>{lang==="en"?driver.modelsEn:driver.modelsBg}</span></div>
+        <footer><span><small>{t("МОДУЛ / ПРОФИЛ","MODULE / PROFILE")}</small><code>{driver.module}</code></span><a href={driver.sourceUrl} target="_blank" rel="noreferrer">{driver.status==="external-reference"?t("Външен модул ↗","External module ↗"):t("GrideX код ↗","GrideX source ↗")}</a></footer>
+        <div className="supported-driver-state"><i/> <span><strong>{status.detail}</strong><small>{driver.status==="external-reference"?t("Не използваме директно външния код; изграждаме собствен драйвер по официален протокол и тестови traces.","External code is not embedded directly; GrideX builds an independent driver from official protocol documents and test traces."):t("Статусът е проследим до наличната проектна документация и код.","The status is traceable to available project documentation and source code.")}</small></span></div>
+      </article>;
+    })}</div>:<article className="card supported-empty"><i>⌕</i><h3>{t("Няма съвпадащи драйвери","No matching drivers")}</h3><p>{t("Променете търсенето или изберете друг интерфейс.","Change the search or choose another interface.")}</p><button className="secondary-btn" onClick={()=>{setQuery("");setCategory("all");setProtocol("all");}}>{t("Покажи всички","Show all")}</button></article>}
+    <article className="card supported-group-readiness"><i>≋</i><div><p>{t("ГОТОВНОСТ ЗА ГРУПОВО УПРАВЛЕНИЕ","GROUP-CONTROL READINESS")}</p><h3>{t("Каталогът ще определя кои устройства и обекти могат безопасно да участват в обща група","The catalogue will determine which devices and sites can safely participate in one control group")}</h3><span>{t("Групирането ще допуска само профили с еднаква канонична команда, известна полярност, актуални BMS лимити и достатъчно ниво на валидация. Външните R&D референции няма да получават групови команди преди bench и commissioning тест.","Grouping will only allow profiles with the same canonical command, known polarity, fresh BMS limits and sufficient validation. External R&D references will not receive group commands before bench and commissioning validation.")}</span></div><strong><small>{t("СЛЕДВАЩ ЕТАП","NEXT STAGE")}</small>Portfolio / VPP groups</strong></article>
+    <article className="supported-source-note"><i>CC</i><span><strong>{t("Лицензионна и инженерна граница","Licensing and engineering boundary")}</strong><small>{t("Имената на наличните модули са каталогизирани от ai-republic/bms-to-inverter. Хранилището е CC BY-NC-SA 4.0 и неговият код не се включва директно в търговския GrideX продукт без отделно разрешение. Всеки production драйвер ще има собствен източник, версия, тестове и доказателствен статус.","Available module names are catalogued from ai-republic/bms-to-inverter. The repository uses CC BY-NC-SA 4.0 and its code is not embedded directly into the commercial GrideX product without separate permission. Every production driver will have its own source, version, tests and evidence status.")}</small></span><a href="https://github.com/ai-republic/bms-to-inverter" target="_blank" rel="noreferrer">GitHub ↗</a></article>
+  </section>;
 }
 
 function Assets({navigate,notify,lang}:{navigate:(v:string)=>void;notify:(v:string)=>void;lang:UiLanguage}) {
