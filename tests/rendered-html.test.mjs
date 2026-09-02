@@ -79,3 +79,21 @@ test("keeps energy-flow status badges in their own grid row", async () => {
   assert.match(css, /\.energy-asset mark\s*\{[^}]*grid-column:2;[^}]*grid-row:1;/);
   assert.doesNotMatch(css, /\.energy-asset mark\s*\{[^}]*position:absolute;/);
 });
+
+test("provides a one-device-per-gateway hardware configurator", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /function EdgeHardwareConfigurator/);
+  assert.match(page, /1 gate = 1 device/);
+  assert.match(page, /LilyGo T-CAN485/);
+  assert.match(page, /Waveshare 2-CH CAN To Ethernet/);
+  assert.match(page, /Compile driver/);
+  assert.match(page, /Install on gateway/);
+  assert.match(page, /ESP32 node firmware/);
+  assert.match(page, /ROCK Pi E driver service/);
+  assert.match(css, /\.gateway-config-fields\s*\{/);
+  assert.match(css, /@media\(max-width:680px\).*\.gateway-config-fields\{grid-template-columns:1fr\}/s);
+});
