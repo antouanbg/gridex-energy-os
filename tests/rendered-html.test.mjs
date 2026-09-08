@@ -122,3 +122,30 @@ test("publishes a traceable supported-device catalogue", async () => {
   assert.match(css, /\.supported-driver-grid\s*\{/);
   assert.match(css, /@media\(max-width:680px\).*\.supported-driver-grid\{grid-template-columns:1fr\}/s);
 });
+
+test("uses a safe backend-aware demo and OIDC integration state", async () => {
+  const [response, page, config, auth, api, plan] = await Promise.all([
+    render(),
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../public/gridex-config.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/gridex-auth.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/gridex-api.ts", import.meta.url), "utf8"),
+    readFile(new URL("../docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md", import.meta.url), "utf8"),
+  ]);
+  const html = await response.text();
+
+  assert.match(html, /Това е Демо режим/);
+  assert.match(html, /Моля, логнете се/);
+  assert.match(config, /mode:\s*"auto"/);
+  assert.match(config, /backendHealthRefreshMs/);
+  assert.match(page, /backendState === "online" && authState === "authenticated" \? "live" : "demo"/);
+  assert.match(page, /Няма връзка с backend-а/);
+  assert.match(page, /LIVE РЕЖИМ · БЕЗ ДЕМО СТОЙНОСТИ/);
+  assert.match(auth, /flow:\s*"standard"/);
+  assert.match(auth, /pkceMethod:\s*"S256"/);
+  assert.doesNotMatch(auth, /localStorage|sessionStorage/);
+  assert.match(api, /subscribeSiteEvents/);
+  assert.match(api, /commands\/power/);
+  assert.match(plan, /Frontend acceptance criteria/);
+  assert.match(plan, /Критерии за приемане/);
+});

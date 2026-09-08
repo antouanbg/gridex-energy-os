@@ -1,0 +1,306 @@
+openapi: 3.1.0
+info:
+  title: GrideX Frontend API
+  version: 0.1.0
+  description: Canonical browser-to-BFF contract. It never exposes OpenRemote service credentials or field protocols.
+servers:
+  - url: "{apiBaseUrl}"
+    variables:
+      apiBaseUrl:
+        default: https://example.invalid
+security:
+  - oidc: []
+paths:
+  /health:
+    get:
+      security: []
+      operationId: getHealth
+      responses:
+        "200":
+          description: Backend and OpenRemote are ready.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /api/v1/me:
+    get:
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: Authenticated identity and effective roles.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorised" }
+  /api/v1/sites:
+    get:
+      operationId: listSites
+      responses:
+        "200":
+          description: Sites authorised for the current subject.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sites]
+                properties:
+                  sites:
+                    type: array
+                    items: { $ref: "#/components/schemas/Site" }
+  /api/v1/sites/{siteId}/snapshot:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: getSiteSnapshot
+      responses:
+        "200":
+          description: Canonical current snapshot.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Snapshot" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/v1/sites/{siteId}/commands/power:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    post:
+      operationId: requestSitePower
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PowerCommand" }
+      responses:
+        "202":
+          description: Accepted for protected execution.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted, sequence, commandId]
+                properties:
+                  accepted: { const: true }
+                  sequence: { type: integer, minimum: 0, maximum: 65535 }
+                  commandId: { type: string }
+        "423": { $ref: "#/components/responses/Locked" }
+  /api/v1/sites/{siteId}/history:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: getSiteHistory
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: resolution, in: query, required: true, schema: { enum: [raw, 1m, 15m, 1h, 1d] } }
+        - { name: metrics, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Ordered historical points.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TimeSeriesPoint" }
+  /api/v1/sites/{siteId}/forecast:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: getSiteForecast
+      parameters:
+        - { name: horizonHours, in: query, schema: { type: integer, minimum: 1, maximum: 168, default: 72 } }
+      responses:
+        "200":
+          description: Weather, PV, load, market and economics forecast.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TimeSeriesPoint" }
+  /api/v1/sites/{siteId}/events:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: streamSiteEvents
+      responses:
+        "200":
+          description: Authenticated server-sent events stream.
+          content:
+            text/event-stream:
+              schema: { type: string }
+  /api/v1/sites/{siteId}/alarms:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: listSiteAlarms
+      responses:
+        "200":
+          description: Site alarms visible to the current subject.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Alarm" }
+  /api/v1/sites/{siteId}/alarms/{alarmId}/acknowledge:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - name: alarmId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      operationId: acknowledgeSiteAlarm
+      responses:
+        "204": { description: Alarm acknowledged and audit record created. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/v1/sites/{siteId}/configurations/{section}:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - name: section
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      operationId: updateSiteConfiguration
+      parameters:
+        - name: If-Match
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        "200":
+          description: New canonical configuration and revision.
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "412":
+          description: The supplied revision is stale.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+components:
+  securitySchemes:
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: https://example.invalid/realms/example/.well-known/openid-configuration
+  parameters:
+    SiteId:
+      name: siteId
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Unauthorised:
+      description: Missing, expired or revoked session.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Forbidden:
+      description: Role or site access denied.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Locked:
+      description: Control writes are locked until commissioning.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Unavailable:
+      description: Backend or required upstream is unavailable.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  schemas:
+    Health:
+      type: object
+      required: [status, openRemote]
+      properties:
+        status: { enum: [ready, degraded] }
+        openRemote: { enum: [online, offline] }
+        writesEnabled: { type: boolean }
+    User:
+      type: object
+      required: [subject, roles]
+      properties:
+        subject: { type: string }
+        email: { type: string, format: email }
+        name: { type: string }
+        preferredUsername: { type: string }
+        roles: { type: array, items: { type: string } }
+    Site:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        status: { type: string }
+        timezone: { type: string }
+        marketCode: { type: string }
+    Snapshot:
+      type: object
+      required: [assetId, timestamp, quality, battery, power]
+      properties:
+        assetId: { type: string }
+        siteId: { type: string }
+        siteName: { type: string }
+        timestamp: { type: string, format: date-time }
+        quality: { enum: [GOOD, STALE, INVALID, FAULT] }
+        battery:
+          type: object
+          required: [socPct, sohPct, maxChargeKw, maxDischargeKw, limitsValid]
+          properties:
+            socPct: { type: number, minimum: 0, maximum: 100 }
+            sohPct: { type: number, minimum: 0, maximum: 100 }
+            maxChargeKw: { type: number, minimum: 0 }
+            maxDischargeKw: { type: number, minimum: 0 }
+            limitsValid: { type: boolean }
+            controlReady: { type: boolean }
+        power:
+          type: object
+          required: [actualKw, requestedKw, appliedKw]
+          properties:
+            actualKw: { type: number, description: Positive discharge; negative charge. }
+            requestedKw: { type: number }
+            appliedKw: { type: number }
+            dcKw: { type: number }
+            reactiveKvar: { type: number }
+            pvKw: { type: number, minimum: 0 }
+            siteLoadKw: { type: number, minimum: 0 }
+            gridKw: { type: number, description: Positive import; negative export. }
+            evKw: { type: number, minimum: 0 }
+        strategy:
+          type: object
+          properties:
+            mode: { type: string }
+            targetSocPct: { type: number, minimum: 0, maximum: 100 }
+    PowerCommand:
+      type: object
+      additionalProperties: false
+      required: [sequence, requestedPowerKw, enable, source, ttlSeconds]
+      properties:
+        sequence: { type: integer, minimum: 0, maximum: 65535 }
+        requestedPowerKw: { type: number, minimum: -3276.8, maximum: 3276.7 }
+        enable: { type: boolean }
+        source: { enum: [automatic, schedule, operator, safe-mode] }
+        ttlSeconds: { type: integer, minimum: 1, maximum: 60 }
+    Alarm:
+      type: object
+      required: [id, siteId, severity, state, title, createdAt]
+      properties:
+        id: { type: string }
+        siteId: { type: string }
+        severity: { enum: [info, warning, critical] }
+        state: { enum: [open, acknowledged, closed] }
+        title: { type: string }
+        message: { type: string }
+        createdAt: { type: string, format: date-time }
+    TimeSeriesPoint:
+      type: object
+      required: [timestamp, values]
+      properties:
+        timestamp: { type: string, format: date-time }
+        values: { type: object, additionalProperties: true }
+        quality: { enum: [GOOD, STALE, INVALID, FAULT] }
+        confidencePct: { type: number, minimum: 0, maximum: 100 }
+        model: { type: string }
+    Error:
+      type: object
+      required: [error, requestId]
+      properties:
+        error: { type: string }
+        message: { type: string }
+        requestId: { type: string }
+        details: { type: object, additionalProperties: true }

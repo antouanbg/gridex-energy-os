@@ -1,4 +1,4 @@
-export type GridexRuntimeMode = "demo" | "live";
+export type GridexRuntimeMode = "auto" | "demo" | "live";
 
 export type GridexRuntimeConfig = {
   mode: GridexRuntimeMode;
@@ -7,6 +7,26 @@ export type GridexRuntimeConfig = {
   oidcIssuer: string;
   oidcClientId: string;
   defaultSiteId: string;
+  backendTimeoutMs: number;
+  backendHealthRefreshMs: number;
+  snapshotRefreshMs: number;
+  authEnabled: boolean;
+};
+
+export type GridexUser = {
+  subject: string;
+  email?: string;
+  name?: string;
+  preferredUsername?: string;
+  roles: string[];
+};
+
+export type GridexSite = {
+  id: string;
+  name: string;
+  status?: string;
+  timezone?: string;
+  marketCode?: string;
 };
 
 export type GridexSiteSnapshot = {
@@ -28,8 +48,43 @@ export type GridexSiteSnapshot = {
     dcKw?: number;
     reactiveKvar?: number;
     siteLoadKw?: number;
+    pvKw?: number;
+    gridKw?: number;
+    evKw?: number;
+  };
+  strategy?: {
+    mode?: string;
+    targetSocPct?: number;
   };
 };
+
+export type GridexHistoryPoint = {
+  timestamp: string;
+  values: Record<string, number | string | boolean | null>;
+  quality?: GridexSiteSnapshot["quality"];
+};
+
+export type GridexForecastPoint = GridexHistoryPoint & {
+  confidencePct?: number;
+  model?: string;
+};
+
+export type GridexAlarm = {
+  id: string;
+  siteId: string;
+  severity: "info" | "warning" | "critical";
+  state: "open" | "acknowledged" | "closed";
+  title: string;
+  message?: string;
+  createdAt: string;
+};
+
+export class GridexApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = "GridexApiError";
+  }
+}
 
 declare global {
   interface Window {
@@ -38,12 +93,16 @@ declare global {
 }
 
 const defaults: GridexRuntimeConfig = {
-  mode: "demo",
+  mode: "auto",
   apiBaseUrl: "",
   realm: "gridex",
   oidcIssuer: "https://ems.gridex.tech/auth/realms/gridex",
   oidcClientId: "gridex-portal",
   defaultSiteId: "solar-park-east",
+  backendTimeoutMs: 5000,
+  backendHealthRefreshMs: 30000,
+  snapshotRefreshMs: 5000,
+  authEnabled: true,
 };
 
 export function getGridexRuntimeConfig(): GridexRuntimeConfig {
@@ -57,11 +116,24 @@ export class GridexApiClient {
     private readonly getAccessToken: () => Promise<string | undefined> = async () => undefined,
   ) {}
 
-  async health(signal?: AbortSignal): Promise<{ status: string; openRemote: string }> {
+  async health(signal?: AbortSignal): Promise<{ status: string; openRemote: string; writesEnabled?: boolean }> {
     if (this.config.mode === "demo") return { status: "demo", openRemote: "not-connected" };
-    const response = await fetch(`${this.config.apiBaseUrl}/health`, { signal, cache: "no-store" });
-    if (!response.ok) throw new Error(`GridEx API health failed: ${response.status}`);
+    const timeout = AbortSignal.timeout(this.config.backendTimeoutMs);
+    const response = await fetch(`${this.config.apiBaseUrl}/health`, {
+      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+      cache: "no-store",
+    });
+    if (!response.ok) throw new GridexApiError(`GridEx API health failed: ${response.status}`, response.status);
     return response.json();
+  }
+
+  async me(signal?: AbortSignal): Promise<GridexUser> {
+    return this.getJson<GridexUser>("/api/v1/me", signal);
+  }
+
+  async sites(signal?: AbortSignal): Promise<GridexSite[]> {
+    const payload = await this.getJson<{ sites?: GridexSite[]; items?: GridexSite[] }>("/api/v1/sites", signal);
+    return payload.sites ?? payload.items ?? [];
   }
 
   async snapshot(siteId = this.config.defaultSiteId, signal?: AbortSignal): Promise<GridexSiteSnapshot> {
@@ -69,7 +141,7 @@ export class GridexApiClient {
       signal,
       cache: "no-store",
     });
-    if (!response.ok) throw new Error(`GridEx snapshot failed: ${response.status}`);
+    if (!response.ok) throw new GridexApiError(`GridEx snapshot failed: ${response.status}`, response.status);
     return response.json();
   }
 
@@ -85,17 +157,97 @@ export class GridexApiClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(command),
     });
-    if (!response.ok) throw new Error(`GridEx command failed: ${response.status}`);
+    if (!response.ok) throw new GridexApiError(`GridEx command failed: ${response.status}`, response.status);
+    return response.json();
+  }
+
+  async history(siteId: string, query: {
+    from: string;
+    to: string;
+    resolution: "raw" | "1m" | "15m" | "1h" | "1d";
+    metrics: string[];
+  }, signal?: AbortSignal): Promise<GridexHistoryPoint[]> {
+    const parameters = new URLSearchParams({
+      from: query.from,
+      to: query.to,
+      resolution: query.resolution,
+      metrics: query.metrics.join(","),
+    });
+    return this.getJson<GridexHistoryPoint[]>(`/api/v1/sites/${encodeURIComponent(siteId)}/history?${parameters}`, signal);
+  }
+
+  async forecast(siteId: string, horizonHours = 72, signal?: AbortSignal): Promise<GridexForecastPoint[]> {
+    return this.getJson<GridexForecastPoint[]>(`/api/v1/sites/${encodeURIComponent(siteId)}/forecast?horizonHours=${horizonHours}`, signal);
+  }
+
+  async alarms(siteId: string, signal?: AbortSignal): Promise<GridexAlarm[]> {
+    return this.getJson<GridexAlarm[]>(`/api/v1/sites/${encodeURIComponent(siteId)}/alarms`, signal);
+  }
+
+  async acknowledgeAlarm(siteId: string, alarmId: string): Promise<void> {
+    const response = await this.authorizedFetch(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/alarms/${encodeURIComponent(alarmId)}/acknowledge`,
+      { method: "POST" },
+    );
+    if (!response.ok) throw new GridexApiError(`GridEx alarm acknowledgement failed: ${response.status}`, response.status);
+  }
+
+  async saveConfiguration(siteId: string, section: string, configuration: unknown, revision: number): Promise<unknown> {
+    const response = await this.authorizedFetch(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${encodeURIComponent(section)}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "If-Match": String(revision) },
+        body: JSON.stringify(configuration),
+      },
+    );
+    if (!response.ok) throw new GridexApiError(`GridEx configuration update failed: ${response.status}`, response.status);
+    return response.json();
+  }
+
+  async subscribeSiteEvents(
+    siteId: string,
+    onEvent: (event: MessageEvent<string>) => void,
+    signal: AbortSignal,
+  ): Promise<void> {
+    const response = await this.authorizedFetch(`/api/v1/sites/${encodeURIComponent(siteId)}/events`, {
+      headers: { Accept: "text/event-stream" },
+      signal,
+      cache: "no-store",
+    });
+    if (!response.ok || !response.body) throw new GridexApiError(`GridEx event stream failed: ${response.status}`, response.status);
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buffer = "";
+    while (!signal.aborted) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += value;
+      const frames = buffer.split("\n\n");
+      buffer = frames.pop() ?? "";
+      frames.forEach((frame) => {
+        const data = frame.split("\n").filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trim()).join("\n");
+        if (data) onEvent(new MessageEvent("message", { data }));
+      });
+    }
+  }
+
+  private async getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+    const response = await this.authorizedFetch(path, { signal, cache: "no-store" });
+    if (!response.ok) throw new GridexApiError(`GridEx API request failed: ${response.status}`, response.status);
     return response.json();
   }
 
   private async authorizedFetch(path: string, init: RequestInit): Promise<Response> {
-    if (this.config.mode !== "live") throw new Error("Live GridEx API is disabled in demo mode");
-    const token = await this.getAccessToken();
-    if (!token) throw new Error("Authentication is required for live GridEx data");
+    if (this.config.mode === "demo") throw new Error("Live GridEx API is disabled in demo mode");
+    let token: string | undefined;
+    try {
+      token = await this.getAccessToken();
+    } catch {
+      throw new GridexApiError("Authentication refresh failed", 401);
+    }
+    if (!token) throw new GridexApiError("Authentication is required for live GridEx data", 401);
     const headers = new Headers(init.headers);
     headers.set("Authorization", `Bearer ${token}`);
     return fetch(`${this.config.apiBaseUrl}${path}`, { ...init, headers });
   }
 }
-

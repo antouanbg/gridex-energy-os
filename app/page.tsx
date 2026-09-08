@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getGridexRuntimeConfig, GridexApiClient } from "./lib/gridex-api";
+import { useEffect, useMemo, useState } from "react";
+import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot } from "./lib/gridex-api";
+import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, type GridexAuthSession } from "./lib/gridex-auth";
 import { supportedDeviceDrivers } from "./data/supported-devices";
 
 const navItems = [
@@ -66,15 +67,33 @@ type DemoUser = {
   roleEn:string;
 };
 
-const demoUser:DemoUser = {
-  nameBg:"Антон Колев",
-  nameEn:"Anton Kolev",
-  initialsBg:"АК",
-  initialsEn:"AK",
-  email:"anton.kolev@gridex.tech",
-  roleBg:"Администратор",
-  roleEn:"Administrator",
-};
+type BackendState = "demo" | "checking" | "online" | "offline";
+type AuthState = "checking" | "authenticated" | "anonymous" | "error";
+type DataMode = "demo" | "live";
+
+function initials(name:string):string {
+  return name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()).join("") || "GX";
+}
+
+function sessionToUser(session:GridexAuthSession):DemoUser {
+  const normalisedRoles=session.roles.map(item=>item.toLowerCase());
+  const role=normalisedRoles.some(item=>item.includes("admin"))
+    ? ["Администратор","Administrator"]
+    : normalisedRoles.some(item=>item.includes("operator"))
+      ? ["Оператор","Operator"]
+      : normalisedRoles.some(item=>item.includes("trader"))
+        ? ["Търговец","Trader"]
+        : ["Клиент","Customer"];
+  return {
+    nameBg:session.name,
+    nameEn:session.name,
+    initialsBg:initials(session.name),
+    initialsEn:initials(session.name),
+    email:session.email,
+    roleBg:role[0],
+    roleEn:role[1],
+  };
+}
 
 const marketValues = [116, 104, 96, 88, 93, 118, 162, 188, 174, 148, 132, 126, 119, 128, 147, 176, 215, 242, 228, 204, 187, 164, 143, 126];
 const scheduleValues = [-20, -28, -34, -30, -18, 0, 18, 30, 22, 8, 0, 0, -12, -25, -38, -46, 0, 30, 44, 50, 34, 18, 0, -10];
@@ -973,6 +992,11 @@ function usePageLanguage(lang: UiLanguage) {
 }
 
 export default function Home() {
+  const runtimeConfig = useMemo(() => getGridexRuntimeConfig(), []);
+  const apiClient = useMemo(
+    () => new GridexApiClient(runtimeConfig, () => getGridexAccessToken(runtimeConfig)),
+    [runtimeConfig],
+  );
   const [view, setView] = useState("overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [auto, setAuto] = useState(true);
@@ -983,21 +1007,114 @@ export default function Home() {
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
   const [toast, setToast] = useState("");
-  const [sessionUser,setSessionUser] = useState<DemoUser|null>(demoUser);
+  const [sessionUser,setSessionUser] = useState<DemoUser|null>(null);
   const [accountMenuOpen,setAccountMenuOpen] = useState(false);
-  const [backendState, setBackendState] = useState<"demo" | "checking" | "online" | "offline">(
-    () => getGridexRuntimeConfig().mode === "demo" ? "demo" : "checking",
+  const [backendState, setBackendState] = useState<BackendState>(
+    () => runtimeConfig.mode === "demo" ? "demo" : "checking",
   );
+  const [authState,setAuthState] = useState<AuthState>(runtimeConfig.mode === "demo" ? "anonymous" : "checking");
+  const [integrationError,setIntegrationError] = useState("");
+  const [liveSites,setLiveSites] = useState<GridexSite[]>([]);
+  const [selectedSiteId,setSelectedSiteId] = useState(runtimeConfig.defaultSiteId);
+  const [liveSnapshot,setLiveSnapshot] = useState<GridexSiteSnapshot|null>(null);
+  const dataMode:DataMode = backendState === "online" && authState === "authenticated" ? "live" : "demo";
   usePageLanguage(lang);
 
   useEffect(() => {
-    const config = getGridexRuntimeConfig();
-    if (config.mode === "demo") return;
-    const controller = new AbortController();
-    const client = new GridexApiClient(config);
-    client.health(controller.signal).then(() => setBackendState("online")).catch(() => setBackendState("offline"));
-    return () => controller.abort();
-  }, []);
+    if (runtimeConfig.mode === "demo") return;
+    let controller = new AbortController();
+    const checkBackend=()=>apiClient.health(controller.signal).then(() => {
+        setBackendState("online");
+        setIntegrationError("");
+      }).catch(error => {
+        if(error instanceof DOMException&&error.name==="AbortError")return;
+        setBackendState("offline");
+        setAuthState("anonymous");
+        setSessionUser(null);
+        setLiveSnapshot(null);
+        setIntegrationError(lang==="en"?"The GrideX backend is currently unavailable.":"В момента няма връзка с GrideX backend-а.");
+      });
+    void checkBackend();
+    const interval=window.setInterval(()=>{
+      controller.abort();
+      controller=new AbortController();
+      void checkBackend();
+    },runtimeConfig.backendHealthRefreshMs);
+    return () => {window.clearInterval(interval);controller.abort();};
+  }, [apiClient, runtimeConfig.mode, runtimeConfig.backendHealthRefreshMs, lang]);
+
+  useEffect(() => {
+    if (backendState !== "online") return;
+    let active=true;
+    initialiseGridexAuth(runtimeConfig).then(session=>{
+      if (!active) return;
+      if (!session) {
+        setSessionUser(null);
+        setAuthState("anonymous");
+        return;
+      }
+      const user=sessionToUser(session);
+      setSessionUser(user);
+      setRole(user.roleBg);
+      setAuthState("authenticated");
+      setIntegrationError("");
+    }).catch(()=>{
+      if (!active) return;
+      setSessionUser(null);
+      setAuthState("error");
+      setIntegrationError(lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
+    });
+    return()=>{active=false;};
+  },[backendState,runtimeConfig,lang]);
+
+  useEffect(()=>{
+    if (dataMode!=="live") return;
+    const controller=new AbortController();
+    apiClient.sites(controller.signal).then(sites=>{
+      if (!sites.length) return;
+      setLiveSites(sites);
+      const selected=sites.find(item=>item.id===selectedSiteId)??sites[0];
+      setSelectedSiteId(selected.id);
+      setSite(selected.name);
+    }).catch(error=>{
+      if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAuthState("anonymous");return;}
+      setIntegrationError(lang==="en"?"The site list could not be loaded.":"Списъкът с обекти не може да бъде зареден.");
+    });
+    return()=>controller.abort();
+  },[apiClient,dataMode,lang,selectedSiteId]);
+
+  useEffect(()=>{
+    if (dataMode!=="live"||!selectedSiteId) return;
+    let controller=new AbortController();
+    const loadSnapshot=()=>apiClient.snapshot(selectedSiteId,controller.signal).then(snapshot=>{
+      setLiveSnapshot(snapshot);
+      setIntegrationError("");
+    }).catch(error=>{
+      if (error instanceof DOMException&&error.name==="AbortError") return;
+      if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAuthState("anonymous");setLiveSnapshot(null);return;}
+      setIntegrationError(lang==="en"?"Live telemetry is temporarily unavailable.":"Телеметрията на живо временно не е достъпна.");
+    });
+    void loadSnapshot();
+    const interval=window.setInterval(()=>{
+      controller.abort();
+      controller=new AbortController();
+      void loadSnapshot();
+    },runtimeConfig.snapshotRefreshMs);
+    return()=>{window.clearInterval(interval);controller.abort();};
+  },[apiClient,dataMode,selectedSiteId,runtimeConfig.snapshotRefreshMs,lang]);
+
+  useEffect(()=>{
+    if(authState!=="authenticated"||backendState!=="online")return;
+    const expireSession=()=>{
+        setSessionUser(null);
+        setAuthState("anonymous");
+        setLiveSnapshot(null);
+        setIntegrationError(lang==="en"?"Your session has expired. Please sign in again.":"Сесията Ви е изтекла. Моля, логнете се отново.");
+      };
+    const verifySession=()=>getGridexAccessToken(runtimeConfig).then(token=>{if(!token)expireSession();}).catch(expireSession);
+    const interval=window.setInterval(()=>{void verifySession();},20000);
+    return()=>window.clearInterval(interval);
+  },[authState,backendState,runtimeConfig,lang]);
 
   useEffect(() => {
     const closeOnEscape = (event:KeyboardEvent) => {
@@ -1019,26 +1136,32 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const signOut = () => {
+  const signOut = async () => {
+    if (authState === "authenticated" && backendState === "online") {
+      try {
+        await gridexLogout(runtimeConfig);
+        return;
+      } catch {
+        setIntegrationError(lang==="en"?"Sign-out could not be completed by the identity service.":"Изходът не може да бъде завършен от услугата за идентичност.");
+      }
+    }
     setSessionUser(null);
     setRole("Администратор");
     navigate("login");
     notify(lang==="en"?"You have signed out safely":"Излязохте успешно от профила");
   };
 
-  const signIn = (email:string) => {
-    const nextUser = email.toLowerCase() === demoUser.email ? demoUser : {
-      ...demoUser,
-      email,
-      nameBg:"Демо потребител",
-      nameEn:"Demo User",
-      initialsBg:"ДП",
-      initialsEn:"DU",
-    };
-    setSessionUser(nextUser);
-    setRole(nextUser.roleBg);
-    navigate("overview");
-    notify(lang==="en"?"Welcome to GrideX Energy OS":"Добре дошли в GrideX Energy OS");
+  const signIn = async () => {
+    if (backendState !== "online") {
+      setIntegrationError(lang==="en"?"Sign-in is unavailable because the backend cannot be reached.":"Входът не е достъпен, защото няма връзка с backend-а.");
+      return;
+    }
+    try {
+      setIntegrationError("");
+      await gridexLogin(runtimeConfig);
+    } catch {
+      setIntegrationError(lang==="en"?"The sign-in service did not respond. Please try again.":"Услугата за вход не отговори. Моля, опитайте отново.");
+    }
   };
 
   return (
@@ -1086,20 +1209,33 @@ export default function Home() {
         <header>
           <div><p className="eyebrow">{(lang==="en"?titlesEn:titles)[view][1]}</p><h1>{view === "overview" ? site : (lang==="en"?titlesEn:titles)[view][0]}</h1></div>
           <div className="header-actions">
-            <span className={`backend-badge ${backendState}`} data-no-translate>
-              <i/>{backendState === "demo" ? "DEMO DATA" : backendState === "online" ? "OPENREMOTE LIVE" : backendState === "offline" ? "API OFFLINE" : "CONNECTING"}
+            <span className={`backend-badge ${dataMode==="live"?"online":backendState==="offline"?"offline":"demo"}`} data-no-translate>
+              <i/>{dataMode === "live" ? "OPENREMOTE LIVE" : backendState === "offline" ? "API OFFLINE · DEMO" : backendState === "checking" ? "CONNECTING · DEMO" : "DEMO DATA"}
             </span>
             <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
             <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
-            <select value={role} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>
-            {view !== "sites" && <select value={site} onChange={(e) => setSite(e.target.value)} aria-label={lang==="en"?"Selected site":"Избран обект"}><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></select>}
+            <select value={role} disabled={dataMode==="live"} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>
+            {view !== "sites" && <select value={site} onChange={(e) => {
+              setSite(e.target.value);
+              const selected=liveSites.find(item=>item.name===e.target.value);
+              if(selected)setSelectedSiteId(selected.id);
+            }} aria-label={lang==="en"?"Selected site":"Избран обект"}>{dataMode==="live"&&liveSites.length?liveSites.map(item=><option key={item.id}>{item.name}</option>):<><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></>}</select>}
             <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label={lang==="en"?"Period":"Период"}><option>Днес</option><option>Тази седмица</option><option>Този месец</option></select>
             <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△<em>3</em></button>
             <button className="mobile-account-button" data-no-translate aria-label={lang==="en"?"Account menu":"Потребителско меню"} aria-expanded={accountMenuOpen} onClick={()=>setAccountMenuOpen(!accountMenuOpen)}>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</button>
           </div>
         </header>
 
-        {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang}/>}
+        {dataMode==="demo"&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
+          <i>{backendState==="offline"?"!":"DEMO"}</i>
+          <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"The backend connection is unavailable. Sign-in will become active automatically after the service recovers.":"Няма връзка с backend-а. Входът ще стане активен автоматично след възстановяване на услугата."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
+          <button onClick={()=>navigate("login")}>{lang==="en"?"Sign in":"Логване"} →</button>
+        </section>}
+
+        {integrationError&&dataMode==="live"&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
+
+        {dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang}/>:<>
+        {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate}/>} 
         {view === "assets" && (
@@ -1123,32 +1259,48 @@ export default function Home() {
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify}/>}
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} navigate={navigate} signOut={signOut} notify={notify}/>}
-        {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate}/>}
+        {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
+        </>}
       </section>
       {toast && <div className="toast"><i>✓</i>{toast}</div>}
     </main>
   );
 }
 
-function LoginPage({lang,user,onSignIn,onSignOut,navigate}:{lang:UiLanguage;user:DemoUser|null;onSignIn:(email:string)=>void;onSignOut:()=>void;navigate:(id:string)=>void}) {
-  const [email,setEmail] = useState(user?.email??demoUser.email);
-  const [password,setPassword] = useState("");
-  const [showPassword,setShowPassword] = useState(false);
-  const [error,setError] = useState("");
+function LiveModulePending({view,lang}:{view:string;lang:UiLanguage}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
-  const submit=(event:React.FormEvent<HTMLFormElement>)=>{
-    event.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setError(t("Въведете валиден имейл адрес.","Enter a valid email address."));
-      return;
-    }
-    if (password.length < 6) {
-      setError(t("Паролата трябва да съдържа поне 6 знака.","Password must contain at least 6 characters."));
-      return;
-    }
-    setError("");
-    onSignIn(email);
+  const endpoints:Record<string,string>={
+    customers:"/api/v1/organisations · /api/v1/contracts",
+    sites:"/api/v1/sites",
+    assets:"/api/v1/sites/{siteId}/assets",
+    battery:"/api/v1/sites/{siteId}/snapshot · /configurations/battery",
+    schedule:"/api/v1/sites/{siteId}/schedules",
+    market:"/api/v1/market/prices · /forecast",
+    settlement:"/api/v1/sites/{siteId}/settlement",
+    automation:"/api/v1/sites/{siteId}/configurations/strategy",
+    loads:"/api/v1/sites/{siteId}/loads",
+    balance:"/api/v1/sites/{siteId}/balancing",
+    gateway:"/api/v1/sites/{siteId}/gateways",
+    supported:"/api/v1/drivers",
+    devices:"/api/v1/sites/{siteId}/devices",
+    alarms:"/api/v1/sites/{siteId}/alarms · /incidents",
+    reports:"/api/v1/sites/{siteId}/reports",
+    settings:"/api/v1/sites/{siteId}/configurations/{section}",
+    plans:"/api/v1/subscription",
+    about:"/api/v1/system/version",
   };
+  return <section className="live-module-pending card" data-no-translate>
+    <i>API</i><p>{t("LIVE РЕЖИМ · БЕЗ ДЕМО СТОЙНОСТИ","LIVE MODE · NO DEMO VALUES")}</p>
+    <h2>{t("Модулът очаква своя backend договор","This module is waiting for its backend contract")}</h2>
+    <span>{t("Вие сте в реална сесия. За да не смесваме демонстрационни и реални данни, примерният екран е скрит, докато съответният endpoint бъде активиран.","You are in a real session. To prevent mixing representative and live data, the preview screen is hidden until its endpoint is enabled.")}</span>
+    <code>{endpoints[view]??"/api/v1"}</code>
+    <small>{t("Договорът и всички полета са описани в docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md","The contract and all fields are documented in docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md")}</small>
+  </section>;
+}
+
+function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState,error}:{lang:UiLanguage;user:DemoUser|null;onSignIn:()=>void;onSignOut:()=>void;navigate:(id:string)=>void;backendState:BackendState;authState:AuthState;error:string}) {
+  const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const backendAvailable=backendState==="online";
   return <div className="login-layout" data-no-translate>
     <section className="login-brand-panel">
       <div className="login-brand-mark">GX</div>
@@ -1161,20 +1313,21 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate}:{lang:UiLanguage;user
         <span><i>✓</i>{t("Подготовка за OpenRemote / Keycloak","Ready for OpenRemote / Keycloak")}</span>
       </div>
     </section>
-    <form className="login-card" onSubmit={submit} autoComplete="off">
-      <div className="login-demo-chip">{t("ДЕМО ДОСТЪП","DEMO ACCESS")}</div>
+    <section className="login-card">
+      <div className={`login-demo-chip ${backendAvailable?"ready":"offline"}`}>{backendAvailable?t("СИГУРЕН ВХОД","SECURE SIGN-IN"):t("BACKEND НЕДОСТЪПЕН","BACKEND UNAVAILABLE")}</div>
       <p>{t("ДОБРЕ ДОШЛИ","WELCOME BACK")}</p>
       <h2>{t("Вход в портала","Sign in to the portal")}</h2>
-      <span className="login-intro">{t("Използвайте профила си за достъп до управляваните обекти.","Use your account to access your managed sites.")}</span>
+      <span className="login-intro">{backendAvailable?t("Използвайте служебния си GrideX профил. Ще бъдете пренасочени към защитения OpenRemote / Keycloak вход.","Use your GrideX work account. You will be redirected to the secure OpenRemote / Keycloak sign-in."):t("Има проблем с връзката към backend-а. Демото остава достъпно, но реалният вход и данните на живо са временно спрени.","There is a backend connection problem. The demo remains available, but real sign-in and live data are temporarily disabled.")}</span>
       {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
-      <label><span>{t("Служебен имейл","Work email")}</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="off" placeholder="name@company.com"/></label>
-      <label><span>{t("Парола","Password")}</span><div className="password-field"><input type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password" placeholder="••••••••"/><button type="button" onClick={()=>setShowPassword(!showPassword)} aria-label={showPassword?t("Скрий паролата","Hide password"):t("Покажи паролата","Show password")}>{showPassword?"○":"◉"}</button></div></label>
-      <div className="login-options"><label><input type="checkbox" defaultChecked/>{t("Запомни това устройство","Remember this device")}</label><button type="button" onClick={()=>setError(t("В демо режима възстановяването на парола не изпраща имейл.","Password recovery does not send email in demo mode."))}>{t("Забравена парола?","Forgot password?")}</button></div>
+      <div className={`login-connection-state ${backendAvailable?"online":"offline"}`}><i/>
+        <span><strong>{backendState==="checking"?t("Проверка на връзката","Checking connection"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):t("Няма връзка с backend-а","Backend connection unavailable")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
+      </div>
       {error&&<div className="login-error" role="alert">{error}</div>}
-      <button className="login-submit" type="submit">{t("Вход в GrideX","Sign in to GrideX")} <b>→</b></button>
+      {!user&&<button className="login-submit" type="button" disabled={!backendAvailable||authState==="checking"} onClick={onSignIn}>{authState==="checking"?t("Проверка на сесията…","Checking session…"):t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
       {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
-      <small className="login-disclaimer">{t("Това е функционален демо вход. При продукционното внедряване удостоверяването и ролите се поемат от OpenRemote / Keycloak чрез OIDC; паролата не се записва от тази страница.","This is a functional demo sign-in. In production, authentication and roles will be handled by OpenRemote / Keycloak over OIDC; this page does not store the password.")}</small>
-    </form>
+      <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{t("Продължи в ясно обозначен Демо режим","Continue in clearly labelled Demo mode")}</button>
+      <small className="login-disclaimer">{t("GrideX никога не приема или записва паролата на тази страница. Keycloak издава краткоживеещ token, който се държи само в паметта на браузъра.","GrideX never accepts or stores your password on this page. Keycloak issues a short-lived token that is kept only in browser memory.")}</small>
+    </section>
   </div>;
 }
 
@@ -1240,21 +1393,30 @@ function FlowLane({className,value,tone,active=true}:{className:string;value:str
   </div>;
 }
 
-function EnergyFlowVisual({lang}:{lang:UiLanguage}) {
+function EnergyFlowVisual({lang,dataMode,snapshot}:{lang:UiLanguage;dataMode:DataMode;snapshot:GridexSiteSnapshot|null}) {
   const [scenario,setScenario]=useState<"solar-surplus"|"grid-charge">("solar-surplus");
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
-  const gridCharge=scenario==="grid-charge";
-  const values=gridCharge
+  const hasLiveSnapshot=dataMode==="live"&&Boolean(snapshot);
+  const liveGrid=snapshot?.power.gridKw;
+  const liveBattery=snapshot?.power.actualKw;
+  const gridCharge=hasLiveSnapshot?Boolean((liveGrid??0)>0&&(liveBattery??0)<0):scenario==="grid-charge";
+  const formatPower=(value:number|undefined)=>value===undefined?"—":Math.abs(value).toFixed(1);
+  const values=hasLiveSnapshot
+    ? {pv:formatPower(snapshot?.power.pvKw),gridIn:formatPower(liveGrid&&liveGrid>0?liveGrid:0),load:formatPower(snapshot?.power.siteLoadKw),battery:formatPower(liveBattery),gridOut:formatPower(liveGrid&&liveGrid<0?liveGrid:0)}
+    : gridCharge
     ? {pv:"18.4",gridIn:"126.0",load:"96.0",battery:"48.4",gridOut:"0.0"}
     : {pv:"248.6",gridIn:"0.0",load:"124.3",battery:"41.1",gridOut:"83.2"};
-  const forecast=gridCharge
+  const forecast=hasLiveSnapshot
+    ? {profit:"—",uplift:t("Очаква данни от forecast endpoint","Awaiting forecast endpoint data")}
+    : gridCharge
     ? {profit:t("+2 384.20 лв.","+BGN 2,384.20"),uplift:t("+237.40 лв. спрямо PV сценария","+BGN 237.40 vs. the PV scenario")}
     : {profit:t("+2 146.80 лв.","+BGN 2,146.80"),uplift:t("Базов оптимизиран сценарий","Optimised baseline scenario")};
+  const batteryState=(liveBattery??0)>0?t("РАЗРЕЖДА","DISCHARGING"):(liveBattery??0)<0?t("ЗАРЕЖДА","CHARGING"):t("ГОТОВА","STANDBY");
   return <div className={`energy-flow-visual ${gridCharge?"grid-charge":"solar-surplus"}`} data-no-translate>
     <div className="energy-flow-toolbar">
       <div className="flow-scenario-tabs" role="group" aria-label={t("Сценарий на енергийния поток","Energy flow scenario")}>
-        <button className={!gridCharge?"active":""} onClick={()=>setScenario("solar-surplus")}><i>☀</i><span><b>{t("PV излишък","PV surplus")}</b><small>{t("+2 146.80 лв. / 24 ч.","+BGN 2,146.80 / 24 h")}</small></span></button>
-        <button className={gridCharge?"active":""} onClick={()=>setScenario("grid-charge")}><i>⌁</i><span><b>{t("Заряд от мрежата","Grid charging")}</b><small>{t("+2 384.20 лв. / 24 ч.","+BGN 2,384.20 / 24 h")}</small></span></button>
+        <button disabled={hasLiveSnapshot} className={!gridCharge?"active":""} onClick={()=>setScenario("solar-surplus")}><i>☀</i><span><b>{t("PV излишък","PV surplus")}</b><small>{hasLiveSnapshot?t("Режимът идва от OpenRemote","Mode from OpenRemote"):t("+2 146.80 лв. / 24 ч.","+BGN 2,146.80 / 24 h")}</small></span></button>
+        <button disabled={hasLiveSnapshot} className={gridCharge?"active":""} onClick={()=>setScenario("grid-charge")}><i>⌁</i><span><b>{t("Заряд от мрежата","Grid charging")}</b><small>{hasLiveSnapshot?t("Режимът идва от OpenRemote","Mode from OpenRemote"):t("+2 384.20 лв. / 24 ч.","+BGN 2,384.20 / 24 h")}</small></span></button>
       </div>
       <div className="flow-toolbar-kpis">
         <div className="flow-profit-forecast"><small>{t("Прогнозна печалба · 24 ч.","Forecast profit · 24 h")}</small><strong>{forecast.profit}</strong><em>{forecast.uplift}</em></div>
@@ -1274,47 +1436,50 @@ function EnergyFlowVisual({lang}:{lang:UiLanguage}) {
       <FlowAsset className="flow-load" icon="⌂" label={t("Консумация","Site load")} value={values.load} unit="kW" note={t("Текущ товар на обекта","Current site demand")} state={t("КОНСУМАТОР","LOAD")}/>
 
       <FlowLane className="lane-battery" value={`${values.battery} kW`} tone="battery"/>
-      <FlowAsset className="flow-battery" icon="▣" label={t("Батерия","Battery")} value="72%" unit="SOC" note={gridCharge?t("Заряд от мрежата · ниска цена","Grid charge · low price"):t("Заряд от PV излишък","Charging from PV surplus")} state={t("ЗАРЕЖДА","CHARGING")}/>
+      <FlowAsset className="flow-battery" icon="▣" label={t("Батерия","Battery")} value={hasLiveSnapshot?`${snapshot?.battery.socPct.toFixed(1)}%`:"72%"} unit="SOC" note={hasLiveSnapshot?`${values.battery} kW · ${snapshot?.quality}`:gridCharge?t("Заряд от мрежата · ниска цена","Grid charge · low price"):t("Заряд от PV излишък","Charging from PV surplus")} state={hasLiveSnapshot?batteryState:t("ЗАРЕЖДА","CHARGING")}/>
 
       <FlowLane className="lane-grid-out" value={`${values.gridOut} kW`} tone="grid" active={!gridCharge}/>
       <FlowAsset className="flow-grid-out" icon="↗" label={t("Износ към мрежата","Grid export")} value={values.gridOut} unit="kW" note={gridCharge?t("Износът е спрян","Export disabled"):t("Продажба на излишъка","Selling surplus")} state={gridCharge?t("ИЗКЛЮЧЕН","OFF"):t("ИЗНОС","EXPORT")} active={!gridCharge}/>
     </div>
-    <div className="flow-scenario-note"><i>{gridCharge?"¤":"☀"}</i><span><strong>{gridCharge?t("Защо зареждаме от мрежата?","Why are we charging from the grid?"):t("Оптимално използване на PV излишъка","Optimal use of PV surplus")}</strong><small>{gridCharge?t("Прогнозата е за слабо слънце, а текущата пазарна цена е под зададения праг. EMS запазва енергия за следващите скъпи часове.","Low solar output is forecast and the current market price is below the configured threshold. EMS stores energy for the next expensive hours."):t("Първо се покрива товарът, след това се зарежда батерията, а останалата енергия се продава към мрежата.","Site demand is covered first, then the battery is charged and the remaining energy is exported to the grid.")}</small><em>LightGBM · {t("достоверност 87% · обновено 14:30","87% confidence · updated 14:30")}</em></span></div>
+    <div className="flow-scenario-note"><i>{gridCharge?"¤":"☀"}</i><span><strong>{hasLiveSnapshot?t("Реален поток от OpenRemote","Live flow from OpenRemote"):gridCharge?t("Защо зареждаме от мрежата?","Why are we charging from the grid?"):t("Оптимално използване на PV излишъка","Optimal use of PV surplus")}</strong><small>{hasLiveSnapshot?t("Стойностите се обновяват автоматично. Липсващите показатели се показват с тире и никога не се заместват с демо стойности.","Values refresh automatically. Missing metrics are shown as a dash and are never replaced with demo values."):gridCharge?t("Прогнозата е за слабо слънце, а текущата пазарна цена е под зададения праг. EMS запазва енергия за следващите скъпи часове.","Low solar output is forecast and the current market price is below the configured threshold. EMS stores energy for the next expensive hours."):t("Първо се покрива товарът, след това се зарежда батерията, а останалата енергия се продава към мрежата.","Site demand is covered first, then the battery is charged and the remaining energy is exported to the grid.")}</small><em>{hasLiveSnapshot?`${t("обновено","updated")} ${new Date(snapshot!.timestamp).toLocaleTimeString(lang==="en"?"en-GB":"bg-BG")}`:`LightGBM · ${t("достоверност 87% · обновено 14:30","87% confidence · updated 14:30")}`}</em></span></div>
   </div>;
 }
 
-function Overview({ auto, setAuto, navigate, notify, lang }: { auto: boolean; setAuto: (v:boolean)=>void; navigate:(v:string)=>void; notify:(v:string)=>void; lang:UiLanguage }) {
+function Overview({ auto, setAuto, navigate, notify, lang, dataMode, snapshot }: { auto: boolean; setAuto: (v:boolean)=>void; navigate:(v:string)=>void; notify:(v:string)=>void; lang:UiLanguage;dataMode:DataMode;snapshot:GridexSiteSnapshot|null }) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  const isLive=dataMode==="live";
+  const batterySoc=isLive&&snapshot?snapshot.battery.socPct.toFixed(1):"72";
   return <>
     <div className="status-strip">
-      <span><i className="live-dot"/>Всички системи работят нормално</span>
-      <span>Последни данни <b>14:32:08</b></span>
-      <button onClick={() => setAuto(!auto)}><i className={auto ? "toggle on" : "toggle"}/><span><strong>{auto ? "Автоматичен режим" : "Ръчен режим"}</strong><small>Оптимизация по пазарна цена</small></span></button>
+      <span><i className="live-dot"/>{dataMode==="live"?t("Свързано с OpenRemote","Connected to OpenRemote"):t("Представителни демо данни","Representative demo data")}</span>
+      <span>{t("Последни данни","Latest data")} <b>{dataMode==="live"&&snapshot?new Date(snapshot.timestamp).toLocaleTimeString(lang==="en"?"en-GB":"bg-BG"):"14:32:08"}</b></span>
+      <button disabled={isLive} title={isLive?t("Режимът се управлява през защитената конфигурационна команда","Mode is controlled through the protected configuration command"):undefined} onClick={() => setAuto(!auto)}><i className={auto ? "toggle on" : "toggle"}/><span><strong>{isLive?(snapshot?.strategy?.mode??t("Режим от OpenRemote","Mode from OpenRemote")):auto ? "Автоматичен режим" : "Ръчен режим"}</strong><small>{isLive?t("Защитена live конфигурация","Protected live configuration"):"Оптимизация по пазарна цена"}</small></span></button>
     </div>
     <section className="hero-grid">
       <article className="flow-card card" data-no-translate>
-        <PanelTitle eyebrow={t("ЕНЕРГИЕН ПОТОК","ENERGY FLOW")} title={t("В реално време","Real-time energy flow")} action={<span className="pill green">● {t("На живо","Live")}</span>}/>
-        <EnergyFlowVisual lang={lang}/>
+        <PanelTitle eyebrow={t("ЕНЕРГИЕН ПОТОК","ENERGY FLOW")} title={t("В реално време","Real-time energy flow")} action={<span className={`pill ${dataMode==="live"?"green":"amber"}`}>● {dataMode==="live"?t("На живо","Live"):t("Демо","Demo")}</span>}/>
+        <EnergyFlowVisual lang={lang} dataMode={dataMode} snapshot={snapshot}/>
       </article>
       <aside className="summary card">
-        <PanelTitle eyebrow="ДНЕШЕН РЕЗУЛТАТ" title="21 август 2026" action={<button onClick={() => notify("Отчетът е подготвен за изтегляне")}>•••</button>}/>
-        <div className="profit"><span>Нетен резултат</span><strong>+1 842.60 лв.</strong><small>↑ 18.4% спрямо прогнозата</small></div>
-        <div className="summary-row"><span>Спестени разходи<small>Собствено потребление</small></span><b>684.20 лв.</b></div>
-        <div className="summary-row"><span>Приход от продажба<small>1.26 MWh към мрежата</small></span><b>1 296.80 лв.</b></div>
-        <div className="summary-row"><span>Разход за покупка<small>0.42 MWh от мрежата</small></span><b className="negative">−138.40 лв.</b></div>
+        <PanelTitle eyebrow={t("ДНЕШЕН РЕЗУЛТАТ","TODAY'S RESULT")} title={isLive?new Date().toLocaleDateString(lang==="en"?"en-GB":"bg-BG"):"21 август 2026"} action={<button disabled={isLive} onClick={() => notify("Отчетът е подготвен за изтегляне")}>•••</button>}/>
+        <div className="profit"><span>{t("Нетен резултат","Net result")}</span><strong>{isLive?"—":"+1 842.60 лв."}</strong><small>{isLive?t("Очаква economics endpoint","Awaiting economics endpoint"):"↑ 18.4% спрямо прогнозата"}</small></div>
+        <div className="summary-row"><span>{t("Спестени разходи","Avoided costs")}<small>{t("Собствено потребление","Self-consumption")}</small></span><b>{isLive?"—":"684.20 лв."}</b></div>
+        <div className="summary-row"><span>{t("Приход от продажба","Export revenue")}<small>{t("Енергия към мрежата","Energy exported")}</small></span><b>{isLive?"—":"1 296.80 лв."}</b></div>
+        <div className="summary-row"><span>{t("Разход за покупка","Import cost")}<small>{t("Енергия от мрежата","Energy imported")}</small></span><b className="negative">{isLive?"—":"−138.40 лв."}</b></div>
         <button className="details" onClick={() => navigate("balance")}>Виж подробен отчет →</button>
       </aside>
     </section>
     <section className="kpis">
-      <Metric label="PV производство" value="2.84" unit="MWh" badge="↑ 8.2%" type="spark solar-spark"/>
-      <Metric label="Консумация" value="1.92" unit="MWh" badge="↓ 3.1%" type="spark load-spark"/>
-      <Metric label="Състояние на батерията" value="72" unit="% SOC" badge="SOH 98%" type="charge"/>
-      <Metric label="Цена в момента" value="214.62" unit="лв./MWh" badge="Висока" type="price"/>
+      <Metric label={t("PV производство","PV production")} value={isLive?"—":"2.84"} unit="MWh" badge={isLive?t("history endpoint","history endpoint"):"↑ 8.2%"} type="spark solar-spark"/>
+      <Metric label={t("Консумация","Consumption")} value={isLive?"—":"1.92"} unit="MWh" badge={isLive?t("history endpoint","history endpoint"):"↓ 3.1%"} type="spark load-spark"/>
+      <Metric label={t("Състояние на батерията","Battery state")} value={batterySoc} unit="% SOC" badge={isLive&&snapshot?`SOH ${snapshot.battery.sohPct.toFixed(1)}%`:"SOH 98%"} type="charge"/>
+      <Metric label={t("Цена в момента","Current price")} value={isLive?"—":"214.62"} unit={t("лв./MWh","BGN/MWh")} badge={isLive?t("market endpoint","market endpoint"):t("Висока","High")} type="price" priceNote={isLive?t("Очаква пазарни данни","Awaiting market data"):undefined}/>
     </section>
-    <section className="lower-grid">
+    {!isLive&&<section className="lower-grid">
       <article className="card chart-card"><PanelTitle eyebrow="МОЩНОСТ И ПРОГНОЗА" title="Днешен профил" action={<div className="legend"><span className="green-key">PV</span><span className="purple-key">Товар</span></div>}/><AreaChart/></article>
       <article className="card activity-card"><PanelTitle eyebrow="ПОСЛЕДНИ ДЕЙСТВИЯ" title="Дневник на системата"/><Activity icon="↗" title="Продажба към мрежата" note="83.2 kW · автоматична команда" time="14:31"/><Activity icon="▣" title="SOC достигна 72%" note="Зареждането е ограничено" time="14:18"/><Activity icon="✓" title="Графикът е приет" note="IBEX ден напред · 24 интервала" time="13:42"/><button className="details" onClick={() => navigate("alarms")}>Всички събития →</button></article>
-    </section>
+    </section>}
+    {isLive&&<section className="live-endpoint-grid"><article className="card"><PanelTitle eyebrow={t("ИСТОРИЯ И ПРОГНОЗА","HISTORY & FORECAST")} title={t("Очаква backend endpoint","Awaiting backend endpoint")}/><p>{t("Графиката ще се зареди от /history и /forecast. Представителни демо стойности не се показват в live режим.","The chart will load from /history and /forecast. Representative demo values are not shown in live mode.")}</p></article><article className="card"><PanelTitle eyebrow={t("ОДИТ И ДЕЙСТВИЯ","AUDIT & ACTIONS")} title={t("Очаква backend endpoint","Awaiting backend endpoint")}/><p>{t("Дневникът ще показва само реални команди и OpenRemote събития за разрешения обект.","The log will show only real commands and OpenRemote events for the authorised site.")}</p></article></section>}
   </>;
 }
 

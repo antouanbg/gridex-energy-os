@@ -14,7 +14,9 @@ The public GitHub Pages demo is deployed automatically from the `main` branch:
 
 The interface uses representative demonstration data. It is not connected to a live power installation and must not be used as a production control system without project-specific engineering, testing and safety validation.
 
-The same build is prepared for a protected live mode. `public/gridex-config.js` selects `demo` or `live`; live data and commands go through `api.gridex.tech`, never directly from the browser to OpenRemote or a field device.
+The same build is prepared for a protected live mode. `public/gridex-config.js` normally uses `auto`: the portal switches to live data only when both the backend and a valid OIDC session are available; otherwise it stays in clearly labelled demo mode. Live data and commands go through the GrideX API, never directly from the browser to OpenRemote or a field device.
+
+The complete frontend state machine, OIDC requirements, endpoint/field catalogue and backend rollout plan are in [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). The machine-readable baseline is [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml).
 
 ## Product scope
 
@@ -115,7 +117,9 @@ GrideX Energy OS е двуезична продуктова демонстрац
 
 Интерфейсът използва представителни демонстрационни данни. Той не е свързан с реална енергийна инсталация и не трябва да се използва за производствено управление без специфично инженерно проектиране, тестове и валидиране на безопасността.
 
-Същият build е подготвен за защитен live режим. `public/gridex-config.js` избира `demo` или `live`; реалните данни и команди преминават през `api.gridex.tech`, никога директно от браузъра към OpenRemote или полево устройство.
+Същият build е подготвен за защитен live режим. `public/gridex-config.js` обичайно използва `auto`: порталът преминава към реални данни само когато backend-ът е достъпен и има валидна OIDC сесия; иначе остава в ясно обозначен демо режим. Реалните данни и команди преминават през GrideX API, никога директно от браузъра към OpenRemote или полево устройство.
+
+Пълната frontend state machine, OIDC изискванията, endpoint/field каталогът и планът за включване на backend-а са в [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). Машинночетимият договор е [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml).
 
 ### Функционален обхват
 
