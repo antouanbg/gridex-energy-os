@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridex.tech/schemas/api/v1/user-preferences.schema.json",
+  "title": "GrideX user preferences",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["revision", "locale", "displayTimezone", "units", "currency", "theme", "notifications"],
+  "properties": {
+    "revision": { "type": "integer", "minimum": 0 },
+    "locale": { "enum": ["en", "bg"] },
+    "displayTimezone": { "type": "string", "minLength": 1 },
+    "units": { "const": "metric" },
+    "currency": { "enum": ["BGN", "EUR"] },
+    "theme": { "enum": ["light", "system"] },
+    "defaultSiteId": { "type": "string" },
+    "dashboardLayout": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "notifications": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channels", "minimumSeverity"],
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": { "enum": ["push", "email", "sms", "webhook"] },
+          "uniqueItems": true
+        },
+        "minimumSeverity": { "enum": ["info", "warning", "critical"] },
+        "quietHours": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "to", "timezone"],
+          "properties": {
+            "from": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "to": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "timezone": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

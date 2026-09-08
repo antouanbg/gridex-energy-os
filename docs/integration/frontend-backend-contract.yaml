@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: GrideX Frontend API
-  version: 0.1.0
+  version: 1.0.0
   description: Canonical browser-to-BFF contract. It never exposes OpenRemote service credentials or field protocols.
 servers:
   - url: "{apiBaseUrl}"
@@ -32,6 +32,46 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
         "401": { $ref: "#/components/responses/Unauthorised" }
+  /api/v1/me/preferences:
+    get:
+      operationId: getCurrentUserPreferences
+      responses:
+        "200":
+          description: Non-operational preferences for the current OIDC subject.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserPreferences" }
+    put:
+      operationId: updateCurrentUserPreferences
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserPreferences" }
+      responses:
+        "200":
+          description: Updated preferences and revision.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserPreferences" }
+        "412": { $ref: "#/components/responses/StaleRevision" }
+  /api/v1/strategies/catalog:
+    get:
+      operationId: getStrategyCatalog
+      responses:
+        "200":
+          description: Strategies allowed by the effective role, plan and site capabilities.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/StrategyCatalogItem" }
   /api/v1/sites:
     get:
       operationId: listSites
@@ -115,6 +155,160 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/TimeSeriesPoint" }
+  /api/v1/sites/{siteId}/strategy:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: getSiteStrategy
+      responses:
+        "200":
+          description: Current canonical site strategy and revision.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StrategyEnvelope" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/v1/sites/{siteId}/strategy/drafts:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    post:
+      operationId: createSiteStrategyDraft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [baseRevision, configuration]
+              properties:
+                baseRevision: { type: integer, minimum: 0 }
+                configuration: { $ref: "#/components/schemas/StrategyConfiguration" }
+      responses:
+        "201":
+          description: Draft created without changing the active site strategy.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StrategyDraft" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/v1/sites/{siteId}/strategy/drafts/{draftId}:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - $ref: "#/components/parameters/DraftId"
+    put:
+      operationId: updateSiteStrategyDraft
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [configuration]
+              properties:
+                configuration: { $ref: "#/components/schemas/StrategyConfiguration" }
+      responses:
+        "200":
+          description: Updated draft and validation summary.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StrategyDraft" }
+        "412": { $ref: "#/components/responses/StaleRevision" }
+  /api/v1/sites/{siteId}/strategy/drafts/{draftId}/validate:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - $ref: "#/components/parameters/DraftId"
+    post:
+      operationId: validateSiteStrategyDraft
+      responses:
+        "200":
+          description: Schema, permission, capability, tariff and safety-relationship validation.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StrategyValidation" }
+  /api/v1/sites/{siteId}/strategy/drafts/{draftId}/simulate:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - $ref: "#/components/parameters/DraftId"
+    post:
+      operationId: simulateSiteStrategyDraft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [horizonFrom, horizonTo]
+              properties:
+                horizonFrom: { type: string, format: date-time }
+                horizonTo: { type: string, format: date-time }
+      responses:
+        "202":
+          description: Simulation queued or completed by an inline backend implementation.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StrategySimulation" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+  /api/v1/sites/{siteId}/strategy/drafts/{draftId}/activate:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - $ref: "#/components/parameters/DraftId"
+      - $ref: "#/components/parameters/IdempotencyKey"
+    post:
+      operationId: activateSiteStrategyDraft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expectedDraftRevision, simulationId]
+              properties:
+                expectedDraftRevision: { type: integer, minimum: 0 }
+                simulationId: { type: string }
+                approvalReason: { type: string, maxLength: 1000 }
+      responses:
+        "202":
+          description: Accepted for OpenRemote activation; not yet proof of application.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StrategyStatus" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "412": { $ref: "#/components/responses/StaleRevision" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "423": { $ref: "#/components/responses/Locked" }
+  /api/v1/sites/{siteId}/strategy/status:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: getSiteStrategyStatus
+      responses:
+        "200":
+          description: Desired versus OpenRemote-applied revision and safety readiness.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StrategyStatus" }
+  /api/v1/sites/{siteId}/strategy/versions:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: listSiteStrategyVersions
+      responses:
+        "200":
+          description: Audited immutable site strategy history.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/StrategyEnvelope" }
   /api/v1/sites/{siteId}/events:
     parameters:
       - $ref: "#/components/parameters/SiteId"
@@ -157,7 +351,24 @@ paths:
       - name: section
         in: path
         required: true
-        schema: { type: string }
+        description: Strategy uses its dedicated lifecycle endpoints and is not a value here.
+        schema: { enum: [battery-asset, tariff, forecast, grid, evse, notifications, trader-schedule, balancing] }
+    get:
+      operationId: getSiteConfiguration
+      responses:
+        "200":
+          description: Current versioned configuration section.
+          headers:
+            ETag:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [revision, configuration]
+                properties:
+                  revision: { type: integer, minimum: 0 }
+                  configuration: { type: object, additionalProperties: true }
     put:
       operationId: updateSiteConfiguration
       parameters:
@@ -190,6 +401,21 @@ components:
       in: path
       required: true
       schema: { type: string }
+    DraftId:
+      name: draftId
+      in: path
+      required: true
+      schema: { type: string }
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      schema: { type: string }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 16, maxLength: 128 }
   responses:
     Unauthorised:
       description: Missing, expired or revoked session.
@@ -203,7 +429,140 @@ components:
     Unavailable:
       description: Backend or required upstream is unavailable.
       content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Conflict:
+      description: Current site state conflicts with the requested transition.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    StaleRevision:
+      description: The supplied revision or ETag is stale.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    ValidationFailed:
+      description: Configuration, capability or simulation validation failed.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
   schemas:
+    StrategyConfiguration:
+      $ref: "./schemas/strategy-configuration.schema.json"
+    UserPreferences:
+      $ref: "./schemas/user-preferences.schema.json"
+    StrategyLifecycle:
+      enum: [draft, validating, invalid, ready, activating, active, rejected, superseded]
+    StrategyCatalogItem:
+      type: object
+      additionalProperties: false
+      required: [code, label, description, requiredCapabilities, requiredRoles, simulationRequired]
+      properties:
+        code: { $ref: "#/components/schemas/StrategyCode" }
+        label: { $ref: "#/components/schemas/BilingualText" }
+        description: { $ref: "#/components/schemas/BilingualText" }
+        requiredCapabilities: { type: array, items: { type: string } }
+        requiredRoles: { type: array, items: { type: string } }
+        simulationRequired: { type: boolean }
+    StrategyCode:
+      enum: [intelligent_hybrid, price_arbitrage, self_consumption, zero_export, peak_shaving, schedule_following, backup_reserve, manual]
+    BilingualText:
+      type: object
+      additionalProperties: false
+      required: [en, bg]
+      properties:
+        en: { type: string }
+        bg: { type: string }
+    StrategyEnvelope:
+      type: object
+      required: [siteId, revision, etag, lifecycle, configuration, createdAt, createdBy]
+      properties:
+        siteId: { type: string }
+        revision: { type: integer, minimum: 0 }
+        etag: { type: string }
+        lifecycle: { $ref: "#/components/schemas/StrategyLifecycle" }
+        configuration: { $ref: "#/components/schemas/StrategyConfiguration" }
+        createdAt: { type: string, format: date-time }
+        createdBy: { type: string }
+    StrategyDraft:
+      allOf:
+        - { $ref: "#/components/schemas/StrategyEnvelope" }
+        - type: object
+          required: [draftId, baseRevision, validation]
+          properties:
+            draftId: { type: string }
+            baseRevision: { type: integer, minimum: 0 }
+            validation: { $ref: "#/components/schemas/StrategyValidation" }
+    StrategyValidation:
+      type: object
+      required: [valid, errors, warnings]
+      properties:
+        valid: { type: boolean }
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/ValidationMessage" }
+        warnings:
+          type: array
+          items: { $ref: "#/components/schemas/ValidationMessage" }
+    ValidationMessage:
+      type: object
+      required: [path, code, message]
+      properties:
+        path: { type: string }
+        code: { type: string }
+        message: { type: string }
+    StrategySimulation:
+      type: object
+      required: [simulationId, draftId, status, horizonFrom, horizonTo, inputVersions, violations]
+      properties:
+        simulationId: { type: string }
+        draftId: { type: string }
+        status: { enum: [queued, running, completed, failed] }
+        horizonFrom: { type: string, format: date-time }
+        horizonTo: { type: string, format: date-time }
+        inputVersions: { type: object, additionalProperties: { type: string } }
+        projected:
+          type: object
+          properties:
+            grossRevenue: { type: number }
+            energyCost: { type: number }
+            imbalanceCost: { type: number }
+            batteryDegradationCost: { type: number }
+            netProfit: { type: number }
+            equivalentFullCycles: { type: number, minimum: 0 }
+            minimumSocPct: { type: number, minimum: 0, maximum: 100 }
+            maximumGridImportKw: { type: number, minimum: 0 }
+            maximumGridExportKw: { type: number, minimum: 0 }
+        violations:
+          type: array
+          items:
+            type: object
+            required: [code, message]
+            properties:
+              code: { type: string }
+              message: { type: string }
+              timestamp: { type: string, format: date-time }
+    StrategyStatus:
+      type: object
+      required: [siteId, code, lifecycle, desiredRevision, rejectionReasons, safety]
+      properties:
+        siteId: { type: string }
+        code: { $ref: "#/components/schemas/StrategyCode" }
+        lifecycle: { $ref: "#/components/schemas/StrategyLifecycle" }
+        desiredRevision: { type: integer, minimum: 0 }
+        appliedRevision: { type: integer, minimum: 0 }
+        openRemoteAssetId: { type: string }
+        requestedAt: { type: string, format: date-time }
+        appliedAt: { type: string, format: date-time }
+        requestedBy: { type: string }
+        rejectionReasons:
+          type: array
+          items:
+            type: object
+            required: [code, message]
+            properties:
+              code: { type: string }
+              message: { type: string }
+        safety:
+          type: object
+          required: [limitsValid, controlReady, writesEnabled, edgeOnline]
+          properties:
+            limitsValid: { type: boolean }
+            controlReady: { type: boolean }
+            writesEnabled: { type: boolean }
+            edgeOnline: { type: boolean }
     Health:
       type: object
       required: [status, openRemote]

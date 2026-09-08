@@ -16,7 +16,7 @@ The interface uses representative demonstration data. It is not connected to a l
 
 The same build is prepared for a protected live mode. `public/gridex-config.js` normally uses `auto`: the portal switches to live data only when both the backend and a valid OIDC session are available; otherwise it stays in clearly labelled demo mode. Live data and commands go through the GrideX API, never directly from the browser to OpenRemote or a field device.
 
-The complete frontend state machine, OIDC requirements, endpoint/field catalogue and backend rollout plan are in [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). The machine-readable baseline is [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml).
+The complete frontend state machine, OIDC requirements, endpoint/field catalogue and backend rollout plan are in [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). The machine-readable API is [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml), and the site strategy/settings lifecycle is [STRATEGY_AND_SETTINGS_CONTRACT.md](docs/integration/STRATEGY_AND_SETTINGS_CONTRACT.md).
 
 ## Product scope
 
@@ -119,7 +119,7 @@ GrideX Energy OS е двуезична продуктова демонстрац
 
 Същият build е подготвен за защитен live режим. `public/gridex-config.js` обичайно използва `auto`: порталът преминава към реални данни само когато backend-ът е достъпен и има валидна OIDC сесия; иначе остава в ясно обозначен демо режим. Реалните данни и команди преминават през GrideX API, никога директно от браузъра към OpenRemote или полево устройство.
 
-Пълната frontend state machine, OIDC изискванията, endpoint/field каталогът и планът за включване на backend-а са в [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). Машинночетимият договор е [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml).
+Пълната frontend state machine, OIDC изискванията, endpoint/field каталогът и планът за включване на backend-а са в [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). Машинночетимият API е [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml), а lifecycle-ът на стратегиите и настройките е в [STRATEGY_AND_SETTINGS_CONTRACT.md](docs/integration/STRATEGY_AND_SETTINGS_CONTRACT.md).
 
 ### Функционален обхват
 

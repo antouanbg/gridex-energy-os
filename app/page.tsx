@@ -340,6 +340,24 @@ const englishPhrases: [string, string][] = [
   ["Поддържа потока в точката на присъединяване под зададения лимит чрез BESS и ограничаване на инверторите.", "Keeps power flow at the grid connection below the set limit using BESS and inverter curtailment."],
   ["Настройки за", "Settings for"],
   ["Запази този режим", "Save this mode"],
+  ["Запази като чернова", "Save as draft"],
+  ["Следване на график", "Schedule following"],
+  ["Резервно захранване", "Backup reserve"],
+  ["Ръчно управление", "Manual control"],
+  ["Изпълнение на 15-минутния график", "15-minute schedule execution"],
+  ["Гарантиран енергиен резерв", "Guaranteed energy reserve"],
+  ["Временно операторско управление", "Temporary operator control"],
+  ["Следва одобрения day-ahead график към търговеца и минимизира отклонението във всеки от 96-те интервала.", "Follows the approved day-ahead trader schedule and minimises deviation in each of the 96 intervals."],
+  ["Запазва зададен SOC за прекъсване на мрежата или предварително планиран прозорец с критичен товар.", "Preserves the configured SOC for a grid outage or a planned critical-load window."],
+  ["Позволява защитена команда с кратък TTL, роля и audit причина, без да изключва BMS или Edge защитите.", "Allows a protected short-TTL command with a role and audit reason, without disabling BMS or Edge protection."],
+  ["Допустимо отклонение", "Allowed deviation"],
+  ["Тежест на небаланса", "Imbalance weight"],
+  ["Активен график", "Active schedule"],
+  ["Гарантиран резерв", "Guaranteed reserve"],
+  ["Прогнозен хоризонт", "Forecast horizon"],
+  ["Критични товари", "Critical loads"],
+  ["Валидност на командата", "Command validity"],
+  ["Изисквана роля", "Required role"],
   ["Хоризонт на прогнозата", "Forecast horizon"],
   ["Хоризонт за предзаряд", "Pre-charge horizon"],
   ["Минимален резерв", "Minimum reserve"],
@@ -1930,6 +1948,9 @@ function ModeCostAccounting({mode,lang,settings}:{mode:string;lang:UiLanguage;se
     {bg:"Самоконсумация",en:"Self-consumption",fec:.56,income:132},
     {bg:"Zero export",en:"Zero export",fec:.32,income:74},
     {bg:"Peak shaving",en:"Peak shaving",fec:.68,income:164},
+    {bg:"Следване на график",en:"Schedule following",fec:.74,income:178},
+    {bg:"Резервно захранване",en:"Backup reserve",fec:.18,income:42},
+    {bg:"Ръчно управление",en:"Manual control",fec:.40,income:80},
   ].map(item=>{
     const depreciation=settings.method==="usage"?costPerCycle*item.fec:straightDaily;
     const variableCost=item.fec*nominalCapacity*24.8;
@@ -1958,6 +1979,8 @@ function Automation({notify,site,lang,batteryCost}:{notify:(v:string)=>void;site
   const [exportLimit,setExportLimit] = useState(0);
   const [peakTarget,setPeakTarget] = useState(620);
   const [gridImport,setGridImport] = useState(40);
+  const [scheduleTolerance,setScheduleTolerance] = useState(25);
+  const [manualTtl,setManualTtl] = useState(15);
   const [rules,setRules] = useState([true,true,true,true,true,true]);
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const applyLogicTuning=()=>{setMode("Интелигентен хибрид");setReserve(25);setTargetSoc(54);setRules([true,true,true,true,true,true]);setOptimised(true);notify(t("Автоматичната логика е синхронизирана с прогнозата","Automatic logic synchronised with the forecast"));};
@@ -1976,6 +1999,9 @@ function Automation({notify,site,lang,batteryCost}:{notify:(v:string)=>void;site
     "Самоконсумация": {icon:"☀",goal:"Минимална покупка от мрежата",description:"Използва първо PV за товара, съхранява излишъка и разрежда батерията при недостиг.",signals:["PV излишък 45%","Товар 35%","SOC 20%"],inputs:["PV производство","Текущ товар","Мрежов внос"],decision:"Следвай локалния баланс",result:`Ограничи вноса до ${gridImport} kW`},
     "Zero export": {icon:"⌁",goal:"Без отдаване към мрежата",description:"Поддържа потока в точката на присъединяване под зададения лимит чрез BESS и ограничаване на инверторите.",signals:["PCC поток 60%","BESS 25%","PV 15%"],inputs:["PCC електромер","BESS капацитет","PV мощност"],decision:"Компенсирай за секунди",result:`Износ ≤ ${exportLimit} kW`},
     "Peak shaving": {icon:"⌂",goal:"Ограничаване на товарния пик",description:"Предзарежда батерията и покрива пиковете, за да не се надвишава договорената мощност.",signals:["Товар 50%","Прогноза 30%","SOC 20%"],inputs:["Текущ товар","Прогноза за пик","Договорен лимит"],decision:"Разреждай над лимита",result:`Целеви пик ${peakTarget} kW`},
+    "Следване на график": {icon:"▦",goal:"Изпълнение на 15-минутния график",description:"Следва одобрения day-ahead график към търговеца и минимизира отклонението във всеки от 96-те интервала.",signals:["График 50%","PCC 30%","Небаланс 20%"],inputs:["Версия на графика","PCC електромер","Цена небаланс"],decision:"Компенсирай отклонението",result:`Толеранс ±${scheduleTolerance} kW`},
+    "Резервно захранване": {icon:"◒",goal:"Гарантиран енергиен резерв",description:"Запазва зададен SOC за прекъсване на мрежата или предварително планиран прозорец с критичен товар.",signals:["SOC 55%","Прогноза 25%","Критичен товар 20%"],inputs:["SOC + BMS","Прогноза 72 h","Критични товари"],decision:"Не използвай резерва",result:`Запази ${targetSoc}% SOC`},
+    "Ръчно управление": {icon:"✥",goal:"Временно операторско управление",description:"Позволява защитена команда с кратък TTL, роля и audit причина, без да изключва BMS или Edge защитите.",signals:["Оператор 50%","TTL 30%","Safety 20%"],inputs:["Желана мощност","Роля и причина","Safety envelope"],decision:"Изпълни до изтичане",result:`TTL ${manualTtl} s`},
   };
   const profile = modeProfiles[mode as keyof typeof modeProfiles];
   return <>
@@ -1987,7 +2013,7 @@ function Automation({notify,site,lang,batteryCost}:{notify:(v:string)=>void;site
       <div className="mode-cards">{Object.entries(modeProfiles).map(([name,item],i)=><button key={name} className={mode===name?`mode-card active tone-${i}`:`mode-card tone-${i}`} onClick={()=>setMode(name)}><i>{item.icon}</i><span><strong>{name}</strong><small>{item.goal}</small></span><em>{mode===name?"Активен":"Преглед"}</em></button>)}</div>
       <div className="mode-detail">
         <article className="mode-map"><div className="mode-intro"><i>{profile.icon}</i><div><p>ЦЕЛ НА РЕЖИМА</p><h3>{profile.goal}</h3><span>{profile.description}</span></div></div><div className="mode-path"><div><small>ВХОДНИ СИГНАЛИ</small>{profile.inputs.map(x=><span key={x}>{x}</span>)}</div><b>→</b><div className="mode-decision"><small>РЕШЕНИЕ</small><strong>{profile.decision}</strong></div><b>→</b><div><small>ИЗХОД</small><span className="mode-result">{profile.result}</span></div></div><div className="signal-weights">{profile.signals.map((x,i)=><span key={x}><i style={{width:`${[92,76,58,42][i]}%`}}/><b>{x}</b></span>)}</div></article>
-        <article className="mode-settings"><h3>Настройки за „{mode}“</h3>{mode==="Интелигентен хибрид"&&<><ModeRange label="Хоризонт на прогнозата" value={forecastHorizon} unit="ч." min={1} max={24} onChange={setForecastHorizon}/><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><ModeRange label="Целеви SOC преди пик" value={targetSoc} unit="%" min={50} max={100} onChange={setTargetSoc}/></>}{mode==="Ценови арбитраж"&&<><ModeRange label="Зареждай под" value={buy} unit="лв./MWh" min={40} max={180} onChange={setBuy}/><ModeRange label="Продавай над" value={sell} unit="лв./MWh" min={120} max={300} onChange={setSell}/><ModeRange label="Цел след зареждане" value={targetSoc} unit="% SOC" min={50} max={100} onChange={setTargetSoc}/><div className="price-window"><span>Нетен ценови прозорец</span><strong>{sell-buy} лв./MWh</strong></div></>}{mode==="Самоконсумация"&&<><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><ModeRange label="Допустим внос" value={gridImport} unit="kW" min={0} max={200} onChange={setGridImport}/><ModeRange label="Цел след PV заряд" value={targetSoc} unit="% SOC" min={60} max={100} onChange={setTargetSoc}/></>}{mode==="Zero export"&&<><ModeRange label="Допустим износ" value={exportLimit} unit="kW" min={0} max={50} onChange={setExportLimit}/><ModeRange label="Резерв за компенсация" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><div className="setting-choice"><span>При пълна батерия</span><div><button className="active">Ограничи PV</button><button>EV товар</button></div></div></>}{mode==="Peak shaving"&&<><ModeRange label="Целеви товарен пик" value={peakTarget} unit="kW" min={300} max={780} onChange={setPeakTarget}/><ModeRange label="Хоризонт за предзаряд" value={forecastHorizon} unit="ч." min={1} max={12} onChange={setForecastHorizon}/><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={60} onChange={setReserve}/></>}<button className="primary-btn" onClick={()=>notify(`Настройките за „${mode}“ са запазени`)}>Запази този режим</button></article>
+        <article className="mode-settings"><h3>Настройки за „{mode}“</h3>{mode==="Интелигентен хибрид"&&<><ModeRange label="Хоризонт на прогнозата" value={forecastHorizon} unit="ч." min={1} max={72} onChange={setForecastHorizon}/><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><ModeRange label="Целеви SOC преди пик" value={targetSoc} unit="%" min={50} max={100} onChange={setTargetSoc}/></>}{mode==="Ценови арбитраж"&&<><ModeRange label="Зареждай под" value={buy} unit="лв./MWh" min={40} max={180} onChange={setBuy}/><ModeRange label="Продавай над" value={sell} unit="лв./MWh" min={120} max={300} onChange={setSell}/><ModeRange label="Цел след зареждане" value={targetSoc} unit="% SOC" min={50} max={100} onChange={setTargetSoc}/><div className="price-window"><span>Нетен ценови прозорец</span><strong>{sell-buy} лв./MWh</strong></div></>}{mode==="Самоконсумация"&&<><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><ModeRange label="Допустим внос" value={gridImport} unit="kW" min={0} max={200} onChange={setGridImport}/><ModeRange label="Цел след PV заряд" value={targetSoc} unit="% SOC" min={60} max={100} onChange={setTargetSoc}/></>}{mode==="Zero export"&&<><ModeRange label="Допустим износ" value={exportLimit} unit="kW" min={0} max={50} onChange={setExportLimit}/><ModeRange label="Резерв за компенсация" value={reserve} unit="% SOC" min={10} max={50} onChange={setReserve}/><div className="setting-choice"><span>При пълна батерия</span><div><button className="active">Ограничи PV</button><button>EV товар</button></div></div></>}{mode==="Peak shaving"&&<><ModeRange label="Целеви товарен пик" value={peakTarget} unit="kW" min={300} max={780} onChange={setPeakTarget}/><ModeRange label="Хоризонт за предзаряд" value={forecastHorizon} unit="ч." min={1} max={72} onChange={setForecastHorizon}/><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={60} onChange={setReserve}/></>}{mode==="Следване на график"&&<><ModeRange label="Допустимо отклонение" value={scheduleTolerance} unit="kW" min={0} max={100} onChange={setScheduleTolerance}/><ModeRange label="Тежест на небаланса" value={sell} unit="лв./MWh" min={0} max={300} onChange={setSell}/><div className="setting-row"><span>Активен график</span><b>96 × 15 min · v12</b></div></>}{mode==="Резервно захранване"&&<><ModeRange label="Гарантиран резерв" value={targetSoc} unit="% SOC" min={20} max={100} onChange={setTargetSoc}/><ModeRange label="Прогнозен хоризонт" value={forecastHorizon} unit="ч." min={1} max={72} onChange={setForecastHorizon}/><div className="setting-row"><span>Критични товари</span><b>Приоритет 1</b></div></>}{mode==="Ръчно управление"&&<><ModeRange label="Валидност на командата" value={manualTtl} unit="сек." min={5} max={60} onChange={setManualTtl}/><ModeRange label="Минимален резерв" value={reserve} unit="% SOC" min={10} max={60} onChange={setReserve}/><div className="setting-row"><span>Изисквана роля</span><b>Energy manager</b></div></>}<button className="primary-btn" onClick={()=>notify(`Създадена е чернова за „${mode}“. Нужни са проверка, симулация и активиране.`)}>Запази като чернова</button></article>
       </div>
     </section>
     <ModeCostAccounting mode={mode} lang={lang} settings={batteryCost}/>

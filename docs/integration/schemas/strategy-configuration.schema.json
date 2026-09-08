@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridex.tech/schemas/api/v1/strategy-configuration.schema.json",
+  "title": "GrideX site strategy configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "code", "enabled", "timezone", "control", "battery", "grid", "forecast", "economics"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "code": {
+      "enum": [
+        "intelligent_hybrid",
+        "price_arbitrage",
+        "self_consumption",
+        "zero_export",
+        "peak_shaving",
+        "schedule_following",
+        "backup_reserve",
+        "manual"
+      ]
+    },
+    "enabled": { "type": "boolean" },
+    "timezone": { "type": "string", "minLength": 1 },
+    "validFrom": { "type": "string", "format": "date-time" },
+    "validTo": { "type": "string", "format": "date-time" },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intervalSeconds", "reoptimiseEveryMinutes", "fallbackMode"],
+      "properties": {
+        "intervalSeconds": { "type": "integer", "minimum": 1, "maximum": 900 },
+        "reoptimiseEveryMinutes": { "type": "integer", "minimum": 1, "maximum": 1440 },
+        "fallbackMode": { "enum": ["safe_idle", "self_consumption", "schedule_following"] },
+        "rampRateKwPerMinute": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "battery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumSocPct", "maximumSocPct", "emergencyReserveSocPct", "allowGridCharge", "allowGridDischarge"],
+      "properties": {
+        "minimumSocPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "maximumSocPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "emergencyReserveSocPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "targetSocPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "maximumChargeKw": { "type": "number", "minimum": 0 },
+        "maximumDischargeKw": { "type": "number", "minimum": 0 },
+        "allowGridCharge": { "type": "boolean" },
+        "allowGridDischarge": { "type": "boolean" }
+      }
+    },
+    "grid": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["importLimitKw", "exportLimitKw", "softwareFuseMarginKw"],
+      "properties": {
+        "importLimitKw": { "type": "number", "minimum": 0 },
+        "exportLimitKw": { "type": "number", "minimum": 0 },
+        "softwareFuseMarginKw": { "type": "number", "minimum": 0 },
+        "zeroExportToleranceKw": { "type": "number", "minimum": 0 }
+      }
+    },
+    "forecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["horizonHours", "minimumConfidencePct", "maximumAgeMinutes", "useWeather", "usePv", "useLoad", "usePrice", "useImbalance", "useErpLoad"],
+      "properties": {
+        "horizonHours": { "type": "integer", "minimum": 1, "maximum": 168 },
+        "minimumConfidencePct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "maximumAgeMinutes": { "type": "integer", "minimum": 1, "maximum": 1440 },
+        "useWeather": { "type": "boolean" },
+        "usePv": { "type": "boolean" },
+        "useLoad": { "type": "boolean" },
+        "usePrice": { "type": "boolean" },
+        "useImbalance": { "type": "boolean" },
+        "useErpLoad": { "type": "boolean" },
+        "lowSolarTomorrowThresholdPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "lowSolarReserveSocPct": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "market": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["marketCode", "tariffConfigurationId"],
+      "properties": {
+        "marketCode": { "type": "string" },
+        "buyBelowPerMwh": { "type": "number" },
+        "sellAbovePerMwh": { "type": "number" },
+        "minimumNetSpreadPerMwh": { "type": "number", "minimum": 0 },
+        "stopExportBelowPerMwh": { "type": "number" },
+        "minimumNetProfitPerDay": { "type": "number", "minimum": 0 },
+        "tariffConfigurationId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "peakShaving": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["targetPeakKw", "warningMarginKw", "prechargeHorizonHours", "recoveryHysteresisKw"],
+      "properties": {
+        "targetPeakKw": { "type": "number", "minimum": 0 },
+        "warningMarginKw": { "type": "number", "minimum": 0 },
+        "prechargeHorizonHours": { "type": "integer", "minimum": 1, "maximum": 72 },
+        "recoveryHysteresisKw": { "type": "number", "minimum": 0 }
+      }
+    },
+    "selfConsumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maximumGridImportKw", "pvSurplusPriority"],
+      "properties": {
+        "maximumGridImportKw": { "type": "number", "minimum": 0 },
+        "pvSurplusPriority": { "enum": ["battery", "flexible_loads", "export", "curtailment"] }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scheduleId", "adherenceWeightPerMwh", "deviationToleranceKw"],
+      "properties": {
+        "scheduleId": { "type": "string", "minLength": 1 },
+        "adherenceWeightPerMwh": { "type": "number", "minimum": 0 },
+        "deviationToleranceKw": { "type": "number", "minimum": 0 }
+      }
+    },
+    "flexibleLoads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assetId", "priority", "minimumKw", "maximumKw"],
+        "properties": {
+          "assetId": { "type": "string", "minLength": 1 },
+          "priority": { "type": "integer", "minimum": 1, "maximum": 100 },
+          "minimumKw": { "type": "number", "minimum": 0 },
+          "maximumKw": { "type": "number", "minimum": 0 },
+          "energyTargetKwh": { "type": "number", "minimum": 0 },
+          "deadline": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "economics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["includeBatteryDegradation"],
+      "properties": {
+        "includeBatteryDegradation": { "type": "boolean" },
+        "batteryAssetConfigurationId": { "type": "string" },
+        "minimumMarginAfterDegradationPerMwh": { "type": "number", "minimum": 0 }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "code": { "const": "price_arbitrage" } } },
+      "then": { "required": ["market"] }
+    },
+    {
+      "if": { "properties": { "code": { "const": "peak_shaving" } } },
+      "then": { "required": ["peakShaving"] }
+    },
+    {
+      "if": { "properties": { "code": { "const": "schedule_following" } } },
+      "then": { "required": ["schedule"] }
+    }
+  ]
+}

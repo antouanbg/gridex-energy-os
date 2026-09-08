@@ -71,12 +71,19 @@ The browser must never receive OpenRemote service-user secrets, MQTT credentials
 | `POST /api/v1/sites/{siteId}/commands/power` | bearer + role | Atomic requested-power command. |
 | `GET /api/v1/sites/{siteId}/history` | bearer | Historical values for charts and reports. |
 | `GET /api/v1/sites/{siteId}/forecast` | bearer | Weather, PV, load, price and economic forecast horizon. |
+| `GET /api/v1/strategies/catalog` | bearer | Modes enabled by role, subscription and site capabilities. |
+| `GET /api/v1/sites/{siteId}/strategy` | bearer | Current versioned site strategy. |
+| `POST/PUT /api/v1/sites/{siteId}/strategy/drafts...` | bearer + role + revision | Create and edit a strategy draft without changing live operation. |
+| `POST .../validate`, `POST .../simulate` | bearer + role | Validate and forecast profit, cost, cycles and violations. |
+| `POST .../activate` | energy-manager role + idempotency key | Request audited activation in OpenRemote. |
+| `GET /api/v1/sites/{siteId}/strategy/status` | bearer | Desired versus actually applied OpenRemote revision. |
+| `GET/PUT /api/v1/me/preferences` | bearer + revision | Personal display and notification preferences only. |
 | `GET /api/v1/sites/{siteId}/alarms` | bearer | Current and historical alarms. |
 | `POST /api/v1/sites/{siteId}/alarms/{alarmId}/acknowledge` | bearer + role | Audited acknowledgement. |
 | `PUT /api/v1/sites/{siteId}/configurations/{section}` | bearer + role + revision | Versioned settings and operating modes. |
 | `GET /api/v1/sites/{siteId}/events` | bearer | Authenticated SSE stream; polling remains the fallback. |
 
-The machine-readable baseline is in [`frontend-backend-contract.yaml`](frontend-backend-contract.yaml).
+The machine-readable contract is in [`frontend-backend-contract.yaml`](frontend-backend-contract.yaml). Strategy ownership, lifecycle and every parameter group are defined in [`STRATEGY_AND_SETTINGS_CONTRACT.md`](STRATEGY_AND_SETTINGS_CONTRACT.md).
 
 ### 6. Canonical snapshot fields
 
@@ -126,6 +133,8 @@ Before a screen may be marked fully live, the backend must implement:
 - command history and audit trail;
 - optimistic concurrency through `ETag`/`If-Match` or an explicit `revision` field.
 
+Strategy configuration is no longer handled by the generic configuration endpoint. It uses a dedicated draft -> validation -> simulation -> activation lifecycle. A site strategy is shared operational state; only language, visual layout and notification choices belong to an individual user.
+
 ### 9. Error contract
 
 All errors use a stable body:
@@ -149,9 +158,10 @@ Expected statuses: `400` validation, `401` missing/expired session, `403` role/s
 4. Verify login, logout, refresh, key rollover, revoked sessions and tenant isolation.
 5. Enable read-only live mode and compare dashboard values with OpenRemote.
 6. Add authenticated events with polling/reconnect fallback.
-7. Implement history, forecasts, alarms, incidents, tariffs and configurations.
-8. Keep `GRIDEX_WRITES_ENABLED=false`; validate every safety layer and command audit.
-9. Enable commands per site and role only after commissioning acceptance tests pass.
+7. Implement history, forecasts, alarms, incidents, tariffs and personal preferences.
+8. Implement the dedicated strategy catalogue, drafts, validation, simulation, activation and applied-revision status.
+9. Keep `GRIDEX_WRITES_ENABLED=false`; validate every safety layer and command audit.
+10. Enable strategy activation and commands per site and role only after commissioning acceptance tests pass.
 
 ### 11. Frontend acceptance criteria
 
@@ -214,7 +224,9 @@ ROCK Pi E / устройствата на обекта
 
 ### 5. Данни и променливи
 
-Реализираният frontend client има договори за health, текущ потребител, разрешени обекти, snapshot, history, 72-часова forecast, аларми, acknowledge, конфигурации с revision, атомарна power команда и удостоверен SSE поток. Точните HTTP пътища са в английската таблица и в [`frontend-backend-contract.yaml`](frontend-backend-contract.yaml).
+Реализираният frontend client има договори за health, текущ потребител, лични preferences, разрешени обекти, snapshot, history, 72-часова forecast, аларми, acknowledge, атомарна power команда, удостоверен SSE поток и пълния lifecycle на стратегията. Точните HTTP пътища са в английската таблица и в [`frontend-backend-contract.yaml`](frontend-backend-contract.yaml).
+
+Стратегията е обща версияна конфигурация за обекта, не лична настройка. Променя се чрез чернова, проверка, симулация и одобрено активиране. Едва когато OpenRemote върне `appliedRevision == desiredRevision`, frontend-ът я показва като активна. Пълният договор е в [`STRATEGY_AND_SETTINGS_CONTRACT.md`](STRATEGY_AND_SETTINGS_CONTRACT.md).
 
 Основната snapshot полярност е:
 
@@ -231,9 +243,10 @@ ROCK Pi E / устройствата на обекта
 4. Тестове на login/logout/refresh, key rollover, revoke и tenant isolation.
 5. Включване на read-only live режим и сравнение с OpenRemote.
 6. Добавяне на удостоверен event stream с polling/reconnect fallback.
-7. Свързване на history, forecasts, alarms, incidents, tariffs и configurations.
-8. Запазване на `GRIDEX_WRITES_ENABLED=false` до приключване на commissioning тестовете.
-9. Разрешаване на команди по обект и роля само след приемане на всички safety тестове.
+7. Свързване на history, forecasts, alarms, incidents, tariffs и лични preferences.
+8. Реализиране на strategy catalog, чернови, проверка, симулация, активиране и applied status.
+9. Запазване на `GRIDEX_WRITES_ENABLED=false` до приключване на commissioning тестовете.
+10. Разрешаване на стратегии и команди по обект и роля само след приемане на всички safety тестове.
 
 ### 7. Критерии за приемане
 

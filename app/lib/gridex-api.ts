@@ -1,3 +1,13 @@
+import type {
+  GridexStrategyCatalogItem,
+  GridexStrategyConfiguration,
+  GridexStrategyDraft,
+  GridexStrategyEnvelope,
+  GridexStrategySimulation,
+  GridexStrategyStatus,
+  GridexUserPreferences,
+} from "./gridex-contracts";
+
 export type GridexRuntimeMode = "auto" | "demo" | "live";
 
 export type GridexRuntimeConfig = {
@@ -54,7 +64,11 @@ export type GridexSiteSnapshot = {
   };
   strategy?: {
     mode?: string;
+    code?: GridexStrategyConfiguration["code"];
     targetSocPct?: number;
+    desiredRevision?: number;
+    appliedRevision?: number;
+    lifecycle?: GridexStrategyStatus["lifecycle"];
   };
 };
 
@@ -131,6 +145,14 @@ export class GridexApiClient {
     return this.getJson<GridexUser>("/api/v1/me", signal);
   }
 
+  async userPreferences(signal?: AbortSignal): Promise<GridexUserPreferences> {
+    return this.getJson<GridexUserPreferences>("/api/v1/me/preferences", signal);
+  }
+
+  async updateUserPreferences(preferences: GridexUserPreferences): Promise<GridexUserPreferences> {
+    return this.putJson<GridexUserPreferences>("/api/v1/me/preferences", preferences, preferences.revision);
+  }
+
   async sites(signal?: AbortSignal): Promise<GridexSite[]> {
     const payload = await this.getJson<{ sites?: GridexSite[]; items?: GridexSite[] }>("/api/v1/sites", signal);
     return payload.sites ?? payload.items ?? [];
@@ -180,6 +202,82 @@ export class GridexApiClient {
     return this.getJson<GridexForecastPoint[]>(`/api/v1/sites/${encodeURIComponent(siteId)}/forecast?horizonHours=${horizonHours}`, signal);
   }
 
+  async strategyCatalog(signal?: AbortSignal): Promise<GridexStrategyCatalogItem[]> {
+    const payload = await this.getJson<{ items: GridexStrategyCatalogItem[] }>("/api/v1/strategies/catalog", signal);
+    return payload.items;
+  }
+
+  async strategy(siteId: string, signal?: AbortSignal): Promise<GridexStrategyEnvelope> {
+    return this.getJson<GridexStrategyEnvelope>(`/api/v1/sites/${encodeURIComponent(siteId)}/strategy`, signal);
+  }
+
+  async createStrategyDraft(
+    siteId: string,
+    configuration: GridexStrategyConfiguration,
+    baseRevision: number,
+  ): Promise<GridexStrategyDraft> {
+    return this.postJson<GridexStrategyDraft>(`/api/v1/sites/${encodeURIComponent(siteId)}/strategy/drafts`, {
+      baseRevision,
+      configuration,
+    });
+  }
+
+  async updateStrategyDraft(
+    siteId: string,
+    draftId: string,
+    configuration: GridexStrategyConfiguration,
+    revision: number,
+  ): Promise<GridexStrategyDraft> {
+    return this.putJson<GridexStrategyDraft>(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/strategy/drafts/${encodeURIComponent(draftId)}`,
+      { configuration },
+      revision,
+    );
+  }
+
+  async validateStrategyDraft(siteId: string, draftId: string): Promise<GridexStrategyDraft["validation"]> {
+    return this.postJson<GridexStrategyDraft["validation"]>(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/strategy/drafts/${encodeURIComponent(draftId)}/validate`,
+      {},
+    );
+  }
+
+  async simulateStrategyDraft(
+    siteId: string,
+    draftId: string,
+    input: { horizonFrom: string; horizonTo: string },
+  ): Promise<GridexStrategySimulation> {
+    return this.postJson<GridexStrategySimulation>(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/strategy/drafts/${encodeURIComponent(draftId)}/simulate`,
+      input,
+    );
+  }
+
+  async activateStrategyDraft(
+    siteId: string,
+    draftId: string,
+    input: { expectedDraftRevision: number; simulationId: string; approvalReason?: string },
+    idempotencyKey: string,
+  ): Promise<GridexStrategyStatus> {
+    return this.postJson<GridexStrategyStatus>(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/strategy/drafts/${encodeURIComponent(draftId)}/activate`,
+      input,
+      { "Idempotency-Key": idempotencyKey },
+    );
+  }
+
+  async strategyStatus(siteId: string, signal?: AbortSignal): Promise<GridexStrategyStatus> {
+    return this.getJson<GridexStrategyStatus>(`/api/v1/sites/${encodeURIComponent(siteId)}/strategy/status`, signal);
+  }
+
+  async strategyVersions(siteId: string, signal?: AbortSignal): Promise<GridexStrategyEnvelope[]> {
+    const payload = await this.getJson<{ items: GridexStrategyEnvelope[] }>(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/strategy/versions`,
+      signal,
+    );
+    return payload.items;
+  }
+
   async alarms(siteId: string, signal?: AbortSignal): Promise<GridexAlarm[]> {
     return this.getJson<GridexAlarm[]>(`/api/v1/sites/${encodeURIComponent(siteId)}/alarms`, signal);
   }
@@ -203,6 +301,13 @@ export class GridexApiClient {
     );
     if (!response.ok) throw new GridexApiError(`GridEx configuration update failed: ${response.status}`, response.status);
     return response.json();
+  }
+
+  async configuration<T>(siteId: string, section: string, signal?: AbortSignal): Promise<{ revision: number; configuration: T }> {
+    return this.getJson<{ revision: number; configuration: T }>(
+      `/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${encodeURIComponent(section)}`,
+      signal,
+    );
   }
 
   async subscribeSiteEvents(
@@ -233,6 +338,26 @@ export class GridexApiClient {
 
   private async getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
     const response = await this.authorizedFetch(path, { signal, cache: "no-store" });
+    if (!response.ok) throw new GridexApiError(`GridEx API request failed: ${response.status}`, response.status);
+    return response.json();
+  }
+
+  private async postJson<T>(path: string, body: unknown, extraHeaders?: Record<string, string>): Promise<T> {
+    const response = await this.authorizedFetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...extraHeaders },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new GridexApiError(`GridEx API request failed: ${response.status}`, response.status);
+    return response.json();
+  }
+
+  private async putJson<T>(path: string, body: unknown, revision: number): Promise<T> {
+    const response = await this.authorizedFetch(path, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "If-Match": String(revision) },
+      body: JSON.stringify(body),
+    });
     if (!response.ok) throw new GridexApiError(`GridEx API request failed: ${response.status}`, response.status);
     return response.json();
   }
