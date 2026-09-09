@@ -93,7 +93,9 @@ export default function Home() {
   const [period, setPeriod] = useState("Днес");
   const [site, setSite] = useState("Solar Park East");
   const [role, setRole] = useState("Администратор");
-  const [lang,setLang] = useState<"bg"|"en">("bg");
+  const [lang,setLang] = useState<"bg"|"en">(
+    () => typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "bg",
+  );
   const tKey = useT(lang);
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [demoNoticeVisible,setDemoNoticeVisible] = useState(true);
