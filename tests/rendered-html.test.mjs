@@ -118,14 +118,15 @@ test("provides a one-device-per-gateway hardware configurator", async () => {
 });
 
 test("publishes a traceable supported-device catalogue", async () => {
-  const [page, catalogue, css] = await Promise.all([
+  const [page, catalogue, css, messages] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data/supported-devices.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/i18n/messages.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(page, /function SupportedDevices/);
-  assert.match(page, /Supported devices/);
+  assert.match(messages, /"nav\.supported":"Supported devices"/);
   assert.match(page, /GROUP-CONTROL READINESS/);
   assert.match(catalogue, /gridex-suntech-ste261l/);
   assert.match(catalogue, /manufacturer-confirmed/);
