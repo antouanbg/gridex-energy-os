@@ -2248,7 +2248,7 @@ function ConfirmedProtocolMaps({lang}:{lang:UiLanguage}) {
   </article>;
 }
 
-function SupportedEdgeHardware({lang,notify}:{lang:UiLanguage;notify:(v:string)=>void}) {
+function SupportedEdgeHardware({lang}:{lang:UiLanguage}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const hardware=[
     {kind:t("УПРАВЛЯВАЩ МОДУЛ","CONTROL MODULE"),icon:"R",name:"Radxa ROCK Pi E",status:t("Основен контролер","Primary controller"),summary:t("Linux мозъкът на Edge решението с отделени OT и WAN мрежи.","The Linux brain of the Edge solution with separated OT and WAN networks."),features:["RK3328 · 4-core ARM",t("2× Gigabit Ethernet: OT + WAN/VPN","2× Gigabit Ethernet: OT + WAN/VPN"),t("Polling, normalization, safety и локален buffer","Polling, normalization, safety and local buffer"),"MQTT/TLS · HTTPS · Modbus TCP"]},
@@ -2258,7 +2258,7 @@ function SupportedEdgeHardware({lang,notify}:{lang:UiLanguage;notify:(v:string)=
   return <article className="card edge-hardware-suite" data-no-translate><div className="edge-hardware-title"><div><p>{t("ПОДДЪРЖАНО ЦЯЛОСТНО РЕШЕНИЕ","SUPPORTED END-TO-END SOLUTION")}</p><h2>{t("Две хардуерни роли в GrideX Edge","Two hardware roles in GrideX Edge")}</h2><span>{t("ROCK Pi E управлява и прилага safety; всеки OLIMEX ESP32-EVB нод държи конкретния CAN или RS485 драйвер за един продукт.","ROCK Pi E controls and applies safety; every OLIMEX ESP32-EVB node holds the dedicated CAN or RS485 driver for one product.")}</span></div><div className="hardware-role-flow"><b>ROCK Pi E</b><i>↔</i><b>OT Ethernet</b><i>↔</i><b>OLIMEX node</b></div></div><div className="edge-hardware-cards">{hardware.map(item=><section key={item.name}><header><i>{item.icon}</i><span><small>{item.kind}</small><strong>{item.name}</strong></span><em>{item.status}</em></header><p>{item.summary}</p><ul>{item.features.map(feature=><li key={feature}>✓ {feature}</li>)}</ul></section>)}</div><button className="primary-btn edge-hardware-action" onClick={()=>notify(t("Цялостният Edge хардуерен профил е избран","The complete Edge hardware profile is selected"))}>{t("Избери цялостното решение","Select the complete solution")}</button></article>;
 }
 
-function WaveshareTransport({mode,lang,notify}:{mode:"path"|"spec";lang:UiLanguage;notify:(v:string)=>void}) {
+function WaveshareTransport({mode,lang}:{mode:"path"|"spec";lang:UiLanguage}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   if(mode==="path") return <article className="card waveshare-path" data-no-translate>
     <div className="waveshare-path-head"><div><p>{t("УСТРОЙСТВЕН EDGE НОД","DEVICE EDGE NODE")}</p><h2>OLIMEX ESP32-EVB-EA-IND</h2><span>{t("Един Ethernet ESP32 нод за един продукт: CAN или външен изолиран RS485 към устройството; Modbus TCP към ROCK Pi E.","One Ethernet ESP32 node per product: CAN or externally isolated RS485 to the device; Modbus TCP to ROCK Pi E.")}</span></div><a href="https://github.com/OLIMEX/ESP32-EVB" target="_blank" rel="noreferrer">OLIMEX ↗</a></div>

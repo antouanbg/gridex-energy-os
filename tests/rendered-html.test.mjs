@@ -59,6 +59,9 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(css, /\.header-actions select\s*\{\s*display:none!important;/);
   assert.match(css, /\.content small,\.content em\s*\{\s*font-size:12px!important;/);
   assert.match(css, /\.sidebar nav button span,\.mobile-menu-toggle span\s*\{\s*font-size:12px;/);
+  assert.match(css, /Mobile readability and overlap guard/);
+  assert.match(css, /\.content small,\.content em\s*\{\s*font-size:13px!important;/);
+  assert.match(css, /@media\(max-width:420px\)\{[\s\S]*\.energy-flow-map\s*\{\s*grid-template-columns:1fr;/);
 });
 
 test("keeps mobile reports within the viewport and scrolls wide data internally", async () => {
