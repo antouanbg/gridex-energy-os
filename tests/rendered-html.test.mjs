@@ -62,7 +62,8 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(css, /Mobile readability and overlap guard/);
   assert.match(css, /\.content small,\.content em\s*\{\s*font-size:13px!important;/);
   assert.match(css, /@media\(max-width:420px\)\{[\s\S]*\.energy-flow-map\s*\{\s*grid-template-columns:1fr;/);
-  assert.match(css, /@media\(max-width:480px\)\{[\s\S]*\.energy-flow-map\s*\{\s*grid-template-columns:minmax\(0,1fr\);/);
+  assert.match(css, /Real phones can report a CSS width above 480px/);
+  assert.match(css, /@media\(max-width:680px\)\{[\s\S]*\.energy-flow-map\s*\{\s*grid-template-columns:minmax\(0,1fr\);/);
   assert.match(css, /@media\(max-width:480px\)\{[\s\S]*\.energy-asset span>strong\s*\{\s*font-size:22px;\s*white-space:normal;/);
 });
 
