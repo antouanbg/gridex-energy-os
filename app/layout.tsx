@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://technosun-energy-os.novacom-grou-6812.chatgpt.site"),
+  metadataBase: new URL("https://gridex.tech"),
   title: "GrideX Energy OS",
   description: "Интелигентна EMS платформа за енергийни обекти, батерии, пазари и SCADA управление.",
   openGraph: {

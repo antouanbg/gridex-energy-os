@@ -39,6 +39,12 @@ test("server-renders the GrideX Energy OS interface", async () => {
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
+test("uses the public GrideX domain for generated metadata", async () => {
+  const layout = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
+  assert.match(layout, /metadataBase: new URL\("https:\/\/gridex\.tech"\)/);
+  assert.doesNotMatch(layout, /technosun-energy-os\.novacom-grou-6812\.chatgpt\.site/);
+});
+
 test("keeps typography readable and mobile navigation inside the viewport", async () => {
   const [page, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
