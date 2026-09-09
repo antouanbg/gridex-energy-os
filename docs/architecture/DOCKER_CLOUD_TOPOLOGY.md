@@ -1,52 +1,43 @@
-# GrideX Docker cloud topology
+# GrideX backend and site VPN topology / GrideX backend и site VPN топология
 
-## Public and private boundaries
+## English
 
 ```text
-Browser
-  ├─ https://gridex.tech          GitHub Pages static frontend
-  ├─ https://ems.gridex.tech/auth Keycloak OIDC login
-  └─ https://api.gridex.tech      GrideX API (Bearer access token)
-
-ROCK Pi E / Edge nodes
-  └─ mqtts://ems.gridex.tech:8883 OpenRemote MQTT API
-
-Private Docker network
-  ├─ GrideX API
-  │   ├─ GrideX PostgreSQL
-  │   └─ OpenRemote HTTP API
-  ├─ OpenRemote Manager / MQTT
-  ├─ OpenRemote Keycloak
-  └─ OpenRemote PostgreSQL
+Browser ── HTTPS ──> GrideX static frontend ── HTTPS/OIDC ──> Windows 11 backend
+                                                              ├─ GrideX API
+                                                              ├─ OpenRemote + Keycloak
+                                                              ├─ PostgreSQL services
+                                                              └─ WireGuard hub
+                                                                     │
+                                        per-site WireGuard peer ─────┼───── per-site WireGuard peer
+                                                                     │
+                                                              Site Router 01        Site Router 02
+                                                              ├─ CONTROL LAN         ├─ CONTROL LAN
+                                                              └─ TELEMETRY LAN       └─ TELEMETRY LAN
+                                                                  └─ ROCK Pi / ESP / OT devices
 ```
 
-GitHub Pages serves only versioned HTML, CSS and JavaScript. It contains no
-database credentials, OpenRemote service secret, MQTT credentials or server
-logic. Login uses the OIDC Authorization Code flow with PKCE. The browser sends
-the resulting short-lived access token only to the GrideX API.
+The Windows 11 backend and each Site Router are the only WireGuard endpoints.
+ROCK Pi, ESP/OLIMEX nodes and OT devices do not have WireGuard clients. Each
+site has independent peer keys and configuration; sites cannot route to one
+another. Modbus and MQTT traffic to a site uses the private tunnel through its
+router. The OT/BESS LAN is never directly exposed to the backend or Internet.
 
-## Why two PostgreSQL services
+Docker hosts OpenRemote, Keycloak, GrideX API and separate supported PostgreSQL
+services. The browser receives only the API/OIDC endpoints and never receives
+service credentials, MQTT credentials, device routes, VPN data or Modbus maps.
+Public MQTT port 8883 is not part of the VPN-only architecture.
 
-The OpenRemote stack is kept on its supported PostgreSQL image and lifecycle.
-GrideX uses a separate official PostgreSQL container for organisations, sites,
-configuration revisions, tariffs, incidents, notifications and audit records.
-This prevents an OpenRemote upgrade from coupling its internal schema to the
-GrideX business schema and allows independent backups and recovery.
+## Български
 
-## MQTT decision
+Windows 11 backend-ът и Site Router на всеки обект са единствените WireGuard
+крайни точки. ROCK Pi, ESP/OLIMEX нодовете и OT устройствата не използват
+WireGuard. Всеки обект има самостоятелен peer, ключове и конфигурация; няма
+маршрутизация между обектите. Modbus и MQTT комуникацията преминава през
+частния тунел и Site Router-а. OT/BESS мрежата не се публикува директно към
+backend-а или интернет.
 
-OpenRemote Manager already functions as the MQTT broker/API and exposes MQTTS
-on port 8883. The first deployment therefore does not add a second broker.
-Every edge gateway receives a restricted service user and unique client ID.
-Plain MQTT port 1883 is not exposed publicly.
-
-## Production requirements
-
-- expose only 80/443 and MQTTS 8883; never publish PostgreSQL 5432;
-- route `api.gridex.tech` to the localhost-only GrideX API through TLS;
-- allow CORS only from `https://gridex.tech` and `https://www.gridex.tech`;
-- register those same origins and redirect URIs in the Keycloak public client;
-- keep service-account credentials and database passwords outside Git;
-- pin tested container versions instead of deploying moving `latest` tags;
-- back up both PostgreSQL volumes independently and test restore procedures;
-- keep Edge safety and heartbeat local even when every cloud service is down.
+Docker услугите включват OpenRemote, Keycloak, GrideX API и отделни
+PostgreSQL услуги. Браузърът получава единствено API/OIDC адресите — никога
+service credentials, MQTT данни, маршрути до устройства, VPN данни или Modbus
+карти. Public MQTT порт 8883 не е част от VPN-only архитектурата.

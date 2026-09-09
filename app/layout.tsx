@@ -17,16 +17,20 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://gridex.tech"),
   title: "GrideX Energy OS",
   description: "Интелигентна EMS платформа за енергийни обекти, батерии, пазари и SCADA управление.",
+  alternates: {
+    canonical: "/",
+    languages: { bg: "/", en: "/en/" },
+  },
   openGraph: {
     title: "GrideX Energy OS",
     description: "Smart control for every watt",
-    images: [{ url: "/og.png", width: 1672, height: 941, alt: "GrideX Energy OS" }],
+    images: [{ url: "/og.jpg", width: 1672, height: 941, alt: "GrideX Energy OS" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "GrideX Energy OS",
     description: "Smart control for every watt",
-    images: ["/og.png"],
+    images: ["/og.jpg"],
   },
 };
 
