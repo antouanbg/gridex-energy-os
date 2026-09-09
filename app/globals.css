@@ -472,6 +472,14 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .energy-flow-hub { min-height:136px; margin:4px 0; }
 }
 
+/* Must remain after the desktop catalogue extension: each statistic gets a
+   bounded grid track so the device page cannot widen the whole phone viewport. */
+@media(max-width:680px){
+  .supported-devices-hero-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .supported-devices-hero-stats>span { min-width:0; overflow-wrap:anywhere; }
+  .supported-devices-hero-stats>span:last-child { grid-column:1/-1; }
+}
+
 /* Mobile readability and overlap guard: keep the desktop visual language, with
    larger touch targets and a simpler flow map on narrow screens. */
 @media(max-width:680px){

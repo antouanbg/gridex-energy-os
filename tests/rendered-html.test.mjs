@@ -49,6 +49,8 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(page, /mobile-menu-toggle/);
   assert.match(page, /mobile-nav-scrim/);
   assert.match(page, /mobilePrimaryNav/);
+  assert.doesNotMatch(page, /MutationObserver/);
+  assert.match(page, /document\.documentElement\.lang = lang/);
 
   assert.match(css, /body\s*\{[^}]*font-size:16px;[^}]*line-height:1\.45;/);
   assert.doesNotMatch(css, /font-size:(?:[1-9]|10)px/);
@@ -65,6 +67,7 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(css, /Real phones can report a CSS width above 480px/);
   assert.match(css, /@media\(max-width:680px\)\{[\s\S]*\.energy-flow-map\s*\{\s*grid-template-columns:minmax\(0,1fr\);/);
   assert.match(css, /@media\(max-width:480px\)\{[\s\S]*\.energy-asset span>strong\s*\{\s*font-size:22px;\s*white-space:normal;/);
+  assert.match(css, /supported-devices-hero-stats\s*\{\s*grid-template-columns:repeat\(2,minmax\(0,1fr\)\);/);
 });
 
 test("keeps mobile reports within the viewport and scrolls wide data internally", async () => {

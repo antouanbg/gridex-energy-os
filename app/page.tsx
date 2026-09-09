@@ -925,87 +925,12 @@ const englishPhrases: [string, string][] = [
   ["ч.", "h"],
 ];
 
-const sortedEnglishPhrases = [...englishPhrases].sort(([left], [right]) => right.length - left.length);
-
-const originalText = new WeakMap<Text, string>();
-const originalAttributes = new WeakMap<Element, Map<string, string>>();
-
-function translateText(value: string) {
-  return sortedEnglishPhrases.reduce((result, [bg, en]) => {
-    const escaped = bg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return result.replace(new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "gu"), en);
-  }, value);
-}
-
 function usePageLanguage(lang: UiLanguage) {
   useEffect(() => {
-    const root = document.querySelector<HTMLElement>(".app-shell");
-    if (!root) return;
     document.documentElement.lang = lang;
-
-    const translateNode = (node: Text) => {
-      if (node.parentElement?.closest("[data-no-translate]")) return;
-      const current = node.nodeValue ?? "";
-      let source = originalText.get(node);
-      if (source === undefined) {
-        source = current;
-        originalText.set(node, source);
-      } else if (lang === "en" && /[А-Яа-я]/.test(current) && current !== translateText(source)) {
-        source = current;
-        originalText.set(node, source);
-      }
-      const next = lang === "en" ? translateText(source) : source;
-      if (current !== next) node.nodeValue = next;
-    };
-
-    const translateElement = (element: Element) => {
-      if (element.closest("[data-no-translate]")) return;
-      const names = ["aria-label", "placeholder", "title"];
-      let sources = originalAttributes.get(element);
-      if (!sources) {
-        sources = new Map<string, string>();
-        originalAttributes.set(element, sources);
-      }
-      names.forEach((name) => {
-        const current = element.getAttribute(name);
-        if (current === null) return;
-        let source = sources!.get(name);
-        if (source === undefined || (lang === "en" && /[А-Яа-я]/.test(current) && current !== translateText(source))) {
-          source = current;
-          sources!.set(name, source);
-        }
-        const next = lang === "en" ? translateText(source) : source;
-        if (current !== next) element.setAttribute(name, next);
-      });
-    };
-
-    const translateTree = (target: Node) => {
-      if (target.nodeType === Node.TEXT_NODE) {
-        translateNode(target as Text);
-        return;
-      }
-      if (target.nodeType === Node.ELEMENT_NODE) {
-        translateElement(target as Element);
-        (target as Element).querySelectorAll("[aria-label], [placeholder], [title]").forEach(translateElement);
-      }
-      const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
-      let node = walker.nextNode();
-      while (node) {
-        translateNode(node as Text);
-        node = walker.nextNode();
-      }
-    };
-
-    translateTree(root);
-    const observer = new MutationObserver((records) => {
-      records.forEach((record) => {
-        if (record.type === "characterData") translateNode(record.target as Text);
-        if (record.type === "attributes") translateElement(record.target as Element);
-        record.addedNodes.forEach(translateTree);
-      });
-    });
-    observer.observe(root, { childList: true, characterData: true, attributes: true, attributeFilter: ["aria-label", "placeholder", "title"], subtree: true });
-    return () => observer.disconnect();
+    // Kept temporarily as source material while JSX literals are migrated to
+    // typed message keys. It is never used to mutate the rendered DOM.
+    void englishPhrases;
   }, [lang]);
 }
 
@@ -1036,6 +961,8 @@ export default function Home() {
   const [selectedSiteId,setSelectedSiteId] = useState(runtimeConfig.defaultSiteId);
   const [liveSnapshot,setLiveSnapshot] = useState<GridexSiteSnapshot|null>(null);
   const dataMode:DataMode = backendState === "online" && authState === "authenticated" ? "live" : "demo";
+  // Text is selected by React during render. Do not mutate rendered text nodes:
+  // doing so can overwrite fresh telemetry and form values after an update.
   usePageLanguage(lang);
 
   useEffect(() => {
@@ -1202,7 +1129,7 @@ export default function Home() {
         <button className="mobile-menu-toggle" data-no-translate aria-controls="main-navigation" aria-expanded={mobileNavOpen} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
-        <div className="gateway"><span className="live-dot"/><div><strong>Edge Gateway</strong><small>Онлайн · преди 8 сек.</small></div></div>
+          <div className="gateway"><span className="live-dot"/><div><strong>{lang==="en"?"Edge gateway":"Edge шлюз"}</strong><small>{lang==="en"?"Online · 8 sec ago":"Онлайн · преди 8 сек."}</small></div></div>
         <div className="profile-wrap" data-no-translate>
           <button className={`profile ${accountMenuOpen?"open":""}`} onClick={()=>setAccountMenuOpen(!accountMenuOpen)} aria-haspopup="menu" aria-expanded={accountMenuOpen}>
             <span>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</span>
@@ -1247,7 +1174,7 @@ export default function Home() {
         {dataMode==="demo"&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
           <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"The backend connection is unavailable. Sign-in will become active automatically after the service recovers.":"Няма връзка с backend-а. Входът ще стане активен автоматично след възстановяване на услугата."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
-          <button onClick={()=>navigate("login")}>{lang==="en"?"Sign in":"Логване"} →</button>
+          <button onClick={()=>navigate("login")}>{lang==="en"?"Sign in":"Вход"} →</button>
         </section>}
 
         {integrationError&&dataMode==="live"&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
