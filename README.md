@@ -44,9 +44,10 @@ The production concept separates strategy from safety:
 The production cloud runs as Docker services. OpenRemote Manager, its Keycloak
 image and its supported PostgreSQL service remain one operational stack.
 GrideX adds a private API and a separate open-source PostgreSQL database for
-organisations, tariffs, configurations, incidents and audit data. OpenRemote's
-built-in MQTTS API is used for Edge communication, so the first deployment does
-not add a second MQTT broker. The complete boundary is documented in
+organisations, tariffs, configurations, incidents and audit data. The Windows
+11 backend and a dedicated Site Router at every site terminate WireGuard; ROCK
+Pi and ESP nodes remain behind the router, with control and telemetry separated
+and no site-to-site routing. The complete boundary is documented in
 [DOCKER_CLOUD_TOPOLOGY.md](docs/architecture/DOCKER_CLOUD_TOPOLOGY.md).
 
 The OLIMEX ESP32-EVB Edge-node topology and the protocol-reference validation
@@ -148,7 +149,7 @@ GrideX Energy OS е двуезична продуктова демонстрац
 3. Защитният слой ограничава всяка команда спрямо текущите BMS и обектови лимити.
 4. Локалният Edge Gateway нормализира различните Modbus карти и поддържа времекритичните функции при отпадане на облака.
 
-Облачната част работи като Docker услуги. OpenRemote Manager, Keycloak и поддържаната PostgreSQL услуга остават един оперативен stack. GrideX добавя частен API и отделна open-source PostgreSQL база за организации, тарифи, конфигурации, инциденти и одит. За Edge комуникация се използва вграденият MQTTS API на OpenRemote, без втори MQTT broker в първата версия. Подробностите са в [DOCKER_CLOUD_TOPOLOGY.md](docs/architecture/DOCKER_CLOUD_TOPOLOGY.md).
+Облачната част работи като Docker услуги. OpenRemote Manager, Keycloak и поддържаната PostgreSQL услуга остават един оперативен stack. GrideX добавя частен API и отделна open-source PostgreSQL база за организации, тарифи, конфигурации, инциденти и одит. Windows 11 backend-ът и отделният Site Router на всеки обект са WireGuard крайните точки; ROCK Pi и ESP нодовете остават зад рутера, CONTROL и TELEMETRY мрежите са разделени, а маршрути между обекти няма. Подробностите са в [DOCKER_CLOUD_TOPOLOGY.md](docs/architecture/DOCKER_CLOUD_TOPOLOGY.md).
 
 Топологията с OLIMEX ESP32-EVB Edge нодове и правилата за валидиране са описани в [OLIMEX_ESP32_EVB_NODES.md](docs/edge/OLIMEX_ESP32_EVB_NODES.md). Потвърденият от производителя Suntech STE-261L / SunStorage Pro 261 профил е в [SUNTECH_STE261L_MODBUS.md](docs/edge/SUNTECH_STE261L_MODBUS.md), а C++ драйверът и тестовете са в [edge/rock-pi-e](edge/rock-pi-e).
 
