@@ -1,0 +1,57 @@
+name: Feature request
+description: Propose a new GrideX capability or a material change to an existing one.
+title: "[Feature]: "
+labels: ["type: feature", "status: triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the outcome, not only the implementation. Use a Discussion first when the scope is still exploratory.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What user, site or operational problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed capability
+      description: Describe the expected behaviour and any alternatives considered.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Primary area
+      options:
+        - Frontend / portal
+        - GrideX API or database
+        - OpenRemote integration
+        - Forecasting and optimisation
+        - Edge gateway / ROCK Pi
+        - ESP field node
+        - Device driver or protocol map
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable results that would make this request complete.
+      placeholder: |
+        - Given ... when ... then ...
+        - Tests cover ...
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety and security
+      options:
+        - label: This request does not include credentials, secrets, customer data or live site-network details.
+          required: true
+        - label: I have stated whether this could affect a physical control command, device limit or live electrical equipment.
+          required: true
