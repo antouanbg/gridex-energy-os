@@ -82,6 +82,10 @@ The browser must never receive OpenRemote service-user secrets, MQTT credentials
 | `POST /api/v1/sites/{siteId}/alarms/{alarmId}/acknowledge` | bearer + role | Audited acknowledgement. |
 | `PUT /api/v1/sites/{siteId}/configurations/{section}` | bearer + role + revision | Versioned settings and operating modes. |
 | `GET /api/v1/sites/{siteId}/events` | bearer | Authenticated SSE stream; polling remains the fallback. |
+| `GET/POST /api/v1/sites/{siteId}/devices` | bearer + role | List or provision inverter, battery, meter and EVSE records/Assets. |
+| `GET/PATCH /api/v1/sites/{siteId}/devices/{deviceId}` | bearer + role + revision | Read live normalised values or update a device safely. |
+| `GET /api/v1/sites/{siteId}/hardware` | bearer | Controller, dedicated gateways, ports and assignments. |
+| `POST /api/v1/sites/{siteId}/hardware-configurations` | bearer + integrator/admin | Save a validated topology draft with one ROCK Pi E controller. |
 
 The machine-readable contract is in [`frontend-backend-contract.yaml`](frontend-backend-contract.yaml). Strategy ownership, lifecycle and every parameter group are defined in [`STRATEGY_AND_SETTINGS_CONTRACT.md`](STRATEGY_AND_SETTINGS_CONTRACT.md).
 
@@ -134,6 +138,15 @@ Before a screen may be marked fully live, the backend must implement:
 - optimistic concurrency through `ETag`/`If-Match` or an explicit `revision` field.
 
 Strategy configuration is no longer handled by the generic configuration endpoint. It uses a dedicated draft -> validation -> simulation -> activation lifecycle. A site strategy is shared operational state; only language, visual layout and notification choices belong to an individual user.
+
+### 8.1 Loss protection and cycle-source forecast
+
+The frontend receives, but does not calculate, the economic decision. The backend returns two independent sale paths:
+
+- `pvDirect`: PV export with PV variable/full asset cost, trader/exchange/export fees, imbalance risk and minimum margin; battery costs are always zero;
+- `batteryDischarge`: source energy (PV or grid), conversion loss, tariffs/fees, imbalance, battery degradation per throughput/cycle and optional asset depreciation.
+
+The setting has two cost policies: `cash_cost` and `full_cost`. Both may block negative-price export. The 24-hour result includes gross revenue, grid purchase, all cost components, net profit, minimum sale price per path, and source-attributed `gridChargeEquivalentCycles`, `pvChargeEquivalentCycles` and total EFC. It also includes both price-forecast versions, current weather/PV/load forecast versions, sunrise, sunset, tariff revision and battery-asset revision. Missing live values render as `—`; demo values are never substituted.
 
 ### 9. Error contract
 
@@ -227,6 +240,8 @@ ROCK Pi E / устройствата на обекта
 Реализираният frontend client има договори за health, текущ потребител, лични preferences, разрешени обекти, snapshot, history, 72-часова forecast, аларми, acknowledge, атомарна power команда, удостоверен SSE поток и пълния lifecycle на стратегията. Точните HTTP пътища са в английската таблица и в [`frontend-backend-contract.yaml`](frontend-backend-contract.yaml).
 
 Стратегията е обща версияна конфигурация за обекта, не лична настройка. Променя се чрез чернова, проверка, симулация и одобрено активиране. Едва когато OpenRemote върне `appliedRevision == desiredRevision`, frontend-ът я показва като активна. Пълният договор е в [`STRATEGY_AND_SETTINGS_CONTRACT.md`](STRATEGY_AND_SETTINGS_CONTRACT.md).
+
+Икономическата прогноза се изчислява в backend-а по два отделни пътя: директна PV продажба и продажба през батерия. Първата никога не включва батериен цикъл; втората следи произхода PV/мрежа, покупна цена, conversion losses, такси, небаланс, деградация и ДМА. UI показва `cash_cost` и `full_cost`, минималната продажна цена за двата пътя, всички разходни компоненти, нетна печалба и 24-часови grid/PV charge-equivalent cycles плюс общи EFC.
 
 Основната snapshot полярност е:
 

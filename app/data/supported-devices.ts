@@ -1,4 +1,4 @@
-export type SupportedDeviceCategory = "aio" | "pcs" | "inverter" | "bms" | "bridge";
+export type SupportedDeviceCategory = "aio" | "pcs" | "inverter" | "bms" | "meter" | "bridge";
 export type SupportedDeviceStatus = "manufacturer-confirmed" | "documented" | "external-reference" | "design-reference";
 
 export type SupportedDeviceDriver = {
@@ -19,6 +19,7 @@ export type SupportedDeviceDriver = {
 const gridexRepository = "https://github.com/antouanbg/gridex-energy-os";
 const referenceRepository = "https://github.com/ai-republic/bms-to-inverter/tree/main";
 const openGivBridgeDocument = "https://github.com/open-giv/bms-analysis/blob/main/docs/08-bridge-implementation.md";
+const solarmanDocumentation = "https://github.com/davidrapan/ha-solarman/wiki/Documentation";
 
 const referenceDriver = (
   module: string,
@@ -47,6 +48,17 @@ const referenceDriver = (
   sourceUrl: `${referenceRepository}/${module}`,
 });
 
+const solarmanReference = (brand:string, profile:string, category:"inverter"|"bms"|"meter", interfaces:string[], models:string):SupportedDeviceDriver => ({
+  id:`solarman-${brand.toLowerCase().replace(/[^a-z0-9]+/g,"-")}-${profile.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`,
+  brand, profile, category, interfaces, module:`solarman.reference.${profile}`,
+  status:"external-reference",
+  scopeBg:"Публична регистрова/комуникационна референция от ha-solarman. Не е GrideX production драйвер и изисква проверка на точния модел и firmware.",
+  scopeEn:"Public register/communication reference from ha-solarman. This is not a GrideX production driver and requires exact model and firmware validation.",
+  modelsBg:`Фамилии/профили, изброени в upstream документацията: ${models}`,
+  modelsEn:models,
+  sourceUrl:solarmanDocumentation,
+});
+
 export const supportedDeviceDrivers: SupportedDeviceDriver[] = [
   {
     id: "gridex-suntech-ste261l",
@@ -62,6 +74,27 @@ export const supportedDeviceDrivers: SupportedDeviceDriver[] = [
     modelsEn: "Confirmed for the 261 kWh cabinet, Modbus TCP port 3200, Unit ID 1 and direct register addresses without offset.",
     sourceUrl: `${gridexRepository}/tree/main/edge/rock-pi-e/src`,
   },
+
+  solarmanReference("Deye","deye_string / deye_hybrid / deye_p3 / deye_micro","inverter",["Modbus RTU","Solarman logger"],"Three-phase, single-phase, string, hybrid and microinverter families listed upstream."),
+  solarmanReference("Sofar","sofar_hybrid / sofar_g3 / sofar_string","inverter",["Modbus RTU","Solarman logger"],"HYD, G3 and string inverter families listed upstream."),
+  solarmanReference("Solis","solis_hybrid / solis_1p-5g / solis_3p-4g","inverter",["Modbus RTU","Solarman logger"],"Hybrid, 1P-5G and 3P-4G families listed upstream."),
+  solarmanReference("Afore","afore_2mppt / afore_bnt-tl / afore_hybrid","inverter",["Modbus RTU","Solarman logger"],"T4, T6 and hybrid families listed upstream."),
+  solarmanReference("Megarevo","megarevo_r-3h","inverter",["Modbus RTU","Solarman logger"],"R6–15KH3 and related profile references listed upstream."),
+  solarmanReference("Solarman","DTSD422-D3 / DDZY422-D2","meter",["Modbus RTU","Solarman logger"],"Three-phase and single-phase smart-meter maps listed upstream."),
+  solarmanReference("Pytes","RS485 V1.21","bms",["RS485"],"Pytes battery protocol reference listed upstream."),
+  solarmanReference("Pylontech","FH3X","bms",["Modbus RTU"],"Pylontech FH3X battery register reference listed upstream."),
+  solarmanReference("KSTAR","kstar_hybrid","inverter",["Modbus RTU","Solarman logger"],"KSTAR and compatible xStorage hybrid profile reference."),
+  solarmanReference("CHINT","hybrid","inverter",["Modbus RTU"],"CHINT hybrid protocol reference."),
+  solarmanReference("INVT","hybrid","inverter",["Modbus RTU"],"INVT Modbus reference."),
+  solarmanReference("SRNE","monitoring-v2","inverter",["Modbus RTU"],"SRNE monitoring register reference."),
+  solarmanReference("Bluesun","BSE12KH3 / BSE15KH3","inverter",["Modbus RTU","Solarman logger"],"Bluesun hybrid profile references."),
+  solarmanReference("Anenji","12K-H3","inverter",["RS232"],"Anenji serial protocol reference."),
+  solarmanReference("Inhenergy","GPRS-WIFI","inverter",["Modbus RTU"],"Inhenergy GPRS/WiFi Modbus reference."),
+  solarmanReference("EG4","18KPV-12LV","inverter",["Modbus RTU"],"EG4 18KPV protocol reference."),
+  solarmanReference("iStorage","iStoragE","inverter",["Modbus RTU"],"iStoragE northbound monitoring reference."),
+  solarmanReference("Hinen","hybrid-v1.62","inverter",["Modbus RTU"],"Hinen inverter Modbus reference."),
+  solarmanReference("Swatten","SiH-TH","inverter",["Modbus RTU","Solarman logger"],"Swatten SiH three-phase hybrid reference."),
+  solarmanReference("Selfa","SFH hybrid","inverter",["Modbus RTU"],"Selfa hybrid Modbus RTU reference."),
   {
     id: "gridex-sinexcel-pcs-261",
     brand: "Sinexcel",

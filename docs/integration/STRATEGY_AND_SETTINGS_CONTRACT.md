@@ -44,6 +44,14 @@ The catalogue endpoint returns only strategies enabled by the customer plan, sit
 
 Factory/BMS limits are intentionally absent from editable strategy fields. The API can expose them as read-only effective constraints; neither a user nor OpenRemote strategy may increase them.
 
+### 3.1 No-sale-at-loss policy
+
+The policy evaluates `pv_direct` and `battery_discharge` separately. A direct PV sale includes the selected PV variable/full asset cost, trader/exchange/export fees, imbalance risk and margin, but never battery degradation. A battery sale additionally includes the attributed source-energy price (PV opportunity cost or grid purchase), charge/discharge conversion loss, degradation per throughput/cycle and optional battery depreciation.
+
+Two modes are explicit: `cash_cost` includes incremental cash expenses, while `full_cost` also includes enabled degradation and asset depreciation. `blockNegativePriceExport`, `minimumMarginPerMwh`, `includeImbalanceRisk`, `includeBatteryDegradation` and `includeAssetDepreciation` are independently visible settings.
+
+A 15-minute provenance ledger separates `pvToBatteryKwh`, `gridToBatteryKwh`, `batteryToLoadKwh` and `batteryToGridKwh`. The next-24-hour forecast reports grid-charge equivalent cycles, PV-charge equivalent cycles and total EFC, using two versioned price forecasts plus weather, PV/load, sunrise/sunset, tariff and battery-asset inputs. This definition prevents grid and PV charge from being double-counted as two physical full cycles.
+
 ### 4. API workflow
 
 | Method and path | Purpose |
@@ -148,3 +156,11 @@ Frontend-ът не показва „Активна“, само защото AP
 Всеки запис пази потребител, организация, обект, стара/нова версия, време, причина, request ID и резултат. При нужда организацията може да изисква двойно одобрение.
 
 Точните API операции са в [`frontend-backend-contract.yaml`](frontend-backend-contract.yaml), а JSON схемите са в [`schemas/`](schemas/).
+
+### 3.1 Защита „не продавай на загуба“
+
+Политиката смята отделно `pv_direct` и `battery_discharge`. Директната PV продажба включва избраните PV разходи, такси, небаланс и марж, но никога батерийна деградация. Продажбата през батерия включва и произхода на енергията (PV opportunity cost или покупка от мрежата), conversion losses, разхода за throughput/цикъл и при желание ДМА на батерията.
+
+`cash_cost` включва текущите парични разходи, а `full_cost` добавя избраните деградация и ДМА. Отделно се задават блокиране при отрицателна цена, минимален марж, небаланс, деградация и ДМА.
+
+15-минутният provenance ledger разделя PV→батерия, мрежа→батерия, батерия→товар и батерия→мрежа. За следващите 24 часа се показват grid-charge equivalent cycles, PV-charge equivalent cycles и общ EFC според две версионирани ценови прогнози, weather/PV/load, изгрев/залез, тарифа и battery-asset revision.

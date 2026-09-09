@@ -49,9 +49,9 @@ built-in MQTTS API is used for Edge communication, so the first deployment does
 not add a second MQTT broker. The complete boundary is documented in
 [DOCKER_CLOUD_TOPOLOGY.md](docs/architecture/DOCKER_CLOUD_TOPOLOGY.md).
 
-The optional Waveshare 2-CH CAN TO ETH transport and the protocol-reference
-validation rules are documented in
-[WAVESHARE_AND_PROTOCOL_REFERENCES.md](docs/edge/WAVESHARE_AND_PROTOCOL_REFERENCES.md).
+The OLIMEX ESP32-EVB Edge-node topology and the protocol-reference validation
+rules are documented in
+[OLIMEX_ESP32_EVB_NODES.md](docs/edge/OLIMEX_ESP32_EVB_NODES.md).
 
 The manufacturer-confirmed Suntech STE-261L / SunStorage Pro 261 Modbus profile
 is documented in [SUNTECH_STE261L_MODBUS.md](docs/edge/SUNTECH_STE261L_MODBUS.md).
@@ -146,7 +146,7 @@ GrideX Energy OS е двуезична продуктова демонстрац
 
 Облачната част работи като Docker услуги. OpenRemote Manager, Keycloak и поддържаната PostgreSQL услуга остават един оперативен stack. GrideX добавя частен API и отделна open-source PostgreSQL база за организации, тарифи, конфигурации, инциденти и одит. За Edge комуникация се използва вграденият MQTTS API на OpenRemote, без втори MQTT broker в първата версия. Подробностите са в [DOCKER_CLOUD_TOPOLOGY.md](docs/architecture/DOCKER_CLOUD_TOPOLOGY.md).
 
-Опционалният Waveshare 2-CH CAN TO ETH транспорт и правилата за валидиране са описани в [WAVESHARE_AND_PROTOCOL_REFERENCES.md](docs/edge/WAVESHARE_AND_PROTOCOL_REFERENCES.md). Потвърденият от производителя Suntech STE-261L / SunStorage Pro 261 профил е в [SUNTECH_STE261L_MODBUS.md](docs/edge/SUNTECH_STE261L_MODBUS.md), а C++ драйверът и тестовете са в [edge/rock-pi-e](edge/rock-pi-e).
+Топологията с OLIMEX ESP32-EVB Edge нодове и правилата за валидиране са описани в [OLIMEX_ESP32_EVB_NODES.md](docs/edge/OLIMEX_ESP32_EVB_NODES.md). Потвърденият от производителя Suntech STE-261L / SunStorage Pro 261 профил е в [SUNTECH_STE261L_MODBUS.md](docs/edge/SUNTECH_STE261L_MODBUS.md), а C++ драйверът и тестовете са в [edge/rock-pi-e](edge/rock-pi-e).
 
 ### Прогнози и икономика на сценариите
 

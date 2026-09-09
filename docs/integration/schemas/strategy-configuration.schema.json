@@ -141,11 +141,41 @@
     "economics": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["includeBatteryDegradation"],
+      "required": ["includeBatteryDegradation", "trackChargeOrigin", "cycleForecastHorizonHours", "priceForecastSources", "lossProtection"],
       "properties": {
         "includeBatteryDegradation": { "type": "boolean" },
         "batteryAssetConfigurationId": { "type": "string" },
-        "minimumMarginAfterDegradationPerMwh": { "type": "number", "minimum": 0 }
+        "minimumMarginAfterDegradationPerMwh": { "type": "number", "minimum": 0 },
+        "trackChargeOrigin": { "const": true },
+        "cycleForecastHorizonHours": { "const": 24 },
+        "priceForecastSources": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source"],
+            "properties": {
+              "source": { "type": "string", "minLength": 1 },
+              "weight": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "lossProtection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "mode", "minimumMarginPerMwh", "blockNegativePriceExport", "includeImbalanceRisk", "includeBatteryDegradation", "includeAssetDepreciation"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "mode": { "enum": ["cash_cost", "full_cost"] },
+            "minimumMarginPerMwh": { "type": "number", "minimum": 0 },
+            "blockNegativePriceExport": { "type": "boolean" },
+            "includeImbalanceRisk": { "type": "boolean" },
+            "includeBatteryDegradation": { "type": "boolean" },
+            "includeAssetDepreciation": { "type": "boolean" }
+          }
+        }
       }
     }
   },
