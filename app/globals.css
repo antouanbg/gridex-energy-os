@@ -480,6 +480,25 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .supported-devices-hero-stats>span:last-child { grid-column:1/-1; }
 }
 
+/* Strategy cards are content cards, not dashboard tiles. A full-width row
+   prevents Bulgarian labels from collapsing into one character per line. */
+@media(max-width:680px){
+  .mode-cards { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .mode-card { min-height:108px; grid-template-columns:36px minmax(0,1fr); gap:11px; padding:14px; }
+  .mode-card>i { width:34px; height:34px; }
+  .mode-card span strong { font-size:16px; overflow-wrap:anywhere; }
+  .mode-card span small { font-size:14px; overflow-wrap:anywhere; }
+  .mode-card em { position:static; align-self:end; margin-top:5px; }
+}
+
+@media(max-width:680px){
+  .demo-mode-notice { grid-template-columns:34px minmax(0,1fr) auto auto; align-items:center; min-height:58px; padding:9px 10px; }
+  .demo-mode-notice>i { width:34px; height:34px; }
+  .demo-mode-notice small { display:none; }
+  .demo-mode-notice>button { grid-column:auto; width:auto; min-height:38px; padding:8px 10px; white-space:nowrap; }
+  .demo-mode-notice>.demo-notice-close { width:38px; padding:0; color:#708078; border-color:transparent; background:transparent; font-size:24px; line-height:1; }
+}
+
 /* Mobile readability and overlap guard: keep the desktop visual language, with
    larger touch targets and a simpler flow map on narrow screens. */
 @media(max-width:680px){

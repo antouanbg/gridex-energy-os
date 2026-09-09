@@ -948,6 +948,7 @@ export default function Home() {
   const [role, setRole] = useState("Администратор");
   const [lang,setLang] = useState<"bg"|"en">("bg");
   const [batteryNotice,setBatteryNotice] = useState(true);
+  const [demoNoticeVisible,setDemoNoticeVisible] = useState(true);
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
   const [toast, setToast] = useState("");
   const [sessionUser,setSessionUser] = useState<DemoUser|null>(null);
@@ -964,6 +965,13 @@ export default function Home() {
   // Text is selected by React during render. Do not mutate rendered text nodes:
   // doing so can overwrite fresh telemetry and form values after an update.
   usePageLanguage(lang);
+
+  useEffect(() => {
+    const restoreNotice = window.setTimeout(() => {
+      setDemoNoticeVisible(sessionStorage.getItem("gridex-demo-notice-dismissed") !== "1");
+    }, 0);
+    return () => window.clearTimeout(restoreNotice);
+  }, []);
 
   useEffect(() => {
     if (runtimeConfig.mode === "demo") return;
@@ -1074,6 +1082,11 @@ export default function Home() {
     window.setTimeout(() => setToast(""), 2600);
   };
 
+  const dismissDemoNotice = () => {
+    sessionStorage.setItem("gridex-demo-notice-dismissed", "1");
+    setDemoNoticeVisible(false);
+  };
+
   const navigate = (id: string) => {
     setView(id);
     setMobileNavOpen(false);
@@ -1171,10 +1184,11 @@ export default function Home() {
           </div>
         </header>
 
-        {dataMode==="demo"&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
+        {dataMode==="demo"&&demoNoticeVisible&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
           <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"The backend connection is unavailable. Sign-in will become active automatically after the service recovers.":"Няма връзка с backend-а. Входът ще стане активен автоматично след възстановяване на услугата."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
           <button onClick={()=>navigate("login")}>{lang==="en"?"Sign in":"Вход"} →</button>
+          <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
 
         {integrationError&&dataMode==="live"&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
