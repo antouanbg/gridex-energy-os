@@ -1394,7 +1394,9 @@ function UserProfile({lang,user,navigate,signOut,notify}:{lang:UiLanguage;user:D
 }
 
 function PanelTitle({ eyebrow, title, action }: { eyebrow: string; title: string; action?: React.ReactNode }) {
-  return <div className="card-title"><div><p>{eyebrow}</p><h2>{title}</h2></div>{action}</div>;
+  const [modelKey,setModelKey] = useState("anguelov_ibex_milp_v1");
+  const modelSelector = title === "Стратегия за оптимизация" && <label className="forecast-model-picker"><span>Модел</span><select value={modelKey} onChange={event=>setModelKey(event.target.value)}><option value="anguelov_ibex_milp_v1">Антоан Ангелов · IBEX MILP</option><option value="lightgbm_v1">LightGBM · PV / товар / цена</option></select><small>{modelKey==="anguelov_ibex_milp_v1"?"96 × 15 мин. график · SOC · разходи · не продавай на загуба":"Прогноза за PV, товар и цена"}</small></label>;
+  return <div className="card-title"><div><p>{eyebrow}</p><h2>{title}</h2></div>{modelSelector}{action}</div>;
 }
 
 function FlowAsset({className,icon,label,value,unit,note,state,active=true}:{className:string;icon:string;label:string;value:string;unit:string;note:string;state:string;active?:boolean}) {

@@ -437,6 +437,12 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .supported-source-links { grid-column:2; flex-wrap:wrap; }
 }
 
+/* Forecast/optimisation selector is deliberately compact on desktop and full-width on phones. */
+.forecast-model-picker { display:grid; gap:3px; min-width:238px; color:var(--muted); font-size:12px; font-weight:800; }
+.forecast-model-picker select { width:100%; min-height:36px; padding:7px 9px; border:1px solid var(--line); border-radius:9px; background:white; color:var(--ink); font:inherit; font-size:13px; }
+.forecast-model-picker small { font-size:11px; font-weight:600; line-height:1.25; }
+@media(max-width:680px){.card-title:has(.forecast-model-picker){align-items:stretch;flex-direction:column}.forecast-model-picker{min-width:0;width:100%}.forecast-model-picker select{min-height:42px;font-size:14px}}
+
 /* Mobile readability and overlap guard: keep the desktop visual language, with
    larger touch targets and a simpler flow map on narrow screens. */
 @media(max-width:680px){
