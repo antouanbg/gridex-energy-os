@@ -2437,9 +2437,9 @@ function About({lang,notify}:{lang:UiLanguage;notify:(v:string)=>void}) {
 
     <section className="card github-project-card">
       <div className="github-project-mark">&lt;/&gt;</div>
-      <div className="github-project-copy"><p>OPEN SOURCE · MIT LICENSE</p><h2>GrideX Energy OS</h2><span>{t("Публичен open-source EMS проект, създаден от д-р инж. Антоан Ангелов. Кодът и техническата архитектура са достъпни в GitHub за преглед, развитие и нови интеграции.","A public open-source EMS project created by Dr. Eng. Antouan Anguelov. The code and technical architecture are available on GitHub for review, development and new integrations.")}</span></div>
-      <div className="github-project-points"><span>✓ {t("Публичен изходен код","Public source code")}</span><span>✓ OpenRemote + GrideX Edge</span><span>✓ {t("Отворен за драйвери","Open to new drivers")}</span></div>
-      <div className="github-project-actions"><a href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer">GitHub repository ↗</a><a href="https://github.com/antouanbg/gridex-energy-os/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License ↗</a></div>
+      <div className="github-project-copy"><p>OPEN SOURCE · MIT LICENSE</p><h2>GrideX Energy OS</h2><span>{t("Публичен open-source EMS проект, създаден от д-р инж. Антуан Ангелов. Кодът и техническата архитектура са достъпни в GitHub за преглед, развитие и нови интеграции.","A public open-source EMS project created by Dr. Eng. Antuan Angelov. The code and technical architecture are available on GitHub for review, development and new integrations.")}</span></div>
+      <div className="github-project-points"><span>✓ {t("Публичен изходен код","Public source code")}</span><span>✓ OpenRemote + GrideX Edge</span><span>✓ {t("Един ценови модел по публикация и GitHub код на Антуан Ангелов","One price-forecast model based on Antuan Angelov’s publication and GitHub code")}</span></div>
+      <div className="github-project-actions"><a href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer">GitHub repository ↗</a><a href="https://github.com/antouanbg/Compiled-IBEX-Day-Ahead-Price-Dataset" target="_blank" rel="noreferrer">{t("Модел и код за IBEX прогноза ↗","IBEX forecast model & code ↗")}</a><a href="https://github.com/antouanbg/gridex-energy-os/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License ↗</a></div>
     </section>
   </div>;
 }

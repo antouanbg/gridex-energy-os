@@ -63,6 +63,8 @@ The independent [forecasting service](services/forecasting/README.md) contains
 the first implementation contract for 72-hour PV, load and IBEX price forecasts.
 It uses LightGBM for the tabular time-series model and a transparent scenario
 calculator for import cost, export revenue, battery degradation and imbalance.
+One selectable price-forecast model is based on Antuan Angelov's published
+research and [GitHub code and dataset](https://github.com/antouanbg/Compiled-IBEX-Day-Ahead-Price-Dataset).
 Forecasting remains in the cloud strategy layer; safety enforcement remains on
 the edge gateway.
 
@@ -98,7 +100,7 @@ code based on manufacturer specifications and validated laboratory traces.
 
 ## Author
 
-Concept and system architecture: **Antouan Anguelov**
+Concept and system architecture: **Antuan Angelov**
 [Digital profile](https://linkmy.cards/en/antouan-anguelov/) · [LinkedIn](https://www.linkedin.com/in/antouan/)
 
 ---
@@ -150,7 +152,7 @@ GrideX Energy OS е двуезична продуктова демонстрац
 
 ### Прогнози и икономика на сценариите
 
-Самостоятелната [услуга за прогнозиране](services/forecasting/README.md) дефинира 72-часови прогнози за PV, товар и IBEX цени. Използва LightGBM и прозрачен калкулатор за разход за внос, приход от износ, деградация на батерията и небаланс. Прогнозирането остава в облачния стратегически слой, а защитите се изпълняват в Edge Gateway.
+Самостоятелната [услуга за прогнозиране](services/forecasting/README.md) дефинира 72-часови прогнози за PV, товар и IBEX цени. Използва LightGBM и прозрачен калкулатор за разход за внос, приход от износ, деградация на батерията и небаланс. Един от избираемите ценови модели е базиран на публикацията и [GitHub кода на Антуан Ангелов](https://github.com/antouanbg/Compiled-IBEX-Day-Ahead-Price-Dataset). Прогнозирането остава в облачния стратегически слой, а защитите се изпълняват в Edge Gateway.
 
 ### Разработка
 
@@ -181,5 +183,5 @@ npm run build:pages
 
 ### Автор
 
-Концепция и системна архитектура: **Антоан Ангелов**
+Концепция и системна архитектура: **Антуан Ангелов**
 [Дигитален профил](https://linkmy.cards/en/antouan-anguelov/) · [LinkedIn](https://www.linkedin.com/in/antouan/)
