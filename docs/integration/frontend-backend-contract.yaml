@@ -590,41 +590,51 @@ components:
         marketCode: { type: string }
     Snapshot:
       type: object
-      required: [assetId, timestamp, quality, battery, power]
+      required: [siteId, siteName, timestamp, quality, battery, power, devices, batteryEconomicsToday]
       properties:
-        assetId: { type: string }
         siteId: { type: string }
         siteName: { type: string }
         timestamp: { type: string, format: date-time }
         quality: { enum: [GOOD, STALE, INVALID, FAULT] }
         battery:
-          type: object
-          required: [socPct, sohPct, maxChargeKw, maxDischargeKw, limitsValid]
+          type: [object, "null"]
           properties:
-            socPct: { type: number, minimum: 0, maximum: 100 }
-            sohPct: { type: number, minimum: 0, maximum: 100 }
-            maxChargeKw: { type: number, minimum: 0 }
-            maxDischargeKw: { type: number, minimum: 0 }
-            limitsValid: { type: boolean }
-            controlReady: { type: boolean }
+            socPct: { type: [number, "null"], minimum: 0, maximum: 100 }
+            sohPct: { type: [number, "null"], minimum: 0, maximum: 100 }
+            maxChargeKw: { type: [number, "null"], minimum: 0 }
+            maxDischargeKw: { type: [number, "null"], minimum: 0 }
+            limitsValid: { type: [boolean, "null"] }
+            controlReady: { type: [boolean, "null"] }
         power:
           type: object
-          required: [actualKw, requestedKw, appliedKw]
+          required: [batteryKw, requestedKw, appliedKw, pvKw, siteLoadKw, gridKw, evKw]
           properties:
-            actualKw: { type: number, description: Positive discharge; negative charge. }
-            requestedKw: { type: number }
-            appliedKw: { type: number }
-            dcKw: { type: number }
-            reactiveKvar: { type: number }
-            pvKw: { type: number, minimum: 0 }
-            siteLoadKw: { type: number, minimum: 0 }
-            gridKw: { type: number, description: Positive import; negative export. }
-            evKw: { type: number, minimum: 0 }
+            batteryKw: { type: [number, "null"], description: Positive discharge; negative charge. }
+            requestedKw: { type: [number, "null"] }
+            appliedKw: { type: [number, "null"] }
+            pvKw: { type: [number, "null"], minimum: 0 }
+            siteLoadKw: { type: [number, "null"], minimum: 0 }
+            gridKw: { type: [number, "null"], description: Positive import; negative export. }
+            evKw: { type: [number, "null"], minimum: 0 }
         strategy:
           type: object
           properties:
             mode: { type: string }
             targetSocPct: { type: number, minimum: 0, maximum: 100 }
+            economicForecast24h: { type: [object, "null"], additionalProperties: true }
+            cycleForecast24h: { type: [object, "null"], additionalProperties: true }
+        batteryEconomicsToday:
+          type: object
+          required: [available]
+          properties:
+            available: { type: boolean }
+            pvChargeEquivalentCycles: { type: [number, "null"], minimum: 0 }
+            gridChargeEquivalentCycles: { type: [number, "null"], minimum: 0 }
+            equivalentFullCycles: { type: [number, "null"], minimum: 0 }
+            degradationCost: { type: number }
+            depreciationCost: { type: number }
+            conversionLossCost: { type: number }
+        devices: { type: array, items: { type: object, additionalProperties: true } }
     PowerCommand:
       type: object
       additionalProperties: false

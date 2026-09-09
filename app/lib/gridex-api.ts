@@ -29,10 +29,12 @@ export type GridexUser = {
   name?: string;
   preferredUsername?: string;
   roles: string[];
+  permissions: string[];
 };
 
 export type GridexSite = {
   id: string;
+  organisationId: string;
   name: string;
   status?: string;
   timezone?: string;
@@ -40,36 +42,151 @@ export type GridexSite = {
 };
 
 export type GridexSiteSnapshot = {
-  assetId: string;
+  assetId?: string;
+  siteId: string;
+  siteName: string;
   timestamp: string;
   quality: "GOOD" | "STALE" | "INVALID" | "FAULT";
-  battery: {
-    socPct: number;
-    sohPct: number;
-    maxChargeKw: number;
-    maxDischargeKw: number;
-    limitsValid: boolean;
-    controlReady?: boolean;
+  battery: null | {
+    deviceId: string;
+    socPct: number | null;
+    sohPct: number | null;
+    maxChargeKw: number | null;
+    maxDischargeKw: number | null;
+    limitsValid: boolean | null;
+    controlReady: boolean | null;
   };
   power: {
-    actualKw: number;
-    requestedKw: number;
-    appliedKw: number;
-    dcKw?: number;
-    reactiveKvar?: number;
-    siteLoadKw?: number;
-    pvKw?: number;
-    gridKw?: number;
-    evKw?: number;
+    batteryKw: number | null;
+    requestedKw: number | null;
+    appliedKw: number | null;
+    pvKw: number | null;
+    gridKw: number | null;
+    siteLoadKw: number | null;
+    evKw: number | null;
   };
-  strategy?: {
+  strategy: null | {
     mode?: string;
     code?: GridexStrategyConfiguration["code"];
-    targetSocPct?: number;
-    desiredRevision?: number;
-    appliedRevision?: number;
+    targetSocPct?: number | null;
+    desiredRevision?: number | null;
+    appliedRevision?: number | null;
     lifecycle?: GridexStrategyStatus["lifecycle"];
+    economicForecast24h?: GridexEconomicForecast24h | null;
+    cycleForecast24h?: GridexBatteryCycleForecast24h | null;
   };
+  devices: GridexDeviceLive[];
+  batteryEconomicsToday: {
+    available: boolean;
+    currency?: "BGN" | "EUR";
+    intervals?: number;
+    pvToBatteryKwh?: number;
+    gridToBatteryKwh?: number;
+    batteryToLoadKwh?: number;
+    batteryToGridKwh?: number;
+    chargeKwh?: number;
+    dischargeKwh?: number;
+    pvChargeEquivalentCycles?: number | null;
+    gridChargeEquivalentCycles?: number | null;
+    equivalentFullCycles?: number | null;
+    degradationCost?: number;
+    depreciationCost?: number;
+    conversionLossCost?: number;
+  };
+};
+
+export type GridexDeviceType = "inverter" | "battery" | "meter" | "evse";
+
+export type GridexDeviceInput = {
+  type: GridexDeviceType;
+  name: string;
+  manufacturer: string;
+  model: string;
+  serialNumber?: string | null;
+  driverKey: string;
+  protocol: string;
+  parentDeviceId?: string | null;
+  gatewayId?: string | null;
+  gatewayPortId?: string | null;
+  connection?: Record<string, unknown>;
+};
+
+export type GridexDeviceConfiguration = Omit<GridexDeviceInput, "connection"> & {
+  id: string;
+  siteId: string;
+  status: string;
+  revision: number;
+  live?: GridexDeviceLive | null;
+};
+
+export type GridexDeviceLive = {
+  id: string;
+  siteId: string;
+  type: GridexDeviceType;
+  name: string;
+  manufacturer: string;
+  model: string;
+  protocol: string;
+  driverKey: string;
+  status: "online" | "offline" | "unknown";
+  quality: "GOOD" | "STALE" | "INVALID";
+  observedAt: string | null;
+  operatingState: string | null;
+  alarmCodes: string | null;
+  measurementPoint: string | null;
+  capabilities: string[];
+  measurements: Record<string, number | null>;
+};
+
+export type GridexGatewayPort = {
+  id?: string;
+  name: string;
+  transport: "ethernet" | "modbus-tcp" | "rs485" | "can" | "ocpp" | "mqtt";
+  channel: string;
+  settings?: Record<string, unknown>;
+};
+
+export type GridexGateway = {
+  id?: string;
+  name: string;
+  hardwareModel: "rock-pi-e" | "olimex-esp32-evb-ea-ind" | "olimex-esp32-evb-lab";
+  role: "controller" | "device-node";
+  managementNetwork?: Record<string, unknown>;
+  ports: GridexGatewayPort[];
+};
+
+export type GridexHardwareTopology = {
+  configuration: null | { id: string; revision: number; status: string };
+  gateways: GridexGateway[];
+  devices: GridexDeviceConfiguration[];
+};
+
+export type GridexBatteryCycleForecast24h = {
+  horizonHours: 24;
+  gridChargeKwh: number;
+  pvChargeKwh: number;
+  dischargeKwh: number;
+  gridChargeEquivalentCycles: number;
+  pvChargeEquivalentCycles: number;
+  equivalentFullCycles: number;
+};
+
+export type GridexEconomicForecast24h = {
+  currency: "BGN" | "EUR";
+  grossRevenue: number;
+  energyPurchaseCost: number;
+  tariffsAndFees: number;
+  imbalanceRiskCost: number;
+  conversionLossCost: number;
+  batteryDegradationCost: number;
+  assetDepreciationCost: number;
+  netProfit: number;
+  pvDirect: { energyKwh: number; netProfit: number; minimumSalePricePerMwh: number };
+  batteryDischarge: { energyKwh: number; netProfit: number; minimumSalePricePerMwh: number };
+  priceForecastSources: Array<{ source: string; version: string; generatedAt: string }>;
+  weatherForecastVersion: string;
+  sunrise: string;
+  sunset: string;
 };
 
 export type GridexHistoryPoint = {
@@ -156,6 +273,41 @@ export class GridexApiClient {
   async sites(signal?: AbortSignal): Promise<GridexSite[]> {
     const payload = await this.getJson<{ sites?: GridexSite[]; items?: GridexSite[] }>("/api/v1/sites", signal);
     return payload.sites ?? payload.items ?? [];
+  }
+
+  async deviceTypes(signal?: AbortSignal): Promise<{ items: GridexDeviceType[]; hardware: Record<string, unknown> }> {
+    return this.getJson("/api/v1/device-types", signal);
+  }
+
+  async hardware(siteId: string, signal?: AbortSignal): Promise<GridexHardwareTopology> {
+    return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/hardware`, signal);
+  }
+
+  async createHardwareConfiguration(siteId: string, gateways: GridexGateway[]): Promise<{ id: string; siteId: string; revision: number; status: string }> {
+    return this.postJson(`/api/v1/sites/${encodeURIComponent(siteId)}/hardware-configurations`, { gateways });
+  }
+
+  async devices(siteId: string, signal?: AbortSignal): Promise<GridexDeviceConfiguration[]> {
+    const result = await this.getJson<{ items: GridexDeviceConfiguration[] }>(`/api/v1/sites/${encodeURIComponent(siteId)}/devices`, signal);
+    return result.items;
+  }
+
+  async provisionDevice(siteId: string, input: GridexDeviceInput): Promise<GridexDeviceConfiguration> {
+    return this.postJson(`/api/v1/sites/${encodeURIComponent(siteId)}/devices`, input);
+  }
+
+  async device(siteId: string, deviceId: string, signal?: AbortSignal): Promise<GridexDeviceConfiguration> {
+    return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/devices/${encodeURIComponent(deviceId)}`, signal);
+  }
+
+  async updateDevice(siteId: string, deviceId: string, patch: Partial<GridexDeviceInput>, revision: number): Promise<GridexDeviceConfiguration> {
+    const response = await this.authorizedFetch(`/api/v1/sites/${encodeURIComponent(siteId)}/devices/${encodeURIComponent(deviceId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "If-Match": String(revision) },
+      body: JSON.stringify(patch),
+    });
+    if (!response.ok) throw new GridexApiError(`GridEx device update failed: ${response.status}`, response.status);
+    return response.json();
   }
 
   async snapshot(siteId = this.config.defaultSiteId, signal?: AbortSignal): Promise<GridexSiteSnapshot> {

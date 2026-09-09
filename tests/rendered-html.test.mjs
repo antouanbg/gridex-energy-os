@@ -88,12 +88,12 @@ test("provides a one-device-per-gateway hardware configurator", async () => {
 
   assert.match(page, /function EdgeHardwareConfigurator/);
   assert.match(page, /1 gate = 1 device/);
-  assert.match(page, /LilyGo T-CAN485/);
-  assert.match(page, /Waveshare 2-CH CAN To Ethernet/);
+  assert.match(page, /OLIMEX ESP32-EVB-EA-IND/);
+  assert.match(page, /Modbus TCP :1502/);
   assert.match(page, /Compile driver/);
   assert.match(page, /Install on gateway/);
-  assert.match(page, /ESP32 node firmware/);
-  assert.match(page, /ROCK Pi E driver service/);
+  assert.match(page, /ESP32-EVB node firmware/);
+  assert.match(page, /ROCK Pi E only/);
   assert.match(css, /\.gateway-config-fields\s*\{/);
   assert.match(css, /@media\(max-width:680px\).*\.gateway-config-fields\{grid-template-columns:1fr\}/s);
 });
@@ -119,6 +119,9 @@ test("publishes a traceable supported-device catalogue", async () => {
   assert.match(catalogue, /open-giv-pylontech-can-target/);
   assert.match(catalogue, /open-giv-sunspec-modbus-target/);
   assert.match(catalogue, /design-reference/);
+  assert.match(catalogue, /ha-solarman\/wiki\/Documentation/);
+  assert.match(catalogue, /solarmanReference/);
+  assert.match(catalogue, /DTSD422-D3/);
   assert.match(css, /\.supported-driver-grid\s*\{/);
   assert.match(css, /@media\(max-width:680px\).*\.supported-driver-grid\{grid-template-columns:1fr\}/s);
 });
@@ -148,4 +151,24 @@ test("uses a safe backend-aware demo and OIDC integration state", async () => {
   assert.match(api, /commands\/power/);
   assert.match(plan, /Frontend acceptance criteria/);
   assert.match(plan, /Критерии за приемане/);
+});
+
+test("exposes device provisioning and transparent no-sale-at-loss economics", async () => {
+  const [page, api, contracts, schema] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/gridex-api.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/gridex-contracts.ts", import.meta.url), "utf8"),
+    readFile(new URL("../docs/integration/schemas/strategy-configuration.schema.json", import.meta.url), "utf8"),
+  ]);
+  assert.match(api, /provisionDevice/);
+  assert.match(api, /createHardwareConfiguration/);
+  assert.match(api, /GridexEconomicForecast24h/);
+  assert.match(contracts, /cash_cost/);
+  assert.match(schema, /priceForecastSources/);
+  assert.match(page, /function LossProtectionPanel/);
+  assert.match(page, /Do not sell at a loss/);
+  assert.match(page, /PV → GRID/);
+  assert.match(page, /BATTERY → GRID/);
+  assert.match(page, /gridChargeEquivalentCycles/);
+  assert.match(page, /pvChargeEquivalentCycles/);
 });

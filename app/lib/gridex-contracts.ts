@@ -105,6 +105,18 @@ export type GridexStrategyConfiguration = {
     includeBatteryDegradation: boolean;
     batteryAssetConfigurationId?: string;
     minimumMarginAfterDegradationPerMwh?: number;
+    trackChargeOrigin?: boolean;
+    cycleForecastHorizonHours?: 24;
+    priceForecastSources?: Array<{ source: string; weight?: number }>;
+    lossProtection?: {
+      enabled: boolean;
+      mode: "cash_cost" | "full_cost";
+      minimumMarginPerMwh: number;
+      blockNegativePriceExport: boolean;
+      includeImbalanceRisk: boolean;
+      includeBatteryDegradation: boolean;
+      includeAssetDepreciation: boolean;
+    };
   };
 };
 
