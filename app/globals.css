@@ -458,6 +458,20 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .energy-asset mark { max-width:calc(100% - 2px); font-size:12px!important; overflow-wrap:anywhere; text-overflow:clip; white-space:normal; }
 }
 
+/* Real phones can report a CSS width above 480px (including devices using
+   display scaling). This deliberately comes last: it supersedes every legacy
+   two-column rule and keeps each energy asset inside the viewport. */
+@media(max-width:680px){
+  .energy-flow-map { grid-template-columns:minmax(0,1fr); gap:12px; }
+  .flow-pv,.flow-grid-in,.flow-load,.flow-battery,.flow-grid-out,.energy-flow-hub { grid-column:1; grid-row:auto; }
+  .energy-asset { min-height:124px; grid-template-columns:42px minmax(0,1fr); gap:8px 10px; padding:14px 12px; }
+  .energy-asset>i { width:42px; height:42px; font-size:19px; }
+  .energy-asset span>strong { font-size:21px; white-space:normal; overflow-wrap:anywhere; }
+  .energy-asset span>small,.energy-asset span>em { font-size:14px!important; overflow-wrap:anywhere; }
+  .energy-asset mark { max-width:100%; font-size:12px!important; overflow-wrap:anywhere; text-overflow:clip; white-space:normal; }
+  .energy-flow-hub { min-height:136px; margin:4px 0; }
+}
+
 /* Mobile readability and overlap guard: keep the desktop visual language, with
    larger touch targets and a simpler flow map on narrow screens. */
 @media(max-width:680px){
@@ -777,4 +791,16 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .energy-asset span>strong { font-size:22px; white-space:normal; overflow-wrap:anywhere; }
   .energy-asset span>em { font-size:14px!important; overflow-wrap:anywhere; }
   .energy-asset mark { max-width:calc(100% - 2px); font-size:12px!important; overflow-wrap:anywhere; text-overflow:clip; white-space:normal; }
+}
+
+/* Full mobile override — intentionally the final flow rule in this stylesheet. */
+@media(max-width:680px){
+  .energy-flow-map { grid-template-columns:minmax(0,1fr); gap:12px; }
+  .flow-pv,.flow-grid-in,.flow-load,.flow-battery,.flow-grid-out,.energy-flow-hub { grid-column:1; grid-row:auto; }
+  .energy-asset { min-height:124px; grid-template-columns:42px minmax(0,1fr); gap:8px 10px; padding:14px 12px; }
+  .energy-asset>i { width:42px; height:42px; font-size:19px; }
+  .energy-asset span>strong { font-size:21px; white-space:normal; overflow-wrap:anywhere; }
+  .energy-asset span>small,.energy-asset span>em { font-size:14px!important; overflow-wrap:anywhere; }
+  .energy-asset mark { max-width:100%; font-size:12px!important; overflow-wrap:anywhere; text-overflow:clip; white-space:normal; }
+  .energy-flow-hub { min-height:136px; margin:4px 0; }
 }
