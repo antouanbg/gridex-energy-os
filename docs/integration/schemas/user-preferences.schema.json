@@ -10,7 +10,7 @@
     "locale": { "enum": ["en", "bg"] },
     "displayTimezone": { "type": "string", "minLength": 1 },
     "units": { "const": "metric" },
-    "currency": { "enum": ["BGN", "EUR"] },
+    "currency": { "const": "EUR" },
     "theme": { "enum": ["light", "system"] },
     "defaultSiteId": { "type": "string" },
     "dashboardLayout": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },

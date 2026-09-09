@@ -78,7 +78,7 @@ export type GridexSiteSnapshot = {
   devices: GridexDeviceLive[];
   batteryEconomicsToday: {
     available: boolean;
-    currency?: "BGN" | "EUR";
+    currency?: "EUR";
     intervals?: number;
     pvToBatteryKwh?: number;
     gridToBatteryKwh?: number;
@@ -172,7 +172,7 @@ export type GridexBatteryCycleForecast24h = {
 };
 
 export type GridexEconomicForecast24h = {
-  currency: "BGN" | "EUR";
+  currency: "EUR";
   grossRevenue: number;
   energyPurchaseCost: number;
   tariffsAndFees: number;

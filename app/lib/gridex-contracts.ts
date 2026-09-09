@@ -185,7 +185,7 @@ export type GridexUserPreferences = {
   locale: "en" | "bg";
   displayTimezone: "site" | "browser" | string;
   units: "metric";
-  currency: "BGN" | "EUR";
+  currency: "EUR";
   theme: "light" | "system";
   defaultSiteId?: string;
   dashboardLayout?: string[];

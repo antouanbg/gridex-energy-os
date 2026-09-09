@@ -18,7 +18,7 @@ The model predicts three independent time series for the next 72 hours:
 
 - `pv_kw` — site photovoltaic production;
 - `load_kw` — site demand, including ERP/MES production-plan features;
-- `price_bgn_mwh` — IBEX day-ahead or intraday price.
+- `price_eur_mwh` — IBEX day-ahead or intraday price in EUR/MWh.
 
 The predictions are not sent directly to equipment. They feed a separate
 15-minute schedule optimiser. OpenRemote receives the selected schedule and the
@@ -52,7 +52,7 @@ baseline energy cost
 = forecast scenario profit
 ```
 
-The degradation input is the battery throughput cost in BGN/kWh derived from the
+The degradation input is the battery throughput cost in EUR/kWh derived from the
 asset value, residual value, expected lifetime throughput and configured
 depreciation method. This keeps apparently profitable arbitrage from being chosen
 when it does not cover battery wear.
@@ -67,7 +67,7 @@ The future cloud service should expose:
 - `POST /api/v1/sites/{siteId}/schedule/select` — approve a proposed schedule.
 
 OpenRemote asset attributes should receive `forecastPvKw`, `forecastLoadKw`,
-`forecastPriceBgnMwh`, `forecastProfit24hBgn`, `forecastConfidencePct`,
+`forecastPriceEurMwh`, `forecastProfit24hEur`, `forecastConfidencePct`,
 `forecastModelVersion` and `selectedScenario`. MQTT carries telemetry from the
 site; authenticated HTTPS is used for forecast and schedule APIs.
 
@@ -104,7 +104,7 @@ acceptance are required before live dispatch.
 
 - `pv_kw` — фотоволтаично производство на обекта;
 - `load_kw` — товар на обекта, включително ERP/MES производствени признаци;
-- `price_bgn_mwh` — IBEX цена „ден напред“ или intraday цена.
+- `price_eur_mwh` — IBEX цена „ден напред“ или intraday цена в EUR/MWh.
 
 Прогнозите не се изпращат директно към оборудването. Те захранват отделен 15-минутен оптимизатор. OpenRemote получава избрания график и прогнозните KPI, а Edge safety envelope продължава да ограничава всяка заявена мощност спрямо текущите BMS и обектови лимити.
 
@@ -133,7 +133,7 @@ acceptance are required before live dispatch.
 = прогнозна печалба на сценария
 ```
 
-Разходът за деградация е throughput стойността в BGN/kWh, изведена от стойността на актива, остатъчната стойност, очаквания lifetime throughput и избрания метод за амортизация. Така арбитраж не се избира, когато привидната печалба не покрива износването на батерията.
+Разходът за деградация е throughput стойността в EUR/kWh, изведена от стойността на актива, остатъчната стойност, очаквания lifetime throughput и избрания метод за амортизация. Така арбитраж не се избира, когато привидната печалба не покрива износването на батерията.
 
 ### Интеграционен договор
 
@@ -144,7 +144,7 @@ acceptance are required before live dispatch.
 - `GET /api/v1/sites/{siteId}/forecast/economics` — сравнение на печалбата по сценарии;
 - `POST /api/v1/sites/{siteId}/schedule/select` — одобряване на предложен график.
 
-OpenRemote Asset атрибутите получават `forecastPvKw`, `forecastLoadKw`, `forecastPriceBgnMwh`, `forecastProfit24hBgn`, `forecastConfidencePct`, `forecastModelVersion` и `selectedScenario`. MQTT пренася телеметрията от обекта, а удостоверен HTTPS се използва за прогнозните и графиковите API.
+OpenRemote Asset атрибутите получават `forecastPvKw`, `forecastLoadKw`, `forecastPriceEurMwh`, `forecastProfit24hEur`, `forecastConfidencePct`, `forecastModelVersion` и `selectedScenario`. MQTT пренася телеметрията от обекта, а удостоверен HTTPS се използва за прогнозните и графиковите API.
 
 ### Локална разработка
 
