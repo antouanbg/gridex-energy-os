@@ -1642,7 +1642,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'BGN/MWh'"
+          "default": "'EUR/MWh'"
         },
         "tou_window": {
           "name": "tou_window",
@@ -1766,7 +1766,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'BGN'"
+          "default": "'EUR'"
         },
         "valid_from": {
           "name": "valid_from",

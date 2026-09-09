@@ -13,23 +13,23 @@ class IntervalEconomics:
     baseline_import_kwh: float
     grid_import_kwh: float
     grid_export_kwh: float
-    import_price_bgn_mwh: float
-    export_price_bgn_mwh: float
+    import_price_eur_mwh: float
+    export_price_eur_mwh: float
     battery_charge_kwh: float = 0.0
     battery_discharge_kwh: float = 0.0
-    degradation_bgn_kwh: float = 0.0
+    degradation_eur_kwh: float = 0.0
     expected_imbalance_kwh: float = 0.0
-    imbalance_price_bgn_mwh: float = 0.0
+    imbalance_price_eur_mwh: float = 0.0
 
 
 @dataclass(frozen=True)
 class ProfitForecast:
-    baseline_cost_bgn: float
-    import_cost_bgn: float
-    export_revenue_bgn: float
-    degradation_cost_bgn: float
-    imbalance_cost_bgn: float
-    net_profit_bgn: float
+    baseline_cost_eur: float
+    import_cost_eur: float
+    export_revenue_eur: float
+    degradation_cost_eur: float
+    imbalance_cost_eur: float
+    net_profit_eur: float
 
 
 def forecast_profit(intervals: Iterable[IntervalEconomics]) -> ProfitForecast:
@@ -43,21 +43,21 @@ def forecast_profit(intervals: Iterable[IntervalEconomics]) -> ProfitForecast:
 
     for item in intervals:
         _validate_non_negative(item)
-        baseline_cost += item.baseline_import_kwh * item.import_price_bgn_mwh / 1000
-        import_cost += item.grid_import_kwh * item.import_price_bgn_mwh / 1000
-        export_revenue += item.grid_export_kwh * item.export_price_bgn_mwh / 1000
+        baseline_cost += item.baseline_import_kwh * item.import_price_eur_mwh / 1000
+        import_cost += item.grid_import_kwh * item.import_price_eur_mwh / 1000
+        export_revenue += item.grid_export_kwh * item.export_price_eur_mwh / 1000
         throughput = item.battery_charge_kwh + item.battery_discharge_kwh
-        degradation_cost += throughput * item.degradation_bgn_kwh
-        imbalance_cost += item.expected_imbalance_kwh * item.imbalance_price_bgn_mwh / 1000
+        degradation_cost += throughput * item.degradation_eur_kwh
+        imbalance_cost += item.expected_imbalance_kwh * item.imbalance_price_eur_mwh / 1000
 
     net_profit = baseline_cost - import_cost + export_revenue - degradation_cost - imbalance_cost
     return ProfitForecast(
-        baseline_cost_bgn=round(baseline_cost, 2),
-        import_cost_bgn=round(import_cost, 2),
-        export_revenue_bgn=round(export_revenue, 2),
-        degradation_cost_bgn=round(degradation_cost, 2),
-        imbalance_cost_bgn=round(imbalance_cost, 2),
-        net_profit_bgn=round(net_profit, 2),
+        baseline_cost_eur=round(baseline_cost, 2),
+        import_cost_eur=round(import_cost, 2),
+        export_revenue_eur=round(export_revenue, 2),
+        degradation_cost_eur=round(degradation_cost, 2),
+        imbalance_cost_eur=round(imbalance_cost, 2),
+        net_profit_eur=round(net_profit, 2),
     )
 
 
@@ -67,7 +67,7 @@ def compare_scenarios(scenarios: Mapping[str, Iterable[IntervalEconomics]]) -> t
     if not scenarios:
         raise ValueError("At least one dispatch scenario is required")
     results = {name: forecast_profit(intervals) for name, intervals in scenarios.items()}
-    selected = max(results, key=lambda name: results[name].net_profit_bgn)
+    selected = max(results, key=lambda name: results[name].net_profit_eur)
     return selected, results
 
 
@@ -78,10 +78,9 @@ def _validate_non_negative(item: IntervalEconomics) -> None:
         item.grid_export_kwh,
         item.battery_charge_kwh,
         item.battery_discharge_kwh,
-        item.degradation_bgn_kwh,
+        item.degradation_eur_kwh,
         item.expected_imbalance_kwh,
-        item.imbalance_price_bgn_mwh,
+        item.imbalance_price_eur_mwh,
     )
     if any(value < 0 for value in non_negative):
         raise ValueError("Energy quantities and cost coefficients cannot be negative")
-

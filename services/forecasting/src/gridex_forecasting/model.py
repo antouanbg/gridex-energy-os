@@ -8,7 +8,7 @@ from typing import Any
 import pandas as pd
 from lightgbm import LGBMRegressor
 
-TARGET_COLUMNS = ("pv_kw", "load_kw", "price_bgn_mwh")
+TARGET_COLUMNS = ("pv_kw", "load_kw", "price_eur_mwh")
 FEATURE_COLUMNS = (
     "horizon_steps",
     "hour_sin",
@@ -107,7 +107,7 @@ class LightGBMForecastModel:
             result["timestamp"] = future_features["timestamp"]
         for target, model in self.models.items():
             predicted = model.predict(future_features.loc[:, FEATURE_COLUMNS])
-            result[target] = predicted.clip(0, None) if target != "price_bgn_mwh" else predicted
+            result[target] = predicted.clip(0, None) if target != "price_eur_mwh" else predicted
         return result
 
     def feature_importance(self, target: str) -> dict[str, int]:
