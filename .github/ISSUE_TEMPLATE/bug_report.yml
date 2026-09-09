@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible problem in the portal, documentation or project code.
+title: "[Bug]: "
+labels: ["type: bug", "status: triage"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Include the expected behaviour and the observed behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Frontend / portal
+        - GrideX API or database
+        - OpenRemote integration
+        - Forecasting and optimisation
+        - Edge gateway / ROCK Pi
+        - ESP field node
+        - Device driver or protocol map
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Add safe screenshots, logs or a minimal example. Do not include secrets or customer data.

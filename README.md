@@ -93,6 +93,8 @@ npm run build:pages
 
 This repository is open source under the [MIT License](LICENSE). Contributions and technical discussion are welcome. Product names and trademarks remain the property of their respective owners.
 
+To propose an idea, use [Discussions](https://github.com/antouanbg/gridex-energy-os/discussions). For an implementable feature or a bug, open an [Issue](https://github.com/antouanbg/gridex-energy-os/issues); code changes are reviewed through Pull Requests. The full bilingual process is in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 External protocol projects are references, not bundled dependencies. In
 particular, `ai-republic/bms-to-inverter` uses CC BY-NC-SA 4.0; its source code
 is not copied into GrideX. Commercial driver implementations require original
@@ -178,6 +180,8 @@ npm run build:pages
 ### Open source
 
 Хранилището е open source под [MIT License](LICENSE). Приносът и техническите дискусии са добре дошли. Имената на продукти и търговските марки са собственост на съответните им притежатели.
+
+За идея използвайте [Discussions](https://github.com/antouanbg/gridex-energy-os/discussions). За функционалност с ясен обхват или проблем отворете [Issue](https://github.com/antouanbg/gridex-energy-os/issues), а кодът се преглежда чрез Pull Request. Пълният двуезичен процес е в [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Външните протоколни проекти са само референции. Кодът на `ai-republic/bms-to-inverter`, лицензиран под CC BY-NC-SA 4.0, не се копира в GrideX. Комерсиалните драйвери трябва да са оригинални реализации по производителски спецификации и валидирани лабораторни записи.
 
