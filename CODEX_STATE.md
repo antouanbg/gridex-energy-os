@@ -25,6 +25,10 @@ Merge and publish the `fix/i18n-mobile` frontend improvements.
 - `tests/rendered-html.test.mjs`
 - `AGENTS.md`
 - GitHub contribution and review workflow files (from `main`).
+- `README.md`
+- `docs/architecture/DOCKER_CLOUD_TOPOLOGY.md`
+- `github-pages/en/index.html`
+- `public/og.jpg`
 
 ## Tests
 
