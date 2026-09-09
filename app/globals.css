@@ -437,6 +437,27 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .supported-source-links { grid-column:2; flex-wrap:wrap; }
 }
 
+/* Final narrow-phone flow layout. This block intentionally follows older
+   responsive rules so no later two-column rule can clip Bulgarian labels. */
+@media(max-width:480px){
+  .energy-flow-toolbar { padding:12px; }
+  .flow-scenario-tabs { grid-template-columns:1fr; }
+  .flow-scenario-tabs button { min-height:64px; padding:11px 10px; }
+  .flow-scenario-tabs button span>b { font-size:15px; }
+  .flow-scenario-tabs button span>small { font-size:13px; line-height:1.3; }
+  .flow-toolbar-kpis { grid-template-columns:1fr; gap:10px; }
+  .flow-profit-forecast,.flow-balance { width:100%; min-width:0; }
+  .energy-flow-map { grid-template-columns:minmax(0,1fr); gap:12px; margin-top:16px; }
+  .flow-pv,.flow-grid-in,.flow-load,.flow-battery,.flow-grid-out,.energy-flow-hub { grid-column:1; grid-row:auto; }
+  .energy-flow-hub { min-height:136px; margin:4px 0; }
+  .energy-asset { min-height:124px; grid-template-columns:42px minmax(0,1fr); gap:8px 10px; padding:14px 12px; }
+  .energy-asset>i { width:42px; height:42px; font-size:19px; }
+  .energy-asset span>small { font-size:14px!important; overflow-wrap:anywhere; }
+  .energy-asset span>strong { font-size:22px; white-space:normal; overflow-wrap:anywhere; }
+  .energy-asset span>em { font-size:14px!important; overflow-wrap:anywhere; }
+  .energy-asset mark { max-width:calc(100% - 2px); font-size:12px!important; overflow-wrap:anywhere; text-overflow:clip; white-space:normal; }
+}
+
 /* Mobile readability and overlap guard: keep the desktop visual language, with
    larger touch targets and a simpler flow map on narrow screens. */
 @media(max-width:680px){
@@ -737,4 +758,23 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .supported-devices-hero-stats>span:nth-child(even) { border-right:0; }
   .supported-devices-hero-stats>span:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.12); }
   .supported-source-links { grid-column:2; flex-wrap:wrap; }
+}
+/* Narrow-phone override: placed last to supersede legacy two-column flow rules. */
+@media(max-width:480px){
+  .energy-flow-toolbar { padding:12px; }
+  .flow-scenario-tabs { grid-template-columns:1fr; }
+  .flow-scenario-tabs button { min-height:64px; padding:11px 10px; }
+  .flow-scenario-tabs button span>b { font-size:15px; }
+  .flow-scenario-tabs button span>small { font-size:13px; line-height:1.3; }
+  .flow-toolbar-kpis { grid-template-columns:1fr; gap:10px; }
+  .flow-profit-forecast,.flow-balance { width:100%; min-width:0; }
+  .energy-flow-map { grid-template-columns:minmax(0,1fr); gap:12px; margin-top:16px; }
+  .flow-pv,.flow-grid-in,.flow-load,.flow-battery,.flow-grid-out,.energy-flow-hub { grid-column:1; grid-row:auto; }
+  .energy-flow-hub { min-height:136px; margin:4px 0; }
+  .energy-asset { min-height:124px; grid-template-columns:42px minmax(0,1fr); gap:8px 10px; padding:14px 12px; }
+  .energy-asset>i { width:42px; height:42px; font-size:19px; }
+  .energy-asset span>small { font-size:14px!important; overflow-wrap:anywhere; }
+  .energy-asset span>strong { font-size:22px; white-space:normal; overflow-wrap:anywhere; }
+  .energy-asset span>em { font-size:14px!important; overflow-wrap:anywhere; }
+  .energy-asset mark { max-width:calc(100% - 2px); font-size:12px!important; overflow-wrap:anywhere; text-overflow:clip; white-space:normal; }
 }
