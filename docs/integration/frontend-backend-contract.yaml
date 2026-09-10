@@ -155,6 +155,33 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/TimeSeriesPoint" }
+  /api/v1/sites/{siteId}/pv-configuration:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      operationId: getPvConfiguration
+      responses:
+        "200":
+          description: Current versioned PV design configuration.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PvConfiguration" }
+    put:
+      operationId: savePvConfigurationDraft
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PvConfiguration" }
+      responses:
+        "200":
+          description: Draft saved; OpenRemote remains unchanged until activation.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PvConfiguration" }
+        "412": { $ref: "#/components/responses/StaleRevision" }
   /api/v1/sites/{siteId}/strategy:
     parameters:
       - $ref: "#/components/parameters/SiteId"
@@ -351,8 +378,8 @@ paths:
       - name: section
         in: path
         required: true
-        description: Strategy uses its dedicated lifecycle endpoints and is not a value here.
-        schema: { enum: [battery-asset, tariff, forecast, grid, evse, notifications, trader-schedule, balancing] }
+        description: Canonical configuration scope. Strategy retains dedicated compatibility endpoints as well.
+        schema: { enum: [site, pv, battery_pcs, metering_grid, market_tariffs, forecast, strategy, loads_ev, edge_devices, notifications_access] }
     get:
       operationId: getSiteConfiguration
       responses:
@@ -390,6 +417,32 @@ paths:
         "412":
           description: The supplied revision is stale.
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  /api/v1/sites/{siteId}/configurations/{section}/validate:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - { name: section, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: validateConfigurationDraft
+      responses:
+        "200": { description: Validation errors and warnings; no OpenRemote write is performed. }
+  /api/v1/sites/{siteId}/configurations/{section}/simulate:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - { name: section, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: simulateConfigurationDraft
+      responses:
+        "202": { description: Simulation accepted. }
+  /api/v1/sites/{siteId}/configurations/{section}/activate:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+      - $ref: "#/components/parameters/IdempotencyKey"
+      - { name: section, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: activateConfigurationDraft
+      responses:
+        "202": { description: Validated revision queued in the transactional outbox for OpenRemote synchronisation. }
+        "409": { description: Validation, simulation or safety prerequisites are not satisfied. }
 components:
   securitySchemes:
     oidc:
@@ -579,6 +632,53 @@ components:
         name: { type: string }
         preferredUsername: { type: string }
         roles: { type: array, items: { type: string } }
+    PvArray:
+      type: object
+      additionalProperties: false
+      required: [id, name, enabled, orientationProfile, mountingType, trackingType, dcKwp, tiltDeg, azimuthDeg, performanceRatio, inverterDeviceId]
+      properties:
+        id: { type: string }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        enabled: { type: boolean }
+        orientationProfile: { enum: [south, east_west, east, west, mixed, custom] }
+        mountingType: { enum: [rooftop, ground, carport, facade, floating] }
+        trackingType: { enum: [fixed, single_axis, dual_axis] }
+        moduleLayout: { enum: [1P, 2P], description: "Required for tracked arrays." }
+        dcKwp: { type: number, exclusiveMinimum: 0 }
+        tiltDeg: { type: number, minimum: 0, maximum: 90 }
+        azimuthDeg: { type: number, minimum: 0, maximum: 359.999, description: "180 degrees means south." }
+        performanceRatio: { type: number, minimum: 0, maximum: 1 }
+        temperatureCoefficientPctPerC: { type: number, minimum: -2, maximum: 0 }
+        shadingLossPct: { type: number, minimum: 0, maximum: 100 }
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+        eastWestSplitPct:
+          type: object
+          description: "Required for the east_west profile; east + west must equal 100. Prefer separate physical arrays when azimuths differ."
+          required: [east, west]
+          properties:
+            east: { type: number, minimum: 0, maximum: 100 }
+            west: { type: number, minimum: 0, maximum: 100 }
+        inverterDeviceId: { type: string }
+        openRemoteAssetId: { type: string, readOnly: true }
+        syncStatus: { enum: [draft, validated, sent, applied, rejected], readOnly: true }
+    PvConfiguration:
+      type: object
+      additionalProperties: false
+      required: [revision, site, arrays]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        site:
+          type: object
+          required: [latitude, longitude, timezone]
+          properties:
+            latitude: { type: number, minimum: -90, maximum: 90 }
+            longitude: { type: number, minimum: -180, maximum: 180 }
+            timezone: { type: string }
+        arrays:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/PvArray" }
     Site:
       type: object
       required: [id, name]
