@@ -94,6 +94,10 @@ export const pvArrays = pgTable("pv_arrays", {
   openremoteAssetId: text("openremote_asset_id"),
   name: text("name").notNull(),
   enabled: boolean("enabled").notNull().default(true),
+  orientationProfile: text("orientation_profile").notNull().default("custom"),
+  mountingType: text("mounting_type").notNull(),
+  trackingType: text("tracking_type").notNull().default("fixed"),
+  moduleLayout: text("module_layout"),
   dcKwp: numeric("dc_kwp", { precision: 12, scale: 3 }).notNull(),
   tiltDeg: numeric("tilt_deg", { precision: 6, scale: 2 }).notNull(),
   azimuthDeg: numeric("azimuth_deg", { precision: 6, scale: 2 }).notNull(),
@@ -102,12 +106,50 @@ export const pvArrays = pgTable("pv_arrays", {
   shadingLossPct: numeric("shading_loss_pct", { precision: 5, scale: 2 }).notNull().default("0"),
   latitude: real("latitude"),
   longitude: real("longitude"),
+  inverterDeviceId: text("inverter_device_id").references(() => devices.id, { onDelete: "set null" }),
+  eastWestSplitJson: jsonb("east_west_split_json"),
   configurationRevision: integer("configuration_revision").notNull().default(1),
   syncStatus: text("sync_status").notNull().default("draft"),
   ...timestamps,
 }, (table) => [
   uniqueIndex("idx_pv_arrays_openremote_asset").on(table.openremoteAssetId),
   index("idx_pv_arrays_site_enabled").on(table.siteId, table.enabled),
+]);
+
+/** Durable site configuration. Runtime telemetry and manufacturer limits remain in OpenRemote. */
+export const siteConfigurationProfiles = pgTable("site_configuration_profiles", {
+  id: text("id").primaryKey(),
+  siteId: text("site_id").notNull().references(() => sites.id, { onDelete: "cascade" }),
+  scope: text("scope").notNull(),
+  activeRevision: integer("active_revision"),
+  desiredRevision: integer("desired_revision"),
+  openremoteSyncState: text("openremote_sync_state").notNull().default("not_requested"),
+  openremoteAppliedRevision: integer("openremote_applied_revision"),
+  lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
+  lastSyncError: text("last_sync_error"),
+  ...timestamps,
+}, (table) => [
+  uniqueIndex("idx_site_configuration_scope").on(table.siteId, table.scope),
+  index("idx_site_configuration_sync").on(table.openremoteSyncState, table.lastSyncAt),
+]);
+
+export const configurationOutbox = pgTable("configuration_outbox", {
+  id: text("id").primaryKey(),
+  configurationRevisionId: text("configuration_revision_id").notNull(),
+  siteId: text("site_id").notNull().references(() => sites.id, { onDelete: "cascade" }),
+  scope: text("scope").notNull(),
+  operation: text("operation").notNull(),
+  payloadJson: jsonb("payload_json").notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  status: text("status").notNull().default("pending"),
+  attempts: integer("attempts").notNull().default(0),
+  availableAt: timestamp("available_at", { withTimezone: true }).notNull().defaultNow(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+  lastError: text("last_error"),
+  ...timestamps,
+}, (table) => [
+  uniqueIndex("idx_configuration_outbox_idempotency").on(table.idempotencyKey),
+  index("idx_configuration_outbox_pending").on(table.status, table.availableAt),
 ]);
 
 export const metricPoints = pgTable("metric_points", {

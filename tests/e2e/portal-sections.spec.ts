@@ -85,3 +85,17 @@ test("navigation updates translated headings and interactive range values", asyn
   await firstRange.press("ArrowLeft");
   await expect(rangeValue).not.toHaveText(before);
 });
+
+test("configuration centre exposes required PV fields and guarded activation", async ({ page }) => {
+  await page.goto("/");
+  await openSection(page, "settings");
+  await page.getByRole("button", { name: "PV", exact: true }).click();
+  await expect(page.getByText("Ориентационен профил")).toBeVisible();
+  await expect(page.getByText(/^Монтаж/)).toBeVisible();
+  await expect(page.getByText(/^Проследяване/)).toBeVisible();
+  await expect(page.getByText("DC мощност (kWp)")).toBeVisible();
+  const activate = page.getByRole("button", { name: "Симулирай и активирай" });
+  await expect(activate).toBeDisabled();
+  await page.getByRole("button", { name: "Валидирай" }).click();
+  await expect(activate).toBeEnabled();
+});

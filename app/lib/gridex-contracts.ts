@@ -195,3 +195,57 @@ export type GridexUserPreferences = {
     quietHours?: { from: string; to: string; timezone: string };
   };
 };
+
+export type GridexConfigurationScope =
+  | "site" | "pv" | "battery_pcs" | "metering_grid" | "market_tariffs"
+  | "forecast" | "strategy" | "loads_ev" | "edge_devices" | "notifications_access";
+
+export type GridexConfigurationStatus =
+  | "draft" | "validating" | "invalid" | "validated" | "simulating"
+  | "ready" | "activating" | "applied" | "rejected" | "superseded";
+
+export type GridexConfigurationEnvelope<TPayload = Record<string, unknown>> = {
+  id: string;
+  siteId: string;
+  scope: GridexConfigurationScope;
+  revision: number;
+  baseRevision: number;
+  etag: string;
+  status: GridexConfigurationStatus;
+  payload: TPayload;
+  validation: {
+    valid: boolean;
+    errors: Array<{ path: string; code: string; message: string }>;
+    warnings: Array<{ path: string; code: string; message: string }>;
+  };
+  openRemoteSync: {
+    desiredRevision: number;
+    appliedRevision?: number;
+    state: "not_requested" | "pending" | "applied" | "failed";
+    lastAttemptAt?: string;
+    errorCode?: string;
+  };
+  createdAt: string;
+  createdBy: string;
+};
+
+export type GridexPvArrayConfiguration = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  orientationProfile: "south" | "east_west" | "east" | "west" | "mixed" | "custom";
+  mountingType: "rooftop" | "ground" | "carport" | "facade" | "floating";
+  trackingType: "fixed" | "single_axis" | "dual_axis";
+  moduleLayout?: "1P" | "2P";
+  dcKwp: number;
+  tiltDeg: number;
+  azimuthDeg: number;
+  eastWestSplitPct?: { east: number; west: number };
+  performanceRatio: number;
+  temperatureCoefficientPctPerC?: number;
+  shadingLossPct?: number;
+  latitude?: number;
+  longitude?: number;
+  inverterDeviceId: string;
+  openRemoteAssetId?: string;
+};

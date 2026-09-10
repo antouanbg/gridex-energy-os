@@ -10,11 +10,14 @@ east/west, roof planes or trackers into one averaged row. The GrideX API owns
 validation, revisions and audit. OpenRemote owns the resulting `SolarPVAsset`
 tree and all live/predicted datapoints.
 
-Required per array: `name`, `dcKwp`, `tiltDeg` (0–90°), `azimuthDeg`
+Required per array: `name`, `orientationProfile`, `mountingType`,
+`trackingType`, `inverterDeviceId`, `dcKwp`, `tiltDeg` (0–90°), `azimuthDeg`
 (0–359°, 180° = south), `performanceRatio` (0–1), and enabled state. Optional
 per-array coordinates override the site location only for physically distant
 arrays. Additional forecast inputs are `temperatureCoefficientPctPerC` and
-`shadingLossPct`.
+`shadingLossPct`. `moduleLayout` (`1P`/`2P`) is required for trackers and
+`eastWestSplitPct` is required for an east-west profile. Physically distinct
+east and west planes should normally be represented as two arrays.
 
 ### Final BFF API
 
@@ -74,8 +77,10 @@ and provider credentials stay in the backend secret store.
 Всеки различно ориентиран PV масив се пази като отделен ред в `pv_arrays` —
 източен/западен покрив, различни скатове и тракери не се усредняват.
 
-За всеки масив са задължителни: име, DC kWp, наклон (0–90°), азимут (0–359°;
-180° = юг), PR и активност. По избор се задават локални координати, температурен
+За всеки масив са задължителни: име, ориентационен профил, монтаж, проследяване,
+връзка към инвертор, DC kWp, наклон (0–90°), азимут (0–359°; 180° = юг), PR и
+активност. При тракер се задава `1P`/`2P`, а при изток–запад сборът на дяловете
+трябва да е 100%. По избор се задават локални координати, температурен
 коефициент и загуби от засенчване. Редакцията създава чернова; валидирането,
 симулацията и активирането вървят през GrideX API. Frontend-ът не пише директно
 в OpenRemote.

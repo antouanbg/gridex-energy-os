@@ -6,6 +6,8 @@ import type {
   GridexStrategySimulation,
   GridexStrategyStatus,
   GridexUserPreferences,
+  GridexConfigurationEnvelope,
+  GridexConfigurationScope,
 } from "./gridex-contracts";
 
 export type GridexRuntimeMode = "auto" | "demo" | "live";
@@ -460,6 +462,26 @@ export class GridexApiClient {
       `/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${encodeURIComponent(section)}`,
       signal,
     );
+  }
+
+  async configurationDraft<T>(siteId: string, scope: GridexConfigurationScope, signal?: AbortSignal): Promise<GridexConfigurationEnvelope<T>> {
+    return this.getJson<GridexConfigurationEnvelope<T>>(`/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${scope}/draft`, signal);
+  }
+
+  async saveConfigurationDraft<T>(siteId: string, scope: GridexConfigurationScope, draft: T, revision: number): Promise<GridexConfigurationEnvelope<T>> {
+    return this.putJson<GridexConfigurationEnvelope<T>>(`/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${scope}/draft`, { payload: draft }, revision);
+  }
+
+  async validateConfiguration(siteId: string, scope: GridexConfigurationScope): Promise<GridexConfigurationEnvelope["validation"]> {
+    return this.postJson<GridexConfigurationEnvelope["validation"]>(`/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${scope}/validate`, {});
+  }
+
+  async simulateConfiguration(siteId: string, scope: GridexConfigurationScope): Promise<{ simulationId: string; status: string }> {
+    return this.postJson<{ simulationId: string; status: string }>(`/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${scope}/simulate`, {});
+  }
+
+  async activateConfiguration(siteId: string, scope: GridexConfigurationScope, revision: number, simulationId: string, idempotencyKey: string): Promise<GridexConfigurationEnvelope> {
+    return this.postJson<GridexConfigurationEnvelope>(`/api/v1/sites/${encodeURIComponent(siteId)}/configurations/${scope}/activate`, { revision, simulationId }, { "Idempotency-Key": idempotencyKey });
   }
 
   async subscribeSiteEvents(
