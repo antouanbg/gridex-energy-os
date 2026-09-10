@@ -1,6 +1,7 @@
 # Current task
 
-Merge and publish the `fix/i18n-mobile` frontend improvements.
+Prepare the lazy-loaded frontend sections and full 19-screen Playwright suite
+for review.
 
 ## Completed
 
@@ -9,12 +10,16 @@ Merge and publish the `fix/i18n-mobile` frontend improvements.
 - Added final mobile flow and overflow guards; checked core phone layouts at
   360, 390 and 430 px without horizontal overflow.
 - Recorded the site-router WireGuard architecture in `AGENTS.md`.
+- Reduced `app/page.tsx` to the portal shell and moved all 19 feature screens
+  into independently loaded section modules plus shared UI/data modules.
+- Added Playwright coverage for all 19 sections at 360, 390 and 430 px.
+- Added heading/language, interactive range and browser-error checks.
+- Added a Pull Request quality workflow for lint, build and browser tests.
 
 ## Remaining
 
-- Complete remaining component-level translation keys and Playwright coverage.
-- Add full 19-section Playwright coverage and split portal sections into lazy
-  modules in a separate follow-up.
+- Review, push and open the Pull Request.
+- Keep component-level i18n completion as a separate follow-up.
 
 ## Modified files
 
@@ -29,6 +34,15 @@ Merge and publish the `fix/i18n-mobile` frontend improvements.
 - `docs/architecture/DOCKER_CLOUD_TOPOLOGY.md`
 - `github-pages/en/index.html`
 - `public/og.jpg`
+- `app/sections/*.tsx`
+- `app/sections/data.ts`
+- `app/sections/types.ts`
+- `tests/e2e/portal-sections.spec.ts`
+- `playwright.config.ts`
+- `.github/workflows/frontend-quality.yml`
+- `package.json`
+- `package-lock.json`
+- `.gitignore`
 
 ## Tests
 
@@ -38,17 +52,23 @@ Merge and publish the `fix/i18n-mobile` frontend improvements.
   document-level horizontal overflow observed.
 - `npm run build:pages` — passes; `/` and `/en/` entries emitted and `og.jpg`
   is 176 KB.
+- `npm test` — passes (10 tests).
+- `npm run test:e2e` — passes (5 Playwright tests); all 19 sections pass at
+  360, 390 and 430 px without page-level horizontal overflow.
+- Static build emits a separate lazy chunk for each of the 19 portal sections,
+  plus small shared UI/data chunks.
 
 ## Known issues
 
-- The current test suite retains server-render checks; a full 19-section
-  Playwright suite remains to be added.
-- The large portal page is still one client module, so code splitting requires
-  component extraction rather than a configuration-only change.
+- Existing image-element lint warnings remain in the Suntech About section;
+  there are no lint errors.
+- `npm install` reports inherited dependency audit findings; no automatic
+  dependency upgrades were made in this task.
 
 ## Next action
 
-Resolve the pull request merge, then monitor GitHub Pages deployment.
+Review the diff, run the final validation set, commit, push and open a Pull
+Request to `main`.
 
 ## Last updated
 

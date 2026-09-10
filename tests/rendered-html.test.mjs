@@ -100,34 +100,34 @@ test("keeps energy-flow status badges in their own grid row", async () => {
 });
 
 test("provides a one-device-per-gateway hardware configurator", async () => {
-  const [page, css] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+  const [gateway, css] = await Promise.all([
+    readFile(new URL("../app/sections/gateway.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(page, /function EdgeHardwareConfigurator/);
-  assert.match(page, /1 gate = 1 device/);
-  assert.match(page, /OLIMEX ESP32-EVB-EA-IND/);
-  assert.match(page, /Modbus TCP :1502/);
-  assert.match(page, /Compile driver/);
-  assert.match(page, /Install on gateway/);
-  assert.match(page, /ESP32-EVB node firmware/);
-  assert.match(page, /ROCK Pi E only/);
+  assert.match(gateway, /function EdgeHardwareConfigurator/);
+  assert.match(gateway, /1 gate = 1 device/);
+  assert.match(gateway, /OLIMEX ESP32-EVB-EA-IND/);
+  assert.match(gateway, /Modbus TCP :1502/);
+  assert.match(gateway, /Compile driver/);
+  assert.match(gateway, /Install on gateway/);
+  assert.match(gateway, /ESP32-EVB node firmware/);
+  assert.match(gateway, /ROCK Pi E only/);
   assert.match(css, /\.gateway-config-fields\s*\{/);
   assert.match(css, /@media\(max-width:680px\).*\.gateway-config-fields\{grid-template-columns:1fr\}/s);
 });
 
 test("publishes a traceable supported-device catalogue", async () => {
-  const [page, catalogue, css, messages] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+  const [supported, catalogue, css, messages] = await Promise.all([
+    readFile(new URL("../app/sections/supported.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data/supported-devices.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/i18n/messages.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.match(page, /function SupportedDevices/);
+  assert.match(supported, /function SupportedDevices/);
   assert.match(messages, /"nav\.supported":"Supported devices"/);
-  assert.match(page, /GROUP-CONTROL READINESS/);
+  assert.match(supported, /GROUP-CONTROL READINESS/);
   assert.match(catalogue, /gridex-suntech-ste261l/);
   assert.match(catalogue, /manufacturer-confirmed/);
   assert.match(catalogue, /inverter-deye-can/);
@@ -174,8 +174,8 @@ test("uses a safe backend-aware demo and OIDC integration state", async () => {
 });
 
 test("exposes device provisioning and transparent no-sale-at-loss economics", async () => {
-  const [page, api, contracts, schema] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+  const [overview, api, contracts, schema] = await Promise.all([
+    readFile(new URL("../app/sections/overview.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/gridex-api.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/gridex-contracts.ts", import.meta.url), "utf8"),
     readFile(new URL("../docs/integration/schemas/strategy-configuration.schema.json", import.meta.url), "utf8"),
@@ -185,10 +185,20 @@ test("exposes device provisioning and transparent no-sale-at-loss economics", as
   assert.match(api, /GridexEconomicForecast24h/);
   assert.match(contracts, /cash_cost/);
   assert.match(schema, /priceForecastSources/);
-  assert.match(page, /function LossProtectionPanel/);
-  assert.match(page, /Do not sell at a loss/);
-  assert.match(page, /PV → GRID/);
-  assert.match(page, /BATTERY → GRID/);
-  assert.match(page, /gridChargeEquivalentCycles/);
-  assert.match(page, /pvChargeEquivalentCycles/);
+  assert.match(overview, /function LossProtectionPanel/);
+  assert.match(overview, /Do not sell at a loss/);
+  assert.match(overview, /PV → GRID/);
+  assert.match(overview, /BATTERY → GRID/);
+  assert.match(overview, /gridChargeEquivalentCycles/);
+  assert.match(overview, /pvChargeEquivalentCycles/);
+});
+
+test("loads the 19 navigation sections through split frontend modules", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const lazyImports = page.match(/lazy\(\(\) => import\("\.\/sections\//g) ?? [];
+
+  assert.equal(lazyImports.length, 19);
+  assert.match(page, /Suspense/);
+  assert.match(page, /data-view-id/);
+  assert.doesNotMatch(page, /function (Overview|Battery|Market|Gateway|SupportedDevices|About)\b/);
 });
