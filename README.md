@@ -90,6 +90,19 @@ Build the static GitHub Pages version:
 npm run build:pages
 ```
 
+Run the real-browser regression suite. It opens every one of the 19 portal
+sections and checks the 360, 390 and 430 px mobile viewports for page-level
+horizontal overflow:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+The portal shell remains in `app/page.tsx`; feature screens are loaded on
+demand from `app/sections/`. Pull Requests that affect the frontend run lint,
+server-render checks and the Playwright suite automatically.
+
 ## Open source
 
 This repository is open source under the [MIT License](LICENSE). Contributions and technical discussion are welcome. Product names and trademarks remain the property of their respective owners.
@@ -177,6 +190,18 @@ npm run build
 ```bash
 npm run build:pages
 ```
+
+Реалните browser тестове отварят всеки от 19-те раздела и проверяват ширини
+360, 390 и 430 px за хоризонтално излизане извън екрана:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+Основната обвивка остава в `app/page.tsx`, а функционалните екрани се зареждат
+при поискване от `app/sections/`. При frontend Pull Request автоматично се
+изпълняват lint, server-render проверките и Playwright тестовете.
 
 ### Open source
 
