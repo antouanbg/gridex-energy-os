@@ -87,6 +87,29 @@ export const devices = pgTable("devices", {
   index("idx_devices_site_status").on(table.siteId, table.connectionStatus),
 ]);
 
+/** Physical PV design parameters for forecast calculation and OpenRemote sync. */
+export const pvArrays = pgTable("pv_arrays", {
+  id: text("id").primaryKey(),
+  siteId: text("site_id").notNull().references(() => sites.id, { onDelete: "cascade" }),
+  openremoteAssetId: text("openremote_asset_id"),
+  name: text("name").notNull(),
+  enabled: boolean("enabled").notNull().default(true),
+  dcKwp: numeric("dc_kwp", { precision: 12, scale: 3 }).notNull(),
+  tiltDeg: numeric("tilt_deg", { precision: 6, scale: 2 }).notNull(),
+  azimuthDeg: numeric("azimuth_deg", { precision: 6, scale: 2 }).notNull(),
+  performanceRatio: numeric("performance_ratio", { precision: 5, scale: 4 }).notNull().default("0.8200"),
+  temperatureCoefficientPctPerC: numeric("temperature_coefficient_pct_per_c", { precision: 6, scale: 4 }).notNull().default("-0.3500"),
+  shadingLossPct: numeric("shading_loss_pct", { precision: 5, scale: 2 }).notNull().default("0"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  configurationRevision: integer("configuration_revision").notNull().default(1),
+  syncStatus: text("sync_status").notNull().default("draft"),
+  ...timestamps,
+}, (table) => [
+  uniqueIndex("idx_pv_arrays_openremote_asset").on(table.openremoteAssetId),
+  index("idx_pv_arrays_site_enabled").on(table.siteId, table.enabled),
+]);
+
 export const metricPoints = pgTable("metric_points", {
   id: text("id").primaryKey(),
   deviceId: text("device_id").notNull().references(() => devices.id, { onDelete: "cascade" }),
