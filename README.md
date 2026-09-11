@@ -14,6 +14,14 @@ The public GitHub Pages demo is deployed automatically from the `main` branch:
 
 The interface uses representative demonstration data. It is not connected to a live power installation and must not be used as a production control system without project-specific engineering, testing and safety validation.
 
+### Regional language default
+
+The portal defaults to Bulgarian when the browser reports the `Europe/Sofia`
+time zone and English everywhere else. This is a local browser check: it does
+not request GPS location or send an IP address to a GeoIP service. The visible
+BG/EN control is always available and its explicit choice is remembered in the
+browser.
+
 The same build is prepared for a protected live mode. `public/gridex-config.js` normally uses `auto`: the portal switches to live data only when both the backend and a valid OIDC session are available; otherwise it stays in clearly labelled demo mode. Live data and commands go through the GrideX API, never directly from the browser to OpenRemote or a field device.
 
 The complete frontend state machine, OIDC requirements, endpoint/field catalogue and backend rollout plan are in [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). The machine-readable API is [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml), and the site strategy/settings lifecycle is [STRATEGY_AND_SETTINGS_CONTRACT.md](docs/integration/STRATEGY_AND_SETTINGS_CONTRACT.md).
@@ -134,6 +142,13 @@ GrideX Energy OS е двуезична продуктова демонстрац
 **https://gridex.tech/**
 
 Интерфейсът използва представителни демонстрационни данни. Той не е свързан с реална енергийна инсталация и не трябва да се използва за производствено управление без специфично инженерно проектиране, тестове и валидиране на безопасността.
+
+### Регионален избор на език
+
+Порталът започва на български при часова зона `Europe/Sofia`, а при всички
+останали часови зони — на английски. Проверката е локална в браузъра: не иска
+GPS локация и не изпраща IP адрес към GeoIP услуга. Видимият бутон BG/EN винаги
+остава наличен и ръчно избраният език се запомня в браузъра.
 
 Същият build е подготвен за защитен live режим. `public/gridex-config.js` обичайно използва `auto`: порталът преминава към реални данни само когато backend-ът е достъпен и има валидна OIDC сесия; иначе остава в ясно обозначен демо режим. Реалните данни и команди преминават през GrideX API, никога директно от браузъра към OpenRemote или полево устройство.
 

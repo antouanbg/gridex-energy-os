@@ -1,7 +1,6 @@
 # Current task
 
-Prepare the lazy-loaded frontend sections and full 19-screen Playwright suite
-for review.
+No active implementation task.
 
 ## Completed
 
@@ -15,11 +14,16 @@ for review.
 - Added Playwright coverage for all 19 sections at 360, 390 and 430 px.
 - Added heading/language, interactive range and browser-error checks.
 - Added a Pull Request quality workflow for lint, build and browser tests.
+- Added `Europe/Sofia` → Bulgarian and all other time zones → English default
+  language selection without GPS or GeoIP tracking.
+- Preserved `/en` as an explicit English route and added remembered manual BG/EN
+  preference in the browser.
+- Published draft PR #12 for the regional language default.
 
 ## Remaining
 
-- Review, push and open the Pull Request.
-- Keep component-level i18n completion as a separate follow-up.
+- Review and merge draft PR #12.
+- Implement the separately approved Settings v2 forms and API persistence.
 
 ## Modified files
 
@@ -43,6 +47,8 @@ for review.
 - `package.json`
 - `package-lock.json`
 - `.gitignore`
+- `app/i18n/locale.ts`
+- `tests/e2e/portal-sections.spec.ts`
 
 ## Tests
 
@@ -57,6 +63,10 @@ for review.
   360, 390 and 430 px without page-level horizontal overflow.
 - Static build emits a separate lazy chunk for each of the 19 portal sections,
   plus small shared UI/data chunks.
+- `npm run lint` — passes with the two existing image warnings in About.
+- `npm test` — 10/10 pass.
+- `npm run test:e2e` — 6/6 pass, including Bulgaria/foreign-region language
+  default and remembered explicit preference.
 
 ## Known issues
 
@@ -67,9 +77,8 @@ for review.
 
 ## Next action
 
-Review the diff, run the final validation set, commit, push and open a Pull
-Request to `main`.
+Review the diff, commit, push and open a Pull Request to `main`.
 
 ## Last updated
 
-2026-09-10
+2026-09-11

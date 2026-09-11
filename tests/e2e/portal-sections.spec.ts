@@ -24,6 +24,8 @@ const sections = [
 
 const phoneWidths = [360, 390, 430] as const;
 
+test.use({ timezoneId: "Europe/Sofia" });
+
 async function openSection(page: Page, section: (typeof sections)[number]) {
   await page.locator(`[data-view-id="${section}"]`).evaluate((button: HTMLButtonElement) => button.click());
   await expect(page.getByTestId(`section-${section}`)).toBeVisible();
@@ -84,4 +86,22 @@ test("navigation updates translated headings and interactive range values", asyn
   await firstRange.focus();
   await firstRange.press("ArrowLeft");
   await expect(rangeValue).not.toHaveText(before);
+});
+
+test("uses English outside Bulgaria and remembers an explicit language choice", async ({ browser }) => {
+  const foreignContext = await browser.newContext({ timezoneId: "Europe/London" });
+  const foreignPage = await foreignContext.newPage();
+  await foreignPage.goto("/");
+  await expect(foreignPage.getByTestId("page-title")).toHaveText("Solar Park East");
+  await foreignContext.close();
+
+  const bgContext = await browser.newContext({ timezoneId: "Europe/Sofia" });
+  const bgPage = await bgContext.newPage();
+  await bgPage.goto("/");
+  await expect(bgPage.getByTestId("page-title")).toHaveText("Соларен парк Изток");
+  await bgPage.getByRole("button", { name: "Language" }).click();
+  await expect(bgPage.getByTestId("page-title")).toHaveText("Solar Park East");
+  await bgPage.reload();
+  await expect(bgPage.getByTestId("page-title")).toHaveText("Solar Park East");
+  await bgContext.close();
 });
