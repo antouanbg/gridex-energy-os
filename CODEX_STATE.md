@@ -17,6 +17,7 @@ without changing mobile layout or runtime communication code.
 - Added a Pull Request quality workflow for lint, build and browser tests.
 - Corrected the Edge gateway screen so it no longer claims direct node MQTT;
   it now shows ROCK Pi polling over OT Modbus TCP and publishing private MQTT.
+- Added durable project-creator attribution in `README.md` and `CREDITS.md`.
 
 ## Remaining
 

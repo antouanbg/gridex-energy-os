@@ -4,6 +4,14 @@
 
 **Open-source EMS demonstration for industrial PV, battery storage and flexible loads.**
 
+## Project credits / Принос към проекта
+
+Created and led by **Dr. Eng. Antuan Hristov Angelov** — product concept, EMS
+and system architecture, software development, frontend implementation, and
+product/UX/UI design. [Digital profile](https://linkmy.cards/en/antouan-anguelov/)
+· [LinkedIn](https://www.linkedin.com/in/antouan/) ·
+[Българска версия](CREDITS.md#български)
+
 GrideX Energy OS is a bilingual Bulgarian/English product demonstration of an industrial Energy Management System. It presents portfolio monitoring, BESS control, day-ahead scheduling, IBEX price logic, weather and production forecasting, imbalance reduction, industrial load planning, SCADA/device integration and edge safety.
 
 ## Live demo
