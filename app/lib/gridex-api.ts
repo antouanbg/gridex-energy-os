@@ -76,6 +76,20 @@ export type GridexSiteSnapshot = {
     cycleForecast24h?: GridexBatteryCycleForecast24h | null;
   };
   devices: GridexDeviceLive[];
+  edge?: {
+    gatewayId: string | null;
+    status: "online" | "degraded" | "offline" | "safe_mode" | "unknown";
+    observedAt: string | null;
+    receivedAt?: string | null;
+    ageSeconds?: number;
+    state?: string | null;
+    pcsHeartbeatOk?: boolean;
+    controlReady?: boolean;
+    safeMode?: boolean;
+    northboundReady?: boolean;
+    nodeOnlineCount?: number;
+    nodeTotal?: number;
+  };
   batteryEconomicsToday: {
     available: boolean;
     currency?: "EUR";

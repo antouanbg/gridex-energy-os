@@ -278,6 +278,16 @@ export default function Home() {
     }
   };
 
+  const edge = dataMode === "live" ? liveSnapshot?.edge : undefined;
+  const edgeTitle = dataMode === "demo" ? (lang === "en" ? "Demo Edge" : "Демо Edge") : (lang === "en" ? "Edge gateway" : "Edge шлюз");
+  const edgeStatus = (() => {
+    if (dataMode === "demo") return lang === "en" ? "Demo mode" : "Демо режим";
+    if (!edge || edge.status === "unknown") return lang === "en" ? "No health data" : "Няма health данни";
+    const labels = lang === "en" ? { online: "Online", degraded: "Degraded", offline: "Offline", safe_mode: "Safe mode" } : { online: "Онлайн", degraded: "Влошен", offline: "Офлайн", safe_mode: "Безопасен режим" };
+    const elapsed = typeof edge.ageSeconds === "number" ? (edge.ageSeconds < 60 ? `${edge.ageSeconds} ${lang === "en" ? "sec ago" : "сек. преди"}` : `${Math.floor(edge.ageSeconds / 60)} ${lang === "en" ? "min ago" : "мин. преди"}`) : "";
+    return `${labels[edge.status]}${elapsed ? ` · ${elapsed}` : ""}`;
+  })();
+
   return (
     <main className="app-shell">
       <aside className={`sidebar ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
@@ -298,7 +308,7 @@ export default function Home() {
         <button className="mobile-menu-toggle" data-no-translate aria-controls="main-navigation" aria-expanded={mobileNavOpen} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
-          <div className="gateway"><span className="live-dot"/><div><strong>{lang==="en"?"Edge gateway":"Edge шлюз"}</strong><small>{lang==="en"?"Online · 8 sec ago":"Онлайн · преди 8 сек."}</small></div></div>
+          <div className="gateway" data-testid="edge-health-status"><span className={`live-dot ${dataMode === "demo" ? "demo" : edge?.status || "unknown"}`}/><div><strong>{edgeTitle}</strong><small>{edgeStatus}</small></div></div>
         <div className="profile-wrap" data-no-translate>
           <button className={`profile ${accountMenuOpen?"open":""}`} onClick={()=>setAccountMenuOpen(!accountMenuOpen)} aria-haspopup="menu" aria-expanded={accountMenuOpen}>
             <span>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</span>

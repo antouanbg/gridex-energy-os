@@ -1,7 +1,7 @@
 # Current task
 
-Prepare the lazy-loaded frontend sections and full 19-screen Playwright suite
-for review.
+Implement the live Edge health presentation contract without changing the
+approved mobile layout.
 
 ## Completed
 
@@ -15,11 +15,13 @@ for review.
 - Added Playwright coverage for all 19 sections at 360, 390 and 430 px.
 - Added heading/language, interactive range and browser-error checks.
 - Added a Pull Request quality workflow for lint, build and browser tests.
+- Added an optional `edge` status shape to `/snapshot` and replaced the fake
+  "Online · 8 sec ago" header with explicit Demo, Unknown or backend-derived
+  Edge state.
 
 ## Remaining
 
-- Review, push and open the Pull Request.
-- Keep component-level i18n completion as a separate follow-up.
+- Run the portal test suite, review, commit, push and open the Edge-health PR.
 
 ## Modified files
 
@@ -43,6 +45,8 @@ for review.
 - `package.json`
 - `package-lock.json`
 - `.gitignore`
+- `app/lib/gridex-api.ts`
+- `app/page.tsx`
 
 ## Tests
 
@@ -52,11 +56,8 @@ for review.
   document-level horizontal overflow observed.
 - `npm run build:pages` — passes; `/` and `/en/` entries emitted and `og.jpg`
   is 176 KB.
-- `npm test` — passes (10 tests).
-- `npm run test:e2e` — passes (5 Playwright tests); all 19 sections pass at
-  360, 390 and 430 px without page-level horizontal overflow.
-- Static build emits a separate lazy chunk for each of the 19 portal sections,
-  plus small shared UI/data chunks.
+- Previous portal checks passed; the Edge-health change still needs its final
+  validation run on this branch.
 
 ## Known issues
 
@@ -67,9 +68,9 @@ for review.
 
 ## Next action
 
-Review the diff, run the final validation set, commit, push and open a Pull
-Request to `main`.
+Run lint, unit/browser tests and build; then commit and open a draft PR to
+`main` for the Edge-health presentation contract.
 
 ## Last updated
 
-2026-09-10
+2026-09-11
