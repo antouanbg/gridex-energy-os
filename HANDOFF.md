@@ -37,6 +37,13 @@ remains the short-lived record of the active task.
      need to read/write the versioned GrideX API configuration endpoints.
    - Do not connect forms directly to OpenRemote or PostgreSQL.
 
+6. **Connect the Alarms & events screen to the operational API**
+   - The current screen is an interactive demo: events, rules, incidents,
+     counters and acknowledgement/resolution actions are local component data.
+   - After the backend alarm/incident API exists, replace the static arrays,
+     wire filter/pagination and permission-aware actions, and render delivery
+     state without exposing notification recipients or secrets.
+
 ## Completion evidence
 
 - Relevant draft PR merged after review.
