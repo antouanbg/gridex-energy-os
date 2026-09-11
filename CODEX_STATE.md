@@ -1,6 +1,6 @@
 # Current task
 
-Publish the privacy-safe regional language default for the portal.
+No active implementation task.
 
 ## Completed
 
@@ -18,10 +18,11 @@ Publish the privacy-safe regional language default for the portal.
   language selection without GPS or GeoIP tracking.
 - Preserved `/en` as an explicit English route and added remembered manual BG/EN
   preference in the browser.
+- Published draft PR #12 for the regional language default.
 
 ## Remaining
 
-- Review, push and open the regional-language Pull Request.
+- Review and merge draft PR #12.
 - Implement the separately approved Settings v2 forms and API persistence.
 
 ## Modified files
