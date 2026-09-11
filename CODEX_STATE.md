@@ -1,7 +1,7 @@
 # Current task
 
-Prepare the lazy-loaded frontend sections and full 19-screen Playwright suite
-for review.
+Correct the portal's Edge data-path copy to the VPN-only Site Router topology
+without changing mobile layout or runtime communication code.
 
 ## Completed
 
@@ -15,6 +15,8 @@ for review.
 - Added Playwright coverage for all 19 sections at 360, 390 and 430 px.
 - Added heading/language, interactive range and browser-error checks.
 - Added a Pull Request quality workflow for lint, build and browser tests.
+- Corrected the Edge gateway screen so it no longer claims direct node MQTT;
+  it now shows ROCK Pi polling over OT Modbus TCP and publishing private MQTT.
 
 ## Remaining
 
@@ -37,6 +39,7 @@ for review.
 - `app/sections/*.tsx`
 - `app/sections/data.ts`
 - `app/sections/types.ts`
+- `app/sections/gateway.tsx`
 - `tests/e2e/portal-sections.spec.ts`
 - `playwright.config.ts`
 - `.github/workflows/frontend-quality.yml`
@@ -57,6 +60,7 @@ for review.
   360, 390 and 430 px without page-level horizontal overflow.
 - Static build emits a separate lazy chunk for each of the 19 portal sections,
   plus small shared UI/data chunks.
+- `npm run lint` — passes with the same two existing image optimisation warnings.
 
 ## Known issues
 
@@ -67,9 +71,9 @@ for review.
 
 ## Next action
 
-Review the diff, run the final validation set, commit, push and open a Pull
-Request to `main`.
+Commit and push the documentation/data-path correction, then continue review of
+the lazy-loaded frontend Pull Request.
 
 ## Last updated
 
-2026-09-10
+2026-09-11
