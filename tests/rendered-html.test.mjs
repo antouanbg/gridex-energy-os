@@ -57,6 +57,8 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(page, /mobilePrimaryNav/);
   assert.doesNotMatch(page, /MutationObserver/);
   assert.match(page, /document\.documentElement\.lang = lang/);
+  assert.match(page, /resolveUiLanguage/);
+  assert.match(page, /LANGUAGE_PREFERENCE_STORAGE_KEY/);
   assert.match(page, /gridex-demo-notice-dismissed/);
   assert.match(page, /demo-notice-close/);
 

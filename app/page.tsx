@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot } from "./lib/gridex-api";
 import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
+import { LANGUAGE_PREFERENCE_STORAGE_KEY, resolveUiLanguage } from "./i18n/locale";
 import { bgnToEur } from "./lib/currency";
 import { PanelTitle } from "./sections/shared";
 import type { BatteryCostSettings, DataMode } from "./sections/types";
@@ -99,9 +100,13 @@ export default function Home() {
   const [period, setPeriod] = useState("Днес");
   const [site, setSite] = useState("Solar Park East");
   const [role, setRole] = useState("Администратор");
-  const [lang,setLang] = useState<"bg"|"en">(
-    () => typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "bg",
-  );
+  // The same browser-only initialisation previously handled the /en route.
+  // A user's explicit choice still takes precedence over the regional default.
+  const [lang,setLang] = useState<UiLanguage>(() => typeof window === "undefined" ? "bg" : resolveUiLanguage({
+    pathname: window.location.pathname,
+    savedPreference: localStorage.getItem(LANGUAGE_PREFERENCE_STORAGE_KEY),
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }));
   const tKey = useT(lang);
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [demoNoticeVisible,setDemoNoticeVisible] = useState(true);
@@ -121,6 +126,11 @@ export default function Home() {
   // Text is selected by React during render. Do not mutate rendered text nodes:
   // doing so can overwrite fresh telemetry and form values after an update.
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+
+  const selectLanguage = (next:UiLanguage) => {
+    localStorage.setItem(LANGUAGE_PREFERENCE_STORAGE_KEY, next);
+    setLang(next);
+  };
 
   useEffect(() => {
     const restoreNotice = window.setTimeout(() => {
@@ -327,7 +337,7 @@ export default function Home() {
               <i/>{dataMode === "live" ? "OPENREMOTE LIVE" : backendState === "offline" ? "API OFFLINE · DEMO" : backendState === "checking" ? "CONNECTING · DEMO" : "DEMO DATA"}
             </span>
             <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
-            <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
+            <button className="language-switch" data-no-translate onClick={()=>selectLanguage(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
             <select value={role} disabled={dataMode==="live"} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>
             {view !== "sites" && <select value={site} onChange={(e) => {
               setSite(e.target.value);
