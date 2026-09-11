@@ -25,6 +25,7 @@ type DemoUser = {
   email:string;
   roleBg:string;
   roleEn:string;
+  roleId:"admin"|"operator"|"trader"|"customer";
 };
 
 type BackendState = "demo" | "checking" | "online" | "offline";
@@ -37,12 +38,12 @@ function initials(name:string):string {
 function sessionToUser(session:GridexAuthSession):DemoUser {
   const normalisedRoles=session.roles.map(item=>item.toLowerCase());
   const role=normalisedRoles.some(item=>item.includes("admin"))
-    ? ["Администратор","Administrator"]
+    ? ["Администратор","Administrator","admin"] as const
     : normalisedRoles.some(item=>item.includes("operator"))
-      ? ["Оператор","Operator"]
+      ? ["Оператор","Operator","operator"] as const
       : normalisedRoles.some(item=>item.includes("trader"))
-        ? ["Търговец","Trader"]
-        : ["Клиент","Customer"];
+        ? ["Търговец","Trader","trader"] as const
+        : ["Клиент","Customer","customer"] as const;
   return {
     nameBg:session.name,
     nameEn:session.name,
@@ -51,6 +52,7 @@ function sessionToUser(session:GridexAuthSession):DemoUser {
     email:session.email,
     roleBg:role[0],
     roleEn:role[1],
+    roleId:role[2],
   };
 }
 
@@ -96,13 +98,24 @@ export default function Home() {
   const [view, setView] = useState("overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [auto, setAuto] = useState(true);
-  const [period, setPeriod] = useState("Днес");
+  const [period, setPeriod] = useState("today");
   const [site, setSite] = useState("Solar Park East");
-  const [role, setRole] = useState("Администратор");
+  const [role, setRole] = useState<DemoUser["roleId"]>("admin");
   const [lang,setLang] = useState<"bg"|"en">(
     () => typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "bg",
   );
   const tKey = useT(lang);
+  const roleOptions = [
+    ["admin", lang === "en" ? "Administrator" : "Администратор"],
+    ["operator", lang === "en" ? "Operator" : "Оператор"],
+    ["customer", lang === "en" ? "Customer" : "Клиент"],
+    ["trader", lang === "en" ? "Trader" : "Търговец"],
+  ] as const;
+  const periodOptions = [
+    ["today", lang === "en" ? "Today" : "Днес"],
+    ["week", lang === "en" ? "This week" : "Тази седмица"],
+    ["month", lang === "en" ? "This month" : "Този месец"],
+  ] as const;
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [demoNoticeVisible,setDemoNoticeVisible] = useState(true);
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
@@ -164,7 +177,7 @@ export default function Home() {
       }
       const user=sessionToUser(session);
       setSessionUser(user);
-      setRole(user.roleBg);
+      setRole(user.roleId);
       setAuthState("authenticated");
       setIntegrationError("");
     }).catch(()=>{
@@ -260,7 +273,7 @@ export default function Home() {
       }
     }
     setSessionUser(null);
-    setRole("Администратор");
+    setRole("admin");
     navigate("login");
     notify(lang==="en"?"You have signed out safely":"Излязохте успешно от профила");
   };
@@ -328,13 +341,13 @@ export default function Home() {
             </span>
             <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
             <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
-            <select value={role} disabled={dataMode==="live"} onChange={(e) => { setRole(e.target.value); notify(`Активна роля: ${e.target.value}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}><option>Администратор</option><option>Оператор</option><option>Клиент</option><option>Търговец</option></select>
+            <select value={role} disabled={dataMode==="live"} onChange={(e) => { const next=e.target.value as DemoUser["roleId"]; setRole(next); notify(lang === "en" ? `Active role: ${roleOptions.find(([id])=>id===next)?.[1]}` : `Активна роля: ${roleOptions.find(([id])=>id===next)?.[1]}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}>{roleOptions.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
             {view !== "sites" && <select value={site} onChange={(e) => {
               setSite(e.target.value);
               const selected=liveSites.find(item=>item.name===e.target.value);
               if(selected)setSelectedSiteId(selected.id);
             }} aria-label={lang==="en"?"Selected site":"Избран обект"}>{dataMode==="live"&&liveSites.length?liveSites.map(item=><option key={item.id}>{item.name}</option>):<><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></>}</select>}
-            <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label={lang==="en"?"Period":"Период"}><option>Днес</option><option>Тази седмица</option><option>Този месец</option></select>
+            <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label={lang==="en"?"Period":"Период"}>{periodOptions.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
             <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△<em>3</em></button>
             <button className="mobile-account-button" data-no-translate aria-label={lang==="en"?"Account menu":"Потребителско меню"} aria-expanded={accountMenuOpen} onClick={()=>setAccountMenuOpen(!accountMenuOpen)}>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</button>
           </div>
@@ -353,15 +366,15 @@ export default function Home() {
           <div className="portal-view" data-testid={"section-"+view} data-view={view}>
             {dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
-        {view === "customers" && <Customers navigate={navigate} notify={notify}/>}
-        {view === "sites" && <Sites setSite={setSite} navigate={navigate}/>} 
+        {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
+        {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
         {view === "assets" && (
           <Assets navigate={navigate} notify={notify} lang={lang}/>
         )}
         {view === "battery" && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
-        {view === "schedule" && <Schedule notify={notify}/>}
+        {view === "schedule" && <Schedule notify={notify} lang={lang}/>}
         {view === "market" && <Market lang={lang} notify={notify}/>}
-        {view === "settlement" && <Settlement notify={notify}/>}
+        {view === "settlement" && <Settlement notify={notify} lang={lang}/>}
         {view === "automation" && <Automation notify={notify} site={site} lang={lang} batteryCost={batteryCost}/>}
         {view === "loads" && <FlexibleLoads notify={notify} lang={lang}/>}
         {view === "balance" && <Balance notify={notify} lang={lang}/>}

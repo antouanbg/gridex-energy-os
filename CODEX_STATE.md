@@ -1,7 +1,7 @@
 # Current task
 
-Correct the portal's Edge data-path copy to the VPN-only Site Router topology
-without changing mobile layout or runtime communication code.
+Remove Bulgarian labels that remained in the English portal locale, without
+changing the mobile layout or runtime backend communication.
 
 ## Completed
 
@@ -21,11 +21,17 @@ without changing mobile layout or runtime communication code.
 - Added a repository-identity requirement for any future `HANDOFF.md`.
 - Strengthened `AGENTS.md` so corresponding English and Bulgarian texts must
   remain semantically synchronized in the same commit.
+- Converted shared role, period and tariff controls to language-neutral IDs
+  with locale-specific labels.
+- Added locale support to Customers, Sites, Schedule and Settlement.
+- Converted alarm severity/filter and connector-state values to neutral IDs;
+  visible demo tables and incident details now follow the selected language.
 
 ## Remaining
 
-- Review, push and open the Pull Request.
-- Keep component-level i18n completion as a separate follow-up.
+- Review and publish the current English-locale correction.
+- Continue the full migration from two-argument helpers to keyed messages as
+  a separate follow-up.
 
 ## Modified files
 
@@ -50,6 +56,12 @@ without changing mobile layout or runtime communication code.
 - `package.json`
 - `package-lock.json`
 - `.gitignore`
+- `app/sections/customers.tsx`
+- `app/sections/sites.tsx`
+- `app/sections/schedule.tsx`
+- `app/sections/settlement.tsx`
+- `app/sections/alarms.tsx`
+- `app/sections/devices.tsx`
 
 ## Tests
 
@@ -65,6 +77,9 @@ without changing mobile layout or runtime communication code.
 - Static build emits a separate lazy chunk for each of the 19 portal sections,
   plus small shared UI/data chunks.
 - `npm run lint` — passes with the same two existing image optimisation warnings.
+- `npm run build:pages` — passes after the English-locale corrections.
+- `npm run test:e2e` cannot run locally because the Playwright executable is
+  not installed in this checkout (`playwright: command not found`).
 
 ## Known issues
 
@@ -75,8 +90,8 @@ without changing mobile layout or runtime communication code.
 
 ## Next action
 
-Commit and push the documentation/data-path correction, then continue review of
-the lazy-loaded frontend Pull Request.
+Commit and publish the English-locale correction; provision the Playwright
+browser dependency before the next full browser test run.
 
 ## Last updated
 
