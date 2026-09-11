@@ -52,3 +52,20 @@ desktop emulation appears to pass. A user-reported mobile issue is authoritative
   remaining work, tests, known issues and the exact next action.
 - Keep architecture diagrams and core documentation in English and Bulgarian.
 - Before a commit inspect `git diff` and `git status` for accidental secrets.
+
+## Mandatory handoff policy
+
+`HANDOFF.md` is the durable, repository-level backlog for explicitly planned
+but unimplemented work. It is not optional.
+
+- At the start of every repository task, read `HANDOFF.md` together with this
+  file and `CODEX_STATE.md`.
+- When a task leaves any concrete work unimplemented, deferred, blocked by an
+  external dependency, or awaiting commissioning, update `HANDOFF.md` before
+  the final response and before the task's final commit/push.
+- Remove or move an item only when completion is evidenced by code,
+  configuration, tests and, where applicable, deployment verification.
+- Every item must state its dependency, acceptance evidence and exact next
+  action. Never add secrets, real network details, credentials or customer data.
+- Do not claim a task is complete while its corresponding `HANDOFF.md` entry
+  is stale or missing.
