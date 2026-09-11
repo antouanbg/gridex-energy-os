@@ -19,6 +19,8 @@ without changing mobile layout or runtime communication code.
   it now shows ROCK Pi polling over OT Modbus TCP and publishing private MQTT.
 - Added durable project-creator attribution in `README.md` and `CREDITS.md`.
 - Added a repository-identity requirement for any future `HANDOFF.md`.
+- Strengthened `AGENTS.md` so corresponding English and Bulgarian texts must
+  remain semantically synchronized in the same commit.
 
 ## Remaining
 

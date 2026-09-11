@@ -43,6 +43,19 @@ desktop emulation appears to pass. A user-reported mobile issue is authoritative
 - Keep product documentation bilingual where practical: English first, Bulgarian second.
 - Update tests and documentation with material implementation changes.
 
+## Bilingual synchronisation — mandatory
+
+For every user-facing, architecture, configuration, safety or operational text:
+
+1. English is the canonical section and Bulgarian is the matching section.
+2. Update both versions in the same commit whenever meaning changes.
+3. Keep figures, data paths, units, defaults, roles and safety conditions
+   semantically identical; wording may differ only for correct translation.
+4. Use `docs/i18n/GLOSSARY.md` as the binding terminology source. Do not
+   translate code identifiers, API fields, protocol names or product brands.
+5. Before commit, inspect the changed EN/BG sections and fix discrepancies;
+   never leave a stale translation for a later task.
+
 ## Task recovery and Git workflow
 
 - Start every task by reading this file, `CODEX_STATE.md`, relevant docs and
