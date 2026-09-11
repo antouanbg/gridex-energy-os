@@ -18,6 +18,7 @@ without changing mobile layout or runtime communication code.
 - Corrected the Edge gateway screen so it no longer claims direct node MQTT;
   it now shows ROCK Pi polling over OT Modbus TCP and publishing private MQTT.
 - Added durable project-creator attribution in `README.md` and `CREDITS.md`.
+- Added a repository-identity requirement for any future `HANDOFF.md`.
 
 ## Remaining
 

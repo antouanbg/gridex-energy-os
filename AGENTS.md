@@ -50,5 +50,8 @@ desktop emulation appears to pass. A user-reported mobile issue is authoritative
 - Preserve unrelated user changes and use small, logical commits.
 - Update `CODEX_STATE.md` after meaningful milestones with completed work,
   remaining work, tests, known issues and the exact next action.
+- Whenever incomplete work needs a `HANDOFF.md`, identify the repository
+  directly below its title as `Repository / GitHub: <owner>/<repository>`.
+  This is mandatory so a handoff is never ambiguous across GrideX repos.
 - Keep architecture diagrams and core documentation in English and Bulgarian.
 - Before a commit inspect `git diff` and `git status` for accidental secrets.
