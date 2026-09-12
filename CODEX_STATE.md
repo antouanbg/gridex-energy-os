@@ -1,7 +1,10 @@
 # Current task
 
-Remove Bulgarian labels that remained in the English portal locale, without
-changing the mobile layout or runtime backend communication.
+No active code change. This documentation checkpoint introduces the mandatory
+Pull Request workflow and records the current unmerged portal work.
+
+Няма активна кодова промяна. Този документационен checkpoint въвежда
+задължителния Pull Request процес и записва текущата немержната portal работа.
 
 ## Completed
 
@@ -26,12 +29,15 @@ changing the mobile layout or runtime backend communication.
 - Added locale support to Customers, Sites, Schedule and Settlement.
 - Converted alarm severity/filter and connector-state values to neutral IDs;
   visible demo tables and incident details now follow the selected language.
+- Added the mandatory rule that every completed change must be pushed and
+  opened as a Pull Request before it is reported as ready, without automatic
+  merging.
 
 ## Remaining
 
-- Review and publish the current English-locale correction.
-- Continue the full migration from two-argument helpers to keyed messages as
-  a separate follow-up.
+- Review the currently open portal Pull Requests before merging them.
+- Continue the full migration from two-argument helpers to keyed messages as a
+  separate follow-up.
 
 ## Modified files
 
@@ -62,6 +68,8 @@ changing the mobile layout or runtime backend communication.
 - `app/sections/settlement.tsx`
 - `app/sections/alarms.tsx`
 - `app/sections/devices.tsx`
+- `AGENTS.md`
+- `HANDOFF.md`
 
 ## Tests
 
@@ -80,6 +88,7 @@ changing the mobile layout or runtime backend communication.
 - `npm run build:pages` — passes after the English-locale corrections.
 - `npm run test:e2e` cannot run locally because the Playwright executable is
   not installed in this checkout (`playwright: command not found`).
+- Documentation checkpoint: `git diff --check` passed.
 
 ## Known issues
 
@@ -87,12 +96,15 @@ changing the mobile layout or runtime backend communication.
   there are no lint errors.
 - `npm install` reports inherited dependency audit findings; no automatic
   dependency upgrades were made in this task.
+- The configuration, locale and edge-health portal work remains in separate
+  open Pull Requests and is not yet visible on `main`.
 
 ## Next action
 
-Commit and publish the English-locale correction; provision the Playwright
-browser dependency before the next full browser test run.
+Review the Pull Request for the mandatory workflow, then review the existing
+open portal Pull Requests. Provision the Playwright browser dependency before
+the next full browser test run.
 
 ## Last updated
 
-2026-09-11
+2026-09-12
