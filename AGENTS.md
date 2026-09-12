@@ -67,4 +67,31 @@ For every user-facing, architecture, configuration, safety or operational text:
   directly below its title as `Repository / GitHub: <owner>/<repository>`.
   This is mandatory so a handoff is never ambiguous across GrideX repos.
 - Keep architecture diagrams and core documentation in English and Bulgarian.
+
+## Mandatory Pull Request workflow / Задължителен Pull Request процес
+
+- Every completed change set must be committed on a named branch, pushed to
+  `origin` and given a Pull Request before it is reported as ready for review.
+- The default target is `main`. Use a different base branch only when a
+  documented dependency requires it, and state that dependency in the PR.
+- Each PR must state its user-visible scope, tests, known limitations and any
+  required deployment or manual verification steps.
+- Never merge automatically. Report the Pull Request URL and wait for the
+  project owner's review/merge decision.
+- If a PR cannot be created, record its branch, commit SHA and exact blocker in
+  `CODEX_STATE.md` and `HANDOFF.md` where applicable; never claim that a change
+  is published to `main` before it is merged.
+
+- Всяка завършена промяна се commit-ва в именуван branch, push-ва се към
+  `origin` и получава Pull Request, преди да бъде докладвана като готова за
+  review.
+- Стандартната цел е `main`. Друга base branch се ползва само при документирана
+  зависимост и тази зависимост се описва в PR-а.
+- Всеки PR описва видимия за потребителя обхват, тестовете, известните
+  ограничения и необходимите deployment или ръчни проверки.
+- Не merge-вай автоматично. Докладвай Pull Request URL и изчакай review/merge
+  решение на собственика на проекта.
+- Ако PR не може да бъде създаден, запиши branch-а, commit SHA и точното
+  препятствие в `CODEX_STATE.md` и при нужда в `HANDOFF.md`; никога не
+  докладвай промяна като публикувана в `main` преди да бъде merge-ната.
 - Before a commit inspect `git diff` and `git status` for accidental secrets.
