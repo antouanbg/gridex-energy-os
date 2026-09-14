@@ -2,6 +2,28 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Invitation forms / Форми за покани — 2026-09-15
+
+Profile/sign-in now show invitation acceptance and organisation-admin invitation
+forms. Uses database membership from /me, not token admin claims. Explicit site
+selection and four non-admin roles; no password collection. Sending is disabled
+on enrollment 503. A sent invitation can be revoked in the same session; persisted
+sent-invitation listing is not yet provided by backend. Anonymous users see the
+invite-only instructions. Backend PR #19 is merged/deployed; the old RBAC notes
+below are historical. Keycloak setup belongs to antouanbg/gridex-openremote-backend.
+SMTP, activation and real user browser tests remain. No mobile CSS/design changes.
+Typecheck exposes existing unrelated errors; builds/lint and 11 tests pass.
+
+Профилът/входът вече показват приемане и форма за покана от администратор на
+организация. Използва membership от /me, не token admin claims. Изричен избор
+на обекти и четири неадминистративни роли; без събиране на пароли. При 503
+изпращането е спряно. Изпратена покана може да се отмени в същата сесия;
+backend още няма постоянен списък с изпратени покани. Анонимните виждат указания.
+Backend PR #19 е merged/внедрен; старите RBAC бележки са исторически. Keycloak
+настройките са в antouanbg/gridex-openremote-backend. Остават SMTP, активиране
+и реален browser тест. Без мобилни CSS/дизайн промени. Typecheck открива стари
+несвързани грешки; builds/lint и 11 теста минават.
+
 ## English
 
 Local integration uses vite.local.config.ts (loopback 4173), existing Keycloak

@@ -30,7 +30,10 @@ export type GridexUser = {
   preferredUsername?: string;
   roles: string[];
   permissions: string[];
+  memberships?: { organisationId: string; role: string; allSites: boolean }[];
 };
+
+export type GridexInvitation = { id: string; organisationId: string; role: string; siteIds: string[]; expiresAt: string };
 
 export type GridexSite = {
   id: string;
@@ -260,6 +263,19 @@ export class GridexApiClient {
 
   async me(signal?: AbortSignal): Promise<GridexUser> {
     return this.getJson<GridexUser>("/api/v1/me", signal);
+  }
+
+  async invitations(signal?: AbortSignal): Promise<{ invitations: GridexInvitation[] }> {
+    return this.getJson('/api/v1/me/invitations', signal);
+  }
+  async invite(organisationId: string, body: { email: string; role: string; siteIds: string[] }): Promise<{ id: string; state: string }> {
+    return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations`, body);
+  }
+  async acceptInvitation(id: string): Promise<{ accepted: boolean }> {
+    return this.postJson(`/api/v1/invitations/${encodeURIComponent(id)}/accept`, {});
+  }
+  async revokeInvitation(organisationId: string, id: string): Promise<{ revoked: boolean }> {
+    return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations/${encodeURIComponent(id)}/revoke`, {});
   }
 
   async userPreferences(signal?: AbortSignal): Promise<GridexUserPreferences> {

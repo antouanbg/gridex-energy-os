@@ -1,5 +1,22 @@
 # Current task
 
+2026-09-15: invitation forms added to profile and sign-in for authenticated users.
+Email, organisation, role, explicit sites, acceptance and immediate cancellation
+use GrideX API; 503 disables sending honestly. Display roles use /me membership.
+No CSS/mobile navigation or public configuration changed. Lint passed with two
+existing image warnings; both builds and 11 tests passed. Typecheck still has
+pre-existing gateway/overview/supported/worker errors; no invitation errors.
+Next: configure SMTP/enable backend enrollment, real invited-user browser QA.
+
+2026-09-15: форми за покани в профила/входа за автентикирани потребители.
+Имейл, организация, роля, обекти, приемане и отмяна през GrideX API; 503 спира
+изпращането. Ролите за показване идват от /me. Без промени по CSS/мобилна
+навигация/публична конфигурация. Lint мина с две стари image предупреждения;
+двата build-а и 11 теста минаха. Typecheck има стари gateway/overview/supported/
+worker грешки, без грешки в поканите. Следва SMTP/активиране и реален browser QA.
+
+## Previous checkpoint / Предходно състояние
+
 2026-09-14 checkpoint: local frontend/backend login preparation on
 feat/local-backend-login. vite.local.config.ts serves local config only;
 frontend HTTP 200 and proxied backend health ready verified. Browser user
