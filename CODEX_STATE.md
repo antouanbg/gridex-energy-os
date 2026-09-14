@@ -1,5 +1,20 @@
 # Current task
 
+## Access planning checkpoint / План за управление на достъпа — 2026-09-15
+
+Completed this task: coordinated EN/BG ACCESS_MANAGEMENT_PLAN.md and HANDOFF update.
+Mailgun REST supersedes SMTP next-actions. 0/8 complete-workflow milestones accepted;
+existing implementation remains foundation only. No runtime/UI changes or email sent.
+Next: BE-01 Mailgun provider compatibility, private region/domain/sender configuration;
+BE-03 admin list contracts and FE-01 screens may proceed without credentials.
+Validation: identical plan copies, Markdown diff/secret review; no runtime tests needed.
+
+Готово в тази задача: общ EN/BG ACCESS_MANAGEMENT_PLAN.md и HANDOFF. Mailgun REST
+заменя SMTP задачите. 0/8 пълни етапа приети; кодът остава основа. Без runtime/UI
+промени или изпратен имейл. Следва BE-01 съвместимост, регион/домейн/подател;
+BE-03 договори и FE-01 екрани могат без ключове. Проверки: идентични копия,
+Markdown diff и secrets; не са нужни runtime тестове за тази документация.
+
 2026-09-15: invitation forms added to profile and sign-in for authenticated users.
 Email, organisation, role, explicit sites, acceptance and immediate cancellation
 use GrideX API; 503 disables sending honestly. Display roles use /me membership.
