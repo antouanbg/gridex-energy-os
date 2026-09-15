@@ -1,5 +1,20 @@
 # Current task
 
+2026-09-14 checkpoint: local frontend/backend login preparation on
+feat/local-backend-login. vite.local.config.ts serves local config only;
+frontend HTTP 200 and proxied backend health ready verified. Browser user
+login not verified; callback/CORS provisioning and a real user remain pending.
+See HANDOFF.md for invitation/RBAC gaps and deferred backend restore.
+npm ci reports 25 vulnerabilities (18 high); no force upgrade performed.
+
+2026-09-14: подготовка на local frontend/backend вход във feat/local-backend-login.
+vite.local.config.ts подава само локална конфигурация; frontend HTTP 200 и
+backend health ready през proxy са проверени. Browser user вход не е проверен;
+callbacks/CORS и реален потребител предстоят. Виж HANDOFF.md за invitation/RBAC
+пропуски и отложения backend restore. npm ci: 25 уязвимости, 18 high; без force upgrade.
+
+## Historical task / Историческа задача
+
 Remove Bulgarian labels that remained in the English portal locale, without
 changing the mobile layout or runtime backend communication.
 

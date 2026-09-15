@@ -1,5 +1,15 @@
 # GrideX Energy OS — Working Rules
 
+## Active host decision / Активен host
+
+Owner decision 2026-09-14: active staging is Linux ARM64 under macOS/Colima.
+Windows deployment statements below are historical. Keep Site Router VPN
+boundaries unchanged; local login testing does not authorize public exposure.
+
+Решение 2026-09-14: активният staging е Linux ARM64 под macOS/Colima.
+Windows deployment текстовете по-долу са исторически. Site Router VPN
+границите се запазват; local login тест не разрешава публично излагане.
+
 ## EMS architecture — mandatory
 
 This repository is part of a distributed EMS based on OpenRemote and custom
