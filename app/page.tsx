@@ -70,6 +70,7 @@ const initialBatteryCost:BatteryCostSettings = {
 
 
 const Overview = lazy(() => import("./sections/overview").then(module => ({ default: module.Overview })));
+const Invitations = lazy(() => import('./sections/invitations').then(module => ({ default: module.Invitations })));
 const Customers = lazy(() => import("./sections/customers").then(module => ({ default: module.Customers })));
 const Sites = lazy(() => import("./sections/sites").then(module => ({ default: module.Sites })));
 const Assets = lazy(() => import("./sections/assets").then(module => ({ default: module.Assets })));
@@ -168,14 +169,16 @@ export default function Home() {
   useEffect(() => {
     if (backendState !== "online") return;
     let active=true;
-    initialiseGridexAuth(runtimeConfig).then(session=>{
+    initialiseGridexAuth(runtimeConfig).then(async session=>{
       if (!active) return;
       if (!session) {
         setSessionUser(null);
         setAuthState("anonymous");
         return;
       }
-      const user=sessionToUser(session);
+      const membershipIdentity = await apiClient.me();
+      if (!active) return;
+      const user=sessionToUser({ ...session, roles: membershipIdentity.roles });
       setSessionUser(user);
       setRole(user.roleId);
       setAuthState("authenticated");
@@ -187,7 +190,7 @@ export default function Home() {
       setIntegrationError(lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
     return()=>{active=false;};
-  },[backendState,runtimeConfig,lang]);
+  },[backendState,runtimeConfig,lang,apiClient]);
 
   useEffect(()=>{
     if (dataMode!=="live") return;
@@ -390,6 +393,7 @@ export default function Home() {
         {view === "about" && <About lang={lang} notify={notify}/>}
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} navigate={navigate} signOut={signOut} notify={notify}/>}
         {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
+        {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang}/>}
             </>}
           </div>
         </Suspense>
@@ -456,6 +460,7 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
       <div className={`login-demo-chip ${backendAvailable?"ready":"offline"}`}>{backendAvailable?t("СИГУРЕН ВХОД","SECURE SIGN-IN"):t("BACKEND НЕДОСТЪПЕН","BACKEND UNAVAILABLE")}</div>
       <p>{t("ДОБРЕ ДОШЛИ","WELCOME BACK")}</p>
       <h2>{t("Вход в портала","Sign in to the portal")}</h2>
+      <p>{t("Регистрацията е с покана по имейл от администратор на организация. След потвърждение на имейла задайте парола в Keycloak и приемете поканата в профила си.","Registration requires an email invitation from your organisation administrator. Verify your email, set your password in Keycloak and accept the invitation in your profile.")}</p>
       <span className="login-intro">{backendAvailable?t("Използвайте служебния си GrideX профил. Ще бъдете пренасочени към защитения OpenRemote / Keycloak вход.","Use your GrideX work account. You will be redirected to the secure OpenRemote / Keycloak sign-in."):t("Има проблем с връзката към backend-а. Демото остава достъпно, но реалният вход и данните на живо са временно спрени.","There is a backend connection problem. The demo remains available, but real sign-in and live data are temporarily disabled.")}</span>
       {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
       <div className={`login-connection-state ${backendAvailable?"online":"offline"}`}><i/>

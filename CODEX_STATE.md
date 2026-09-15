@@ -1,5 +1,49 @@
 # Current task
 
+## Merge review / Преглед за merge — 2026-09-15
+
+PR #15 merged; PR #16 reviewed for merge. Corrected stale SMTP UI copy to
+Mailgun in both languages. Lint: 0 errors, 2 existing image warnings; build and
+11 tests passed. Public HTTPS/login commissioning remains incomplete; runtime
+URLs and mobile CSS unchanged. No claim of working real email invitations.
+
+PR #15 е merged; PR #16 е прегледан за merge. Старият SMTP UI текст е заменен
+с Mailgun на двата езика. Lint: 0 грешки, 2 стари image предупреждения; build
+и 11 теста минаха. Публичният HTTPS/вход предстои; runtime URLs и mobile CSS
+са непроменени. Реални имейл покани не са доказани.
+
+## Access planning checkpoint / План за управление на достъпа — 2026-09-15
+
+Completed this task: coordinated EN/BG ACCESS_MANAGEMENT_PLAN.md and HANDOFF update.
+Mailgun REST supersedes SMTP next-actions. 0/8 complete-workflow milestones accepted;
+existing implementation remains foundation only. No runtime/UI changes or email sent.
+Next: BE-01 Mailgun provider compatibility, private region/domain/sender configuration;
+BE-03 admin list contracts and FE-01 screens may proceed without credentials.
+Validation: identical plan copies, Markdown diff/secret review; no runtime tests needed.
+
+Готово в тази задача: общ EN/BG ACCESS_MANAGEMENT_PLAN.md и HANDOFF. Mailgun REST
+заменя SMTP задачите. 0/8 пълни етапа приети; кодът остава основа. Без runtime/UI
+промени или изпратен имейл. Следва BE-01 съвместимост, регион/домейн/подател;
+BE-03 договори и FE-01 екрани могат без ключове. Проверки: идентични копия,
+Markdown diff и secrets; не са нужни runtime тестове за тази документация.
+
+2026-09-15: invitation forms added to profile and sign-in for authenticated users.
+Email, organisation, role, explicit sites, acceptance and immediate cancellation
+use GrideX API; 503 disables sending honestly. Display roles use /me membership.
+No CSS/mobile navigation or public configuration changed. Lint passed with two
+existing image warnings; both builds and 11 tests passed. Typecheck still has
+pre-existing gateway/overview/supported/worker errors; no invitation errors.
+Next: configure SMTP/enable backend enrollment, real invited-user browser QA.
+
+2026-09-15: форми за покани в профила/входа за автентикирани потребители.
+Имейл, организация, роля, обекти, приемане и отмяна през GrideX API; 503 спира
+изпращането. Ролите за показване идват от /me. Без промени по CSS/мобилна
+навигация/публична конфигурация. Lint мина с две стари image предупреждения;
+двата build-а и 11 теста минаха. Typecheck има стари gateway/overview/supported/
+worker грешки, без грешки в поканите. Следва SMTP/активиране и реален browser QA.
+
+## Previous checkpoint / Предходно състояние
+
 2026-09-14 checkpoint: local frontend/backend login preparation on
 feat/local-backend-login. vite.local.config.ts serves local config only;
 frontend HTTP 200 and proxied backend health ready verified. Browser user

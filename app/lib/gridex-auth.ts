@@ -84,7 +84,7 @@ async function sessionFrom(instance: Keycloak): Promise<GridexAuthSession> {
   } catch {
     // Profile is optional; verified ID/access-token claims remain the fallback.
   }
-  const clientRoles = parsed?.resource_access?.[instance.clientId]?.roles ?? [];
+  const clientRoles = instance.clientId ? parsed?.resource_access?.[instance.clientId]?.roles ?? [] : [];
   const realmRoles = parsed?.realm_access?.roles ?? [];
   const name = profile?.firstName || profile?.lastName
     ? [profile.firstName, profile.lastName].filter(Boolean).join(" ")
