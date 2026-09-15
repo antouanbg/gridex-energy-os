@@ -1,5 +1,17 @@
 # Current task
 
+## Merge review / Преглед за merge — 2026-09-15
+
+PR #15 merged; PR #16 reviewed for merge. Corrected stale SMTP UI copy to
+Mailgun in both languages. Lint: 0 errors, 2 existing image warnings; build and
+11 tests passed. Public HTTPS/login commissioning remains incomplete; runtime
+URLs and mobile CSS unchanged. No claim of working real email invitations.
+
+PR #15 е merged; PR #16 е прегледан за merge. Старият SMTP UI текст е заменен
+с Mailgun на двата езика. Lint: 0 грешки, 2 стари image предупреждения; build
+и 11 теста минаха. Публичният HTTPS/вход предстои; runtime URLs и mobile CSS
+са непроменени. Реални имейл покани не са доказани.
+
 ## Access planning checkpoint / План за управление на достъпа — 2026-09-15
 
 Completed this task: coordinated EN/BG ACCESS_MANAGEMENT_PLAN.md and HANDOFF update.

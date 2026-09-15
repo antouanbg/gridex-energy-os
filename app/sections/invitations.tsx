@@ -4,14 +4,14 @@ import { GridexApiError, type GridexApiClient, type GridexUser, type GridexSite,
 import type { UiLanguage } from '../i18n/messages';
 
 const copy = {
-  en: { title: 'Organisation access', loading: 'Loading access…', unavailable: 'Email invitations are not enabled yet. SMTP and identity setup must be completed.',
+  en: { title: 'Organisation access', loading: 'Loading access…', unavailable: 'Email invitations are not enabled yet. Mailgun and identity setup must be completed.',
     failed: 'The request failed. Refresh and try again; do not assume an email was sent.', empty: 'No pending invitations. Registration alone does not grant access to sites.',
     invite: 'Invite by email', email: 'Work email', org: 'Organisation', role: 'Role', sites: 'Permitted sites', send: 'Send invitation', accept: 'Accept invitation',
     accepted: 'Invitation accepted. Reload to load your sites.', reload: 'Reload portal', sent: 'Email dispatch confirmed. Membership starts only after acceptance.',
     revoke: 'Revoke invitation', revoked: 'Invitation revoked.', pending: 'Your invitations', expiry: 'Expires', busy: 'Working…',
     noadmin: 'Only an organisation administrator can invite members.', noSites: 'No sites are available for this organisation.',
     viewer: 'Viewer — read only', operator: 'Operator — operational actions', energy_manager: 'Energy manager — strategies and configuration', integrator: 'Integrator — device configuration' },
-  bg: { title: 'Достъп до организации', loading: 'Зареждане на правата…', unavailable: 'Поканите по имейл още не са включени. Нужни са SMTP и настройки за идентификация.',
+  bg: { title: 'Достъп до организации', loading: 'Зареждане на правата…', unavailable: 'Поканите по имейл още не са включени. Нужни са Mailgun и настройки за идентификация.',
     failed: 'Заявката е неуспешна. Обновете и опитайте пак; не приемайте, че имейлът е изпратен.', empty: 'Няма чакащи покани. Самата регистрация не дава достъп до обекти.',
     invite: 'Покана по имейл', email: 'Служебен имейл', org: 'Организация', role: 'Роля', sites: 'Разрешени обекти', send: 'Изпрати покана', accept: 'Приеми покана',
     accepted: 'Поканата е приета. Презаредете, за да заредите обектите.', reload: 'Презареди портала', sent: 'Изпращането е потвърдено. Членството започва само след приемане.',
