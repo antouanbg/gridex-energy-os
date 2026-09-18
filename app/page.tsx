@@ -145,35 +145,15 @@ export default function Home() {
 
   useEffect(() => {
     if (runtimeConfig.mode === "demo") return;
-    let controller = new AbortController();
-    const checkBackend=()=>apiClient.health(controller.signal).then(() => {
-        setBackendState("online");
-        setIntegrationError("");
-      }).catch(error => {
-        if(error instanceof DOMException&&error.name==="AbortError")return;
-        setBackendState("offline");
-        setAuthState("anonymous");
-        setSessionUser(null);
-        setLiveSnapshot(null);
-        setIntegrationError(lang==="en"?"The GrideX backend is currently unavailable.":"В момента няма връзка с GrideX backend-а.");
-      });
-    void checkBackend();
-    const interval=window.setInterval(()=>{
-      controller.abort();
-      controller=new AbortController();
-      void checkBackend();
-    },runtimeConfig.backendHealthRefreshMs);
-    return () => {window.clearInterval(interval);controller.abort();};
-  }, [apiClient, runtimeConfig.mode, runtimeConfig.backendHealthRefreshMs, lang]);
-
-  useEffect(() => {
-    if (backendState !== "online") return;
     let active=true;
     initialiseGridexAuth(runtimeConfig).then(async session=>{
       if (!active) return;
       if (!session) {
         setSessionUser(null);
         setAuthState("anonymous");
+        // Login must not depend on a public unauthenticated health endpoint.
+        setBackendState("online");
+        setIntegrationError("");
         return;
       }
       const membershipIdentity = await apiClient.me();
@@ -186,11 +166,12 @@ export default function Home() {
     }).catch(()=>{
       if (!active) return;
       setSessionUser(null);
+      setBackendState("offline");
       setAuthState("error");
       setIntegrationError(lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
     return()=>{active=false;};
-  },[backendState,runtimeConfig,lang,apiClient]);
+  },[runtimeConfig,lang,apiClient]);
 
   useEffect(()=>{
     if (dataMode!=="live") return;
@@ -267,7 +248,7 @@ export default function Home() {
   };
 
   const signOut = async () => {
-    if (authState === "authenticated" && backendState === "online") {
+    if (authState === "authenticated") {
       try {
         await gridexLogout(runtimeConfig);
         return;
@@ -282,8 +263,8 @@ export default function Home() {
   };
 
   const signIn = async () => {
-    if (backendState !== "online") {
-      setIntegrationError(lang==="en"?"Sign-in is unavailable because the backend cannot be reached.":"Входът не е достъпен, защото няма връзка с backend-а.");
+    if (authState === "error") {
+      setIntegrationError(lang==="en"?"Sign-in is unavailable because the identity service cannot be reached.":"Входът не е достъпен, защото услугата за идентичност не е достъпна.");
       return;
     }
     try {
