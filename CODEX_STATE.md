@@ -1,5 +1,22 @@
 # Current task
 
+## Public OIDC runtime readiness / Публична OIDC runtime готовност — 2026-09-18
+
+Updated public OIDC defaults to `auth.gridex.tech` and removed the unauthenticated
+`/health` preflight that blocked the login button behind the restricted proxy.
+`npm run lint`, `npm run build:pages` and 11 Node tests pass; lint retains only
+two existing image warnings. No mobile UI/design change. Backend public issuer
+is verified, but exact Keycloak callbacks and a real ordinary-user browser test
+are still pending; do not deploy/claim production login before those checks.
+
+Обновени са public OIDC defaults към `auth.gridex.tech` и е премахнат
+неудостовереният `/health` preflight, който блокираше бутона за вход зад
+ограничения proxy. `npm run lint`, `npm run build:pages` и 11 Node теста
+минават; lint пази само две стари image предупреждения. Няма mobile UI/design
+промяна. Public issuer на backend е проверен, но точните Keycloak callbacks и
+реалният browser тест с обикновен user предстоят; не публикувай/заявявай
+production login преди тези проверки.
+
 ## Merge review / Преглед за merge — 2026-09-15
 
 PR #15 merged; PR #16 reviewed for merge. Corrected stale SMTP UI copy to

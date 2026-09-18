@@ -5,7 +5,7 @@ window.__GRIDEX_CONFIG__ = {
   mode: "auto",
   apiBaseUrl: "https://api.gridex.tech",
   realm: "gridex",
-  oidcIssuer: "https://ems.gridex.tech/auth/realms/gridex",
+  oidcIssuer: "https://auth.gridex.tech/auth/realms/gridex",
   oidcClientId: "gridex-portal",
   defaultSiteId: "solar-park-east",
   backendTimeoutMs: 5000,

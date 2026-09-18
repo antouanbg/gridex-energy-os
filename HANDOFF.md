@@ -2,6 +2,35 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Public OIDC handoff / Публичен OIDC handoff — 2026-09-18
+
+The public runtime defaults now use `https://auth.gridex.tech/auth/realms/gridex`.
+Startup no longer makes an unauthenticated request to the intentionally private
+backend `/health` path before OIDC; that removed the former login/readiness
+circular dependency. No CSS, mobile layout or navigation was changed.
+
+Backend discovery and issuer now use the same public auth hostname. Before this
+frontend may be published, the backend owner must apply the exact Keycloak
+callbacks for `https://gridex.tech` root, `/en/` and `/silent-check-sso.html`,
+then verify real PKCE sign-in/sign-out. A master administrator is not a normal
+portal member: accept only an ordinary Gridex user with explicit organization/
+site membership and prove empty/foreign-site denial. Invitation email delivery
+through Mailgun remains separately disabled pending provider commissioning.
+
+Публичните runtime defaults вече ползват
+`https://auth.gridex.tech/auth/realms/gridex`. При стартиране вече няма заявка
+без удостоверяване към умишлено частния backend `/health` преди OIDC; така е
+премахнат предишният цикъл вход/готовност. Няма промяна по CSS, mobile layout
+или навигация.
+
+Backend discovery и issuer вече използват същото публично auth име. Преди този
+frontend да се публикува, backend собственикът трябва да приложи точните
+Keycloak callbacks за `https://gridex.tech` root, `/en/` и
+`/silent-check-sso.html`, после да провери реален PKCE вход/изход. Master admin
+не е нормален portal member: приеми само обикновен Gridex user с изрично
+членство в организация/обект и докажи отказ при липсващо/чуждо членство.
+Поканите по Mailgun остават отделно изключени до provider commissioning.
+
 ## Active access-management backlog / Активен план за достъп — 2026-09-15
 
 Owner selected Mailgun REST API, not SMTP. Follow [the coordinated plan](docs/ACCESS_MANAGEMENT_PLAN.md):
