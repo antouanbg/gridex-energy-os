@@ -28,7 +28,7 @@ type DemoUser = {
   roleId:"admin"|"operator"|"trader"|"customer";
 };
 
-type BackendState = "demo" | "checking" | "online" | "offline";
+type BackendState = "demo" | "checking" | "unknown" | "online" | "offline";
 type AuthState = "checking" | "authenticated" | "anonymous" | "error";
 
 function initials(name:string):string {
@@ -152,21 +152,32 @@ export default function Home() {
         setSessionUser(null);
         setAuthState("anonymous");
         // Login must not depend on a public unauthenticated health endpoint.
-        setBackendState("online");
+        setBackendState("unknown");
         setIntegrationError("");
         return;
       }
-      const membershipIdentity = await apiClient.me();
+      let membershipIdentity;
+      try {
+        membershipIdentity = await apiClient.me();
+      } catch {
+        if (!active) return;
+        setSessionUser(null);
+        setBackendState("offline");
+        setAuthState("error");
+        setIntegrationError(lang==="en"?"Sign-in completed, but API access could not be verified. Please retry.":"Входът приключи, но достъпът до API не може да се потвърди. Опитайте отново.");
+        return;
+      }
       if (!active) return;
       const user=sessionToUser({ ...session, roles: membershipIdentity.roles });
       setSessionUser(user);
       setRole(user.roleId);
       setAuthState("authenticated");
+      setBackendState("online");
       setIntegrationError("");
     }).catch(()=>{
       if (!active) return;
       setSessionUser(null);
-      setBackendState("offline");
+      setBackendState("unknown");
       setAuthState("error");
       setIntegrationError(lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
@@ -263,14 +274,12 @@ export default function Home() {
   };
 
   const signIn = async () => {
-    if (authState === "error") {
-      setIntegrationError(lang==="en"?"Sign-in is unavailable because the identity service cannot be reached.":"Входът не е достъпен, защото услугата за идентичност не е достъпна.");
-      return;
-    }
     try {
+      setAuthState("checking");
       setIntegrationError("");
       await gridexLogin(runtimeConfig);
     } catch {
+      setAuthState("error");
       setIntegrationError(lang==="en"?"The sign-in service did not respond. Please try again.":"Услугата за вход не отговори. Моля, опитайте отново.");
     }
   };
@@ -339,7 +348,7 @@ export default function Home() {
 
         {dataMode==="demo"&&demoNoticeVisible&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
-          <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"The backend connection is unavailable. Sign-in will become active automatically after the service recovers.":"Няма връзка с backend-а. Входът ще стане активен автоматично след възстановяване на услугата."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
+          <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"API access could not be verified. You can retry sign-in.":"Достъпът до API не може да се потвърди. Можете да опитате вход отново."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
           <button onClick={()=>navigate("login")}>{lang==="en"?"Sign in":"Вход"} →</button>
           <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
@@ -438,17 +447,17 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
       </div>
     </section>
     <section className="login-card">
-      <div className={`login-demo-chip ${backendAvailable?"ready":"offline"}`}>{backendAvailable?t("СИГУРЕН ВХОД","SECURE SIGN-IN"):t("BACKEND НЕДОСТЪПЕН","BACKEND UNAVAILABLE")}</div>
+      <div className={`login-demo-chip ${backendAvailable?"ready":"offline"}`}>{t("СИГУРЕН ВХОД","SECURE SIGN-IN")}</div>
       <p>{t("ДОБРЕ ДОШЛИ","WELCOME BACK")}</p>
       <h2>{t("Вход в портала","Sign in to the portal")}</h2>
       <p>{t("Регистрацията е с покана по имейл от администратор на организация. След потвърждение на имейла задайте парола в Keycloak и приемете поканата в профила си.","Registration requires an email invitation from your organisation administrator. Verify your email, set your password in Keycloak and accept the invitation in your profile.")}</p>
-      <span className="login-intro">{backendAvailable?t("Използвайте служебния си GrideX профил. Ще бъдете пренасочени към защитения OpenRemote / Keycloak вход.","Use your GrideX work account. You will be redirected to the secure OpenRemote / Keycloak sign-in."):t("Има проблем с връзката към backend-а. Демото остава достъпно, но реалният вход и данните на живо са временно спрени.","There is a backend connection problem. The demo remains available, but real sign-in and live data are temporarily disabled.")}</span>
+      <span className="login-intro">{t("Използвайте служебния си GrideX профил. Ще бъдете пренасочени към защитения OpenRemote / Keycloak вход.","Use your GrideX work account. You will be redirected to the secure OpenRemote / Keycloak sign-in.")}</span>
       {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
       <div className={`login-connection-state ${backendAvailable?"online":"offline"}`}><i/>
-        <span><strong>{backendState==="checking"?t("Проверка на връзката","Checking connection"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):t("Няма връзка с backend-а","Backend connection unavailable")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
+        <span><strong>{authState==="checking"?t("Проверка на сесията","Checking session"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):backendState==="offline"?t("API достъпът не е потвърден","API access could not be verified"):t("Влезте за проверка на достъпа","Sign in to verify access")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
       </div>
       {error&&<div className="login-error" role="alert">{error}</div>}
-      {!user&&<button className="login-submit" type="button" disabled={!backendAvailable||authState==="checking"} onClick={onSignIn}>{authState==="checking"?t("Проверка на сесията…","Checking session…"):t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
+      {!user&&<button className="login-submit" type="button" disabled={backendState==="demo"||authState==="checking"} onClick={onSignIn}>{authState==="checking"?t("Проверка на сесията…","Checking session…"):t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
       {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
       <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{t("Продължи в ясно обозначен Демо режим","Continue in clearly labelled Demo mode")}</button>
       <small className="login-disclaimer">{t("GrideX никога не приема или записва паролата на тази страница. Keycloak издава краткоживеещ token, който се държи само в паметта на браузъра.","GrideX never accepts or stores your password on this page. Keycloak issues a short-lived token that is kept only in browser memory.")}</small>

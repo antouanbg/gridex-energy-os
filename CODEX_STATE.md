@@ -1,13 +1,26 @@
 # Current task
 
+## Login retry fix / Поправка на повторния вход — 2026-09-18
+
+Removed hidden SSO initialization, enabled retry after auth errors, separated
+unknown API state from identity errors, and fixed missing online transition after
+authenticated `/me`. Lint/build and explicit-login Chromium regression pass.
+Next: publish and verify real public user login; no full login claim yet.
+
+Премахната е скритата SSO инициализация, разрешен е повторен вход след auth
+грешка, неизвестният API статус е отделен от identity грешките и е поправен
+липсващият online преход след удостоверен `/me`. Lint/build и Chromium regression
+за изричен вход минават. Следва публикуване и реален public user login тест;
+пълен вход още не е доказан.
+
 ## Public OIDC runtime readiness / Публична OIDC runtime готовност — 2026-09-18
 
 Updated public OIDC defaults to `auth.gridex.tech` and removed the unauthenticated
 `/health` preflight that blocked the login button behind the restricted proxy.
 `npm run lint`, `npm run build:pages` and 11 Node tests pass; lint retains only
 two existing image warnings. No mobile UI/design change. Backend public issuer
-is verified, but exact Keycloak callbacks and a real ordinary-user browser test
-are now configured and verified. Real ordinary-user browser login and
+is verified, and exact Keycloak callbacks are configured and verified.
+Real ordinary-user browser login and
 authorization are still pending; do not claim production login before those
 checks.
 

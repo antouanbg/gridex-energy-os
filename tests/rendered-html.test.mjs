@@ -162,7 +162,7 @@ test("uses a safe backend-aware demo and OIDC integration state", async () => {
   assert.match(config, /mode:\s*"auto"/);
   assert.match(config, /backendHealthRefreshMs/);
   assert.match(page, /backendState === "online" && authState === "authenticated" \? "live" : "demo"/);
-  assert.match(page, /Няма връзка с backend-а/);
+  assert.match(page, /API достъпът не е потвърден/);
   assert.match(page, /LIVE РЕЖИМ · БЕЗ ДЕМО СТОЙНОСТИ/);
   assert.match(auth, /flow:\s*"standard"/);
   assert.match(auth, /pkceMethod:\s*"S256"/);

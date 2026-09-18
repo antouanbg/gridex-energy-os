@@ -2,6 +2,28 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Login recovery / Възстановяване на входа — 2026-09-18
+
+Explicit PKCE login no longer depends on embedded SSO cookie checks. Failed
+initialization resets the client so retry is possible. Anonymous API status is
+unknown; only authenticated `/me` success marks it online. Identity failures
+and API-access failures have separate messages and neither permanently disables
+retry. Refresh now requires explicit login (the identity provider may reuse its
+session); token refresh and server authorization remain enforced.
+Chromium regression passed: login enabled without health/iframe requests and
+redirect includes code, S256, state and nonce. Real credentials, site permissions
+and public-network reachability still need end-to-end acceptance.
+
+Изричният PKCE вход вече не зависи от скрити SSO cookie проверки. При неуспешна
+инициализация клиентът се изчиства за повторен опит. API статусът преди вход е
+неизвестен; само успешен удостоверен `/me` го маркира online. Грешките на
+идентификацията и API достъпа са отделни и не блокират трайно повторния вход.
+След refresh се натиска вход (identity provider може да използва своята сесия);
+token refresh и сървърните права продължават да се проверяват.
+Chromium regression мина: активен вход без health/iframe заявки и redirect с
+code, S256, state и nonce. Реални credentials, права по обекти и публична
+мрежова достъпност още изискват цялостен приемателен тест.
+
 ## Public OIDC handoff / Публичен OIDC handoff — 2026-09-18
 
 The public runtime defaults now use `https://auth.gridex.tech/auth/realms/gridex`.
