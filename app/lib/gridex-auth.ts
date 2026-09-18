@@ -35,12 +35,16 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
   if (!config.authEnabled || config.mode === "demo") return null;
   const instance = client(config);
   initialisation ??= instance.init({
-    onLoad: "check-sso",
     flow: "standard",
     pkceMethod: "S256",
-    checkLoginIframe: true,
-    silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
-    silentCheckSsoFallback: false,
+    // Explicit login avoids embedded-cookie checks; init still verifies callbacks.
+    checkLoginIframe: false,
+  }).catch(error => {
+    if (keycloak === instance) {
+      keycloak = undefined;
+      initialisation = undefined;
+    }
+    throw error;
   });
   const authenticated = await initialisation;
   if (!authenticated) return null;
@@ -48,8 +52,9 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
 }
 
 export async function gridexLogin(config: GridexRuntimeConfig): Promise<void> {
+  if (!config.authEnabled || config.mode === "demo") throw new Error("Live sign-in is disabled");
+  await initialiseGridexAuth(config);
   const instance = client(config);
-  if (!initialisation) await initialiseGridexAuth(config);
   await instance.login({
     redirectUri: `${window.location.origin}${window.location.pathname}`,
     scope: "openid profile email",
