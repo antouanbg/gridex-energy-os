@@ -2,6 +2,149 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Planned: day-ahead net-profit arbitrage / Планирано: арбитраж „ден напред“ — 2026-09-19
+
+Status: requirement recorded, not implemented or activated by this task.
+Extend the existing `price_arbitrage` strategy rather than introducing a duplicate.
+
+### English
+
+- [ ] Select/configure the strategy per Site in the frontend, persist a versioned
+  configuration in the backend, enforce Site administrator permissions and audit
+  approval. Deployment settings remain in the single backend configuration file;
+  no hard-coded operational settings or secrets in frontend/Git.
+- [ ] Backend jointly optimizes next-day charging and later discharging windows
+  for maximum expected **net profit**, not merely the lowest/highest spot price.
+  Use published day-ahead intervals, currency/energy units, timezone and DST;
+  distinguish actual published prices from forecasts and validate source freshness.
+- [ ] Net profit = export revenue minus purchased energy, applicable grid/market
+  fees and taxes, and battery degradation cost. Model charge/discharge efficiency
+  in the energy balance, without charging losses twice.
+- [ ] Configure battery cost per equivalent full cycle (EFC), or an equivalent
+  throughput cost with an explicit kWh basis. Allocate partial-cycle wear to each
+  dispatch interval and show hourly costs; cycle cost is not an arbitrary fixed
+  cost per clock hour. Document the conversion and avoid double-counting wear.
+- [ ] Respect initial/final SOC, reserve, usable capacity, charge/discharge power,
+  grid import/export limits, cycle budget, availability and the Edge safety
+  envelope. Prevent simultaneous charge/discharge; do not schedule trades below
+  the configured minimum net margin. Missing/stale prices or telemetry must
+  block new automatic dispatch and follow an approved safe fallback.
+- [ ] UI displays buy/sell windows, kWh, prices, losses, fees, cycle cost and
+  expected net profit by interval and total. Support preview/simulation, explicit
+  administrator approval and an audited plan/configuration revision. Compare
+  forecasts with actual metered results; predicted profit is not guaranteed.
+- [ ] Acceptance: tests for low spread, negative prices, efficiency/degradation,
+  partial cycles, SOC/power/reserve limits, DST/missing intervals, stale inputs
+  and unauthorized changes; then read-only simulation with real price data.
+  Physical battery dispatch remains disabled until separate commissioning and
+  approval. No Suntech 261 Modbus activation is authorized by this task.
+
+Next: agree the versioned strategy inputs, cost units and plan API contract,
+then implement backend optimization and frontend selection/preview together.
+
+### Български
+
+- [ ] Избор/настройка на стратегията по Обект през frontend, versioned конфигурация
+  в backend, права на администратор на Обекта и одит на одобрението. Deployment
+  настройките остават в единния backend конфигурационен файл; без hard-coded
+  оперативни настройки или тайни във frontend/Git.
+- [ ] Backend оптимизира съвместно прозорците за зареждане и последващо разреждане
+  за следващия ден за максимална очаквана **нетна печалба**, не само най-ниска/
+  най-висока борсова цена. Ползва публикуваните интервали „ден напред“, валута,
+  енергийни единици, часова зона и лятно/зимно време; различава реалните публикувани
+  цени от прогнози и проверява актуалността на източника.
+- [ ] Нетна печалба = приход от продажба минус закупена енергия, приложими
+  мрежови/пазарни такси и данъци и износване на батерията. КПД при заряд/разряд
+  се отчита в енергийния баланс, без двойно начисляване на загубите.
+- [ ] Настройва се цена на еквивалентен пълен цикъл (EFC) или еквивалентна цена
+  за преминала енергия с изрична kWh база. Износването от частичните цикли се
+  разпределя по интервали и се показва по часове; цената на цикъла не е произволна
+  фиксирана такса на астрономически час. Документирана конверсия, без двойно
+  начисляване на износването.
+- [ ] Спазват се начален/краен SOC, резерв, използваем капацитет, мощности на
+  заряд/разряд, мрежови лимити за внос/износ, бюджет цикли, наличност и безопасният
+  работен диапазон на Edge. Без едновременен заряд/разряд и сделки под зададения
+  минимален нетен марж. Липсващи/стари цени или телеметрия блокират новото
+  автоматично управление и задействат предварително одобрено безопасно поведение.
+- [ ] UI показва прозорци за покупка/продажба, kWh, цени, загуби, такси, цена на
+  цикъла и очаквана нетна печалба по интервал и общо. Преглед/симулация, изрично
+  одобрение от администратор и одит на ревизията на плана/конфигурацията.
+  Сравнение с реално измерения резултат; прогнозната печалба не е гаранция.
+- [ ] Приемане: тестове за малък спред, отрицателни цени, КПД/износване, частични
+  цикли, SOC/мощност/резерв, смяна на часа/липсващи интервали, стари входни данни
+  и неразрешени промени; после read-only симулация с реални цени. Физическото
+  управление остава изключено до отделно commissioning и одобрение. Тази задача
+  не разрешава активиране на Modbus към Suntech 261.
+
+Следва: договор за versioned входни параметри, единици за разходите и plan API,
+после съвместна реализация на backend оптимизацията и frontend избора/прегледа.
+
+## Protected device access / Защитен достъп до устройства — 2026-09-19
+
+Backend deployed: GET/PUT site gateway access metadata/replacement endpoints.
+Verified current site administrator required; foreign Sites rejected, ESP direct
+access rejected. Hardware topology/config administration is now admin-only.
+Full SSH connection material encrypted AES-256-GCM with Site/gateway/version/time
+AAD, stored outside SQL. Separate 0400 master-key volume, read-only API mount;
+data directory 0700/files 0600. Single backend .env holds vault path settings.
+No secret read HTTP endpoint. Explicit confirmation, optimistic version check,
+no-store response and secret-free replacement audit. API tests: 22 pass.
+
+Frontend Profile form implemented, lint/Pages build pass; publication and real
+browser acceptance remain pending. Full tsc is blocked by existing gateway,
+overview, supported-device, worker and service dependency errors, not new form.
+No actual device credential has been saved; no SSH execution, heartbeat worker,
+OTA queue or fresh-auth/MFA approval flow exists yet. Key fingerprint is required
+as input but not verified against a connection yet; key input is structurally
+validated only. Current vault supports one API process (not distributed writers).
+Master-key offline encrypted backup/rotation and recovery drill remain mandatory
+before production; SQL backup alone cannot restore credentials. Host/API takeover
+can expose decrypt capability; this protects database-only leakage, not host
+compromise. Demo must never reuse this endpoint or store.
+
+Backend е внедрен: GET/PUT за статус/замяна на достъп по Обект/gateway. Изисква
+потвърден текущ администратор; чужд Обект и директен ESP достъп се отказват.
+Hardware topology/config администрацията е само за администратор. Целият SSH
+достъп е криптиран AES-256-GCM с Site/gateway/version/time AAD извън SQL. Master
+ключът е в отделен volume с 0400 и read-only API mount; данни 0700/0600. Пътищата
+са в единния .env. Няма secret-read HTTP endpoint. Има изрично потвърждение,
+version check, no-store и audit без тайни. 22 API теста минават.
+
+Profile формата е реализирана; lint/Pages build минават, публикация и реален
+browser тест предстоят. Пълният tsc е блокиран от съществуващи gateway/overview/
+supported/worker/dependency грешки, не от новата форма. Реален credential още не
+е записан; няма SSH изпълнение, heartbeat worker, OTA queue или fresh-auth/MFA
+одобрение. Fingerprint се изисква, но не е проверен с връзка; key input се
+валидира само структурно. Vault е за един API процес, не distributed writers.
+Отделен криптиран offline backup/rotation на master key и restore тренировка
+са задължителни преди production; SQL backup не възстановява ключовете.
+Превзет host/API може да дешифрира; защитата е срещу database-only изтичане.
+Демото никога не ползва този endpoint/store.
+
+## Local test inventory / Локален тестов inventory — 2026-09-19
+
+Owner approved a local-only test Site with one ROCK Pi E controller and one
+OLIMEX ESP32-EVB lab node, owned through the organization's administrator.
+Inventory registered transactionally as commissioning/draft; repeat registration
+does not duplicate it. No hardware commands, IP/MAC reassignment, VPN activation,
+battery Modbus or physical configuration changes were performed. RS485 battery
+port is marked disabled in inventory; this is NOT proof of firmware state.
+Demo uses a sanitized illustrative pair, not private inventory IDs or telemetry.
+Remaining: publish frontend example, verify authorized topology UI, reconcile
+physical identities/config files, ingest heartbeat, then separately implement
+opt-in sanitized live demo projection. Other demo simulations are not live data.
+
+Одобрен е локален тестов Обект с един ROCK Pi E контролер и OLIMEX ESP32-EVB
+lab нод, собственост чрез администратора на организацията. Inventory е записан
+транзакционно като commissioning/draft; повторният старт не го дублира. Няма
+хардуерни команди, IP/MAC промени, VPN активация, battery Modbus или физически
+конфигурационни промени. RS485 battery портът е disabled в inventory — това НЕ
+доказва firmware състоянието. Демото използва обезличена примерна двойка, не
+частни ID или телеметрия. Остават публикуване на frontend примера, проверка на
+удостоверения topology UI, сверяване на физически identity/config файлове,
+heartbeat приемане и отделна opt-in обезличена live demo проекция. Останалите
+демо симулации не са реални данни.
+
 ## Login recovery / Възстановяване на входа — 2026-09-18
 
 Explicit PKCE login no longer depends on embedded SSO cookie checks. Failed

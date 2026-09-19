@@ -1,5 +1,45 @@
 # Current task
 
+## Day-ahead strategy backlog / Задача за стратегия „ден напред“ — 2026-09-19
+
+Recorded the owner requirement in both HANDOFF files: extend `price_arbitrage`
+with frontend selection and backend net-profit optimization including cycle
+wear, losses and fees. Planning only; no runtime or battery changes.
+Next: agree cost units/versioned contract, implement and test in simulation.
+
+Изискването е записано в двата HANDOFF файла: разширяване на `price_arbitrage`
+с frontend избор и backend оптимизация на нетната печалба с износване,
+загуби и такси. Само план, без runtime/батерийни промени.
+Следва: единици за разходите/versioned договор, реализация и симулационни тестове.
+
+## Device access protection / Защита на device достъпа
+
+Implemented encrypted external vault, administrator-only API and write-only UI.
+Backend deployed; frontend lint/build and 22 API tests pass. No real credential,
+SSH or OTA operation performed. Browser publication/acceptance, master-key
+backup/rotation, telemetry worker and OTA approval execution remain pending.
+Full frontend tsc has existing unrelated errors; see HANDOFF.
+
+Реализирани криптиран външен vault, admin-only API и write-only UI. Backend е
+внедрен; frontend lint/build и 22 API теста минават. Няма реален credential,
+SSH/OTA операция. Остават browser публикация/приемане, master-key backup/rotation,
+telemetry worker и изпълнение на OTA одобрения. Пълният tsc има стари несвързани
+грешки; виж HANDOFF.
+
+## Test pair registration / Регистрация на тестовата двойка — 2026-09-19
+
+Owner-authorized local test inventory now contains a commissioning Site and
+two draft gateways (ROCK Pi E, ESP32 lab), assigned via organization admin.
+Idempotent repeat verified. Sanitized demo example prepared; frontend lint/build
+pass (two existing image warnings). No actual telemetry or device writes enabled.
+See HANDOFF for remaining live integration and publication.
+
+Одобреният локален тестов inventory съдържа commissioning Обект и два draft
+gateway записа (ROCK Pi E, ESP32 lab) към администратора на организацията.
+Повторният старт е проверен без дублиране. Обезличеният демо пример е подготвен;
+frontend lint/build минават с две стари image предупреждения. Няма включени
+реална телеметрия или device writes. Остатъчните стъпки са в HANDOFF.
+
 ## Login retry fix / Поправка на повторния вход — 2026-09-18
 
 Removed hidden SSO initialization, enabled retry after auth errors, separated
