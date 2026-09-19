@@ -160,8 +160,8 @@ test("uses a safe backend-aware demo and OIDC integration state", async () => {
   ]);
   const html = await response.text();
 
-  assert.match(html, /Проверка на сесията/);
-  assert.doesNotMatch(html, /Това е Демо режим|Solar Park East|248\.6/);
+  assert.match(html, /Това е Демо режим/);
+  assert.doesNotMatch(html, /Свързване…/);
   assert.match(config, /mode:\s*"auto"/);
   assert.match(config, /backendHealthRefreshMs/);
   assert.match(page, /sessionUser \|\| authState !== "anonymous" \? "live" : "demo"/);

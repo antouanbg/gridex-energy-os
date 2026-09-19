@@ -610,6 +610,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 
 /* Account, sign-in and user statistics */
 .profile-wrap { position:relative; }
+.sidebar-language { width:100%; margin-top:8px; min-height:42px; border:1px solid #507e67; border-radius:10px; background:#174836; color:#d2eb9a!important; }
 .profile { width:100%; border:0; color:inherit; background:transparent; text-align:left; cursor:pointer; border-radius:11px; transition:background .18s ease; }
 .profile:hover,.profile.open { background:rgba(255,255,255,.07); }
 .profile b { font-size:21px; line-height:1; }
@@ -816,6 +817,10 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .sidebar.mobile-nav-open nav button span { font-size:14px; line-height:1.25; white-space:normal; }
   .sidebar.mobile-nav-open nav button i { width:24px; flex:0 0 24px; }
   .sidebar.mobile-nav-open nav button em { position:static; margin-left:auto; }
+  .sidebar.mobile-nav-open nav { bottom:224px; max-height:calc(100dvh - 248px); }
+  .sidebar.mobile-nav-open .profile-wrap { display:block; position:fixed; z-index:23; left:12px; right:12px; bottom:84px; height:132px; padding:10px 12px; border:1px solid #2c5d49; border-radius:16px; background:#0b2b21; }
+  .sidebar.mobile-nav-open .profile { display:grid; grid-template-columns:34px 1fr auto; margin:0; min-height:52px; }
+  .sidebar.mobile-nav-open .profile div,.sidebar.mobile-nav-open .profile b { display:block; }
   .content { padding-bottom:94px; }
   header { align-items:flex-start; gap:12px; }
   .header-actions { flex-shrink:0; }

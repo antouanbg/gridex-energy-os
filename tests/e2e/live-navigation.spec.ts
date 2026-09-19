@@ -38,7 +38,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await page.locator('.quick-sign-in').click();
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
-  await expect(page.locator('[data-view-id="market"]')).toContainText('Настройка и данни');
+  await expect(page.locator('[data-view-id="market"]')).toHaveText('↗Пазар');
   await expect(page.locator('[data-view-id="devices"]')).not.toHaveAttribute('data-provisioning-required');
   await expect(page.locator('[data-view-id="gateway"]')).toHaveCount(0);
   for(const view of ['sites','devices','overview','customers','assets','battery','schedule','market','settlement','automation','loads','balance','supported','alarms','reports','settings','plans','about']) {
@@ -48,7 +48,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
     await expect(page.getByTestId('page-eyebrow')).not.toContainText('6 ОБЕКТА');
     await expect(page.locator('.nav-badge')).toHaveCount(0);
     await expect(page.getByTestId('section-'+view)).not.toContainText('248.6');
-    if(await page.locator(`[data-view-id="${view}"]`).getAttribute('data-provisioning-required')) {
+    if(!['sites','devices','overview','about'].includes(view)) {
       await expect(page.getByRole('heading',{name:'Този раздел очаква провизиране на реални данни'})).toBeVisible();
     }
   }

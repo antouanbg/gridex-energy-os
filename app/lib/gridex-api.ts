@@ -551,6 +551,8 @@ export class GridexApiClient {
 
   private async authorizedFetch(path: string, init: RequestInit): Promise<Response> {
     if (this.config.mode === "demo") throw new Error("Live GridEx API is disabled in demo mode");
+    const timeout=AbortSignal.timeout(Math.max(1000,this.config.backendTimeoutMs||5000));
+    init={...init,signal:init.signal?AbortSignal.any([init.signal,timeout]):timeout};
     let token: string | undefined;
     try {
       token = await this.getAccessToken();

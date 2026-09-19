@@ -2,7 +2,7 @@
 
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot } from "./lib/gridex-api";
-import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
+import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
@@ -122,7 +122,8 @@ export default function Home() {
   const [backendState, setBackendState] = useState<BackendState>(
     () => runtimeConfig.mode === "demo" ? "demo" : "checking",
   );
-  const [authState,setAuthState] = useState<AuthState>(runtimeConfig.mode === "demo" ? "anonymous" : "checking");
+  const [authCallback] = useState(hasGridexAuthCallback);
+  const [authState,setAuthState] = useState<AuthState>(()=>runtimeConfig.mode !== "demo"&&authCallback ? "checking" : "anonymous");
   const [integrationError,setIntegrationError] = useState("");
   const [liveSites,setLiveSites] = useState<GridexSite[]>([]);
   const [sitesStatus,setSitesStatus] = useState<'loading'|'ready'|'error'>('loading');
@@ -175,11 +176,11 @@ export default function Home() {
       if (!active) return;
       setSessionUser(null);
       setBackendState("unknown");
-      setAuthState("error");
+      setAuthState(authCallback?"error":"anonymous");
       setIntegrationError(document.documentElement.lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
     return()=>{active=false;};
-  },[runtimeConfig,apiClient]);
+  },[runtimeConfig,apiClient,authCallback]);
 
   useEffect(()=>{
     if (dataMode!=="live"||backendState!=="online") return;
@@ -306,10 +307,8 @@ export default function Home() {
             const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            const pending=dataMode==='live'&&!liveViews.has(id);
-            const setupLabel=lang==='en'?'Requires setup and data':'Изисква настройка и данни';
-            return <button key={id} data-view-id={id} data-provisioning-required={pending||undefined} title={`${tKey(`nav.${id}` as MessageKey)}${pending?' · '+setupLabel:''}`} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""}`} onClick={() => navigate(id)}>
-              <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}{pending&&<small> · {lang==='en'?'Setup & data':'Настройка и данни'}</small>}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
+            return <button key={id} data-view-id={id} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""}`} onClick={() => navigate(id)}>
+              <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </button>;
           })}
         </nav>
@@ -318,10 +317,11 @@ export default function Home() {
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
         <div className="profile-wrap" data-no-translate>
-          <button className={`profile ${accountMenuOpen?"open":""}`} onClick={()=>setAccountMenuOpen(!accountMenuOpen)} aria-haspopup="menu" aria-expanded={accountMenuOpen}>
+          <button className={`profile ${!sessionUser?'quick-sign-in':''} ${accountMenuOpen?"open":""}`} onClick={()=>sessionUser?setAccountMenuOpen(!accountMenuOpen):void signIn()} aria-haspopup={sessionUser?"menu":undefined} aria-expanded={sessionUser?accountMenuOpen:undefined}>
             <span>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</span>
             <div><strong>{sessionUser?(lang==="en"?sessionUser.nameEn:sessionUser.nameBg):(lang==="en"?"Sign in":"Вход")}</strong><small>{sessionUser?(lang==="en"?sessionUser.roleEn:sessionUser.roleBg):(lang==="en"?"No active session":"Няма активна сесия")}</small></div><b>⋮</b>
           </button>
+          <button className="language-switch sidebar-language" data-no-translate onClick={()=>{const next=lang==='bg'?'en':'bg';setLang(next);try{localStorage.setItem('gridex.ui-language',next);}catch{/* Storage is optional. */}}} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
         </div>
       </aside>
 
@@ -333,24 +333,13 @@ export default function Home() {
             <button role="menuitem" onClick={()=>navigate("profile")}><i>◎</i><span><strong>{lang==="en"?"Profile & statistics":"Профил и статистика"}</strong><small>{lang==="en"?"Activity, permissions and sessions":"Активност, права и сесии"}</small></span><b>›</b></button>
             <button role="menuitem" onClick={()=>navigate("login")}><i>⇄</i><span><strong>{lang==="en"?"Switch account":"Смяна на профил"}</strong><small>{lang==="en"?"Open the sign-in page":"Отвори страницата за вход"}</small></span><b>›</b></button>
             <button className="account-menu-logout" role="menuitem" onClick={signOut}><i>↪</i><span><strong>{lang==="en"?"Sign out":"Изход"}</strong><small>{lang==="en"?"End this portal session":"Прекрати тази сесия"}</small></span></button>
-          </>:<button role="menuitem" disabled={authState==='checking'} onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button>}
+          </>:<button role="menuitem" onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button>}
         </div>
       </>}
 
       <section className="content">
         <header>
           <div><p className="eyebrow" data-testid="page-eyebrow">{dataMode==='live'?(view==='sites'?(lang==='en'?`PORTFOLIO / ${sitesStatus==='ready'?liveSites.length:'—'} SITES`:`ПОРТФОЛИО / ${sitesStatus==='ready'?liveSites.length:'—'} ОБЕКТА`):(liveSites.find(item=>item.id===selectedSiteId)?.name??'GrideX')):tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (dataMode==='live'?(liveSites.find(item=>item.id===selectedSiteId)?.name??(lang==='en'?'My sites':'Моите обекти')):lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
-          <div className="header-actions">
-            <button className="language-switch" data-no-translate onClick={()=>{const next=lang==='bg'?'en':'bg';setLang(next);try{localStorage.setItem('gridex.ui-language',next);}catch{/* Storage is optional. */}}} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
-            {!sessionUser&&<button className="primary-btn quick-sign-in" disabled={authState==='checking'} onClick={signIn}>{authState==='checking'?(lang==='en'?'Connecting…':'Свързване…'):(lang==='en'?'Sign in':'Вход')}</button>}
-            {view !== "sites" && <select value={dataMode==='live'?selectedSiteId:site} onChange={(e) => {
-              setSite(e.target.value);
-              const selected=liveSites.find(item=>item.id===e.target.value);
-              if(selected){setSelectedSiteId(selected.id);setSite(selected.name);setLiveSnapshot(null);}
-            }} aria-label={lang==="en"?"Selected site":"Избран обект"}>{dataMode==="live"?(liveSites.length?liveSites.map(item=><option key={item.id} value={item.id}>{item.name}</option>):<option value="">{lang==='en'?'No site selected':'Няма избран обект'}</option>):<><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></>}</select>}
-            <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△{dataMode==='demo'&&<em>3</em>}</button>
-            <button className="mobile-account-button" data-no-translate aria-label={lang==="en"?"Account menu":"Потребителско меню"} aria-expanded={accountMenuOpen} onClick={()=>setAccountMenuOpen(!accountMenuOpen)}>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</button>
-          </div>
         </header>
 
         {!sessionUser&&view!=='login'&&<TranslationSuggestion key={lang}/>}
@@ -358,7 +347,7 @@ export default function Home() {
         {dataMode==="demo"&&demoNoticeVisible&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
           <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"API access could not be verified. You can retry sign-in.":"Достъпът до API не може да се потвърди. Можете да опитате вход отново."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
-          <button disabled={authState==='checking'} onClick={signIn}>{lang==="en"?"Sign in":"Вход"} →</button>
+          <button onClick={signIn}>{lang==="en"?"Sign in":"Вход"} →</button>
           <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
 
@@ -466,7 +455,7 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
         <span><strong>{authState==="checking"?t("Проверка на сесията","Checking session"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):backendState==="offline"?t("API достъпът не е потвърден","API access could not be verified"):t("Влезте за проверка на достъпа","Sign in to verify access")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
       </div>
       {error&&<div className="login-error" role="alert">{error}</div>}
-      {!user&&<button className="login-submit" type="button" disabled={backendState==="demo"||authState==="checking"} onClick={onSignIn}>{authState==="checking"?t("Проверка на сесията…","Checking session…"):t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
+      {!user&&<button className="login-submit" type="button" disabled={backendState==="demo"} onClick={onSignIn}>{t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
       {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
       <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{user?t('Към моите обекти','Back to my sites'):t("Към прегледа","Back to overview")}</button>
       <small className="login-disclaimer">{t("GrideX никога не приема или записва паролата на тази страница. Keycloak издава краткоживеещ token, който се държи само в паметта на браузъра.","GrideX never accepts or stores your password on this page. Keycloak issues a short-lived token that is kept only in browser memory.")}</small>

@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
 
-for (const status of [403,503]) {
+for (const status of [403,503,0]) {
   test(`successful identity with API ${status} never falls back to demo`,async({page})=>{
     let nonce='';
     const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
-    await page.route('**/gridex-config.js',route=>route.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
+    await page.route('**/gridex-config.js',route=>route.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,backendTimeoutMs:1000,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
     await page.route('https://auth.example.invalid/**',route=>{
       const url=new URL(route.request().url());
       if(url.pathname.endsWith('/auth')) {
@@ -15,7 +15,7 @@ for (const status of [403,503]) {
       const claims={sub:'test-user',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce,email:'test@example.invalid'};
       return route.fulfill({json:{access_token:jwt(claims),id_token:jwt(claims),refresh_token:jwt(claims),expires_in:600,token_type:'Bearer'}});
     });
-    await page.route('https://api.example.invalid/**',route=>route.fulfill({status,json:{error:'unavailable'}}));
+    await page.route('https://api.example.invalid/**',route=>status?route.fulfill({status,json:{error:'unavailable'}}):new Promise<void>(()=>{}));
     await page.goto('/');
     await page.locator('.quick-sign-in').click();
     await expect(page.getByRole('heading',{name:'Данните от акаунта са недостъпни'})).toBeVisible();

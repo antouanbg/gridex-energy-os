@@ -1,5 +1,16 @@
 # Current task
 
+Owner correction: no upper-right controls; sidebar language below direct login;
+site selection in Sites; short unchanged menu titles. Anonymous demo immediate,
+bounded callback/API wait, retryable failed init, no blocking profile fetch.
+Latest HANDOFF supersedes earlier menu-label instructions. Real-owner acceptance
+still required; do not infer it from browser fixtures.
+
+Корекция: без горни десни контроли; език под директния вход в менюто; обект от
+„Обекти“; кратки имена без добавки. Демо веднага за анонимен посетител, ограничено
+callback/API чакане, повторим вход без блокираща profile заявка. Последният
+HANDOFF отменя предходните указания за етикети. Реалното приемане предстои.
+
 Signed-in/no-demo follow-up: fail-closed UI during session checks/API errors;
 unfinished menus marked Setup & data; no fabricated profile history, site name
 or zero power/balance. See latest HANDOFF. Prior PR #25 is deployed (b308b75).
