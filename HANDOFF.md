@@ -2,6 +2,23 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Device heartbeat display / Heartbeat в Устройства — 2026-09-19
+
+Devices separately shows last backend-received ROCK message and last successful
+ESP contact observed by ROCK, plus ESP counter. Authenticated Site-scoped polling
+every 10s, cancelled on unmount/Site change; errors clear live status, no demo.
+No navigation/login/CSS changes. API client tests (3) and Pages/Vinext builds pass.
+Not published; needs backend device-heartbeats endpoint/migration and real MQTT
+delivery first. Actual populated/empty/denied/unavailable browser flow and owner
+account acceptance remain pending; API tests are fixtures, not real delivery.
+
+Устройства показва отделно полученото в backend ROCK съобщение, последния
+успешен ESP контакт през ROCK и ESP брояча. Удостоверен Site polling през 10s,
+отменен при смяна/напускане; при грешка няма live статус или демо заместител.
+Без промени по меню/вход/CSS. 3 API теста и Pages/Vinext builds минават.
+Не е публикувано; нужни са backend endpoint/миграция и реален MQTT receipt.
+Browser populated/empty/denied/unavailable и owner приемане предстоят.
+
 ## Sidebar controls and anonymous demo / Меню и анонимно демо — 2026-09-19
 
 Owner explicitly removes ALL upper-right controls, including language, login

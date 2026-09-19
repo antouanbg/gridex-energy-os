@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import type { GridexApiClient, GridexHardwareTopology } from '../lib/gridex-api';
+import type { DeviceHeartbeat, GridexApiClient, GridexHardwareTopology } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { DeviceSetupWizard } from './device-setup';
 
@@ -10,6 +10,29 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
   const [topology, setTopology] = useState<GridexHardwareTopology | null>(null);
   const [status, setStatus] = useState('loading');
   const [refresh, setRefresh] = useState(0);
+  const [health, setHealth] = useState<{ siteId: string; items: DeviceHeartbeat[] } | null>(null);
+  const [healthError, setHealthError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      try {
+        const result = await api.deviceHeartbeats(siteId, controller.signal);
+        if (!controller.signal.aborted) { setHealth({ siteId, items: result.items }); setHealthError(false); }
+      } catch {
+        if (!controller.signal.aborted) { setHealth(null); setHealthError(true); }
+      }
+      if (!controller.signal.aborted) timer = setTimeout(poll, 10000);
+    };
+    if (siteId) void poll();
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [api, siteId, refresh]);
+  const time = (value?: string | null) => value ? new Date(value).toLocaleString(lang === 'en' ? 'en-GB' : 'bg-BG') : t('Няма потвърдено съобщение', 'No confirmed message');
+  const healthLabel = (item?: DeviceHeartbeat) => healthError ? t('Проверката е недостъпна', 'Status check unavailable')
+    : item?.status === 'online' ? t('Има връзка', 'Connected')
+    : item?.status === 'offline' ? t('Няма скорошен контакт', 'No recent contact')
+    : item?.status === 'stale' ? t('Остарял статус — чакаме ново съобщение', 'Stale — waiting for a new message')
+    : t('Връзката още не е потвърдена', 'Connection not yet confirmed');
   useEffect(() => {
     const controller = new AbortController();
     if (siteId) void api.hardware(siteId, controller.signal).then(result => {
@@ -30,16 +53,24 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
         {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang}/>}
         <p>{t('Конфигурация', 'Configuration')}: {topology.configuration ? `${topology.configuration.revision} · ${topology.configuration.status}` : t('Няма записана ревизия', 'No saved revision')}</p>
         {!topology.gateways.length && <p>{t('Няма регистрирани шлюзове или нодове.', 'No registered gateways or nodes.')}</p>}
-        {topology.gateways.map((gateway, index) => <article key={gateway.id || index}>
+        {topology.gateways.map((gateway, index) => {
+          const item = health?.siteId === siteId ? health.items.find(value => value.gatewayId === gateway.id) : undefined;
+          return <article key={gateway.id || index}>
           <h3>{gateway.name}</h3>
           <dl>
             <dt>{t('Модел', 'Model')}</dt><dd>{gateway.hardwareModel}</dd>
             <dt>{t('Роля', 'Role')}</dt><dd>{gateway.role === 'controller' ? t('Edge шлюз / контролер', 'Edge gateway / controller') : t('Нод зад Edge шлюза', 'Node behind the Edge gateway')}</dd>
             <dt>{t('Идентификатор', 'Identifier')}</dt><dd>{gateway.id || '—'}</dd>
             <dt>{t('Интерфейси', 'Interfaces')}</dt><dd>{gateway.ports.map(port => `${port.name} (${port.transport})`).join(', ') || '—'}</dd>
-            <dt>{t('Сигнал за живот (heartbeat)', 'Heartbeat')}</dt><dd>{t('Непотвърден — този API връща конфигурация, не live статус.', 'Unverified — this API returns configuration, not live status.')}</dd>
+            <dt>{t('Връзка', 'Connection')}</dt><dd>{healthLabel(item)}</dd>
+            {gateway.role === 'controller' ? <>
+              <dt>{t('Последно съобщение от ROCK Pi в backend', 'Last ROCK Pi message received by backend')}</dt><dd>{time(item?.receivedAt)}</dd>
+            </> : <>
+              <dt>{t('Последен успешен контакт с ESP32 през ROCK Pi', 'Last successful ESP32 contact through ROCK Pi')}</dt><dd>{time(item?.lastSuccessfulContactAt)}</dd>
+              <dt>{t('ESP32 heartbeat брояч', 'ESP32 heartbeat counter')}</dt><dd>{item?.heartbeat ?? '—'}</dd>
+            </>}
           </dl>
-        </article>)}
+        </article>; })}
         <h3>{t('Свързани устройства', 'Attached devices')}</h3>
         {!topology.devices.length && <p>{t('Няма регистрирани допълнителни устройства.', 'No additional devices registered.')}</p>}
         {topology.devices.map(device => <article key={device.id}><h4>{device.name}</h4><p>{device.manufacturer} · {device.model} · {device.protocol}</p><p>{t('Драйвер', 'Driver')}: {device.driverKey || '—'} · {t('Статус на конфигурацията', 'Configuration status')}: {device.status}</p></article>)}

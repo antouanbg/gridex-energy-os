@@ -1,5 +1,13 @@
 # Current task
 
+Latest: feat/device-heartbeat prepares separate ROCK backend receipt / ESP
+successful-contact display in Devices. Three API tests and both builds pass.
+Not published: backend/physical delivery and owner browser acceptance pending.
+
+Последно: feat/device-heartbeat подготвя отделни ROCK backend receipt / ESP
+успешен контакт в Устройства. 3 API теста и двата build-а минават. Не е
+публикувано: backend/реална доставка и owner browser приемане предстоят.
+
 Owner correction: no upper-right controls; sidebar language below direct login;
 site selection in Sites; short unchanged menu titles. Anonymous demo immediate,
 bounded callback/API wait, retryable failed init, no blocking profile fetch.

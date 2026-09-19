@@ -5,6 +5,22 @@ import ts from 'typescript';
 const source = await readFile(new URL('../app/lib/gridex-api.ts', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const { GridexApiClient } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
+test('device heartbeat reads are authenticated, site-scoped and never fall back to demo', async () => {
+  const original = globalThis.fetch;
+  try {
+    const client = new GridexApiClient({ mode: 'auto', apiBaseUrl: '' }, async () => 'test-token');
+    globalThis.fetch = async (url, init) => {
+      assert.equal(url, '/api/v1/sites/site%2Fone/device-heartbeats');
+      assert.equal(init.headers.get('Authorization'), 'Bearer test-token');
+      return new Response(JSON.stringify({ items: [] }));
+    };
+    assert.deepEqual(await client.deviceHeartbeats('site/one'), {items: []});
+    for (const status of [403,404,503]) {
+      globalThis.fetch = async () => new Response('{}',{status});
+      await assert.rejects(client.deviceHeartbeats('site/one'), {status});
+    }
+  } finally {globalThis.fetch = original;}
+});
 test('device inventory is site-scoped, authenticated and preserves denied access', async () => {
   const original = globalThis.fetch;
   try {
