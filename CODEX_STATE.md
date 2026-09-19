@@ -1,5 +1,35 @@
 # Current task
 
+Device setup: selection → max two roles/peers → provisioning moved to Devices.
+Admin-only versioned backend draft; no hardware activation. See latest HANDOFF.
+
+Настройки: избор → до две роли/партньори → provisioning в Устройства.
+Admin-only versioned backend чернова; без hardware активиране. Виж HANDOFF.
+
+## UI publication and device inventory / UI публикация и устройства — 2026-09-19
+
+PR #19 merged; GitHub Pages run 35442969353 succeeded. Protected access form
+and sanitized demo example are published. New device-information implementation
+uses the existing administrator-only hardware API in live Devices/Gateway views.
+Shows model, role, ID, interfaces, configuration revision and attached-device
+drivers; never renders connection settings or credentials. Site changes unmount
+old data, requests are aborted on cleanup, denied/error states never use demo
+fallback. No live gateway heartbeat claim: configuration is not telemetry.
+No backend, hardware, CSS/mobile layout, VPN or battery Modbus changes.
+New inventory publication and real authenticated browser acceptance remain pending;
+heartbeat ingestion remains a separate unfinished task.
+
+PR #19 е слят; GitHub Pages run 35442969353 завърши успешно. Публикувани са
+формата за защитен достъп и обезличеният демо пример. Новата информация за
+устройства ползва съществуващия admin-only hardware API в live Устройства/Gateway.
+Показва модел, роля, ID, интерфейси, конфигурационна ревизия и драйвери на свързани
+устройства; не показва connection настройки или credentials. Смяна на Обект
+премахва старите данни, заявките се прекратяват при cleanup, отказ/грешка не
+замества данните с демо. Няма твърдение за live heartbeat: конфигурацията не е
+телеметрия. Без промени по backend, хардуер, CSS/mobile layout, VPN или Modbus.
+Публикацията на новия inventory и реален browser тест с вход предстоят;
+heartbeat ingestion остава отделна незавършена задача.
+
 ## Day-ahead strategy backlog / Задача за стратегия „ден напред“ — 2026-09-19
 
 Recorded the owner requirement in both HANDOFF files: extend `price_arbitrage`

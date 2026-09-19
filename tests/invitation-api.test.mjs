@@ -5,6 +5,22 @@ import ts from 'typescript';
 const source = await readFile(new URL('../app/lib/gridex-api.ts', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const { GridexApiClient } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
+test('device inventory is site-scoped, authenticated and preserves denied access', async () => {
+  const original = globalThis.fetch;
+  try {
+    const client = new GridexApiClient({ mode: 'auto', apiBaseUrl: '' }, async () => 'test-token');
+    globalThis.fetch = async (url, init) => {
+      assert.equal(url, '/api/v1/sites/site%2Fone/hardware');
+      assert.equal(init.headers.get('Authorization'), 'Bearer test-token');
+      return new Response(JSON.stringify({ configuration: null, gateways: [], devices: [] }));
+    };
+    assert.deepEqual((await client.hardware('site/one')).gateways, []);
+    for (const status of [403, 404, 503]) {
+      globalThis.fetch = async () => new Response('{}', { status });
+      await assert.rejects(client.hardware('site/one'), { status });
+    }
+  } finally { globalThis.fetch = original; }
+});
 test('invitation API sends bearer identity and explicit scope; rejects unavailable enrollment', async () => {
   const original = globalThis.fetch;
   const calls = [];

@@ -1,5 +1,34 @@
 # GrideX Energy OS — Working Rules
 
+## Mandatory auth regression gate / Задължителна auth проверка
+
+After proxy, Keycloak, OIDC, frontend login changes or restart: verify local
+master discovery, admin console authServerUrl and a fresh login form all stay
+on the configured local admin origin; verify public gridex issuer/callbacks
+remain public, and master/admin/health/metrics stay blocked at public ingress.
+Run backend scripts/check-auth-routing.mjs with the single private backend env.
+Normal-DNS trusted-TLS probes and forced local/LAN probes are different evidence;
+never claim external reachability from a local probe. Read the actual router
+destination port before testing; do not assume host port 443.
+HTTP 200 for a shell/form is NOT completed login. Require browser login,
+logout and fresh login after session expiry before declaring authentication
+accepted. Record untested steps, failures, rollback and deployment revision in
+HANDOFF. Never weaken CORS/TLS or expose master to repair login. Do not print
+passwords, tokens or session/action URLs. This gate is not a running monitor.
+
+След proxy, Keycloak, OIDC, frontend login промени или рестарт: провери local
+master discovery, authServerUrl на admin конзолата и нова login форма — всички
+към конфигурирания локален admin адрес. Public gridex issuer/callbacks остават
+публични, а master/admin/health/metrics — забранени на публичния ingress.
+Изпълни backend scripts/check-auth-routing.mjs с единния частен backend env.
+Normal-DNS/trusted-TLS и принудителните local/LAN проби са различни доказателства;
+локален успех не доказва външен достъп. Чети реалния целеви порт на рутера,
+не приемай host 443. HTTP 200 на shell/форма НЕ е завършен вход. Изисквай browser
+вход, изход и нов вход след изтекла сесия преди приемане. Записвай непроверените
+стъпки, грешки, rollback и deployment ревизия в HANDOFF. Не отслабвай CORS/TLS
+и не излагай master за поправка. Без пароли, токени и session/action URL в логове.
+Това е проверка при промени, не работещ постоянен монитор.
+
 ## Active host decision / Активен host
 
 Owner decision 2026-09-14: active staging is Linux ARM64 under macOS/Colima.

@@ -2,6 +2,89 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Device setup flow / Настройки на устройства — 2026-09-19
+
+Owner requested all device configuration under Devices, not Profile. Implemented
+registered-device dropdown, one/two communication roles, peer selection (backend,
+Deye 100 kW, Suntech 261) and transport. Backend enforces verified Site admin,
+known gateway, max two roles, no duplicate peer and no direct ESP-to-backend role.
+Versioned device-setup configuration is persisted in PostgreSQL with draft
+lifecycle, optimistic revision and audit; no new env files or hardware commands.
+Only after confirmed save is the controller's protected provisioning/access form
+shown. ESP stays DHCP via ROCK Pi; reservation/driver deployment is not implemented.
+Equipment labels are planning choices, not proof of compatible drivers or exact
+vendor model; commissioning remains required. Existing inventory IDs are reused.
+No migration, battery Modbus activation, VPN or credential changes.
+Tests: 25 API tests pass, including HTTP admin/scope/revision protection.
+Frontend lint/build and null-battery regression pass. API deployment initiated;
+UI CI/publication and real browser acceptance must be checked before claiming live.
+
+Настройките са преместени от Профил в Устройства: падащо меню със заведени
+устройства, една/две комуникационни роли, партньор (backend, Deye 100 kW,
+Suntech 261) и транспорт. Backend проверява потвърден admin на Обекта,
+познат gateway, максимум две роли, без дублиран партньор и без директна ESP-backend
+роля. Versioned device-setup е в PostgreSQL с draft lifecycle, revision check
+и одит; без нов env файл или hardware команди. Едва след потвърден запис се
+показва защитената форма за provisioning/достъп на контролера. ESP остава DHCP
+през ROCK Pi; прилагане на резервация/driver не е реализирано. Етикетите са
+план, не доказан съвместим драйвер/точен модел; commissioning предстои.
+Запазени са inventory ID. Без миграции, battery Modbus, VPN или credentials промени.
+25 API теста минават, включително HTTP admin/scope/revision защити. Frontend
+lint/build и null-battery regression минават. API deployment е стартиран;
+UI CI/публикация и реалният browser тест трябва да се проверят преди live твърдение.
+
+## Local admin login repair / Поправка на локалния admin вход — 2026-09-19
+
+Applied master realm frontendUrl from GRIDEX_ADMIN_AUTH_BASE in the single
+private env, preserving other realm attributes and public gridex issuer.
+Rollback metadata saved privately. No password, proxy ACL, TLS trust or router
+change. Verified local discovery, admin authServerUrl and fresh PKCE login form
+all use the local admin origin; forced restricted-proxy master probe remains 404.
+Actual LAN forwarding target is host port 14443, not 443; LAN TLS probe passed.
+Public-domain access from this Mac still times out: external/mobile reachability
+and LAN hairpin routing are not proven by these local checks. Earlier diagnosis
+based on host port 443 refusal was not valid for this router mapping.
+Backend check-auth-routing.mjs provides a read-only regression gate; both AGENTS
+require login/logout/expired-session browser acceptance, not just HTTP 200.
+Actual password submission and browser session-expiry acceptance remain pending;
+no continuous monitoring has been installed.
+
+Приложен master realm frontendUrl от GRIDEX_ADMIN_AUTH_BASE в единния частен env,
+със запазени останалите realm attributes и public gridex issuer. Частен rollback
+е записан. Без промяна на пароли, proxy ACL, TLS доверие или рутер. Local discovery,
+admin authServerUrl и новата PKCE login форма вече ползват локалния admin адрес;
+принудителната проба през ограничения proxy за master остава 404.
+Реалната LAN цел е host порт 14443, не 443; LAN TLS пробата мина. Публичният домейн
+от този Mac още изтича: външен/mobile достъп и LAN hairpin не са доказани с тези
+локални проверки. Предишният извод от отказ на host 443 не е валиден за този NAT.
+Backend check-auth-routing.mjs е read-only regression проверка; двата AGENTS
+изискват browser вход/изход/изтекла сесия, не само HTTP 200. Реално подаване на
+парола и browser приемане след изтекла сесия предстоят; няма постоянен монитор.
+
+## UI publication and device inventory / UI публикация и устройства — 2026-09-19
+
+PR #19 merged; GitHub Pages run 35442969353 succeeded. Protected access form
+and sanitized demo example are published. New device-information implementation
+uses the existing administrator-only hardware API in live Devices/Gateway views.
+Shows model, role, ID, interfaces, configuration revision and attached-device
+drivers; never renders connection settings or credentials. Site changes unmount
+old data, requests are aborted on cleanup, denied/error states never use demo
+fallback. No live gateway heartbeat claim: configuration is not telemetry.
+No backend, hardware, CSS/mobile layout, VPN or battery Modbus changes.
+New inventory publication and real authenticated browser acceptance remain pending;
+heartbeat ingestion remains a separate unfinished task.
+
+PR #19 е слят; GitHub Pages run 35442969353 завърши успешно. Публикувани са
+формата за защитен достъп и обезличеният демо пример. Новата информация за
+устройства ползва съществуващия admin-only hardware API в live Устройства/Gateway.
+Показва модел, роля, ID, интерфейси, конфигурационна ревизия и драйвери на свързани
+устройства; не показва connection настройки или credentials. Смяна на Обект
+премахва старите данни, заявките се прекратяват при cleanup, отказ/грешка не
+замества данните с демо. Няма твърдение за live heartbeat: конфигурацията не е
+телеметрия. Без промени по backend, хардуер, CSS/mobile layout, VPN или Modbus.
+Публикацията на новия inventory и реален browser тест с вход предстоят;
+heartbeat ingestion остава отделна незавършена задача.
+
 ## Blank screen after login / Празен екран след вход — 2026-09-19
 
 Proxy logs show successful token, identity and Site snapshot responses. Found
