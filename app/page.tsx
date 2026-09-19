@@ -374,7 +374,7 @@ export default function Home() {
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div className="portal-view" data-testid={"section-"+view} data-view={view}>
-            {dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang}/>:<>
+            {dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
@@ -417,7 +417,7 @@ function SectionLoading({view,lang}:{view:string;lang:UiLanguage}) {
   </section>;
 }
 
-function LiveModulePending({view,lang}:{view:string;lang:UiLanguage}) {
+function LiveModulePending({view,lang,onDevices}:{view:string;lang:UiLanguage;onDevices:()=>void}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const endpoints:Record<string,string>={
     customers:"/api/v1/organisations · /api/v1/contracts",
@@ -444,6 +444,8 @@ function LiveModulePending({view,lang}:{view:string;lang:UiLanguage}) {
     <h2>{t("Този раздел още не е свързан с реални данни","This section is not connected to live data yet")}</h2>
     <span>{t("Входът Ви остава активен. Това е незавършена интеграция на раздела, не грешка в паролата. Демо стойности не се показват.","You remain signed in. This section's integration is unfinished; it is not a password error. Demo values are not displayed.")}</span>
     <code>{endpoints[view]??"/api/v1"}</code>
+    <p>{t('Регистрираните ROCK Pi и ESP32 са в раздел „Устройства“, не в енергийните активи.','Registered ROCK Pi and ESP32 units are under Devices, not energy assets.')}</p>
+    <button type="button" className="primary-btn" onClick={onDevices}>{t('Отвори регистрираните устройства','Open registered devices')}</button>
     <small>{t("Договорът и всички полета са описани в docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md","The contract and all fields are documented in docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md")}</small>
   </section>;
 }

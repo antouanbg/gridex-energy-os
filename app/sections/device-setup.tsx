@@ -24,8 +24,16 @@ export function DeviceSetupWizard({api, siteId, topology, lang}: {api:GridexApiC
   const update=(index:number,patch:Partial<DeviceSetupRole>)=>{setRoles(items=>items.map((item,i)=>i===index?{...item,...patch}:item));setProvision(false);setConfirmed(false);};
   return <section className="card config-card" data-no-translate>
     <h2>{t('Настройка на устройство','Device setup')}</h2>
+    {!!saved?.imported?.devices?.length&&<section aria-label={t('Внесени устройства','Imported devices')}>
+      <h3>{t('Запазена тестова конфигурация','Saved test configuration')}</h3>
+      <p>{t('Устройствата вече са заведени към този Обект. Не е необходимо да ги добавяте или настройвате повторно. Изберете устройство от менюто за подробности.','These devices already belong to this Site. Do not add or provision them again. Select a device below for details.')}</p>
+      <ul>{saved.imported.devices.map(device=>{
+        const item=topology.gateways.find(g=>g.id===device.gatewayId);
+        return item?<li key={device.gatewayId}>{item.name} · {item.hardwareModel} — {t('конфигурация внесена; връзката не е потвърдена','configuration imported; connectivity unverified')}</li>:null;
+      })}</ul>
+    </section>}
     <p>{t('1. Устройство → 2. До две роли и партньор → 3. Provisioning','1. Device → 2. Up to two roles and peer → 3. Provisioning')}</p>
-    <label>{t('Устройство','Device')}<select disabled={!saved||busy} value={selected} onChange={event=>{
+    <label>{t('Устройство','Device')}<select aria-label={t('Устройство','Device')} disabled={!saved||busy} value={selected} onChange={event=>{
       const id=event.target.value;setSelected(id);setRoles(saved?.configuration.devices?.find(d=>d.gatewayId===id)?.roles||[]);setProvision(false);setConfirmed(false);setEditImported(false);setNotice('');
     }}><option value="">{t('Избери устройство','Choose device')}</option>{topology.gateways.map(g=><option key={g.id} value={g.id}>{g.name} · {g.hardwareModel}</option>)}</select></label>
     {!saved&&!notice&&<p role="status">{t('Зареждане на настройките…','Loading setup…')}</p>}
