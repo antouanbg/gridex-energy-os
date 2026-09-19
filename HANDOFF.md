@@ -2,6 +2,24 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Blank screen after login / Празен екран след вход — 2026-09-19
+
+Proxy logs show successful token, identity and Site snapshot responses. Found
+an unconditional battery.sohPct.toFixed call in live Overview: a commissioned
+inventory without battery telemetry can return battery=null and crash rendering.
+Guard missing battery/SOH and show a dash, never demo SOH. Six EN/BG render
+regressions cover absent battery, null metrics and populated metrics; included
+in npm test. Pages build passes. No auth, network or hardware setting changed.
+Actual external browser acceptance remains required after publication.
+
+Proxy логовете показват успешни token, identity и Site snapshot отговори.
+Открито е безусловно battery.sohPct.toFixed в live Overview: Обект без батерийна
+телеметрия може да върне battery=null и да срине визуализацията. Добавена защита
+за липсваща батерия/SOH с тире, не демо SOH. Шест EN/BG render теста покриват
+липсваща батерия, null и налични стойности; включени в npm test. Pages build
+минава. Без auth, мрежови или hardware промени. Реален външен browser тест
+след публикацията остава необходим.
+
 ## Planned: day-ahead net-profit arbitrage / Планирано: арбитраж „ден напред“ — 2026-09-19
 
 Status: requirement recorded, not implemented or activated by this task.

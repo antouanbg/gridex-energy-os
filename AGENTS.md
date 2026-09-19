@@ -48,6 +48,13 @@ desktop emulation appears to pass. A user-reported mobile issue is authoritative
 
 ## General safeguards
 
+- Before publishing login or live dashboard changes, render a successfully
+  authenticated Site with no battery and null SOC/SOH, in both languages.
+  HTTP 200/auth token success does not prove the post-login UI works.
+- Преди публикация на login/live табло тествай успешно удостоверен Обект без
+  батерия и с null SOC/SOH на двата езика. HTTP 200/token успех не доказва,
+  че екранът след вход работи.
+
 - Preserve unrelated work and inspect `git status` before changes.
 - Do not commit secrets, credentials, private keys, or production-only settings.
 - Keep product documentation bilingual where practical: English first, Bulgarian second.
