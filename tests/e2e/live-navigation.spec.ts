@@ -35,14 +35,13 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
     return route.fulfill({json:{invitations:[]}});
   });
   await page.goto('/');
-  await page.locator('.demo-mode-notice button').first().click();
-  await page.locator('.login-submit').click();
-  await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
+  await page.locator('.quick-sign-in').click();
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   await expect(page.locator('[data-view-id="gateway"]')).toHaveCount(0);
   for(const view of ['sites','devices','overview','customers','assets','battery','schedule','market','settlement','automation','loads','balance','supported','alarms','reports','settings','plans','about']) {
     await page.locator(`[data-view-id="${view}"]`).click();
     await expect(page.getByTestId('section-'+view)).toBeVisible();
-    await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
+    await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
     await expect(page.getByTestId('page-eyebrow')).not.toContainText('6 ОБЕКТА');
   }
   await page.locator('[data-view-id="sites"]').click();
@@ -69,12 +68,12 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   refreshFailure=503;
   await page.waitForTimeout(22000);
   expect(refreshes).toBeGreaterThan(0);
-  await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   refreshFailure=0;
   await page.waitForTimeout(21000);
-  await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   refreshFailure=400;
   await page.waitForTimeout(22000);
-  await expect(page.locator('.backend-badge')).not.toHaveText('OPENREMOTE LIVE');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
   expect(errors).toEqual([]);
 });

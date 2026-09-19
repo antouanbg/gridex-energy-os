@@ -1,5 +1,13 @@
 # Current task
 
+Header cleanup and one-click OIDC sign-in added to PR #25. LIVE context now in
+Devices; About holds GitHub links; global role/unused period removed. Tests pass,
+publication and real-owner acceptance pending. Public route from Mac still fails.
+
+Изчистена лента и директен OIDC вход към PR #25. LIVE е в Устройства; GitHub е
+в За нас; обща роля/неработещ период са премахнати. Тестовете минават; чакат
+публикация и реално приемане. Публичният маршрут от Mac още не работи.
+
 Owner-requested removal of Edge gateway navigation and static online card:
 Devices is the only device-management menu entry on desktop and phone.
 Included in PR #25; no device/API data deleted. Publication pending.

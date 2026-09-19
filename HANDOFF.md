@@ -2,6 +2,33 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Header and direct login / Лента и директен вход — 2026-09-19
+
+Moved live/demo context into Devices with explicit separation from heartbeat.
+Open-source links remain in About, now available in authenticated mode too.
+Removed global role selection (server authorization unchanged) and unused global
+period state: existing section-local time selectors remain, no fictitious filter.
+Header and demo notice sign-in now start existing OIDC/PKCE directly; failure
+opens the login error/retry screen. No new auth provider or backend changes.
+Tests: 20 Node tests; 7 full Chromium tests plus two one-click login viewport
+tests (390/1280px) pass. Both builds pass; lint has two existing image warnings.
+Local master issuer/admin URL/login form pass; forced-local public discovery 200,
+admin 404. Normal-DNS public auth regression probes still fail from Mac; not
+external acceptance. Added to PR #25, not published. Full real-owner login,
+logout and expiry acceptance remains unverified.
+
+LIVE/DEMO контекстът е в Устройства, отделен от heartbeat. Open-source връзките
+остават в За нас, вече достъпен и след вход. Премахнати са общият избор на роля
+(backend правата са непроменени) и неизползваният общ период; локалните избори
+на период се запазват, без фиктивен филтър. Входът от лентата и демо съобщението
+стартира OIDC/PKCE директно; при грешка се показва екранът за повторен опит.
+Без нов auth provider или backend промени. Минават 20 Node, 7 пълни Chromium
+теста и два теста за еднократен вход на 390/1280px. Двата build-а минават;
+lint има две стари image предупреждения. Local master issuer/admin URL/login
+форма минават; forced-local public discovery 200, admin 404. Normal-DNS public
+auth пробите от Mac още не минават; това не е външно приемане. Към PR #25,
+непубликувано. Реален вход/изход/изтекла сесия със собственика остават непроверени.
+
 ## Single device entry / Един вход за устройства — 2026-09-19
 
 Owner requested removal of Edge gateway from desktop/mobile navigation.

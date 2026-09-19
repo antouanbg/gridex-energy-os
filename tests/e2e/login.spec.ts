@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test('explicit PKCE login is available without API health or hidden SSO checks', async ({ page }) => {
+for (const width of [390, 1280]) {
+test(`one-click PKCE login at ${width}px without API health or hidden SSO`, async ({ page }) => {
+  await page.setViewportSize({width,height:900});
   const requests: string[] = [];
   page.on('request', request => requests.push(request.url()));
   await page.route('**/gridex-config.js', route => route.fulfill({
@@ -14,10 +16,12 @@ test('explicit PKCE login is available without API health or hidden SSO checks',
     contentType: 'text/html', body: '<h1>Identity provider sign-in</h1>',
   }));
   await page.goto('/');
-  await page.locator('.demo-mode-notice button').first().click();
-  const login = page.locator('.login-submit');
+  const login = page.locator('.quick-sign-in');
   await expect(login).toBeEnabled();
-  await expect(page.locator('.login-connection-state')).not.toContainText('Backend connection is ready');
+  await expect(page.locator('.header-actions .backend-badge')).toHaveCount(0);
+  await expect(page.locator('.header-actions .open-source-badge')).toHaveCount(0);
+  await expect(page.getByLabel('Работна роля',{exact:true})).toHaveCount(0);
+  await expect(page.getByLabel('Период',{exact:true})).toHaveCount(0);
   expect(requests.filter(url => /\/health|3p-cookies|login-status-iframe|silent-check-sso/.test(url))).toEqual([]);
   await login.click();
   await expect(page.getByRole('heading', { name: 'Identity provider sign-in' })).toBeVisible();
@@ -30,3 +34,4 @@ test('explicit PKCE login is available without API health or hidden SSO checks',
   expect(redirect.searchParams.get('state')).toBeTruthy();
   expect(redirect.searchParams.get('nonce')).toBeTruthy();
 });
+}

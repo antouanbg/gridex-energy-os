@@ -100,24 +100,11 @@ export default function Home() {
   const [view, setView] = useState("overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [auto, setAuto] = useState(true);
-  const [period, setPeriod] = useState("today");
   const [site, setSite] = useState("Solar Park East");
-  const [role, setRole] = useState<DemoUser["roleId"]>("admin");
   const [lang,setLang] = useState<"bg"|"en">(
     () => typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "bg",
   );
   const tKey = useT(lang);
-  const roleOptions = [
-    ["admin", lang === "en" ? "Administrator" : "Администратор"],
-    ["operator", lang === "en" ? "Operator" : "Оператор"],
-    ["customer", lang === "en" ? "Customer" : "Клиент"],
-    ["trader", lang === "en" ? "Trader" : "Търговец"],
-  ] as const;
-  const periodOptions = [
-    ["today", lang === "en" ? "Today" : "Днес"],
-    ["week", lang === "en" ? "This week" : "Тази седмица"],
-    ["month", lang === "en" ? "This month" : "Този месец"],
-  ] as const;
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [demoNoticeVisible,setDemoNoticeVisible] = useState(true);
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
@@ -172,7 +159,6 @@ export default function Home() {
       if (!active) return;
       const user=sessionToUser({ ...session, roles: membershipIdentity.roles });
       setSessionUser(user);
-      setRole(user.roleId);
       setAuthState("authenticated");
       setBackendState("online");
       setIntegrationError("");
@@ -284,7 +270,6 @@ export default function Home() {
       }
     }
     setSessionUser(null);
-    setRole("admin");
     navigate("login");
     notify(lang==="en"?"You have signed out safely":"Излязохте успешно от профила");
   };
@@ -297,11 +282,12 @@ export default function Home() {
     } catch {
       setAuthState("error");
       setIntegrationError(lang==="en"?"The sign-in service did not respond. Please try again.":"Услугата за вход не отговори. Моля, опитайте отново.");
+      navigate('login');
     }
   };
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-mode={dataMode}>
       <aside className={`sidebar ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
         <button className="brand" onClick={() => navigate("overview")} aria-label={lang==="en"?"GrideX Energy OS – home":"GrideX Energy OS – начало"}>
           <span>GX</span><div>GRIDEX<small>ENERGY OS</small></div>
@@ -336,7 +322,7 @@ export default function Home() {
             <button role="menuitem" onClick={()=>navigate("profile")}><i>◎</i><span><strong>{lang==="en"?"Profile & statistics":"Профил и статистика"}</strong><small>{lang==="en"?"Activity, permissions and sessions":"Активност, права и сесии"}</small></span><b>›</b></button>
             <button role="menuitem" onClick={()=>navigate("login")}><i>⇄</i><span><strong>{lang==="en"?"Switch account":"Смяна на профил"}</strong><small>{lang==="en"?"Open the sign-in page":"Отвори страницата за вход"}</small></span><b>›</b></button>
             <button className="account-menu-logout" role="menuitem" onClick={signOut}><i>↪</i><span><strong>{lang==="en"?"Sign out":"Изход"}</strong><small>{lang==="en"?"End this portal session":"Прекрати тази сесия"}</small></span></button>
-          </>:<button role="menuitem" onClick={()=>navigate("login")}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open the secure-access page":"Отвори страницата за достъп"}</small></span><b>›</b></button>}
+          </>:<button role="menuitem" disabled={authState==='checking'} onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button>}
         </div>
       </>}
 
@@ -344,18 +330,13 @@ export default function Home() {
         <header>
           <div><p className="eyebrow" data-testid="page-eyebrow">{dataMode==='live'?(view==='sites'?(lang==='en'?`PORTFOLIO / ${sitesStatus==='ready'?liveSites.length:'—'} SITES`:`ПОРТФОЛИО / ${sitesStatus==='ready'?liveSites.length:'—'} ОБЕКТА`):(selectedSiteId?site:'GrideX')):tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (dataMode==='live'?site:lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
           <div className="header-actions">
-            <span className={`backend-badge ${dataMode==="live"?"online":backendState==="offline"?"offline":"demo"}`} data-no-translate>
-              <i/>{dataMode === "live" ? "OPENREMOTE LIVE" : backendState === "offline" ? "API OFFLINE · DEMO" : backendState === "checking" ? "CONNECTING · DEMO" : "DEMO DATA"}
-            </span>
-            <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
             <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
-            <select value={role} disabled={dataMode==="live"} onChange={(e) => { const next=e.target.value as DemoUser["roleId"]; setRole(next); notify(lang === "en" ? `Active role: ${roleOptions.find(([id])=>id===next)?.[1]}` : `Активна роля: ${roleOptions.find(([id])=>id===next)?.[1]}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}>{roleOptions.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
+            {!sessionUser&&<button className="primary-btn quick-sign-in" disabled={authState==='checking'} onClick={signIn}>{authState==='checking'?(lang==='en'?'Connecting…':'Свързване…'):(lang==='en'?'Sign in':'Вход')}</button>}
             {view !== "sites" && <select value={dataMode==='live'?selectedSiteId:site} onChange={(e) => {
               setSite(e.target.value);
               const selected=liveSites.find(item=>item.id===e.target.value);
               if(selected){setSelectedSiteId(selected.id);setSite(selected.name);setLiveSnapshot(null);}
             }} aria-label={lang==="en"?"Selected site":"Избран обект"}>{dataMode==="live"?(liveSites.length?liveSites.map(item=><option key={item.id} value={item.id}>{item.name}</option>):<option value="">{lang==='en'?'No site selected':'Няма избран обект'}</option>):<><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></>}</select>}
-            <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label={lang==="en"?"Period":"Период"}>{periodOptions.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
             <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△{dataMode==='demo'&&<em>3</em>}</button>
             <button className="mobile-account-button" data-no-translate aria-label={lang==="en"?"Account menu":"Потребителско меню"} aria-expanded={accountMenuOpen} onClick={()=>setAccountMenuOpen(!accountMenuOpen)}>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</button>
           </div>
@@ -364,7 +345,7 @@ export default function Home() {
         {dataMode==="demo"&&demoNoticeVisible&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
           <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"API access could not be verified. You can retry sign-in.":"Достъпът до API не може да се потвърди. Можете да опитате вход отново."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
-          <button onClick={()=>navigate("login")}>{lang==="en"?"Sign in":"Вход"} →</button>
+          <button disabled={authState==='checking'} onClick={signIn}>{lang==="en"?"Sign in":"Вход"} →</button>
           <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
 
@@ -372,7 +353,8 @@ export default function Home() {
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div className="portal-view" data-testid={"section-"+view} data-view={view}>
-            {dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+            {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
+            {dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login","about"]).has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}

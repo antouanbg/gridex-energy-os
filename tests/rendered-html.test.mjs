@@ -35,7 +35,10 @@ test("server-renders the GrideX Energy OS interface", async () => {
   assert.match(html, /class="mobile-menu-toggle"/);
   assert.match(html, /aria-controls="main-navigation"/);
   assert.match(html, /mobile-primary/);
-  assert.match(html, /OPEN SOURCE/);
+  assert.match(html, /quick-sign-in/);
+  assert.doesNotMatch(html, /open-source-badge|Работна роля/);
+  const about = await readFile(new URL('../app/sections/about.tsx', import.meta.url), 'utf8');
+  assert.match(about, /OPEN SOURCE/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
