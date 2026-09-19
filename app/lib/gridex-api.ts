@@ -250,7 +250,7 @@ export function getGridexRuntimeConfig(): GridexRuntimeConfig {
 export class GridexApiClient {
   constructor(
     private readonly config: GridexRuntimeConfig,
-    private readonly getAccessToken: () => Promise<string | undefined> = async () => undefined,
+    private readonly getAccessToken: (force?: boolean) => Promise<string | undefined> = async () => undefined,
   ) {}
 
   async health(signal?: AbortSignal): Promise<{ status: string; openRemote: string; writesEnabled?: boolean }> {
@@ -554,12 +554,21 @@ export class GridexApiClient {
     let token: string | undefined;
     try {
       token = await this.getAccessToken();
-    } catch {
-      throw new GridexApiError("Authentication refresh failed", 401);
+    } catch(error) {
+      throw new GridexApiError("Authentication refresh unavailable", (error as {status?:number})?.status===401?401:503);
     }
     if (!token) throw new GridexApiError("Authentication is required for live GridEx data", 401);
     const headers = new Headers(init.headers);
     headers.set("Authorization", `Bearer ${token}`);
-    return fetch(`${this.config.apiBaseUrl}${path}`, { ...init, headers });
+    const response=await fetch(`${this.config.apiBaseUrl}${path}`, { ...init, headers });
+    // Retry a read once after an explicit refresh. Never replay writes automatically.
+    if(response.status===401 && (!init.method || init.method==='GET') && !init.signal?.aborted) {
+      try { token=await this.getAccessToken(true); }
+      catch(error) {throw new GridexApiError('Authentication refresh unavailable',(error as {status?:number})?.status===401?401:503);}
+      if(!token)throw new GridexApiError('Authentication required',401);
+      headers.set('Authorization',`Bearer ${token}`);
+      return fetch(`${this.config.apiBaseUrl}${path}`,{...init,headers});
+    }
+    return response;
   }
 }

@@ -2,7 +2,7 @@
 
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot } from "./lib/gridex-api";
-import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, type GridexAuthSession } from "./lib/gridex-auth";
+import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { PanelTitle } from "./sections/shared";
@@ -74,6 +74,7 @@ const Invitations = lazy(() => import('./sections/invitations').then(module => (
 const DeviceInformation = lazy(() => import('./sections/device-information').then(module => ({ default: module.DeviceInformation })));
 const Customers = lazy(() => import("./sections/customers").then(module => ({ default: module.Customers })));
 const Sites = lazy(() => import("./sections/sites").then(module => ({ default: module.Sites })));
+const LiveSites = lazy(() => import("./sections/live-sites").then(module => ({ default: module.LiveSites })));
 const Assets = lazy(() => import("./sections/assets").then(module => ({ default: module.Assets })));
 const Battery = lazy(() => import("./sections/battery").then(module => ({ default: module.Battery })));
 const Schedule = lazy(() => import("./sections/schedule").then(module => ({ default: module.Schedule })));
@@ -94,7 +95,7 @@ const About = lazy(() => import("./sections/about").then(module => ({ default: m
 export default function Home() {
   const runtimeConfig = useMemo(() => getGridexRuntimeConfig(), []);
   const apiClient = useMemo(
-    () => new GridexApiClient(runtimeConfig, () => getGridexAccessToken(runtimeConfig)),
+    () => new GridexApiClient(runtimeConfig, force => getGridexAccessToken(runtimeConfig,force)),
     [runtimeConfig],
   );
   const [view, setView] = useState("overview");
@@ -130,6 +131,7 @@ export default function Home() {
   const [authState,setAuthState] = useState<AuthState>(runtimeConfig.mode === "demo" ? "anonymous" : "checking");
   const [integrationError,setIntegrationError] = useState("");
   const [liveSites,setLiveSites] = useState<GridexSite[]>([]);
+  const [sitesStatus,setSitesStatus] = useState<'loading'|'ready'|'error'>('loading');
   const [selectedSiteId,setSelectedSiteId] = useState(runtimeConfig.defaultSiteId);
   const [liveSnapshot,setLiveSnapshot] = useState<GridexSiteSnapshot|null>(null);
   const dataMode:DataMode = backendState === "online" && authState === "authenticated" ? "live" : "demo";
@@ -165,7 +167,7 @@ export default function Home() {
         setSessionUser(null);
         setBackendState("offline");
         setAuthState("error");
-        setIntegrationError(lang==="en"?"Sign-in completed, but API access could not be verified. Please retry.":"Входът приключи, но достъпът до API не може да се потвърди. Опитайте отново.");
+        setIntegrationError(document.documentElement.lang==="en"?"Sign-in completed, but API access could not be verified. Please retry.":"Входът приключи, но достъпът до API не може да се потвърди. Опитайте отново.");
         return;
       }
       if (!active) return;
@@ -180,21 +182,25 @@ export default function Home() {
       setSessionUser(null);
       setBackendState("unknown");
       setAuthState("error");
-      setIntegrationError(lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
+      setIntegrationError(document.documentElement.lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
     return()=>{active=false;};
-  },[runtimeConfig,lang,apiClient]);
+  },[runtimeConfig,apiClient]);
 
   useEffect(()=>{
     if (dataMode!=="live") return;
     const controller=new AbortController();
     apiClient.sites(controller.signal).then(sites=>{
-      if (!sites.length) return;
+      if(controller.signal.aborted)return;
       setLiveSites(sites);
+      setSitesStatus('ready');
+      if (!sites.length) {setSelectedSiteId('');setLiveSnapshot(null);return;}
       const selected=sites.find(item=>item.id===selectedSiteId)??sites[0];
       setSelectedSiteId(selected.id);
       setSite(selected.name);
     }).catch(error=>{
+      if(controller.signal.aborted)return;
+      setLiveSites([]);setSitesStatus('error');setSelectedSiteId('');setLiveSnapshot(null);
       if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAuthState("anonymous");return;}
       setIntegrationError(lang==="en"?"The site list could not be loaded.":"Списъкът с обекти не може да бъде зареден.");
     });
@@ -202,16 +208,20 @@ export default function Home() {
   },[apiClient,dataMode,lang,selectedSiteId]);
 
   useEffect(()=>{
-    if (dataMode!=="live"||!selectedSiteId) return;
+    if (dataMode!=="live"||!selectedSiteId||!liveSites.some(item=>item.id===selectedSiteId)) return;
     let controller=new AbortController();
-    const loadSnapshot=()=>apiClient.snapshot(selectedSiteId,controller.signal).then(snapshot=>{
+    const loadSnapshot=()=>{
+      const requestController=controller;
+      return apiClient.snapshot(selectedSiteId,requestController.signal).then(snapshot=>{
+      if(requestController.signal.aborted)return;
       setLiveSnapshot(snapshot);
       setIntegrationError("");
     }).catch(error=>{
+      if(requestController.signal.aborted)return;
       if (error instanceof DOMException&&error.name==="AbortError") return;
       if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAuthState("anonymous");setLiveSnapshot(null);return;}
       setIntegrationError(lang==="en"?"Live telemetry is temporarily unavailable.":"Телеметрията на живо временно не е достъпна.");
-    });
+    });};
     void loadSnapshot();
     const interval=window.setInterval(()=>{
       controller.abort();
@@ -219,19 +229,25 @@ export default function Home() {
       void loadSnapshot();
     },runtimeConfig.snapshotRefreshMs);
     return()=>{window.clearInterval(interval);controller.abort();};
-  },[apiClient,dataMode,selectedSiteId,runtimeConfig.snapshotRefreshMs,lang]);
+  },[apiClient,dataMode,selectedSiteId,runtimeConfig.snapshotRefreshMs,lang,liveSites]);
 
   useEffect(()=>{
     if(authState!=="authenticated"||backendState!=="online")return;
+    let active=true;
     const expireSession=()=>{
+        if(!active)return;
         setSessionUser(null);
+        setLiveSites([]);setSelectedSiteId('');
         setAuthState("anonymous");
         setLiveSnapshot(null);
         setIntegrationError(lang==="en"?"Your session has expired. Please sign in again.":"Сесията Ви е изтекла. Моля, логнете се отново.");
       };
-    const verifySession=()=>getGridexAccessToken(runtimeConfig).then(token=>{if(!token)expireSession();}).catch(expireSession);
+    const verifySession=()=>getGridexAccessToken(runtimeConfig).then(token=>{if(!token)expireSession();}).catch(error=>{
+      if(error instanceof GridexSessionExpiredError)expireSession();
+      else if(active)setIntegrationError(lang==='en'?'Session refresh is temporarily unavailable. Retrying without signing you out.':'Обновяването на сесията временно е недостъпно. Ще опитаме отново, без да те отписваме.');
+    });
     const interval=window.setInterval(()=>{void verifySession();},20000);
-    return()=>window.clearInterval(interval);
+    return()=>{active=false;window.clearInterval(interval);};
   },[authState,backendState,runtimeConfig,lang]);
 
   useEffect(() => {
@@ -293,7 +309,7 @@ export default function Home() {
         </button>
         <nav id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
           {navItems.map(([id, icon]) => {
-            const badge=id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
+            const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
             return <button key={id} data-view-id={id} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""}`} onClick={() => navigate(id)}>
@@ -328,7 +344,7 @@ export default function Home() {
 
       <section className="content">
         <header>
-          <div><p className="eyebrow" data-testid="page-eyebrow">{tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
+          <div><p className="eyebrow" data-testid="page-eyebrow">{dataMode==='live'?(view==='sites'?(lang==='en'?`PORTFOLIO / ${sitesStatus==='ready'?liveSites.length:'—'} SITES`:`ПОРТФОЛИО / ${sitesStatus==='ready'?liveSites.length:'—'} ОБЕКТА`):(selectedSiteId?site:'GrideX')):tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (dataMode==='live'?site:lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
           <div className="header-actions">
             <span className={`backend-badge ${dataMode==="live"?"online":backendState==="offline"?"offline":"demo"}`} data-no-translate>
               <i/>{dataMode === "live" ? "OPENREMOTE LIVE" : backendState === "offline" ? "API OFFLINE · DEMO" : backendState === "checking" ? "CONNECTING · DEMO" : "DEMO DATA"}
@@ -336,13 +352,13 @@ export default function Home() {
             <a className="open-source-badge" href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer" data-no-translate>OPEN SOURCE ↗</a>
             <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
             <select value={role} disabled={dataMode==="live"} onChange={(e) => { const next=e.target.value as DemoUser["roleId"]; setRole(next); notify(lang === "en" ? `Active role: ${roleOptions.find(([id])=>id===next)?.[1]}` : `Активна роля: ${roleOptions.find(([id])=>id===next)?.[1]}`); }} aria-label={lang==="en"?"Working role":"Работна роля"}>{roleOptions.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
-            {view !== "sites" && <select value={site} onChange={(e) => {
+            {view !== "sites" && <select value={dataMode==='live'?selectedSiteId:site} onChange={(e) => {
               setSite(e.target.value);
-              const selected=liveSites.find(item=>item.name===e.target.value);
-              if(selected)setSelectedSiteId(selected.id);
-            }} aria-label={lang==="en"?"Selected site":"Избран обект"}>{dataMode==="live"&&liveSites.length?liveSites.map(item=><option key={item.id}>{item.name}</option>):<><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></>}</select>}
+              const selected=liveSites.find(item=>item.id===e.target.value);
+              if(selected){setSelectedSiteId(selected.id);setSite(selected.name);setLiveSnapshot(null);}
+            }} aria-label={lang==="en"?"Selected site":"Избран обект"}>{dataMode==="live"?(liveSites.length?liveSites.map(item=><option key={item.id} value={item.id}>{item.name}</option>):<option value="">{lang==='en'?'No site selected':'Няма избран обект'}</option>):<><option>Solar Park East</option><option>Logistics Hub Plovdiv</option><option>Factory Varna</option></>}</select>}
             <select value={period} onChange={(e) => setPeriod(e.target.value)} aria-label={lang==="en"?"Period":"Период"}>{periodOptions.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
-            <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△<em>3</em></button>
+            <button className="icon-btn" aria-label={lang==="en"?"Notifications":"Известия"} onClick={() => navigate("alarms")}>△{dataMode==='demo'&&<em>3</em>}</button>
             <button className="mobile-account-button" data-no-translate aria-label={lang==="en"?"Account menu":"Потребителско меню"} aria-expanded={accountMenuOpen} onClick={()=>setAccountMenuOpen(!accountMenuOpen)}>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</button>
           </div>
         </header>
@@ -358,7 +374,7 @@ export default function Home() {
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div className="portal-view" data-testid={"section-"+view} data-view={view}>
-            {dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang}/>:<>
+            {dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
@@ -382,7 +398,7 @@ export default function Home() {
         {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify}/>}
-        {view === "profile" && <UserProfile lang={lang} user={sessionUser} navigate={navigate} signOut={signOut} notify={notify}/>}
+        {view === "profile" && <UserProfile live={dataMode==='live'} lang={lang} user={sessionUser} navigate={navigate} signOut={signOut} notify={notify}/>}
         {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
         {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang}/>}
             </>}
@@ -425,8 +441,8 @@ function LiveModulePending({view,lang}:{view:string;lang:UiLanguage}) {
   };
   return <section className="live-module-pending card" data-no-translate>
     <i>API</i><p>{t("LIVE РЕЖИМ · БЕЗ ДЕМО СТОЙНОСТИ","LIVE MODE · NO DEMO VALUES")}</p>
-    <h2>{t("Модулът очаква своя backend договор","This module is waiting for its backend contract")}</h2>
-    <span>{t("Вие сте в реална сесия. За да не смесваме демонстрационни и реални данни, примерният екран е скрит, докато съответният endpoint бъде активиран.","You are in a real session. To prevent mixing representative and live data, the preview screen is hidden until its endpoint is enabled.")}</span>
+    <h2>{t("Този раздел още не е свързан с реални данни","This section is not connected to live data yet")}</h2>
+    <span>{t("Входът Ви остава активен. Това е незавършена интеграция на раздела, не грешка в паролата. Демо стойности не се показват.","You remain signed in. This section's integration is unfinished; it is not a password error. Demo values are not displayed.")}</span>
     <code>{endpoints[view]??"/api/v1"}</code>
     <small>{t("Договорът и всички полета са описани в docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md","The contract and all fields are documented in docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md")}</small>
   </section>;
@@ -466,8 +482,9 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
   </div>;
 }
 
-function UserProfile({lang,user,navigate,signOut,notify}:{lang:UiLanguage;user:DemoUser|null;navigate:(id:string)=>void;signOut:()=>void;notify:(message:string)=>void}) {
+function UserProfile({lang,user,navigate,signOut,notify,live=false}:{lang:UiLanguage;user:DemoUser|null;navigate:(id:string)=>void;signOut:()=>void;notify:(message:string)=>void;live?:boolean}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
+  if(live&&user)return <section className="card" data-no-translate><h2>{user.nameBg}</h2><p>{user.email}</p><p>{lang==='en'?user.roleEn:user.roleBg}</p><button onClick={()=>navigate('sites')}>{t('Моите обекти','My sites')}</button><button onClick={signOut}>{t('Изход','Sign out')}</button><p>{t('Статистиката и историята на действията още не са свързани.','Statistics and activity history are not connected yet.')}</p></section>;
   if (!user) return <section className="empty-profile card" data-no-translate><span>↪</span><h2>{t("Няма активна сесия","No active session")}</h2><p>{t("Влезте, за да видите потребителската статистика, правата и историята на действията.","Sign in to view user statistics, permissions and activity history.")}</p><button className="primary-btn" onClick={()=>navigate("login")}>{t("Към входа","Go to sign in")}</button></section>;
   const activity = [
     ["14:28",t("Потвърдена аларма","Alarm acknowledged"),t("BESS температура · Solar Park East","BESS temperature · Solar Park East")],

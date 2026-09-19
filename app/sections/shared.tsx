@@ -7,7 +7,7 @@ export function PanelTitle({ eyebrow, title, action }: { eyebrow: string; title:
 }
 
 export function Metric({label,value,unit,badge,type,priceNote="Продаваме към мрежата"}:{label:string;value:string;unit:string;badge:string;type:string;priceNote?:string}) {
-  return <article className="card metric"><p>{label}<span>{badge}</span></p><strong>{value} <small>{unit}</small></strong>{type === "charge" ? <div className="charge"><i style={{width:"72%"}}/></div> : type === "price" ? <div className="price-note">{priceNote}</div> : <div className={type}/>}</article>;
+  return <article className="card metric"><p>{label}<span>{badge}</span></p><strong>{value} <small>{unit}</small></strong>{type === "charge" ? <div className="charge">{value!=='—'&&Number.isFinite(Number(value))&&<i style={{width:`${Math.max(0,Math.min(100,Number(value)))}%`}}/>}</div> : type === "price" ? <div className="price-note">{priceNote}</div> : value!=='—'?<div className={type}/>:null}</article>;
 }
 
 export function ModeRange({label,value,unit,min,max,onChange}:{label:string;value:number;unit:string;min:number;max:number;onChange:(value:number)=>void}) { return <label className="mode-range"><span>{label}<strong>{value} {unit}</strong></span><input type="range" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/><small><b>{min}</b><b>{max}</b></small></label>; }
