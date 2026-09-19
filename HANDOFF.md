@@ -2,6 +2,16 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Menu governance / Правило за менюто — 2026-09-19
+
+AGENTS.md now requires explicit owner permission for any menu structure change
+and an explicit owner request for each new menu item, across desktop/mobile and
+submenus. Documentation only; EN/BG reviewed and git diff --check passed.
+
+AGENTS.md изисква изрично разрешение за всяка структурна промяна на менюто
+и изрично искане от собственика за нов елемент, включително mobile/подменюта.
+Само документация; EN/BG са проверени и git diff --check минава.
+
 ## Header and direct login / Лента и директен вход — 2026-09-19
 
 Moved live/demo context into Devices with explicit separation from heartbeat.

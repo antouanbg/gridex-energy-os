@@ -63,7 +63,26 @@ Vendor-specific Modbus/CAN/RS mappings belong in drivers and mappings, never
 in generic EMS logic. Commands to physical devices must be limited, logged,
 validated and fail safe. Use the manufacturer protocol as authoritative.
 
-## Mobile frontend approval
+## Menu structure — owner approval required / Структура на менюто — само с разрешение
+
+- Do not change menu structure, grouping, order, labels, hierarchy, visibility
+  or navigation destinations without the project owner's explicit permission.
+  This applies to desktop, mobile, account menus and submenus.
+- Add a new menu item only when explicitly requested by the owner. Do not infer
+  permission from a new feature, endpoint, design task or general cleanup.
+- When a menu change seems necessary, describe the affected items and proposed
+  change and obtain approval before implementation. Limit any approval to the
+  requested change; preserve the rest of the navigation.
+- Не променяй структурата, групирането, реда, имената, йерархията, видимостта
+  или целевите екрани на менюто без изрично разрешение от собственика.
+  Правилото важи за desktop, mobile, потребителско меню и подменюта.
+- Добавяй нов елемент само по изрично искане на собственика. Нова функция,
+  endpoint, дизайн задача или общо почистване НЕ означава разрешение.
+- Ако промяна е необходима, опиши засегнатите елементи и предложението и
+  получи одобрение преди изпълнение. Одобрението важи само за поисканата
+  промяна; останалата навигация се запазва.
+
+## Mobile layout approval / Одобрение за мобилното оформление
 
 Before changing any mobile layout, responsive CSS, mobile navigation, font size,
 touch target, or mobile-only component behavior:
