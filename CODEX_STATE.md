@@ -1,5 +1,14 @@
 # Current task
 
+Owner approved PR #25 deployment. Four optional pre-login translation suggestions
+(FR/ES/DE/IT) implemented using browser language, with persistent dismissal and
+BG/EN preference. No GeoIP or external translation requests; native dictionaries
+remain backlog. See latest HANDOFF and PR deployment evidence for final status.
+
+Собственикът одобри публикация на PR #25. Предложения преди вход за FR/ES/DE/IT
+според браузъра, запазен отказ и BG/EN избор. Без GeoIP/външни заявки за превод;
+пълните речници остават задача. Актуалният статус е в HANDOFF и PR доказателствата.
+
 Header cleanup and one-click OIDC sign-in added to PR #25. LIVE context now in
 Devices; About holds GitHub links; global role/unused period removed. Tests pass,
 publication and real-owner acceptance pending. Public route from Mac still fails.

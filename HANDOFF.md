@@ -2,6 +2,44 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Design publication and four-language suggestion — 2026-09-19
+
+Owner approved publishing PR #25. Includes desktop provisioning cards, removal
+of Edge gateway navigation, Devices-only management, header cleanup and direct
+sign-in. No new menu items, hardware commands or backend configuration changes.
+Implemented optional FR/ES/DE/IT browser-translation guidance before login,
+chosen from navigator.languages, not IP. Dismissal and explicit BG/EN choices
+are remembered; /en takes precedence. Other browser languages use English.
+No translation widget, GeoIP service or automatic text transmission is installed.
+This is guidance, NOT four complete translated application catalogues. Native
+reviewed FR/ES/DE/IT catalogues remain backlog; authenticated data translation
+is not automated. Mobile provisioning redesign remains separately unapproved.
+Tests include all four suggestions, dismissal, saved BG preference, /en,
+navigation, mocked login/session expiry and imported devices. Real owner-session
+acceptance and live device heartbeat remain pending; mocks do not prove these.
+Publication evidence is recorded on PR #25 after the deployment workflow.
+Validation: 14 Chromium tests and 20 Node tests pass; six translation tests
+rerun with screenshots, visually reviewed. Pages and Vinext builds pass. Lint:
+zero errors, two existing About image warnings. Local master auth probes pass;
+normal-DNS public issuer from Mac still fails (known network-path limitation).
+
+Собственикът одобри публикуването на PR #25: desktop provisioning карти,
+премахнат Edge шлюз, управление през Устройства, изчистена лента и директен вход.
+Без нови менюта, хардуерни команди или backend настройки. Добавени са инструкции
+по желание за браузърен превод на FR/ES/DE/IT преди вход според navigator.languages,
+не IP. Отказът и изричният BG/EN избор се пазят; /en има предимство. За други
+езици основата е английски. Без външен widget, GeoIP или автоматично изпращане
+на текст. Това са предложения/инструкции, НЕ четири пълни превода на приложението.
+Прегледаните FR/ES/DE/IT речници остават задача; няма автоматичен превод на
+удостоверени данни. Mobile provisioning редизайнът чака отделно одобрение.
+Тестовете покриват четирите предложения, отказ, запазен BG, /en, навигация,
+симулиран вход/изтичане и внесени устройства. Реално приемане с акаунта и жив
+heartbeat остават непотвърдени. Публикацията се документира в PR #25 след workflow.
+Проверки: 14 Chromium и 20 Node теста минават; шестте езикови са повторени със
+снимки и визуален преглед. Pages/Vinext build минават; lint без грешки, две стари
+About image предупреждения. Local master пробите минават; public issuer през
+normal DNS от Mac още не се достига (известно ограничение на мрежовия път).
+
 ## Language suggestions / Езикови предложения — 2026-09-19
 
 Owner requests translation suggestions for visitors outside Bulgaria, including

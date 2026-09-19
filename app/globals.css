@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 :root { --ink:#10211c; --muted:#738079; --line:#e3eae6; --green:#24b56a; --green-dark:#0d593b; --lime:#b8e844; --cream:#f4f6f3; }
+.translation-suggestion { padding:18px 20px; margin-bottom:16px; color:var(--ink); }
+.translation-suggestion>strong { font-size:16px; }
+.translation-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.translation-suggestion p { color:#53685c; line-height:1.6; max-width:80ch; overflow-wrap:anywhere; }
 /* Live provisioning uses the existing GrideX settings/Edge visual language.
    Mobile remains unchanged until owner approval. */
 @media (min-width:681px) {

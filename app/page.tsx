@@ -6,6 +6,7 @@ import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, 
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { PanelTitle } from "./sections/shared";
+import { TranslationSuggestion } from './sections/translation-suggestion';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
 const navItems = [
@@ -105,6 +106,13 @@ export default function Home() {
     () => typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "bg",
   );
   const tKey = useT(lang);
+  useEffect(()=>{
+    if(window.location.pathname.startsWith('/en'))return;
+    // Client-only preference is read after hydration to preserve the server HTML.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    try { const saved=localStorage.getItem('gridex.ui-language');if(saved==='bg'||saved==='en'){setLang(saved);return;} } catch { /* Storage is optional. */ }
+    if(navigator.language&&!navigator.language.toLowerCase().startsWith('bg'))setLang('en');
+  },[]);
   const [batteryNotice,setBatteryNotice] = useState(true);
   const [demoNoticeVisible,setDemoNoticeVisible] = useState(true);
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
@@ -330,7 +338,7 @@ export default function Home() {
         <header>
           <div><p className="eyebrow" data-testid="page-eyebrow">{dataMode==='live'?(view==='sites'?(lang==='en'?`PORTFOLIO / ${sitesStatus==='ready'?liveSites.length:'—'} SITES`:`ПОРТФОЛИО / ${sitesStatus==='ready'?liveSites.length:'—'} ОБЕКТА`):(selectedSiteId?site:'GrideX')):tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (dataMode==='live'?site:lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
           <div className="header-actions">
-            <button className="language-switch" data-no-translate onClick={()=>setLang(lang==="bg"?"en":"bg")} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
+            <button className="language-switch" data-no-translate onClick={()=>{const next=lang==='bg'?'en':'bg';setLang(next);try{localStorage.setItem('gridex.ui-language',next);}catch{/* Storage is optional. */}}} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
             {!sessionUser&&<button className="primary-btn quick-sign-in" disabled={authState==='checking'} onClick={signIn}>{authState==='checking'?(lang==='en'?'Connecting…':'Свързване…'):(lang==='en'?'Sign in':'Вход')}</button>}
             {view !== "sites" && <select value={dataMode==='live'?selectedSiteId:site} onChange={(e) => {
               setSite(e.target.value);
@@ -341,6 +349,8 @@ export default function Home() {
             <button className="mobile-account-button" data-no-translate aria-label={lang==="en"?"Account menu":"Потребителско меню"} aria-expanded={accountMenuOpen} onClick={()=>setAccountMenuOpen(!accountMenuOpen)}>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</button>
           </div>
         </header>
+
+        {!sessionUser&&view!=='login'&&<TranslationSuggestion key={lang}/>}
 
         {dataMode==="demo"&&demoNoticeVisible&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
