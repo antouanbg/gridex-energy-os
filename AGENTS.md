@@ -104,6 +104,20 @@ For every user-facing, architecture, configuration, safety or operational text:
 
 ## Task recovery and Git workflow
 
+- Before declaring completion, test the exact requested flow, including populated,
+  empty, denied and unavailable states. Record mocked versus real-user evidence,
+  tested revision, results and publication verification. CI or a demo shell alone
+  does not establish real-account acceptance.
+- Keep unfinished work in HANDOFF with status, blocker, next action and acceptance
+  criteria. On resuming, review it and propose the highest-priority unfinished
+  step without waiting to be reminded; do not expand hardware/network authority.
+- Преди приключване тествай точния поток: налични/липсващи данни, отказ и
+  недостъпност. Записвай mock спрямо реален вход, ревизия, резултати и проверена
+  публикация. CI или демо екран не доказва приемане с реален акаунт.
+- Незавършеното остава в HANDOFF със статус, пречка, следващо действие и критерий
+  за приемане. При подновяване предложи най-важната незавършена стъпка без
+  подсещане; не разширявай разрешенията за хардуер и мрежа.
+
 - Start every task by reading this file, `CODEX_STATE.md`, relevant docs and
   `git status`; the repository is authoritative over remembered conversation.
 - Preserve unrelated user changes and use small, logical commits.

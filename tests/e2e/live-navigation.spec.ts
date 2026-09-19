@@ -30,7 +30,8 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
     if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',roles:['administrator'],permissions:['site:read'],memberships:[]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:'test-site',name:'Test Lab',organisationId:'test-org'}]}});
     if(path.endsWith('/snapshot'))return route.fulfill({status:503,json:{error:'unavailable'}});
-    if(path.endsWith('/hardware'))return route.fulfill({json:{configuration:null,gateways:[],devices:[]}});
+    if(path.endsWith('/hardware'))return route.fulfill({json:{configuration:{revision:1,status:'draft'},gateways:[{id:'rock',name:'Test ROCK Pi',hardwareModel:'ROCK Pi E',role:'controller',ports:[]},{id:'esp',name:'Test ESP32',hardwareModel:'ESP32',role:'device-node',ports:[]}],devices:[]}});
+    if(path.endsWith('/device-setup'))return route.fulfill({json:{revision:0,configuration:{},imported:{pollMs:500,timeoutMs:400,devices:[{gatewayId:'rock',communication:'node-polling-and-local-modbus-listener'},{gatewayId:'esp',communication:'modbus-tcp-via-rockpi'}]}}});
     return route.fulfill({json:{invitations:[]}});
   });
   await page.goto('/');
@@ -47,6 +48,15 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await expect(page.getByRole('heading',{name:'Test Lab'})).toBeVisible();
   await page.getByRole('button',{name:'Устройства →',exact:true}).click();
   await expect(page.getByTestId('section-devices')).toBeVisible();
+  await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ROCK Pi');
+  await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ESP32');
+  await page.getByLabel('Устройство',{exact:true}).selectOption('rock');
+  await expect(page.getByText('Не е необходим повторен provisioning.',{exact:false})).toBeVisible();
+  await page.getByLabel('Устройство',{exact:true}).selectOption('esp');
+  await expect(page.getByText('ESP32: Modbus TCP през ROCK Pi; DHCP резервация.',{exact:true})).toBeVisible();
+  await page.locator('[data-view-id="assets"]').click();
+  await page.getByRole('button',{name:'Отвори регистрираните устройства',exact:true}).click();
+  await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ESP32');
   refreshFailure=503;
   await page.waitForTimeout(22000);
   expect(refreshes).toBeGreaterThan(0);

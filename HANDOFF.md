@@ -2,6 +2,40 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Imported pair visibility / Видимост на внесената двойка — 2026-09-19
+
+Runtime read-only DB inspection confirms two registered gateways and an active
+device-import revision with two entries. Hardware inventory revision remains
+draft; an active import is NOT hardware activation. Devices now shows imported
+inventory immediately, before selecting a unit. Pending modules provide an
+explicit action to Devices, including the Assets screen reported by the owner.
+No duplicate registration, backend deployment, hardware commands or mobile CSS.
+Browser regression covers both imported units, selecting each without repeat
+provisioning, and Assets → Devices; OIDC/API fixtures are mocked, not actual
+owner-session acceptance. Real account acceptance and heartbeat remain pending.
+Next: owner-session verification of the published Devices screen; then finish
+ROCK-initiated approved-revision execution and real heartbeat separately.
+
+Validation: 20 Node tests pass; extended Chromium imported-pair/navigation and
+refresh regression passes (1.1 min); Pages and Vinext builds pass; lint has only
+two pre-existing image warnings. Initial browser attempt exposed a missing
+explicit selector accessible name; fixed and rerun passed. Publication pending.
+
+Read-only проверка в реалната база потвърди два шлюза и активна device-import
+ревизия с два записа. Hardware ревизията остава чернова; активен импорт НЕ е
+активиране на хардуера. Устройства показва внесената двойка веднага, преди избор.
+Незавършените раздели имат преход към Устройства, включително докладвания Активи.
+Без дублиране, backend deployment, хардуерни команди или mobile CSS промени.
+Browser regression проверява двата уреда, избор без повторен provisioning и
+Активи → Устройства; OIDC/API са mock, не приемане с реалния акаунт.
+Реалното приемане и heartbeat предстоят. Следва проверка с акаунта на собственика
+в публикувания екран; после отделно ROCK-инициирано прилагане и реален heartbeat.
+
+Проверки: 20 Node теста и разширеният Chromium тест за двойката/навигацията и
+refresh минават (1.1 мин); Pages/Vinext build минават; lint има само две стари
+image предупреждения. Първият browser опит откри липсващо изрично достъпно име
+на избора; поправено и повторно проверено. Публикацията предстои.
+
 ## Live navigation/session repair / Поправка на навигация и сесия — 2026-09-19
 
 Found: Sites was routed to a placeholder despite the existing sites API; header

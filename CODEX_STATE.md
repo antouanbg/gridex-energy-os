@@ -1,5 +1,19 @@
 # Current task
 
+2026-09-19: imported-device visibility follow-up. Real DB confirms two gateways
+and two matching imported IDs, with one administrator membership. Devices shows
+the imported pair before selection; unfinished modules link directly to Devices.
+No runtime/backend/hardware change. Build and 20 Node tests pass; browser and
+publication result recorded in HANDOFF. Real owner-session acceptance and
+heartbeat are still distinct unfinished tasks, not implied by the imported data.
+
+2026-09-19: видимост на внесената двойка. Реалната база потвърди два шлюза,
+два съвпадащи внесени ID и една администраторска принадлежност. Устройства показва
+двойката преди избор; незавършените раздели водят директно към Устройства.
+Без runtime/backend/хардуерни промени. Build и 20 Node теста минават; browser и
+публикация са в HANDOFF. Реално приемане с акаунта и heartbeat остават отделни
+незавършени задачи; импортът не ги доказва.
+
 Live Site navigation and transient-refresh logout bug fixed on
 `fix/live-sites-navigation`. See latest HANDOFF for tests and network caveat.
 Device activation is paused until the user-visible login/navigation repair is
