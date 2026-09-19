@@ -4,6 +4,83 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## DOC-01 — Documentation portal / Портал за документация — 2026-09-19
 
+### Owner-selected structure reference / Избран структурен пример
+
+Reference inspected on 2026-09-19:
+https://docs.eniris.com/en/Controller/External%20Signals/DSO/poland
+The rendered HTML exposes a nested topic tree, search and language controls,
+breadcrumbs, article contents, previous/next pages and a last-updated date.
+Use these navigation patterns for the DOCUMENTATION portal, not the product
+menu. This is structural inspiration, not permission to copy articles, images,
+branding or assume Eniris capabilities/compliance exist in GrideX. Docusaurus
+remains our proposed implementation; the reference's underlying engine is not
+an architectural requirement.
+
+Proposed GrideX documentation hierarchy (EN / BG):
+
+```text
+Start here / Първи стъпки
+  Quick start; demo vs live; commissioning checklist / Бърз старт; демо и реални данни; приемателен списък
+Portal and accounts / Портал и акаунти
+  Invitations and login; organisations and roles; Sites / Покани и вход; организации и роли; Обекти
+Controller and devices / Контролер и устройства
+  Architecture and safety / Архитектура и безопасност
+  Installation → wiring, network, prerequisites / Инсталация → свързване, мрежа, изисквания
+  Configuration → discovery/import, roles, draft, approval, acknowledgement, rollback / Конфигурация → откриване/импорт, роли, чернова, одобрение, потвърждение, връщане
+  Devices → ROCK Pi, ESP32, supported drivers / Устройства → ROCK Pi, ESP32, поддържани драйвери
+  External signals → market prices; DSO → country → operator / Външни сигнали → пазарни цени; DSO → държава → оператор
+Telemetry and monitoring / Телеметрия и наблюдение
+  Heartbeat; offline; journal and recovery; alarms / Heartbeat; офлайн; журнал и възстановяване; аларми
+Energy strategies / Енергийни стратегии
+  Day-ahead prices; battery cycle cost; operating limits / Цени ден напред; цена на цикъла; работни ограничения
+Integrations and API / Интеграции и API
+  Authentication; contracts; MQTT/TLS; WireGuard boundaries / Удостоверяване; договори; MQTT/TLS; граници на WireGuard
+Diagnostics and support / Диагностика и поддръжка
+  Symptoms; safe checks; test results; support checklist / Симптоми; безопасни проверки; резултати; данни за поддръжка
+Releases and reference / Издания и справочници
+  Changelog; compatibility matrix; glossary / Промени; матрица за съвместимост; речник
+```
+
+Article template: purpose and feature status → supported models/firmware and
+required role → prerequisites and safety → data/control path → numbered setup
+steps → expected result and verification → failure/timeout behaviour → rollback
+→ troubleshooting → authoritative references, owner and last verification date.
+Use GrideX-specific diagrams/tables and clearly distinguish warnings from notes.
+Every device/driver page records tested model, firmware, protocol, read/write
+support and actual acceptance evidence. Unknown compatibility is not support.
+Country/DSO branches are future scaffolding: publish technical requirements only
+after checking the relevant operator's primary specification and project approval;
+do not import the Polish example's claims or activate physical control.
+
+Implementation acceptance: stable /en/ and /bg/ paths; nested sidebar, breadcrumbs,
+in-page contents and previous/next links; searchable public pages; accessible
+mobile navigation. No product-menu changes. Preserve private-content boundaries
+below. Next action: approve platform/repository, then implement this docs skeleton
+and the first verified onboarding/device guides. Status remains planned only.
+
+Примерът е прегледан на 2026-09-19 чрез HTML: тематично дърво, търсене, език,
+път до страницата, съдържание, предишна/следваща страница и дата на обновяване.
+Тези модели са за ДОКУМЕНТАЦИЯТА, не за менюто на продукта. Не копираме статии,
+изображения или марка и не приемаме възможностите/съответствието на Eniris за
+налични в GrideX. Docusaurus остава предложението; технологията на примера не е
+изискване. Двуезичното дърво по-горе е предложената адаптация за GrideX.
+
+Шаблон на статия: цел и статус → модели/firmware и необходима роля → изисквания
+и безопасност → път на данни/команди → номерирани стъпки → очакван резултат и
+проверка → поведение при отказ/timeout → връщане назад → диагностика → първични
+източници, отговорник и дата на проверка. Собствени диаграми/таблици, ясно отделени
+предупреждения. За драйвер: тестван модел, firmware, протокол, четене/запис и
+доказателства от приемане. Неизвестна съвместимост не означава поддръжка.
+Държава/DSO е бъдеща структура: технически изисквания се публикуват след проверка
+на първичната спецификация на оператора и проектно одобрение. Не пренасяме
+твърденията от полския пример и не активираме управление на оборудване.
+
+Приемане: стабилни /en/ и /bg/ адреси; вложено меню, път до страницата, съдържание
+и предишна/следваща; търсене само в публичните страници; достъпна мобилна навигация.
+Без промени в продуктовото меню и без нарушаване на частните граници по-долу.
+Следва одобряване на платформата/хранилището, после реализация на тази структура
+и първите проверени ръководства за начало/устройства. Статус: само планирано.
+
 Status: planned, not implemented. Owner requests a separate documentation site
 at `doc.gridex.tech` (explicitly approved public hostname). Recommendation:
 **Docusaurus**, an open-source docs-as-code platform, with Markdown/MDX in Git,

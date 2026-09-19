@@ -1,5 +1,14 @@
 # Current task
 
+DOC-01 expanded with the owner-selected Eniris reference: inspected nested docs
+navigation and article patterns, mapped to a bilingual GrideX hierarchy and
+verification-first article template in HANDOFF. Planning only; no product menu,
+runtime or DNS changes, no copied vendor content or claimed DSO compatibility.
+
+DOC-01 е допълнена с избрания пример Eniris: прегледана структура и навигация,
+адаптирани в двуезично дърво и шаблон с проверими резултати в HANDOFF. Само план;
+без промени в продуктовото меню/runtime/DNS, копирано съдържание или заявена DSO поддръжка.
+
 Documentation backlog DOC-01 recorded in HANDOFF: proposed Docusaurus portal
 at owner-requested doc.gridex.tech, separate Git/Pages deployment, matching
 EN/BG guides and strict public/private content separation. Planning only;
