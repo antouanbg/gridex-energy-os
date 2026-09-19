@@ -2,6 +2,46 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Language suggestions / Езикови предложения — 2026-09-19
+
+Owner requests translation suggestions for visitors outside Bulgaria, including
+French and Spanish. Existing unmerged PR #12 uses browser time zone, NOT GeoIP.
+Proposed implementation, not enabled: saved explicit choice first, explicit
+language route next, browser navigator.languages next; optional country-only
+server GeoIP may suggest a language only when the preferred language is unknown.
+Never equate nationality/country with language or override a saved choice.
+Keep BG/EN; add reviewed static FR/ES translation catalogues incrementally with
+English fallback, including login/invitation/error strings and number/date units.
+Suggest once, allow dismissal and remember choice. Use the existing language
+control, not a new navigation item. GeoIP provider and privacy/storage policy
+must be selected before adding any external IP lookup; no browser GPS required.
+Interim option: user-initiated browser translation guidance (Chrome Translate),
+not an injected third-party widget and not an automatic external proxy of the
+authenticated portal. Do not send customer/device data, credentials, tokens or
+private runtime text to translation providers. Machine assistance may translate
+public static catalogues offline, with review of technical/safety terminology.
+Tests: French/Spanish browsers, BG user abroad, country/language conflict, VPN,
+unavailable GeoIP, explicit /en, dismissed suggestion and saved preference;
+no session reset or menu changes. This is a proposal/backlog, not delivered FR/ES.
+
+Собственикът иска предложения за превод извън България, включително френски и
+испански. Неслетият PR #12 използва часова зона, НЕ GeoIP. Предложение, още
+неактивно: запазен изричен избор, после изричен езиков маршрут, после
+navigator.languages; опционално GeoIP само за държава може да предложи език,
+ако предпочитаният е неизвестен. Държавата не определя езика и не отменя избора.
+BG/EN остават; постепенно се добавят прегледани статични FR/ES речници с EN
+fallback, включително вход/покани/грешки и формати на числа/дати/единици.
+Еднократно предложение с отказ и запомняне. Използва се текущият езиков контрол,
+не нов елемент в менюто. GeoIP доставчик и политика за поверителност/съхранение
+се избират преди външна IP заявка; без GPS. Временна опция: инструкции за
+превод от браузъра по желание (Chrome Translate), без външен widget или
+автоматичен proxy на удостоверения портал. Клиентски/device данни, credentials,
+tokens и частен runtime текст не се изпращат към преводачи. Машинен превод може
+да помага за публични статични речници офлайн, с техническа/безопасностна редакция.
+Тестове: FR/ES браузър, българин в чужбина, конфликт държава/език, VPN, отказал
+GeoIP, /en, отказано предложение и запазен избор; без рестарт на сесия/промяна
+на менюто. Това е предложение/backlog, не внедрен FR/ES превод.
+
 ## Menu governance / Правило за менюто — 2026-09-19
 
 AGENTS.md now requires explicit owner permission for any menu structure change
