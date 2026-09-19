@@ -32,6 +32,179 @@ account acceptance remain pending; API tests are fixtures, not real delivery.
 Без промени по меню/вход/CSS. 3 API теста и Pages/Vinext builds минават.
 Не е публикувано; нужни са backend endpoint/миграция и реален MQTT receipt.
 Browser populated/empty/denied/unavailable и owner приемане предстоят.
+## SRS implementation plan / Проверим план по спецификацията — 2026-09-19
+
+Owner-requested point-by-point comparison is in
+[SRS_VERIFIABLE_PLAN.md](docs/integration/SRS_VERIFIABLE_PLAN.md).
+All 32 source subsections plus chapter 12 commissioning are mapped: 33 items,
+each with evidence, gap and acceptance gate. G0–G7 define dependencies and
+DOC-01 follows verified features. No complete SRS requirement is accepted by
+this review; existing component work is explicitly retained as partial evidence.
+Local source revisions and dirty changes are recorded; remote main/runtime were
+not revalidated. Backend activation adapter/migration remain uncommitted WIP,
+not deployed proof. Next: G0 reconcile the SRS with approved architecture, then
+G1 read-only end-to-end telemetry acceptance before physical control.
+Validation: section coverage, EN/BG parity, evidence paths and diff check.
+No source document, product UI, backend runtime, device or network changes.
+
+По искане на собственика е добавено сравнение точка по точка в свързания план.
+Всички 32 подраздела и commissioning от глава 12: 33 позиции с доказателство,
+липса и приемателен тест. G0–G7 описват зависимости, DOC-01 следва проверените
+функции. Няма прието изцяло SRS изискване от този преглед; съществуващата работа
+е запазена като частично доказателство. Записани са локални ревизии и dirty
+промени; remote main/runtime не са проверявани отново. Backend адаптерът и
+миграцията за активация остават непубликуван WIP, не доказано внедряване.
+Следва G0 съгласуване с архитектурата, после G1 read-only телеметрия от край
+до край преди физическо управление. Проверки: покритие, EN/BG, evidence пътища
+и diff check. Без промяна на Word документа, UI, runtime, устройства или мрежа.
+
+## DOC-01 — Documentation portal / Портал за документация — 2026-09-19
+
+### Owner-selected structure reference / Избран структурен пример
+
+Reference inspected on 2026-09-19:
+https://docs.eniris.com/en/Controller/External%20Signals/DSO/poland
+The rendered HTML exposes a nested topic tree, search and language controls,
+breadcrumbs, article contents, previous/next pages and a last-updated date.
+Use these navigation patterns for the DOCUMENTATION portal, not the product
+menu. This is structural inspiration, not permission to copy articles, images,
+branding or assume Eniris capabilities/compliance exist in GrideX. Docusaurus
+remains our proposed implementation; the reference's underlying engine is not
+an architectural requirement.
+
+Proposed GrideX documentation hierarchy (EN / BG):
+
+```text
+Start here / Първи стъпки
+  Quick start; demo vs live; commissioning checklist / Бърз старт; демо и реални данни; приемателен списък
+Portal and accounts / Портал и акаунти
+  Invitations and login; organisations and roles; Sites / Покани и вход; организации и роли; Обекти
+Controller and devices / Контролер и устройства
+  Architecture and safety / Архитектура и безопасност
+  Installation → wiring, network, prerequisites / Инсталация → свързване, мрежа, изисквания
+  Configuration → discovery/import, roles, draft, approval, acknowledgement, rollback / Конфигурация → откриване/импорт, роли, чернова, одобрение, потвърждение, връщане
+  Devices → ROCK Pi, ESP32, supported drivers / Устройства → ROCK Pi, ESP32, поддържани драйвери
+  External signals → market prices; DSO → country → operator / Външни сигнали → пазарни цени; DSO → държава → оператор
+Telemetry and monitoring / Телеметрия и наблюдение
+  Heartbeat; offline; journal and recovery; alarms / Heartbeat; офлайн; журнал и възстановяване; аларми
+Energy strategies / Енергийни стратегии
+  Day-ahead prices; battery cycle cost; operating limits / Цени ден напред; цена на цикъла; работни ограничения
+Integrations and API / Интеграции и API
+  Authentication; contracts; MQTT/TLS; WireGuard boundaries / Удостоверяване; договори; MQTT/TLS; граници на WireGuard
+Diagnostics and support / Диагностика и поддръжка
+  Symptoms; safe checks; test results; support checklist / Симптоми; безопасни проверки; резултати; данни за поддръжка
+Releases and reference / Издания и справочници
+  Changelog; compatibility matrix; glossary / Промени; матрица за съвместимост; речник
+```
+
+Article template: purpose and feature status → supported models/firmware and
+required role → prerequisites and safety → data/control path → numbered setup
+steps → expected result and verification → failure/timeout behaviour → rollback
+→ troubleshooting → authoritative references, owner and last verification date.
+Use GrideX-specific diagrams/tables and clearly distinguish warnings from notes.
+Every device/driver page records tested model, firmware, protocol, read/write
+support and actual acceptance evidence. Unknown compatibility is not support.
+Country/DSO branches are future scaffolding: publish technical requirements only
+after checking the relevant operator's primary specification and project approval;
+do not import the Polish example's claims or activate physical control.
+
+Implementation acceptance: stable /en/ and /bg/ paths; nested sidebar, breadcrumbs,
+in-page contents and previous/next links; searchable public pages; accessible
+mobile navigation. No product-menu changes. Preserve private-content boundaries
+below. Next action: approve platform/repository, then implement this docs skeleton
+and the first verified onboarding/device guides. Status remains planned only.
+
+Примерът е прегледан на 2026-09-19 чрез HTML: тематично дърво, търсене, език,
+път до страницата, съдържание, предишна/следваща страница и дата на обновяване.
+Тези модели са за ДОКУМЕНТАЦИЯТА, не за менюто на продукта. Не копираме статии,
+изображения или марка и не приемаме възможностите/съответствието на Eniris за
+налични в GrideX. Docusaurus остава предложението; технологията на примера не е
+изискване. Двуезичното дърво по-горе е предложената адаптация за GrideX.
+
+Шаблон на статия: цел и статус → модели/firmware и необходима роля → изисквания
+и безопасност → път на данни/команди → номерирани стъпки → очакван резултат и
+проверка → поведение при отказ/timeout → връщане назад → диагностика → първични
+източници, отговорник и дата на проверка. Собствени диаграми/таблици, ясно отделени
+предупреждения. За драйвер: тестван модел, firmware, протокол, четене/запис и
+доказателства от приемане. Неизвестна съвместимост не означава поддръжка.
+Държава/DSO е бъдеща структура: технически изисквания се публикуват след проверка
+на първичната спецификация на оператора и проектно одобрение. Не пренасяме
+твърденията от полския пример и не активираме управление на оборудване.
+
+Приемане: стабилни /en/ и /bg/ адреси; вложено меню, път до страницата, съдържание
+и предишна/следваща; търсене само в публичните страници; достъпна мобилна навигация.
+Без промени в продуктовото меню и без нарушаване на частните граници по-долу.
+Следва одобряване на платформата/хранилището, после реализация на тази структура
+и първите проверени ръководства за начало/устройства. Статус: само планирано.
+
+Status: planned, not implemented. Owner requests a separate documentation site
+at `doc.gridex.tech` (explicitly approved public hostname). Recommendation:
+**Docusaurus**, an open-source docs-as-code platform, with Markdown/MDX in Git,
+reviewed PRs and a separate GitHub Pages deployment. No new backend container,
+database or router port is needed for this static public documentation.
+
+Next steps and acceptance criteria:
+1. Confirm Docusaurus and a separate documentation repository (proposed name:
+   `gridex-docs`); pin a supported release and dependencies when implementing.
+2. Write matching EN/BG guides: quick start; demo versus signed-in mode; email
+   invitations, registration and recovery; organisations, roles and site access;
+   Sites/Devices; ROCK Pi → ESP32 provisioning and draft → approval → device
+   acknowledgement; telemetry/offline states; troubleshooting and support.
+   Describe only verified behaviour as available; label planned features clearly.
+3. Add public architecture/API reference with sanitised examples. Keep internal
+   runbooks, real device inventories/addresses, backups and secrets out of public
+   source, generated assets and search indexes. Private docs need separate access
+   control; hiding navigation or using robots.txt is NOT protection.
+4. Implement GrideX styling, responsive reading, language navigation and search
+   (evaluate a maintained local search integration). Add release versions when
+   stable product releases exist, plus last-reviewed revision and page ownership.
+5. Publish separately through CI: build, broken-link checks, secret/content
+   review and desktop/mobile reading/search tests. Configure the custom domain,
+   DNS and trusted HTTPS only during the approved implementation. Do not change
+   the existing product Pages domain or add product menu items without approval.
+6. Accept only after external HTTPS access, EN/BG navigation/search, onboarding
+   walkthrough and absence of private data are checked. Record deployment SHA,
+   evidence, rollback and unfinished chapters in HANDOFF. Future feature PRs
+   must update their affected documentation or explicitly track the missing work.
+
+Blocker: platform/repository choice and implementation remain to be approved;
+this task only records the proposal. No DNS, deployment or menu changes made.
+Sources: https://docusaurus.io/docs/deployment,
+https://docusaurus.io/docs/i18n/introduction,
+https://docusaurus.io/docs/versioning.
+
+Статус: планирано, не е реализирано. Собственикът иска отделен сайт за
+документация на `doc.gridex.tech` (изрично одобрен публичен адрес). Предложение:
+**Docusaurus** — open-source документация с Markdown/MDX в Git, преглед през PR
+и отделна публикация в GitHub Pages. За статичната публична документация не
+трябват нов backend контейнер, база или отворен порт на рутера.
+
+Следващи стъпки и критерии за приемане:
+1. Одобряване на Docusaurus и отделно хранилище (предложено име `gridex-docs`);
+   фиксиране на поддържана версия и зависимости при реализацията.
+2. Еднакви EN/BG ръководства: първи стъпки; демо спрямо реален вход; покани по
+   имейл, регистрация и възстановяване; организации, роли и достъп до обекти;
+   Обекти/Устройства; провизиране ROCK Pi → ESP32 и чернова → одобрение →
+   потвърждение от устройството; телеметрия/офлайн; проблеми и поддръжка.
+   Само провереното се описва като налично; бъдещите функции се маркират ясно.
+3. Публична архитектура/API справочник с обезличени примери. Вътрешни инструкции,
+   реални устройства/адреси, архиви и тайни не попадат в публичния код, генерираните
+   файлове или индекса за търсене. Частната документация изисква отделна защита;
+   скрито меню или robots.txt НЕ ограничават достъпа.
+4. Стил на GrideX, четене на телефон, езиков избор и търсене (оценка на поддържана
+   локална интеграция). Версии при стабилни продуктови издания, последна проверена
+   ревизия и отговорник за всяка страница.
+5. Отделна CI публикация: build, невалидни връзки, проверка за тайни/съдържание и
+   тестове на четене/търсене на компютър и телефон. Домейнът, DNS и доверен HTTPS
+   се настройват при одобрената реализация. Без промяна на текущия продуктов
+   Pages домейн или добавяне на меню в продукта без разрешение.
+6. Приемане след външен HTTPS тест, EN/BG навигация/търсене, преминаване на първите
+   стъпки и проверка за липса на частни данни. Запис на deployment SHA,
+   доказателства, rollback и незавършени глави в HANDOFF. Бъдещите feature PR-и
+   обновяват засегнатата документация или изрично записват липсващата работа.
+
+Пречка: изборът на платформа/хранилище и реализацията чакат одобрение; текущата
+задача записва предложението. Няма промени по DNS, публикацията или менюто.
 
 ## Sidebar controls and anonymous demo / Меню и анонимно демо — 2026-09-19
 

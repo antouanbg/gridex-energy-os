@@ -7,6 +7,35 @@ Not published: backend/physical delivery and owner browser acceptance pending.
 Последно: feat/device-heartbeat подготвя отделни ROCK backend receipt / ESP
 успешен контакт в Устройства. 3 API теста и двата build-а минават. Не е
 публикувано: backend/реална доставка и owner browser приемане предстоят.
+SRS point-by-point acceptance plan added: 33 mapped items, evidence baseline
+across frontend/backend/edge, gaps, G0–G7 gates and acceptance-record template.
+See docs/integration/SRS_VERIFIABLE_PLAN.md and latest HANDOFF. Review only;
+uncommitted backend activation remains WIP. Next G0 reconciliation, then G1
+read-only live telemetry acceptance. No runtime or hardware actions.
+
+Добавен проверим SRS план: 33 позиции, доказателства от трите хранилища,
+липси, етапи G0–G7 и шаблон за приемане. Виж плана и последния HANDOFF.
+Само преглед; backend активацията е непубликуван WIP. Следва G0 съгласуване,
+после G1 приемане на read-only телеметрия. Без runtime/хардуерни действия.
+
+DOC-01 expanded with the owner-selected Eniris reference: inspected nested docs
+navigation and article patterns, mapped to a bilingual GrideX hierarchy and
+verification-first article template in HANDOFF. Planning only; no product menu,
+runtime or DNS changes, no copied vendor content or claimed DSO compatibility.
+
+DOC-01 е допълнена с избрания пример Eniris: прегледана структура и навигация,
+адаптирани в двуезично дърво и шаблон с проверими резултати в HANDOFF. Само план;
+без промени в продуктовото меню/runtime/DNS, копирано съдържание или заявена DSO поддръжка.
+
+Documentation backlog DOC-01 recorded in HANDOFF: proposed Docusaurus portal
+at owner-requested doc.gridex.tech, separate Git/Pages deployment, matching
+EN/BG guides and strict public/private content separation. Planning only;
+platform/repository approval and implementation pending. No runtime/UI changes.
+
+Задача DOC-01 е записана в HANDOFF: предложение за Docusaurus на поисканото
+doc.gridex.tech, отделен Git/Pages сайт, EN/BG ръководства и разделяне на публично
+и частно съдържание. Само план; изборът и реализацията чакат одобрение.
+Без runtime/UI промени.
 
 Owner correction: no upper-right controls; sidebar language below direct login;
 site selection in Sites; short unchanged menu titles. Anonymous demo immediate,
