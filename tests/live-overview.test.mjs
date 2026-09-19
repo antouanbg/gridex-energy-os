@@ -41,6 +41,7 @@ for (const lang of ['en', 'bg']) {
       const html = renderToStaticMarkup(React.createElement(Overview, { auto: false, setAuto() {}, navigate() {}, notify() {}, lang, dataMode: 'live', snapshot }));
       assert.match(html, battery?.sohPct == null ? /SOH —/ : /SOH 97.0%/);
       assert.doesNotMatch(html, /SOH 98%/);
+      assert.doesNotMatch(html, /0\.0 kW/);
     });
   }
 }

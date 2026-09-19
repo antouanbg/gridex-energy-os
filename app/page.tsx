@@ -5,7 +5,6 @@ import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSit
 import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
-import { PanelTitle } from "./sections/shared";
 import { TranslationSuggestion } from './sections/translation-suggestion';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
@@ -17,6 +16,7 @@ const navItems = [
 ] as const;
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
+const liveViews = new Set(["overview", "sites", "devices", "profile", "login", "about"]);
 
 type DemoUser = {
   nameBg:string;
@@ -128,7 +128,8 @@ export default function Home() {
   const [sitesStatus,setSitesStatus] = useState<'loading'|'ready'|'error'>('loading');
   const [selectedSiteId,setSelectedSiteId] = useState(runtimeConfig.defaultSiteId);
   const [liveSnapshot,setLiveSnapshot] = useState<GridexSiteSnapshot|null>(null);
-  const dataMode:DataMode = backendState === "online" && authState === "authenticated" ? "live" : "demo";
+  // Demo is only for confirmed anonymous visitors, never an API-error fallback.
+  const dataMode:DataMode = sessionUser || authState !== "anonymous" ? "live" : "demo";
   // Text is selected by React during render. Do not mutate rendered text nodes:
   // doing so can overwrite fresh telemetry and form values after an update.
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -181,7 +182,7 @@ export default function Home() {
   },[runtimeConfig,apiClient]);
 
   useEffect(()=>{
-    if (dataMode!=="live") return;
+    if (dataMode!=="live"||backendState!=="online") return;
     const controller=new AbortController();
     apiClient.sites(controller.signal).then(sites=>{
       if(controller.signal.aborted)return;
@@ -198,7 +199,7 @@ export default function Home() {
       setIntegrationError(lang==="en"?"The site list could not be loaded.":"Списъкът с обекти не може да бъде зареден.");
     });
     return()=>controller.abort();
-  },[apiClient,dataMode,lang,selectedSiteId]);
+  },[apiClient,dataMode,backendState,lang,selectedSiteId]);
 
   useEffect(()=>{
     if (dataMode!=="live"||!selectedSiteId||!liveSites.some(item=>item.id===selectedSiteId)) return;
@@ -305,8 +306,10 @@ export default function Home() {
             const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            return <button key={id} data-view-id={id} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""}`} onClick={() => navigate(id)}>
-              <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
+            const pending=dataMode==='live'&&!liveViews.has(id);
+            const setupLabel=lang==='en'?'Requires setup and data':'Изисква настройка и данни';
+            return <button key={id} data-view-id={id} data-provisioning-required={pending||undefined} title={`${tKey(`nav.${id}` as MessageKey)}${pending?' · '+setupLabel:''}`} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""}`} onClick={() => navigate(id)}>
+              <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}{pending&&<small> · {lang==='en'?'Setup & data':'Настройка и данни'}</small>}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </button>;
           })}
         </nav>
@@ -336,7 +339,7 @@ export default function Home() {
 
       <section className="content">
         <header>
-          <div><p className="eyebrow" data-testid="page-eyebrow">{dataMode==='live'?(view==='sites'?(lang==='en'?`PORTFOLIO / ${sitesStatus==='ready'?liveSites.length:'—'} SITES`:`ПОРТФОЛИО / ${sitesStatus==='ready'?liveSites.length:'—'} ОБЕКТА`):(selectedSiteId?site:'GrideX')):tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (dataMode==='live'?site:lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
+          <div><p className="eyebrow" data-testid="page-eyebrow">{dataMode==='live'?(view==='sites'?(lang==='en'?`PORTFOLIO / ${sitesStatus==='ready'?liveSites.length:'—'} SITES`:`ПОРТФОЛИО / ${sitesStatus==='ready'?liveSites.length:'—'} ОБЕКТА`):(liveSites.find(item=>item.id===selectedSiteId)?.name??'GrideX')):tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (dataMode==='live'?(liveSites.find(item=>item.id===selectedSiteId)?.name??(lang==='en'?'My sites':'Моите обекти')):lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
           <div className="header-actions">
             <button className="language-switch" data-no-translate onClick={()=>{const next=lang==='bg'?'en':'bg';setLang(next);try{localStorage.setItem('gridex.ui-language',next);}catch{/* Storage is optional. */}}} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
             {!sessionUser&&<button className="primary-btn quick-sign-in" disabled={authState==='checking'} onClick={signIn}>{authState==='checking'?(lang==='en'?'Connecting…':'Свързване…'):(lang==='en'?'Sign in':'Вход')}</button>}
@@ -364,7 +367,7 @@ export default function Home() {
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-            {dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login","about"]).has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+            {dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={()=>navigate('login')}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
@@ -385,7 +388,7 @@ export default function Home() {
         {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify}/>}
-        {view === "profile" && <UserProfile live={dataMode==='live'} lang={lang} user={sessionUser} navigate={navigate} signOut={signOut} notify={notify}/>}
+        {view === "profile" && <UserProfile lang={lang} user={sessionUser} navigate={navigate} signOut={signOut}/>}
         {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
         {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang}/>}
             </>}
@@ -427,9 +430,9 @@ function LiveModulePending({view,lang,onDevices}:{view:string;lang:UiLanguage;on
     about:"/api/v1/system/version",
   };
   return <section className="live-module-pending card" data-no-translate>
-    <i>API</i><p>{t("LIVE РЕЖИМ · БЕЗ ДЕМО СТОЙНОСТИ","LIVE MODE · NO DEMO VALUES")}</p>
-    <h2>{t("Този раздел още не е свързан с реални данни","This section is not connected to live data yet")}</h2>
-    <span>{t("Входът Ви остава активен. Това е незавършена интеграция на раздела, не грешка в паролата. Демо стойности не се показват.","You remain signed in. This section's integration is unfinished; it is not a password error. Demo values are not displayed.")}</span>
+    <i>API</i><p>{t("ИЗИСКВА НАСТРОЙКА И ДАННИ","REQUIRES SETUP AND DATA")}</p>
+    <h2>{t("Този раздел очаква провизиране на реални данни","This section requires provisioning of real data")}</h2>
+    <span>{t("За да се използва, трябва да бъдат свързани съответните източници на данни и да бъде завършена интеграцията с backend. Само регистрацията на устройство не активира всички раздели. Входът Ви остава активен; примерни стойности не се показват.","To use this section, the relevant data sources must be configured and the backend integration completed. Registering a device alone does not activate every section. You remain signed in; sample values are never displayed.")}</span>
     <code>{endpoints[view]??"/api/v1"}</code>
     <p>{t('Регистрираните ROCK Pi и ESP32 са в раздел „Устройства“, не в енергийните активи.','Registered ROCK Pi and ESP32 units are under Devices, not energy assets.')}</p>
     <button type="button" className="primary-btn" onClick={onDevices}>{t('Отвори регистрираните устройства','Open registered devices')}</button>
@@ -465,53 +468,14 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
       {error&&<div className="login-error" role="alert">{error}</div>}
       {!user&&<button className="login-submit" type="button" disabled={backendState==="demo"||authState==="checking"} onClick={onSignIn}>{authState==="checking"?t("Проверка на сесията…","Checking session…"):t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
       {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
-      <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{t("Продължи в ясно обозначен Демо режим","Continue in clearly labelled Demo mode")}</button>
+      <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{user?t('Към моите обекти','Back to my sites'):t("Към прегледа","Back to overview")}</button>
       <small className="login-disclaimer">{t("GrideX никога не приема или записва паролата на тази страница. Keycloak издава краткоживеещ token, който се държи само в паметта на браузъра.","GrideX never accepts or stores your password on this page. Keycloak issues a short-lived token that is kept only in browser memory.")}</small>
     </section>
   </div>;
 }
 
-function UserProfile({lang,user,navigate,signOut,notify,live=false}:{lang:UiLanguage;user:DemoUser|null;navigate:(id:string)=>void;signOut:()=>void;notify:(message:string)=>void;live?:boolean}) {
+function UserProfile({lang,user,navigate,signOut}:{lang:UiLanguage;user:DemoUser|null;navigate:(id:string)=>void;signOut:()=>void}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
-  if(live&&user)return <section className="card" data-no-translate><h2>{user.nameBg}</h2><p>{user.email}</p><p>{lang==='en'?user.roleEn:user.roleBg}</p><button onClick={()=>navigate('sites')}>{t('Моите обекти','My sites')}</button><button onClick={signOut}>{t('Изход','Sign out')}</button><p>{t('Статистиката и историята на действията още не са свързани.','Statistics and activity history are not connected yet.')}</p></section>;
-  if (!user) return <section className="empty-profile card" data-no-translate><span>↪</span><h2>{t("Няма активна сесия","No active session")}</h2><p>{t("Влезте, за да видите потребителската статистика, правата и историята на действията.","Sign in to view user statistics, permissions and activity history.")}</p><button className="primary-btn" onClick={()=>navigate("login")}>{t("Към входа","Go to sign in")}</button></section>;
-  const activity = [
-    ["14:28",t("Потвърдена аларма","Alarm acknowledged"),t("BESS температура · Solar Park East","BESS temperature · Solar Park East")],
-    ["13:45",t("Експортиран отчет","Report exported"),t("Дневна икономика · PDF","Daily economics · PDF")],
-    ["11:12",t("Променена стратегия","Strategy changed"),t("Ценови арбитраж · автоматичен режим","Price arbitrage · automatic mode")],
-    ["09:04",t("Прегледан график","Schedule reviewed"),t("IBEX ден напред · 96 интервала","IBEX day-ahead · 96 intervals")],
-  ];
-  return <div className="user-profile-page" data-no-translate>
-    <section className="user-hero card">
-      <div className="user-avatar-large">{lang==="en"?user.initialsEn:user.initialsBg}<i/></div>
-      <div><p>{t("АКТИВЕН ПОТРЕБИТЕЛ","ACTIVE USER")}</p><h2>{lang==="en"?user.nameEn:user.nameBg}</h2><span>{user.email}</span><div><b>{lang==="en"?user.roleEn:user.roleBg}</b><b>GrideX Ltd.</b><b>{t("Pro план","Pro plan")}</b></div></div>
-      <div className="user-hero-actions"><button className="secondary-btn" onClick={()=>notify(t("Редакцията на профила ще се свърже с OpenRemote identity provider.","Profile editing will connect to the OpenRemote identity provider."))}>{t("Редакция на профил","Edit profile")}</button><button className="logout-btn" onClick={signOut}>{t("Изход","Sign out")} ↪</button></div>
-    </section>
-
-    <section className="user-kpis">
-      <article className="card"><i>◇</i><small>{t("Управлявани обекти","Managed sites")}</small><strong>6</strong><span>{t("5 онлайн · 1 в сервиз","5 online · 1 in service")}</span></article>
-      <article className="card"><i>▦</i><small>{t("Енергийни активи","Energy assets")}</small><strong>59</strong><span>{t("12 под директен контрол","12 under direct control")}</span></article>
-      <article className="card"><i>⌘</i><small>{t("Действия днес","Actions today")}</small><strong>24</strong><span>{t("0 неуспешни команди","0 failed commands")}</span></article>
-      <article className="card"><i>✓</i><small>{t("Изпълнен график","Schedule fulfilment")}</small><strong>99.2%</strong><span>{t("Средно за последните 30 дни","30-day average")}</span></article>
-    </section>
-
-    <section className="user-profile-grid">
-      <article className="card user-activity-card">
-        <PanelTitle eyebrow={t("ОДИТ И АКТИВНОСТ","AUDIT & ACTIVITY")} title={t("Последни действия","Recent actions")} action={<button className="text-action" onClick={()=>notify(t("Пълният одит ще се зарежда от OpenRemote.","The full audit trail will load from OpenRemote."))}>{t("Виж всички","View all")}</button>}/>
-        <div className="user-activity-list">{activity.map(([time,title,note])=><div key={time}><time>{time}</time><i/><span><strong>{title}</strong><small>{note}</small></span></div>)}</div>
-      </article>
-      <article className="card user-access-card">
-        <PanelTitle eyebrow={t("ДОСТЪП","ACCESS")} title={t("Роля и права","Role & permissions")}/>
-        <div className="permission-role"><i>◎</i><span><strong>{lang==="en"?user.roleEn:user.roleBg}</strong><small>{t("Пълен достъп до организацията","Full organisation access")}</small></span><b>{t("АКТИВНА","ACTIVE")}</b></div>
-        {[t("Мониторинг и телеметрия","Monitoring & telemetry"),t("Графици и прогнози","Schedules & forecasts"),t("Команди към активи","Asset commands"),t("Настройки и потребители","Settings & users")].map(item=><div className="permission-item" key={item}><i>✓</i><span>{item}</span><b>{t("Разрешено","Allowed")}</b></div>)}
-      </article>
-      <article className="card user-session-card">
-        <PanelTitle eyebrow={t("СИГУРНОСТ","SECURITY")} title={t("Текуща сесия","Current session")}/>
-        <div className="session-status"><i>●</i><span><strong>{t("Активна сега","Active now")}</strong><small>{t("Последен вход: днес, 08:42","Last sign-in: today, 08:42")}</small></span></div>
-        <dl><div><dt>{t("Устройство","Device")}</dt><dd>Mac · Safari</dd></div><div><dt>{t("Местоположение","Location")}</dt><dd>Sofia, BG</dd></div><div><dt>{t("Двуфакторна защита","Two-factor authentication")}</dt><dd>{t("При продукционен вход","With production sign-in")}</dd></div></dl>
-        <button className="secondary-btn" onClick={()=>notify(t("Настройките за сигурност ще се управляват от Keycloak.","Security settings will be managed by Keycloak."))}>{t("Настройки за сигурност","Security settings")}</button>
-      </article>
-    </section>
-    <div className="identity-note"><i>i</i><span><strong>{t("Архитектура за продукционен достъп","Production access architecture")}</strong><small>{t("GrideX Frontend → OpenID Connect → OpenRemote / Keycloak. Ролите и разрешенията се прилагат и от backend API, не само от интерфейса.","GrideX Frontend → OpenID Connect → OpenRemote / Keycloak. Roles and permissions are enforced by the backend API, not only by the interface.")}</small></span></div>
-  </div>;
+  if (!user) return <section className="empty-profile card" data-no-translate><h2>{t("Няма активна сесия","No active session")}</h2><button className="primary-btn" onClick={()=>navigate("login")}>{t("Към входа","Go to sign in")}</button></section>;
+  return <section className="card" data-no-translate><h2>{lang==='en'?user.nameEn:user.nameBg}</h2><p>{user.email}</p><p>{lang==='en'?user.roleEn:user.roleBg}</p><button onClick={()=>navigate('sites')}>{t('Моите обекти','My sites')}</button><button onClick={signOut}>{t('Изход','Sign out')}</button><p>{t('Статистиката и историята на действията очакват свързване на реални данни.','Statistics and activity history require real data integration.')}</p></section>;
 }

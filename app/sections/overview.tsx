@@ -30,7 +30,7 @@ function EnergyFlowVisual({lang,dataMode,snapshot}:{lang:UiLanguage;dataMode:Dat
   const gridCharge=hasLiveSnapshot?Boolean((liveGrid??0)>0&&(liveBattery??0)<0):scenario==="grid-charge";
   const formatPower=(value:number|null|undefined)=>value==null?"—":Math.abs(value).toFixed(1);
   const values=hasLiveSnapshot
-    ? {pv:formatPower(snapshot?.power.pvKw),gridIn:formatPower(liveGrid&&liveGrid>0?liveGrid:0),load:formatPower(snapshot?.power.siteLoadKw),battery:formatPower(liveBattery),gridOut:formatPower(liveGrid&&liveGrid<0?liveGrid:0)}
+    ? {pv:formatPower(snapshot?.power.pvKw),gridIn:formatPower(liveGrid==null?null:Math.max(0,liveGrid)),load:formatPower(snapshot?.power.siteLoadKw),battery:formatPower(liveBattery),gridOut:formatPower(liveGrid==null?null:Math.min(0,liveGrid))}
     : gridCharge
     ? {pv:"18.4",gridIn:"126.0",load:"96.0",battery:"48.4",gridOut:"0.0"}
     : {pv:"248.6",gridIn:"0.0",load:"124.3",battery:"41.1",gridOut:"83.2"};
@@ -49,7 +49,7 @@ function EnergyFlowVisual({lang,dataMode,snapshot}:{lang:UiLanguage;dataMode:Dat
       </div>
       <div className="flow-toolbar-kpis">
         <div className="flow-profit-forecast"><small>{t("Прогнозна печалба · 24 ч.","Forecast profit · 24 h")}</small><strong>{forecast.profit}</strong><em>{forecast.uplift}</em></div>
-        <div className="flow-balance"><i>✓</i><span><small>{t("Баланс","Balance")}</small><strong>0.0 kW</strong></span></div>
+        <div className="flow-balance"><i>{hasLiveSnapshot?'—':'✓'}</i><span><small>{t("Баланс","Balance")}</small><strong>{hasLiveSnapshot?'—':'0.0'} kW</strong></span></div>
       </div>
     </div>
     <div className="energy-flow-map">
@@ -122,6 +122,7 @@ export function Overview({ auto, setAuto, navigate, notify, lang, dataMode, snap
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const isLive=dataMode==="live";
   const batterySoc=isLive&&snapshot?.battery?.socPct!=null?snapshot.battery.socPct.toFixed(1):isLive?"—":"72";
+  if(isLive&&!snapshot)return <section className="card config-card" role="status"><h2>{t('Очаква реални данни','Awaiting real data')}</h2><p>{t('За прегледа са необходими избран обект, конфигурирани устройства и получена телеметрия. Ако устройствата вече са настроени, провери връзката им — не е нужно повторно провизиране.','The overview requires a selected site, configured devices and received telemetry. If devices are already configured, check their connection; do not provision them again.')}</p><button className="primary-btn" onClick={()=>navigate('devices')}>{t('Към устройства','Go to devices')}</button></section>;
   return <>
     <div className="status-strip">
       <span><i className="live-dot"/>{dataMode==="live"?t("Свързано с OpenRemote","Connected to OpenRemote"):t("Представителни демо данни","Representative demo data")}</span>
