@@ -30,6 +30,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
     if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',roles:['administrator'],permissions:['site:read'],memberships:[]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:'test-site',name:'Test Lab',organisationId:'test-org'}]}});
     if(path.endsWith('/snapshot'))return route.fulfill({status:503,json:{error:'unavailable'}});
+    if(path.endsWith('/device-heartbeats'))return route.fulfill({json:{items:[]}});
     if(path.endsWith('/hardware'))return route.fulfill({json:{configuration:{revision:1,status:'draft'},gateways:[{id:'rock',name:'Test ROCK Pi',hardwareModel:'ROCK Pi E',role:'controller',ports:[]},{id:'esp',name:'Test ESP32',hardwareModel:'ESP32',role:'device-node',ports:[]}],devices:[]}});
     if(path.endsWith('/device-setup'))return route.fulfill({json:{revision:0,configuration:{},imported:{pollMs:500,timeoutMs:400,devices:[{gatewayId:'rock',communication:'node-polling-and-local-modbus-listener'},{gatewayId:'esp',communication:'modbus-tcp-via-rockpi'}]}}});
     return route.fulfill({json:{invitations:[]}});

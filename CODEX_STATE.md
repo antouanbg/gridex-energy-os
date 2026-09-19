@@ -1,5 +1,12 @@
 # Current task
 
+Latest: feat/device-heartbeat prepares separate ROCK backend receipt / ESP
+successful-contact display in Devices. Three API tests and both builds pass.
+Not published: backend/physical delivery and owner browser acceptance pending.
+
+Последно: feat/device-heartbeat подготвя отделни ROCK backend receipt / ESP
+успешен контакт в Устройства. 3 API теста и двата build-а минават. Не е
+публикувано: backend/реална доставка и owner browser приемане предстоят.
 SRS point-by-point acceptance plan added: 33 mapped items, evidence baseline
 across frontend/backend/edge, gaps, G0–G7 gates and acceptance-record template.
 See docs/integration/SRS_VERIFIABLE_PLAN.md and latest HANDOFF. Review only;
