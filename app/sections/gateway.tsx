@@ -15,14 +15,8 @@ export function Gateway({notify,lang}:{notify:(v:string)=>void;lang:UiLanguage})
   const headroom = Math.max(0,contractLimit-siteLoad);
   const appliedCharge = emsConnected ? Math.min(requestedCharge,headroom) : 0;
   const gatewayDevices = [
-    ["PCS","Sinexcel","Modbus TCP · :3200","Heartbeat < 50 s","Онлайн"],
-    ["BAU / BMS","261 kWh cabinet","RS485-1 · Modbus RTU","Лимити заряд/разряд","Онлайн"],
-    ["PV","Huawei SmartLogger","Ethernet · Modbus TCP","Инвертори + електромери","Онлайн"],
-    ["EV","Зарядни станции","RS485-2 / Ethernet","Мощностен лимит","Онлайн"],
-    ["Meter","PCC електромер","RS485-3 · Modbus RTU","Обща мощност на обекта","Онлайн"],
-    ["I/O","Shelly контролери","Ethernet · локална LAN","Управляеми товари","Онлайн"],
-    ["CAN","OLIMEX ESP32-EVB-EA-IND","OT Ethernet · Modbus TCP :1502","Един CAN драйвер на нод","Предвиден"],
-    ["RS485","OLIMEX ESP32-EVB-EA-IND","OT Ethernet · Modbus TCP :1502","Външен изолиран RS485 transceiver","Предвиден"],
+    ["Controller","ROCK Pi E",t("Тестова локална мрежа · без VPN","Local test network · no VPN"),t("Демо на заведена конфигурация","Registered configuration example"),t("Телеметрията не е потвърдена","Telemetry not verified")],
+    ["Node","OLIMEX ESP32-EVB",t("OT Ethernet · DHCP","OT Ethernet · DHCP"),t("RS485 към батерия 261: изключен","RS485 to battery 261: disabled"),t("Телеметрията не е потвърдена","Telemetry not verified")],
   ];
   const registerRows = [
     ["40001","site.active_power","kW ×10","Read","PCC meter","0-based → +1"],

@@ -2,6 +2,30 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Local test inventory / Локален тестов inventory — 2026-09-19
+
+Owner approved a local-only test Site with one ROCK Pi E controller and one
+OLIMEX ESP32-EVB lab node, owned through the organization's administrator.
+Inventory registered transactionally as commissioning/draft; repeat registration
+does not duplicate it. No hardware commands, IP/MAC reassignment, VPN activation,
+battery Modbus or physical configuration changes were performed. RS485 battery
+port is marked disabled in inventory; this is NOT proof of firmware state.
+Demo uses a sanitized illustrative pair, not private inventory IDs or telemetry.
+Remaining: publish frontend example, verify authorized topology UI, reconcile
+physical identities/config files, ingest heartbeat, then separately implement
+opt-in sanitized live demo projection. Other demo simulations are not live data.
+
+Одобрен е локален тестов Обект с един ROCK Pi E контролер и OLIMEX ESP32-EVB
+lab нод, собственост чрез администратора на организацията. Inventory е записан
+транзакционно като commissioning/draft; повторният старт не го дублира. Няма
+хардуерни команди, IP/MAC промени, VPN активация, battery Modbus или физически
+конфигурационни промени. RS485 battery портът е disabled в inventory — това НЕ
+доказва firmware състоянието. Демото използва обезличена примерна двойка, не
+частни ID или телеметрия. Остават публикуване на frontend примера, проверка на
+удостоверения topology UI, сверяване на физически identity/config файлове,
+heartbeat приемане и отделна opt-in обезличена live demo проекция. Останалите
+демо симулации не са реални данни.
+
 ## Login recovery / Възстановяване на входа — 2026-09-18
 
 Explicit PKCE login no longer depends on embedded SSO cookie checks. Failed
