@@ -2,6 +2,34 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Local admin login repair / Поправка на локалния admin вход — 2026-09-19
+
+Applied master realm frontendUrl from GRIDEX_ADMIN_AUTH_BASE in the single
+private env, preserving other realm attributes and public gridex issuer.
+Rollback metadata saved privately. No password, proxy ACL, TLS trust or router
+change. Verified local discovery, admin authServerUrl and fresh PKCE login form
+all use the local admin origin; forced restricted-proxy master probe remains 404.
+Actual LAN forwarding target is host port 14443, not 443; LAN TLS probe passed.
+Public-domain access from this Mac still times out: external/mobile reachability
+and LAN hairpin routing are not proven by these local checks. Earlier diagnosis
+based on host port 443 refusal was not valid for this router mapping.
+Backend check-auth-routing.mjs provides a read-only regression gate; both AGENTS
+require login/logout/expired-session browser acceptance, not just HTTP 200.
+Actual password submission and browser session-expiry acceptance remain pending;
+no continuous monitoring has been installed.
+
+Приложен master realm frontendUrl от GRIDEX_ADMIN_AUTH_BASE в единния частен env,
+със запазени останалите realm attributes и public gridex issuer. Частен rollback
+е записан. Без промяна на пароли, proxy ACL, TLS доверие или рутер. Local discovery,
+admin authServerUrl и новата PKCE login форма вече ползват локалния admin адрес;
+принудителната проба през ограничения proxy за master остава 404.
+Реалната LAN цел е host порт 14443, не 443; LAN TLS пробата мина. Публичният домейн
+от този Mac още изтича: външен/mobile достъп и LAN hairpin не са доказани с тези
+локални проверки. Предишният извод от отказ на host 443 не е валиден за този NAT.
+Backend check-auth-routing.mjs е read-only regression проверка; двата AGENTS
+изискват browser вход/изход/изтекла сесия, не само HTTP 200. Реално подаване на
+парола и browser приемане след изтекла сесия предстоят; няма постоянен монитор.
+
 ## UI publication and device inventory / UI публикация и устройства — 2026-09-19
 
 PR #19 merged; GitHub Pages run 35442969353 succeeded. Protected access form
