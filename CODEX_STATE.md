@@ -1,5 +1,11 @@
 # Current task
 
+Device setup: selection → max two roles/peers → provisioning moved to Devices.
+Admin-only versioned backend draft; no hardware activation. See latest HANDOFF.
+
+Настройки: избор → до две роли/партньори → provisioning в Устройства.
+Admin-only versioned backend чернова; без hardware активиране. Виж HANDOFF.
+
 ## UI publication and device inventory / UI публикация и устройства — 2026-09-19
 
 PR #19 merged; GitHub Pages run 35442969353 succeeded. Protected access form

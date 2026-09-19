@@ -164,6 +164,9 @@ export type GridexHardwareTopology = {
   devices: GridexDeviceConfiguration[];
 };
 
+export type DeviceSetupRole = { kind: 'backend' | 'equipment'; target: 'backend' | 'deye-100kw' | 'suntech-261'; transport: 'ethernet' | 'rs485' | 'modbus-tcp' };
+export type DeviceSetup = { revision: number; configuration: { devices?: { gatewayId: string; roles: DeviceSetupRole[] }[]; lifecycle?: string } };
+
 export type GridexBatteryCycleForecast24h = {
   horizonHours: 24;
   gridChargeKwh: number;
@@ -306,6 +309,13 @@ export class GridexApiClient {
 
   async hardware(siteId: string, signal?: AbortSignal): Promise<GridexHardwareTopology> {
     return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/hardware`, signal);
+  }
+
+  async deviceSetup(siteId: string, signal?: AbortSignal): Promise<DeviceSetup> {
+    return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/device-setup`, signal);
+  }
+  async saveDeviceSetup(siteId: string, configuration: DeviceSetup['configuration'], revision: number): Promise<DeviceSetup> {
+    return this.putJson(`/api/v1/sites/${encodeURIComponent(siteId)}/device-setup`, { configuration, confirmed: true }, revision);
   }
 
   async createHardwareConfiguration(siteId: string, gateways: GridexGateway[]): Promise<{ id: string; siteId: string; revision: number; status: string }> {

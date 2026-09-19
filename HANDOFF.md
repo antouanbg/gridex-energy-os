@@ -2,6 +2,37 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Device setup flow / Настройки на устройства — 2026-09-19
+
+Owner requested all device configuration under Devices, not Profile. Implemented
+registered-device dropdown, one/two communication roles, peer selection (backend,
+Deye 100 kW, Suntech 261) and transport. Backend enforces verified Site admin,
+known gateway, max two roles, no duplicate peer and no direct ESP-to-backend role.
+Versioned device-setup configuration is persisted in PostgreSQL with draft
+lifecycle, optimistic revision and audit; no new env files or hardware commands.
+Only after confirmed save is the controller's protected provisioning/access form
+shown. ESP stays DHCP via ROCK Pi; reservation/driver deployment is not implemented.
+Equipment labels are planning choices, not proof of compatible drivers or exact
+vendor model; commissioning remains required. Existing inventory IDs are reused.
+No migration, battery Modbus activation, VPN or credential changes.
+Tests: 25 API tests pass, including HTTP admin/scope/revision protection.
+Frontend lint/build and null-battery regression pass. API deployment initiated;
+UI CI/publication and real browser acceptance must be checked before claiming live.
+
+Настройките са преместени от Профил в Устройства: падащо меню със заведени
+устройства, една/две комуникационни роли, партньор (backend, Deye 100 kW,
+Suntech 261) и транспорт. Backend проверява потвърден admin на Обекта,
+познат gateway, максимум две роли, без дублиран партньор и без директна ESP-backend
+роля. Versioned device-setup е в PostgreSQL с draft lifecycle, revision check
+и одит; без нов env файл или hardware команди. Едва след потвърден запис се
+показва защитената форма за provisioning/достъп на контролера. ESP остава DHCP
+през ROCK Pi; прилагане на резервация/driver не е реализирано. Етикетите са
+план, не доказан съвместим драйвер/точен модел; commissioning предстои.
+Запазени са inventory ID. Без миграции, battery Modbus, VPN или credentials промени.
+25 API теста минават, включително HTTP admin/scope/revision защити. Frontend
+lint/build и null-battery regression минават. API deployment е стартиран;
+UI CI/публикация и реалният browser тест трябва да се проверят преди live твърдение.
+
 ## Local admin login repair / Поправка на локалния admin вход — 2026-09-19
 
 Applied master realm frontendUrl from GRIDEX_ADMIN_AUTH_BASE in the single

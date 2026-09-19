@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import type { GridexApiClient, GridexHardwareTopology } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
+import { DeviceSetupWizard } from './device-setup';
 
-export function DeviceInformation({ api, siteId, lang }: { api: GridexApiClient; siteId: string; lang: UiLanguage }) {
+export function DeviceInformation({ api, siteId, lang, configure = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
   const [topology, setTopology] = useState<GridexHardwareTopology | null>(null);
   const [status, setStatus] = useState('loading');
@@ -26,6 +27,7 @@ export function DeviceInformation({ api, siteId, lang }: { api: GridexApiClient;
       <button className="primary-btn" type="button" disabled={status === 'loading'} onClick={() => { setTopology(null); setStatus('loading'); setRefresh(value => value + 1); }}>{t('Обнови', 'Refresh')}</button>
       <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате администраторски достъп до устройствата на този Обект.', 'You do not have administrator access to this Site inventory.') : status === 'failed' ? t('Информацията е недостъпна. Опитайте отново.', 'Information unavailable. Please retry.') : ''}</p>
       {topology && <>
+        {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang}/>}
         <p>{t('Конфигурация', 'Configuration')}: {topology.configuration ? `${topology.configuration.revision} · ${topology.configuration.status}` : t('Няма записана ревизия', 'No saved revision')}</p>
         {!topology.gateways.length && <p>{t('Няма регистрирани шлюзове или нодове.', 'No registered gateways or nodes.')}</p>}
         {topology.gateways.map((gateway, index) => <article key={gateway.id || index}>
