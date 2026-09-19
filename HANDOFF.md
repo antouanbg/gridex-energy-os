@@ -2,6 +2,36 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Merge compatibility check / Проверка преди merge — 2026-09-19
+
+Owner approved merging the current PRs. Added fail-closed handling of malformed
+heartbeat responses and an explicit heartbeat fixture in the navigation suite.
+The previous failing PR run is historical, not evidence of a live login outage.
+New local results: 18 browser tests and 3 API-client tests pass; Pages build passes.
+These are fixture tests, not physical MQTT receipt or owner-account acceptance.
+
+Собственикът одобри актуалните PR-и. Добавени защитена обработка на невалиден
+heartbeat отговор и изричен fixture в навигационния тест. Старият неуспешен PR
+run не доказва текущ проблем с live входа. Нови локални резултати: 18 browser
+и 3 API теста минават, Pages build минава. Това не е реален MQTT receipt или
+приемане с акаунта на собственика.
+
+## Device heartbeat display / Heartbeat в Устройства — 2026-09-19
+
+Devices separately shows last backend-received ROCK message and last successful
+ESP contact observed by ROCK, plus ESP counter. Authenticated Site-scoped polling
+every 10s, cancelled on unmount/Site change; errors clear live status, no demo.
+No navigation/login/CSS changes. API client tests (3) and Pages/Vinext builds pass.
+Not published; needs backend device-heartbeats endpoint/migration and real MQTT
+delivery first. Actual populated/empty/denied/unavailable browser flow and owner
+account acceptance remain pending; API tests are fixtures, not real delivery.
+
+Устройства показва отделно полученото в backend ROCK съобщение, последния
+успешен ESP контакт през ROCK и ESP брояча. Удостоверен Site polling през 10s,
+отменен при смяна/напускане; при грешка няма live статус или демо заместител.
+Без промени по меню/вход/CSS. 3 API теста и Pages/Vinext builds минават.
+Не е публикувано; нужни са backend endpoint/миграция и реален MQTT receipt.
+Browser populated/empty/denied/unavailable и owner приемане предстоят.
 ## SRS implementation plan / Проверим план по спецификацията — 2026-09-19
 
 Owner-requested point-by-point comparison is in

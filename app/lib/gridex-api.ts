@@ -158,6 +158,12 @@ export type GridexGateway = {
   ports: GridexGatewayPort[];
 };
 
+export type DeviceHeartbeat = {
+  gatewayId: string; sourceGatewayId: string;
+  observedAt: string; receivedAt: string; lastSuccessfulContactAt: string | null;
+  heartbeat: number | null; status: 'unknown' | 'online' | 'stale' | 'offline';
+};
+
 export type GridexHardwareTopology = {
   configuration: null | { id: string; revision: number; status: string };
   gateways: GridexGateway[];
@@ -309,6 +315,14 @@ export class GridexApiClient {
 
   async hardware(siteId: string, signal?: AbortSignal): Promise<GridexHardwareTopology> {
     return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/hardware`, signal);
+  }
+
+  async deviceHeartbeats(siteId: string, signal?: AbortSignal): Promise<{ items: DeviceHeartbeat[] }> {
+    const result = await this.getJson<{ items: DeviceHeartbeat[] }>(`/api/v1/sites/${encodeURIComponent(siteId)}/device-heartbeats`, signal);
+    if (!result || !Array.isArray(result.items) || result.items.some(item => !item || typeof item.gatewayId !== 'string')) {
+      throw new Error('Invalid device heartbeat response');
+    }
+    return result;
   }
 
   async deviceSetup(siteId: string, signal?: AbortSignal): Promise<DeviceSetup> {
