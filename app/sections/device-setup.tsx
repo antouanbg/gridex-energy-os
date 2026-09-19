@@ -13,27 +13,37 @@ export function DeviceSetupWizard({api, siteId, topology, lang}: {api:GridexApiC
   const [busy,setBusy]=useState(false);
   const [provision,setProvision]=useState(false);
   const [confirmed,setConfirmed]=useState(false);
+  const [editImported,setEditImported]=useState(false);
   useEffect(()=>{
     const abort=new AbortController();
     void api.deviceSetup(siteId,abort.signal).then(value=>{if(!abort.signal.aborted)setSaved(value);}).catch(()=>{if(!abort.signal.aborted)setNotice('failed');});
     return()=>abort.abort();
   },[api,siteId]);
   const gateway=topology.gateways.find(g=>g.id===selected);
+  const importedDevice=saved?.imported?.devices?.find(d=>d.gatewayId===selected);
   const update=(index:number,patch:Partial<DeviceSetupRole>)=>{setRoles(items=>items.map((item,i)=>i===index?{...item,...patch}:item));setProvision(false);setConfirmed(false);};
   return <section className="card config-card" data-no-translate>
     <h2>{t('Настройка на устройство','Device setup')}</h2>
     <p>{t('1. Устройство → 2. До две роли и партньор → 3. Provisioning','1. Device → 2. Up to two roles and peer → 3. Provisioning')}</p>
     <label>{t('Устройство','Device')}<select disabled={!saved||busy} value={selected} onChange={event=>{
-      const id=event.target.value;setSelected(id);setRoles(saved?.configuration.devices?.find(d=>d.gatewayId===id)?.roles||[]);setProvision(false);setConfirmed(false);setNotice('');
+      const id=event.target.value;setSelected(id);setRoles(saved?.configuration.devices?.find(d=>d.gatewayId===id)?.roles||[]);setProvision(false);setConfirmed(false);setEditImported(false);setNotice('');
     }}><option value="">{t('Избери устройство','Choose device')}</option>{topology.gateways.map(g=><option key={g.id} value={g.id}>{g.name} · {g.hardwareModel}</option>)}</select></label>
     {!saved&&!notice&&<p role="status">{t('Зареждане на настройките…','Loading setup…')}</p>}
-    {gateway&&<form onSubmit={async event=>{
+    {importedDevice&&<section>
+      <h3>{t('Съществуваща тестова конфигурация — внесена','Existing test configuration — imported')}</h3>
+      <p>{t('Не е необходим повторен provisioning. Източник: конфигурационният файл на ROCK Pi. Адресите са запазени криптирано.','No repeat provisioning required. Source: ROCK Pi configuration file. Addresses are stored encrypted.')}</p>
+      <p>{gateway?.role==='controller'?t('ROCK Pi: polling на нода и локален Modbus listener.','ROCK Pi: node polling and local Modbus listener.'):t('ESP32: Modbus TCP през ROCK Pi; DHCP резервация.','ESP32: Modbus TCP through ROCK Pi; DHCP reservation.')}</p>
+      <p>Polling: {saved?.imported?.pollMs} ms · Timeout: {saved?.imported?.timeoutMs} ms</p>
+      <p>{t('Live телеметрията не е потвърдена. Одобренията за батерията са изключени. Няма приложени хардуерни промени.','Live telemetry is not verified. Battery commissioning approvals are off. No hardware changes applied.')}</p>
+      <button type="button" onClick={()=>setEditImported(v=>!v)}>{editImported?t('Затвори новата чернова','Close new draft'):t('Създай отделна чернова за промяна','Create a separate change draft')}</button>
+    </section>}
+    {gateway&&(!importedDevice||editImported)&&<form onSubmit={async event=>{
       event.preventDefault();if(!saved||!confirmed||!roles.length||busy)return;
       setBusy(true);setNotice('');
       try {
         const devices=[...(saved.configuration.devices||[]).filter(d=>d.gatewayId!==selected),{gatewayId:selected,roles}];
         const result=await api.saveDeviceSetup(siteId,{devices},saved.revision);
-        setSaved(result);setNotice('saved');setProvision(true);setConfirmed(false);
+        setSaved({...result,imported:saved.imported});setNotice('saved');setProvision(true);setConfirmed(false);
       } catch {setNotice('failed');setProvision(false);} finally{setBusy(false);}
     }}>
       <fieldset disabled={busy}>

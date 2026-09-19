@@ -165,7 +165,7 @@ export type GridexHardwareTopology = {
 };
 
 export type DeviceSetupRole = { kind: 'backend' | 'equipment'; target: 'backend' | 'deye-100kw' | 'suntech-261'; transport: 'ethernet' | 'rs485' | 'modbus-tcp' };
-export type DeviceSetup = { revision: number; configuration: { devices?: { gatewayId: string; roles: DeviceSetupRole[] }[]; lifecycle?: string } };
+export type DeviceSetup = { revision: number; imported?: { mode?: string; pollMs?: number; timeoutMs?: number; dhcpReservation?: boolean; devices?: { gatewayId: string; communication: string }[] }; configuration: { devices?: { gatewayId: string; roles: DeviceSetupRole[] }[]; lifecycle?: string } };
 
 export type GridexBatteryCycleForecast24h = {
   horizonHours: 24;

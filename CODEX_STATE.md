@@ -1,5 +1,17 @@
 # Current task
 
+Existing test configuration imported for both registered devices. Original source
+encrypted outside PostgreSQL; safe import metadata shown in Devices without
+repeat provisioning. Backend migration 005 applied and API healthy. PR #22
+publishes this UI; see HANDOFF. Live telemetry and authenticated UI acceptance
+remain unverified; no hardware writes performed.
+
+Съществуващата тестова конфигурация е импортирана за двете устройства. Оригиналът
+е криптиран извън PostgreSQL; безопасните метаданни се показват в Устройства без
+повторно настройване. Миграция 005 е приложена и API е здрав. PR #22 публикува
+екрана; виж HANDOFF. Живата телеметрия и приемането на екрана с реален вход
+остават непроверени; няма записи към хардуера.
+
 Device setup: selection → max two roles/peers → provisioning moved to Devices.
 Admin-only versioned backend draft; no hardware activation. See latest HANDOFF.
 

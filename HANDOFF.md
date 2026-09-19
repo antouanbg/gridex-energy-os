@@ -2,6 +2,34 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Existing test config import / Импорт на съществуваща тестова конфигурация
+
+Owner-supplied private ROCK Pi env imported into the existing owning Site.
+Exactly two registered gateways matched, no new inventory or hardware writes.
+Original encrypted AES-256-GCM in external vault imports with Site/hash AAD;
+SQL stores only provenance and sanitized polling/DHCP/commissioning summary.
+Repeated import verified idempotent. No SSH credential, Deye driver validation
+or live telemetry established. Source proves intended ROCK Pi settings, not
+current ESP firmware or physical health. Device UI skips repeat provisioning
+for imported pair, offers a separate draft for changes. Private export remains
+0600 outside Git; key backup is necessary for encrypted source recovery.
+Migration 005 expands configuration section constraint for device-setup/import;
+prior memory tests missed this real PostgreSQL restriction. Applied successfully.
+Frontend publication/real user acceptance must be verified separately.
+
+Внесен е частният ROCK Pi env към съществуващия Обект на собственика. Намерени
+точно два регистрирани gateway записа; без нов inventory/hardware writes.
+Оригиналът е AES-256-GCM криптиран във външния vault imports със Site/hash AAD;
+SQL съдържа само произход и обезличени polling/DHCP/commissioning данни.
+Повторният импорт е проверен без дублиране. Не са добавени SSH credentials,
+проверен Deye драйвер или live телеметрия. Файлът доказва ROCK Pi настройки,
+не ESP firmware/физическо здраве. UI пропуска повторния provisioning на двойката
+и предлага отделна чернова за промени. Частният експорт остава 0600 извън Git;
+за възстановяване на криптирания оригинал е нужен backup на ключа.
+Миграция 005 разширява section constraint за device-setup/import; предишните
+memory тестове са пропуснали това PostgreSQL ограничение. Приложена успешно.
+Frontend публикацията и приемането от реалния потребител се проверяват отделно.
+
 ## Device setup flow / Настройки на устройства — 2026-09-19
 
 Owner requested all device configuration under Devices, not Profile. Implemented
