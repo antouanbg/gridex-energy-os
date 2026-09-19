@@ -1,5 +1,15 @@
 # Current task
 
+Documentation backlog DOC-01 recorded in HANDOFF: proposed Docusaurus portal
+at owner-requested doc.gridex.tech, separate Git/Pages deployment, matching
+EN/BG guides and strict public/private content separation. Planning only;
+platform/repository approval and implementation pending. No runtime/UI changes.
+
+Задача DOC-01 е записана в HANDOFF: предложение за Docusaurus на поисканото
+doc.gridex.tech, отделен Git/Pages сайт, EN/BG ръководства и разделяне на публично
+и частно съдържание. Само план; изборът и реализацията чакат одобрение.
+Без runtime/UI промени.
+
 Owner correction: no upper-right controls; sidebar language below direct login;
 site selection in Sites; short unchanged menu titles. Anonymous demo immediate,
 bounded callback/API wait, retryable failed init, no blocking profile fetch.

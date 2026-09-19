@@ -2,6 +2,77 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## DOC-01 — Documentation portal / Портал за документация — 2026-09-19
+
+Status: planned, not implemented. Owner requests a separate documentation site
+at `doc.gridex.tech` (explicitly approved public hostname). Recommendation:
+**Docusaurus**, an open-source docs-as-code platform, with Markdown/MDX in Git,
+reviewed PRs and a separate GitHub Pages deployment. No new backend container,
+database or router port is needed for this static public documentation.
+
+Next steps and acceptance criteria:
+1. Confirm Docusaurus and a separate documentation repository (proposed name:
+   `gridex-docs`); pin a supported release and dependencies when implementing.
+2. Write matching EN/BG guides: quick start; demo versus signed-in mode; email
+   invitations, registration and recovery; organisations, roles and site access;
+   Sites/Devices; ROCK Pi → ESP32 provisioning and draft → approval → device
+   acknowledgement; telemetry/offline states; troubleshooting and support.
+   Describe only verified behaviour as available; label planned features clearly.
+3. Add public architecture/API reference with sanitised examples. Keep internal
+   runbooks, real device inventories/addresses, backups and secrets out of public
+   source, generated assets and search indexes. Private docs need separate access
+   control; hiding navigation or using robots.txt is NOT protection.
+4. Implement GrideX styling, responsive reading, language navigation and search
+   (evaluate a maintained local search integration). Add release versions when
+   stable product releases exist, plus last-reviewed revision and page ownership.
+5. Publish separately through CI: build, broken-link checks, secret/content
+   review and desktop/mobile reading/search tests. Configure the custom domain,
+   DNS and trusted HTTPS only during the approved implementation. Do not change
+   the existing product Pages domain or add product menu items without approval.
+6. Accept only after external HTTPS access, EN/BG navigation/search, onboarding
+   walkthrough and absence of private data are checked. Record deployment SHA,
+   evidence, rollback and unfinished chapters in HANDOFF. Future feature PRs
+   must update their affected documentation or explicitly track the missing work.
+
+Blocker: platform/repository choice and implementation remain to be approved;
+this task only records the proposal. No DNS, deployment or menu changes made.
+Sources: https://docusaurus.io/docs/deployment,
+https://docusaurus.io/docs/i18n/introduction,
+https://docusaurus.io/docs/versioning.
+
+Статус: планирано, не е реализирано. Собственикът иска отделен сайт за
+документация на `doc.gridex.tech` (изрично одобрен публичен адрес). Предложение:
+**Docusaurus** — open-source документация с Markdown/MDX в Git, преглед през PR
+и отделна публикация в GitHub Pages. За статичната публична документация не
+трябват нов backend контейнер, база или отворен порт на рутера.
+
+Следващи стъпки и критерии за приемане:
+1. Одобряване на Docusaurus и отделно хранилище (предложено име `gridex-docs`);
+   фиксиране на поддържана версия и зависимости при реализацията.
+2. Еднакви EN/BG ръководства: първи стъпки; демо спрямо реален вход; покани по
+   имейл, регистрация и възстановяване; организации, роли и достъп до обекти;
+   Обекти/Устройства; провизиране ROCK Pi → ESP32 и чернова → одобрение →
+   потвърждение от устройството; телеметрия/офлайн; проблеми и поддръжка.
+   Само провереното се описва като налично; бъдещите функции се маркират ясно.
+3. Публична архитектура/API справочник с обезличени примери. Вътрешни инструкции,
+   реални устройства/адреси, архиви и тайни не попадат в публичния код, генерираните
+   файлове или индекса за търсене. Частната документация изисква отделна защита;
+   скрито меню или robots.txt НЕ ограничават достъпа.
+4. Стил на GrideX, четене на телефон, езиков избор и търсене (оценка на поддържана
+   локална интеграция). Версии при стабилни продуктови издания, последна проверена
+   ревизия и отговорник за всяка страница.
+5. Отделна CI публикация: build, невалидни връзки, проверка за тайни/съдържание и
+   тестове на четене/търсене на компютър и телефон. Домейнът, DNS и доверен HTTPS
+   се настройват при одобрената реализация. Без промяна на текущия продуктов
+   Pages домейн или добавяне на меню в продукта без разрешение.
+6. Приемане след външен HTTPS тест, EN/BG навигация/търсене, преминаване на първите
+   стъпки и проверка за липса на частни данни. Запис на deployment SHA,
+   доказателства, rollback и незавършени глави в HANDOFF. Бъдещите feature PR-и
+   обновяват засегнатата документация или изрично записват липсващата работа.
+
+Пречка: изборът на платформа/хранилище и реализацията чакат одобрение; текущата
+задача записва предложението. Няма промени по DNS, публикацията или менюто.
+
 ## Sidebar controls and anonymous demo / Меню и анонимно демо — 2026-09-19
 
 Owner explicitly removes ALL upper-right controls, including language, login
