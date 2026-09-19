@@ -1,5 +1,13 @@
 # Current task
 
+Signed-in/no-demo follow-up: fail-closed UI during session checks/API errors;
+unfinished menus marked Setup & data; no fabricated profile history, site name
+or zero power/balance. See latest HANDOFF. Prior PR #25 is deployed (b308b75).
+
+След вход без демо: защитен екран при проверка/API грешка; несвързаните менюта
+са означени „Настройка и данни“. Без измислена история, име на обект или нулева
+мощност/баланс. Виж HANDOFF. Предходният PR #25 е публикуван (b308b75).
+
 Owner approved PR #25 deployment. Four optional pre-login translation suggestions
 (FR/ES/DE/IT) implemented using browser language, with persistent dismissal and
 BG/EN preference. No GeoIP or external translation requests; native dictionaries

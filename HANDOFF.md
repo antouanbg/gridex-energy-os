@@ -2,6 +2,43 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Authenticated data only / Само реални данни след вход — 2026-09-19
+
+Demo is now allowed only for confirmed anonymous visitors. Session checking and
+identity/API errors never fall back to sample sites, metrics, alarms or profile
+history. Header names resolve from the authorised site list, not the demo default.
+Unintegrated menu sections are marked "Setup & data" without changing menu
+structure; their screens explain that data provisioning AND backend integration
+are prerequisites. Existing Devices/Sites remain available. Missing telemetry
+shows a connection/setup explanation, not an instruction to reprovision working
+devices. Unknown grid power/balance remains unknown, never a fabricated zero.
+No device, database, network or backend changes. Mocked tests cover successful
+identity with API 403/503, all authenticated navigation, imported devices,
+refresh outage/recovery, null battery and missing metrics in BG/EN. Real-owner
+acceptance and heartbeat remain pending. Next: complete missing backend data
+contracts and live edge telemetry; do not mark sections ready from demo fixtures.
+Prior design PR #25 was deployed at b308b75, Pages run 35458931893 succeeded.
+Validation: 16 browser tests and 20 Node tests pass. Both production builds pass;
+lint has no errors (two existing About image warnings). Local master auth probes
+pass; public normal-DNS reachability from Mac remains separately unverified.
+
+Демо има само за потвърден анонимен посетител. Проверка на сесията и identity/API
+грешки не връщат примерни обекти, показатели, аларми или история на профила.
+Името в лентата идва от разрешените обекти, не от демо стойността по подразбиране.
+Несвързаните раздели са означени „Настройка и данни“, без структурни промени;
+екраните уточняват нуждата от провизирани данни И backend интеграция. Обекти и
+Устройства остават достъпни. При липсваща телеметрия се обясняват връзката и
+настройката, без повторно провизиране на работещи устройства. Неизвестните
+мрежови мощност/баланс не се заменят с измислена нула. Без промени в устройства,
+база, мрежа или backend. Mock тестове: вход с API 403/503, навигация след вход,
+внесени устройства, refresh отказ/възстановяване, липсваща батерия/показатели в
+BG/EN. Реално приемане и heartbeat предстоят. Следва: липсващи backend договори
+и жива edge телеметрия; демо fixtures не доказват готовност. Предходният дизайн
+PR #25 е публикуван при b308b75, успешен Pages run 35458931893.
+Проверки: 16 браузърни и 20 Node теста минават; двата production build минават.
+Lint без грешки (две стари About image предупреждения). Local master auth пробите
+минават; публичният маршрут през normal DNS от Mac остава отделно непотвърден.
+
 ## Design publication and four-language suggestion — 2026-09-19
 
 Owner approved publishing PR #25. Includes desktop provisioning cards, removal
