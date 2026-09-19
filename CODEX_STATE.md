@@ -1,5 +1,19 @@
 # Current task
 
+## Device access protection / Защита на device достъпа
+
+Implemented encrypted external vault, administrator-only API and write-only UI.
+Backend deployed; frontend lint/build and 22 API tests pass. No real credential,
+SSH or OTA operation performed. Browser publication/acceptance, master-key
+backup/rotation, telemetry worker and OTA approval execution remain pending.
+Full frontend tsc has existing unrelated errors; see HANDOFF.
+
+Реализирани криптиран външен vault, admin-only API и write-only UI. Backend е
+внедрен; frontend lint/build и 22 API теста минават. Няма реален credential,
+SSH/OTA операция. Остават browser публикация/приемане, master-key backup/rotation,
+telemetry worker и изпълнение на OTA одобрения. Пълният tsc има стари несвързани
+грешки; виж HANDOFF.
+
 ## Test pair registration / Регистрация на тестовата двойка — 2026-09-19
 
 Owner-authorized local test inventory now contains a commissioning Site and

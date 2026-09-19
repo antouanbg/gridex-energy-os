@@ -71,6 +71,7 @@ const initialBatteryCost:BatteryCostSettings = {
 
 const Overview = lazy(() => import("./sections/overview").then(module => ({ default: module.Overview })));
 const Invitations = lazy(() => import('./sections/invitations').then(module => ({ default: module.Invitations })));
+const DeviceAccess = lazy(() => import('./sections/device-access').then(module => ({ default: module.DeviceAccess })));
 const Customers = lazy(() => import("./sections/customers").then(module => ({ default: module.Customers })));
 const Sites = lazy(() => import("./sections/sites").then(module => ({ default: module.Sites })));
 const Assets = lazy(() => import("./sections/assets").then(module => ({ default: module.Assets })));
@@ -384,6 +385,7 @@ export default function Home() {
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} navigate={navigate} signOut={signOut} notify={notify}/>}
         {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
         {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang}/>}
+        {view === 'profile' && authState === 'authenticated' && backendState === 'online' && <DeviceAccess key={selectedSiteId} api={apiClient} siteId={selectedSiteId} lang={lang}/>}
             </>}
           </div>
         </Suspense>

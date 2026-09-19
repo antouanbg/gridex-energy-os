@@ -2,6 +2,48 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Protected device access / Защитен достъп до устройства — 2026-09-19
+
+Backend deployed: GET/PUT site gateway access metadata/replacement endpoints.
+Verified current site administrator required; foreign Sites rejected, ESP direct
+access rejected. Hardware topology/config administration is now admin-only.
+Full SSH connection material encrypted AES-256-GCM with Site/gateway/version/time
+AAD, stored outside SQL. Separate 0400 master-key volume, read-only API mount;
+data directory 0700/files 0600. Single backend .env holds vault path settings.
+No secret read HTTP endpoint. Explicit confirmation, optimistic version check,
+no-store response and secret-free replacement audit. API tests: 22 pass.
+
+Frontend Profile form implemented, lint/Pages build pass; publication and real
+browser acceptance remain pending. Full tsc is blocked by existing gateway,
+overview, supported-device, worker and service dependency errors, not new form.
+No actual device credential has been saved; no SSH execution, heartbeat worker,
+OTA queue or fresh-auth/MFA approval flow exists yet. Key fingerprint is required
+as input but not verified against a connection yet; key input is structurally
+validated only. Current vault supports one API process (not distributed writers).
+Master-key offline encrypted backup/rotation and recovery drill remain mandatory
+before production; SQL backup alone cannot restore credentials. Host/API takeover
+can expose decrypt capability; this protects database-only leakage, not host
+compromise. Demo must never reuse this endpoint or store.
+
+Backend е внедрен: GET/PUT за статус/замяна на достъп по Обект/gateway. Изисква
+потвърден текущ администратор; чужд Обект и директен ESP достъп се отказват.
+Hardware topology/config администрацията е само за администратор. Целият SSH
+достъп е криптиран AES-256-GCM с Site/gateway/version/time AAD извън SQL. Master
+ключът е в отделен volume с 0400 и read-only API mount; данни 0700/0600. Пътищата
+са в единния .env. Няма secret-read HTTP endpoint. Има изрично потвърждение,
+version check, no-store и audit без тайни. 22 API теста минават.
+
+Profile формата е реализирана; lint/Pages build минават, публикация и реален
+browser тест предстоят. Пълният tsc е блокиран от съществуващи gateway/overview/
+supported/worker/dependency грешки, не от новата форма. Реален credential още не
+е записан; няма SSH изпълнение, heartbeat worker, OTA queue или fresh-auth/MFA
+одобрение. Fingerprint се изисква, но не е проверен с връзка; key input се
+валидира само структурно. Vault е за един API процес, не distributed writers.
+Отделен криптиран offline backup/rotation на master key и restore тренировка
+са задължителни преди production; SQL backup не възстановява ключовете.
+Превзет host/API може да дешифрира; защитата е срещу database-only изтичане.
+Демото никога не ползва този endpoint/store.
+
 ## Local test inventory / Локален тестов inventory — 2026-09-19
 
 Owner approved a local-only test Site with one ROCK Pi E controller and one

@@ -264,6 +264,15 @@ export class GridexApiClient {
   async me(signal?: AbortSignal): Promise<GridexUser> {
     return this.getJson<GridexUser>("/api/v1/me", signal);
   }
+  async deviceAccessTopology(site: string): Promise<{gateways:{id:string;name:string;role:string}[]}> {
+    return this.getJson(`/api/v1/sites/${encodeURIComponent(site)}/hardware`);
+  }
+  async deviceAccessStatus(site:string,gateway:string): Promise<{configured:boolean;version:number}> {
+    return this.getJson(`/api/v1/sites/${encodeURIComponent(site)}/gateways/${encodeURIComponent(gateway)}/access`);
+  }
+  async saveDeviceAccess(site:string,gateway:string,body:unknown,version:number):Promise<{configured:boolean;version:number}> {
+    return this.putJson(`/api/v1/sites/${encodeURIComponent(site)}/gateways/${encodeURIComponent(gateway)}/access`,body,version);
+  }
 
   async invitations(signal?: AbortSignal): Promise<{ invitations: GridexInvitation[] }> {
     return this.getJson('/api/v1/me/invitations', signal);
