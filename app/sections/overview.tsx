@@ -144,7 +144,7 @@ export function Overview({ auto, setAuto, navigate, notify, lang, dataMode, snap
     <section className="kpis">
       <Metric label={t("PV производство","PV production")} value={isLive?"—":"2.84"} unit="MWh" badge={isLive?t("history endpoint","history endpoint"):"↑ 8.2%"} type="spark solar-spark"/>
       <Metric label={t("Консумация","Consumption")} value={isLive?"—":"1.92"} unit="MWh" badge={isLive?t("history endpoint","history endpoint"):"↓ 3.1%"} type="spark load-spark"/>
-      <Metric label={t("Състояние на батерията","Battery state")} value={batterySoc} unit="% SOC" badge={isLive&&snapshot?`SOH ${snapshot.battery.sohPct.toFixed(1)}%`:"SOH 98%"} type="charge"/>
+      <Metric label={t("Състояние на батерията","Battery state")} value={batterySoc} unit="% SOC" badge={isLive?(snapshot?.battery?.sohPct!=null?`SOH ${snapshot.battery.sohPct.toFixed(1)}%`:"SOH —"):"SOH 98%"} type="charge"/>
       <Metric label={t("Цена в момента","Current price")} value={isLive?"—":"214.62"} unit={t("€/MWh","EUR/MWh")} badge={isLive?t("market endpoint","market endpoint"):t("Висока","High")} type="price" priceNote={isLive?t("Очаква пазарни данни","Awaiting market data"):undefined}/>
     </section>
     {!isLive&&<section className="lower-grid">
