@@ -1,5 +1,15 @@
 # Current task
 
+Live Site navigation and transient-refresh logout bug fixed on
+`fix/live-sites-navigation`. See latest HANDOFF for tests and network caveat.
+Device activation is paused until the user-visible login/navigation repair is
+published and accepted. No new device jobs/migrations deployed.
+
+Поправени реална навигация към Обекти и погрешно отписване при временен refresh
+отказ в `fix/live-sites-navigation`. Тестове и network ограничение: HANDOFF.
+Активирането на устройства е на пауза до публикация и приемане на поправката.
+Няма внедрени нови device задачи/миграции.
+
 Existing test configuration imported for both registered devices. Original source
 encrypted outside PostgreSQL; safe import metadata shown in Devices without
 repeat provisioning. Backend migration 005 applied and API healthy. PR #22

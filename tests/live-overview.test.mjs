@@ -20,6 +20,20 @@ function load(file) {
   return exports;
 }
 const { Overview } = load('../app/sections/overview.tsx');
+const { LiveSites } = load('../app/sections/live-sites.tsx');
+for(const lang of ['en','bg']) {
+  test(`live pages never substitute sample sites or power (${lang})`,()=>{
+    const html=renderToStaticMarkup(React.createElement(Overview,{auto:false,setAuto(){},navigate(){},notify(){},lang,dataMode:'live',snapshot:null}));
+    assert.doesNotMatch(html,/72%|14:32:08|87%/);
+    for(const status of ['loading','error','ready']) {
+      const empty=renderToStaticMarkup(React.createElement(LiveSites,{sites:[],status,lang,onSelect(){}}));
+      assert.doesNotMatch(empty,/Solar Park|581|6.42/);
+    }
+    const site=renderToStaticMarkup(React.createElement(LiveSites,{sites:[{id:'test',name:'Owned site'}],status:'ready',lang,onSelect(){}}));
+    assert.match(site,/Owned site/);
+    assert.doesNotMatch(site,/online|Онлайн/);
+  });
+}
 for (const lang of ['en', 'bg']) {
   for (const battery of [null, { socPct: null, sohPct: null }, { socPct: 50, sohPct: 97 }]) {
     test(`live overview renders missing battery safely (${lang}, ${JSON.stringify(battery)})`, () => {

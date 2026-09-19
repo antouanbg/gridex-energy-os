@@ -2,6 +2,68 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Live navigation/session repair / Поправка на навигация и сесия — 2026-09-19
+
+Found: Sites was routed to a placeholder despite the existing sites API; header
+count and profile statistics were demo constants. Refresh transport errors were
+converted to 401 and the periodic verifier logged users out on every error.
+Fixed: real authorized Site list/ID selection and Devices action; no demo sites,
+alarm counts, profile statistics, power flow or forecast when live data is absent.
+Read-only API 401 gets one forced-refresh retry; writes are never replayed.
+Refresh network/5xx errors preserve the session and show temporary failure;
+actual rejected refresh still expires it. Aborted snapshot results are ignored.
+Other operational menu modules remain explicitly unfinished, not falsely live.
+
+Tests: authenticated mocked-OIDC browser traversal of 19 sections plus 503
+refresh outage, recovery and invalid_grant expiry passed; eight EN/BG render
+tests passed. Lint: two existing image warnings. Local master issuer, console
+URL and login form passed. Normal-DNS public probes from Mac timed out; forced
+local trusted-TLS public discovery returned 200. This is not external reachability
+or real-account login/logout acceptance. Publication pending this branch CI.
+Device pull/update implementation is paused; incomplete backend files are not
+deployed and must not be reported as an active device update mechanism.
+
+Открито: Обекти отиваше към заглушка въпреки наличния API; броят и статистиката
+в профила бяха демо константи. Мрежова refresh грешка ставаше 401, а периодичната
+проверка отписваше при всяка грешка. Поправено: реален списък/избор по ID и
+бутон Устройства; без демо обекти, аларми, профилна статистика, поток и прогноза
+при липсващи live данни. Read-only 401 има един refresh retry, без повторение
+на записи. Мрежови/5xx откази пазят сесията; отхвърлен refresh я прекратява.
+Прекратени snapshot заявки не обновяват екрана. Останалите оперативни раздели
+остават изрично незавършени, не фиктивно live.
+
+Тестове: browser обход на 19 раздела с тестов OIDC, refresh 503, възстановяване
+и invalid_grant — успешен; осем EN/BG render теста — успешни. Lint: две стари
+image предупреждения. Local master issuer/console URL/login форма минават.
+Публичните normal-DNS проби от Mac изтичат; forced local trusted-TLS discovery
+връща 200. Това не доказва външен достъп или вход/изход с реален акаунт.
+Публикацията чака CI. Device pull/update работата е спряна; незавършените backend
+файлове не са внедрени и не са действащ механизъм за обновяване.
+
+## ROCK Pi initiated activation — work plan / План за активиране от ROCK Pi
+
+Owner decision: only ROCK Pi initiates provisioning/update communication.
+Browser approval queues an immutable revision; backend never opens an inbound
+connection to ROCK Pi/ESP32. Receiving a job is not successful application.
+
+- [ ] Durable approved revision queue, scoped device identity, idempotent receipt.
+- [ ] ROCK Pi outbound pull, bounded validation, local backup/recovery and health proof.
+- [ ] UI draft, explicit approval, pending/active/failed/unconfirmed status.
+- [ ] ESP32 provisioning through ROCK Pi with verified readback; no direct backend path.
+- [ ] Firmware update adapters and rollback verified separately from configuration.
+- [ ] Negative tests, deployment commissioning and Git push/PR.
+
+Решение: само ROCK Pi започва provisioning/update комуникацията. Одобрението
+в сайта поставя неизменяема версия в опашка; backend не отваря входяща връзка
+към ROCK Pi/ESP32. Получена задача не означава успешно прилагане.
+
+- [ ] Устойчива опашка, отделна идентичност, повторяемо потвърждение без дублиране.
+- [ ] Изходящо изтегляне от ROCK Pi, проверки, локален backup/recovery и health проверка.
+- [ ] UI чернова, изрично одобрение, чака/активна/грешка/непотвърдено.
+- [ ] ESP32 provisioning през ROCK Pi с проверка чрез прочит, без пряк backend достъп.
+- [ ] Firmware адаптери и rollback се проверяват отделно от конфигурацията.
+- [ ] Отрицателни тестове, проверка при внедряване и Git push/PR.
+
 ## Existing test config import / Импорт на съществуваща тестова конфигурация
 
 Owner-supplied private ROCK Pi env imported into the existing owning Site.

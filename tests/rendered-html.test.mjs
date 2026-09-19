@@ -193,11 +193,12 @@ test("exposes device provisioning and transparent no-sale-at-loss economics", as
   assert.match(overview, /pvChargeEquivalentCycles/);
 });
 
-test("loads the 19 navigation sections through split frontend modules", async () => {
+test("loads the 19 navigation sections and live sites variant through split frontend modules", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const lazyImports = page.match(/lazy\(\(\) => import\("\.\/sections\//g) ?? [];
 
-  assert.equal(lazyImports.length, 19);
+  assert.equal(lazyImports.length, 20);
+  assert.match(page, /sections\/live-sites/);
   assert.match(page, /Suspense/);
   assert.match(page, /data-view-id/);
   assert.doesNotMatch(page, /function (Overview|Battery|Market|Gateway|SupportedDevices|About)\b/);

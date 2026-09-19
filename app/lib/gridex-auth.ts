@@ -12,6 +12,10 @@ export type GridexAuthSession = {
 
 let keycloak: Keycloak | undefined;
 let initialisation: Promise<boolean> | undefined;
+export class GridexSessionExpiredError extends Error {
+  readonly status = 401;
+  constructor() { super('Session expired'); this.name='GridexSessionExpiredError'; }
+}
 
 function keycloakServerUrl(issuer: string): string {
   const marker = "/realms/";
@@ -47,7 +51,7 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
     throw error;
   });
   const authenticated = await initialisation;
-  if (!authenticated) return null;
+  if (!authenticated || !instance.authenticated) return null;
   return sessionFrom(instance);
 }
 
@@ -67,11 +71,16 @@ export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
   await instance.logout({ redirectUri: `${window.location.origin}${window.location.pathname}` });
 }
 
-export async function getGridexAccessToken(config: GridexRuntimeConfig): Promise<string | undefined> {
+export async function getGridexAccessToken(config: GridexRuntimeConfig, force = false): Promise<string | undefined> {
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
   if (!instance.authenticated) return undefined;
-  await instance.updateToken(30);
+  try { await instance.updateToken(force ? -1 : 30); }
+  catch(error) {
+    // Keycloak clears authentication on a rejected refresh, not on transport/5xx failures.
+    if(!instance.authenticated) throw new GridexSessionExpiredError();
+    throw error;
+  }
   return instance.token;
 }
 

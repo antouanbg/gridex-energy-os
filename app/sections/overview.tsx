@@ -39,7 +39,8 @@ function EnergyFlowVisual({lang,dataMode,snapshot}:{lang:UiLanguage;dataMode:Dat
     : gridCharge
     ? {profit:t("+1219.02 €","+EUR 2,384.20"),uplift:t("+121.38 € спрямо PV сценария","+EUR 237.40 vs. the PV scenario")}
     : {profit:t("+1097.64 €","+EUR 2,146.80"),uplift:t("Базов оптимизиран сценарий","Optimised baseline scenario")};
-  const batteryState=(liveBattery??0)>0?t("РАЗРЕЖДА","DISCHARGING"):(liveBattery??0)<0?t("ЗАРЕЖДА","CHARGING"):t("ГОТОВА","STANDBY");
+  const batteryState=liveBattery==null?'—':liveBattery>0?t("РАЗРЕЖДА","DISCHARGING"):liveBattery<0?t("ЗАРЕЖДА","CHARGING"):t("ГОТОВА","STANDBY");
+  if(dataMode==='live'&&!snapshot)return <p role="status">{t('Телеметрията още не е налична. Не показваме примерни стойности.','Telemetry is not available yet. No sample values are displayed.')}</p>;
   return <div className={`energy-flow-visual ${gridCharge?"grid-charge":"solar-surplus"}`} data-no-translate>
     <div className="energy-flow-toolbar">
       <div className="flow-scenario-tabs" role="group" aria-label={t("Сценарий на енергийния поток","Energy flow scenario")}>
@@ -80,6 +81,7 @@ function LossProtectionPanel({lang,dataMode,snapshot}:{lang:UiLanguage;dataMode:
   const economics=live?snapshot?.strategy?.economicForecast24h:null;
   const cycles=live?snapshot?.strategy?.cycleForecast24h:null;
   const actual=live?snapshot?.batteryEconomicsToday:null;
+  if(live&&!economics)return <article className="card"><h2>{t('Икономическа прогноза','Economic forecast')}</h2><p>{t('Все още няма реална прогноза. Примерни цени и часове не се показват.','No live forecast is available yet. Sample prices and times are not displayed.')}</p></article>;
   const money=(value:number|undefined)=>value==null?"—":formatMoney(value,lang);
   const number=(value:number|undefined,digits=2)=>value==null?"—":value.toFixed(digits);
   const demo=costMode==="full_cost"
@@ -123,7 +125,7 @@ export function Overview({ auto, setAuto, navigate, notify, lang, dataMode, snap
   return <>
     <div className="status-strip">
       <span><i className="live-dot"/>{dataMode==="live"?t("Свързано с OpenRemote","Connected to OpenRemote"):t("Представителни демо данни","Representative demo data")}</span>
-      <span>{t("Последни данни","Latest data")} <b>{dataMode==="live"&&snapshot?new Date(snapshot.timestamp).toLocaleTimeString(lang==="en"?"en-GB":"bg-BG"):"14:32:08"}</b></span>
+      <span>{t("Последни данни","Latest data")} <b>{isLive?(snapshot?new Date(snapshot.timestamp).toLocaleTimeString(lang==="en"?"en-GB":"bg-BG"):'—'):"14:32:08"}</b></span>
       <button disabled={isLive} title={isLive?t("Режимът се управлява през защитената конфигурационна команда","Mode is controlled through the protected configuration command"):undefined} onClick={() => setAuto(!auto)}><i className={auto ? "toggle on" : "toggle"}/><span><strong>{isLive?(snapshot?.strategy?.mode??t("Режим от OpenRemote","Mode from OpenRemote")):auto ? "Автоматичен режим" : "Ръчен режим"}</strong><small>{isLive?t("Защитена live конфигурация","Protected live configuration"):"Оптимизация по пазарна цена"}</small></span></button>
     </div>
     <section className="hero-grid">
