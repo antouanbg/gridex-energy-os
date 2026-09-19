@@ -1,0 +1,48 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import type { GridexApiClient, GridexHardwareTopology } from '../lib/gridex-api';
+import type { UiLanguage } from '../i18n/messages';
+
+export function DeviceInformation({ api, siteId, lang }: { api: GridexApiClient; siteId: string; lang: UiLanguage }) {
+  const t = (bg: string, en: string) => lang === 'en' ? en : bg;
+  const [topology, setTopology] = useState<GridexHardwareTopology | null>(null);
+  const [status, setStatus] = useState('loading');
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    if (siteId) void api.hardware(siteId, controller.signal).then(result => {
+      if (!controller.signal.aborted) { setTopology(result); setStatus('ready'); }
+    }).catch((error: { status?: number }) => {
+      if (!controller.signal.aborted) setStatus(error.status === 403 || error.status === 404 ? 'denied' : 'failed');
+    });
+    return () => controller.abort();
+  }, [api, siteId, refresh]);
+
+  return <section className="card config-card" data-no-translate>
+    <h2>{t('Информация за устройствата', 'Device information')}</h2>
+    <p>{t('Данни от backend за избрания Обект. Само за потвърден администратор. Регистрацията не доказва работеща връзка.', 'Backend inventory for the selected Site. Verified administrators only. Registration does not prove connectivity.')}</p>
+    {!siteId ? <p>{t('Изберете Обект.', 'Select a Site.')}</p> : <>
+      <button className="primary-btn" type="button" disabled={status === 'loading'} onClick={() => { setTopology(null); setStatus('loading'); setRefresh(value => value + 1); }}>{t('Обнови', 'Refresh')}</button>
+      <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате администраторски достъп до устройствата на този Обект.', 'You do not have administrator access to this Site inventory.') : status === 'failed' ? t('Информацията е недостъпна. Опитайте отново.', 'Information unavailable. Please retry.') : ''}</p>
+      {topology && <>
+        <p>{t('Конфигурация', 'Configuration')}: {topology.configuration ? `${topology.configuration.revision} · ${topology.configuration.status}` : t('Няма записана ревизия', 'No saved revision')}</p>
+        {!topology.gateways.length && <p>{t('Няма регистрирани шлюзове или нодове.', 'No registered gateways or nodes.')}</p>}
+        {topology.gateways.map((gateway, index) => <article key={gateway.id || index}>
+          <h3>{gateway.name}</h3>
+          <dl>
+            <dt>{t('Модел', 'Model')}</dt><dd>{gateway.hardwareModel}</dd>
+            <dt>{t('Роля', 'Role')}</dt><dd>{gateway.role === 'controller' ? t('Edge шлюз / контролер', 'Edge gateway / controller') : t('Нод зад Edge шлюза', 'Node behind the Edge gateway')}</dd>
+            <dt>{t('Идентификатор', 'Identifier')}</dt><dd>{gateway.id || '—'}</dd>
+            <dt>{t('Интерфейси', 'Interfaces')}</dt><dd>{gateway.ports.map(port => `${port.name} (${port.transport})`).join(', ') || '—'}</dd>
+            <dt>{t('Сигнал за живот (heartbeat)', 'Heartbeat')}</dt><dd>{t('Непотвърден — този API връща конфигурация, не live статус.', 'Unverified — this API returns configuration, not live status.')}</dd>
+          </dl>
+        </article>)}
+        <h3>{t('Свързани устройства', 'Attached devices')}</h3>
+        {!topology.devices.length && <p>{t('Няма регистрирани допълнителни устройства.', 'No additional devices registered.')}</p>}
+        {topology.devices.map(device => <article key={device.id}><h4>{device.name}</h4><p>{device.manufacturer} · {device.model} · {device.protocol}</p><p>{t('Драйвер', 'Driver')}: {device.driverKey || '—'} · {t('Статус на конфигурацията', 'Configuration status')}: {device.status}</p></article>)}
+        <p>{t('Само преглед. Тук не се изпращат команди, OTA или Modbus записи към батерията.', 'Read only. No commands, OTA or battery Modbus writes are sent here.')}</p>
+      </>}
+    </>}
+  </section>;
+}

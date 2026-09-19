@@ -72,6 +72,7 @@ const initialBatteryCost:BatteryCostSettings = {
 const Overview = lazy(() => import("./sections/overview").then(module => ({ default: module.Overview })));
 const Invitations = lazy(() => import('./sections/invitations').then(module => ({ default: module.Invitations })));
 const DeviceAccess = lazy(() => import('./sections/device-access').then(module => ({ default: module.DeviceAccess })));
+const DeviceInformation = lazy(() => import('./sections/device-information').then(module => ({ default: module.DeviceInformation })));
 const Customers = lazy(() => import("./sections/customers").then(module => ({ default: module.Customers })));
 const Sites = lazy(() => import("./sections/sites").then(module => ({ default: module.Sites })));
 const Assets = lazy(() => import("./sections/assets").then(module => ({ default: module.Assets })));
@@ -358,7 +359,7 @@ export default function Home() {
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div className="portal-view" data-testid={"section-"+view} data-view={view}>
-            {dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang}/>:<>
+            {dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!new Set(["overview","profile","login"]).has(view)?<LiveModulePending view={view} lang={lang}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
