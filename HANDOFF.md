@@ -2,6 +2,27 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Approved dual transport plan / Одобрен план за два транспорта — 2026-09-19
+
+Owner approval recorded for per-Site WireGuard-private OR direct MQTT-mTLS.
+Canonical execution checklist: backend docs/PER_SITE_TRANSPORT_AND_ENROLLMENT.md
+on branch docs/per-site-transport. Twelve TODO items cover contract, persistence,
+existing broker/worker, ingress, certificate lifecycle, first-boot claim, approved
+configuration application, UI, signed firmware, ROCK-initiated ESP OTA, fleet
+operations and end-to-end release acceptance. No new menu; no SSH requirement.
+This change is documentation only: no listener, runtime env, migration, device
+or router changed. Next: versioned transport contract, then persistence/worker.
+Heartbeat implementation is merged; physical delivery still needs acceptance.
+
+Записано е одобрение за избор по Обект: WireGuard-private ИЛИ direct MQTT-mTLS.
+Каноничният план е backend docs/PER_SITE_TRANSPORT_AND_ENROLLMENT.md в branch
+docs/per-site-transport. 12 TODO задачи: договор, база, broker/worker, входове,
+сертификати, first-boot claim, одобрено прилагане, UI, подписан firmware, ESP OTA
+от ROCK, управление на много обекти и end-to-end приемане. Без ново меню и SSH
+зависимост. Само документация: без listener/env/миграция/device/router промени.
+Следва versioned transport договор, после база/worker. Heartbeat кодът е слят;
+физическата доставка още изисква приемане.
+
 ## Merge compatibility check / Проверка преди merge — 2026-09-19
 
 Owner approved merging the current PRs. Added fail-closed handling of malformed

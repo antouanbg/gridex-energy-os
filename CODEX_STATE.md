@@ -1,5 +1,13 @@
 # Current task
 
+2026-09-19: per-Site private WireGuard and direct MQTT-mTLS explicitly approved.
+Execution plan recorded in backend docs/PER_SITE_TRANSPORT_AND_ENROLLMENT.md;
+12 TODO items, documentation-only publication, no live activation. See HANDOFF.
+
+2026-09-19: изрично одобрени WireGuard-private и direct MQTT-mTLS по Обект.
+Планът е в backend docs/PER_SITE_TRANSPORT_AND_ENROLLMENT.md; 12 TODO задачи,
+само документална публикация, без live активиране. Виж HANDOFF.
+
 Latest: feat/device-heartbeat prepares separate ROCK backend receipt / ESP
 successful-contact display in Devices. Three API tests and both builds pass.
 Not published: backend/physical delivery and owner browser acceptance pending.
