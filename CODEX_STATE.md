@@ -1,5 +1,17 @@
 # Current task
 
+## Day-ahead strategy backlog / Задача за стратегия „ден напред“ — 2026-09-19
+
+Recorded the owner requirement in both HANDOFF files: extend `price_arbitrage`
+with frontend selection and backend net-profit optimization including cycle
+wear, losses and fees. Planning only; no runtime or battery changes.
+Next: agree cost units/versioned contract, implement and test in simulation.
+
+Изискването е записано в двата HANDOFF файла: разширяване на `price_arbitrage`
+с frontend избор и backend оптимизация на нетната печалба с износване,
+загуби и такси. Само план, без runtime/батерийни промени.
+Следва: единици за разходите/versioned договор, реализация и симулационни тестове.
+
 ## Device access protection / Защита на device достъпа
 
 Implemented encrypted external vault, administrator-only API and write-only UI.
