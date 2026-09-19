@@ -2,6 +2,162 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Design publication and four-language suggestion — 2026-09-19
+
+Owner approved publishing PR #25. Includes desktop provisioning cards, removal
+of Edge gateway navigation, Devices-only management, header cleanup and direct
+sign-in. No new menu items, hardware commands or backend configuration changes.
+Implemented optional FR/ES/DE/IT browser-translation guidance before login,
+chosen from navigator.languages, not IP. Dismissal and explicit BG/EN choices
+are remembered; /en takes precedence. Other browser languages use English.
+No translation widget, GeoIP service or automatic text transmission is installed.
+This is guidance, NOT four complete translated application catalogues. Native
+reviewed FR/ES/DE/IT catalogues remain backlog; authenticated data translation
+is not automated. Mobile provisioning redesign remains separately unapproved.
+Tests include all four suggestions, dismissal, saved BG preference, /en,
+navigation, mocked login/session expiry and imported devices. Real owner-session
+acceptance and live device heartbeat remain pending; mocks do not prove these.
+Publication evidence is recorded on PR #25 after the deployment workflow.
+Validation: 14 Chromium tests and 20 Node tests pass; six translation tests
+rerun with screenshots, visually reviewed. Pages and Vinext builds pass. Lint:
+zero errors, two existing About image warnings. Local master auth probes pass;
+normal-DNS public issuer from Mac still fails (known network-path limitation).
+
+Собственикът одобри публикуването на PR #25: desktop provisioning карти,
+премахнат Edge шлюз, управление през Устройства, изчистена лента и директен вход.
+Без нови менюта, хардуерни команди или backend настройки. Добавени са инструкции
+по желание за браузърен превод на FR/ES/DE/IT преди вход според navigator.languages,
+не IP. Отказът и изричният BG/EN избор се пазят; /en има предимство. За други
+езици основата е английски. Без външен widget, GeoIP или автоматично изпращане
+на текст. Това са предложения/инструкции, НЕ четири пълни превода на приложението.
+Прегледаните FR/ES/DE/IT речници остават задача; няма автоматичен превод на
+удостоверени данни. Mobile provisioning редизайнът чака отделно одобрение.
+Тестовете покриват четирите предложения, отказ, запазен BG, /en, навигация,
+симулиран вход/изтичане и внесени устройства. Реално приемане с акаунта и жив
+heartbeat остават непотвърдени. Публикацията се документира в PR #25 след workflow.
+Проверки: 14 Chromium и 20 Node теста минават; шестте езикови са повторени със
+снимки и визуален преглед. Pages/Vinext build минават; lint без грешки, две стари
+About image предупреждения. Local master пробите минават; public issuer през
+normal DNS от Mac още не се достига (известно ограничение на мрежовия път).
+
+## Language suggestions / Езикови предложения — 2026-09-19
+
+Owner requests translation suggestions for visitors outside Bulgaria, including
+French and Spanish. Existing unmerged PR #12 uses browser time zone, NOT GeoIP.
+Proposed implementation, not enabled: saved explicit choice first, explicit
+language route next, browser navigator.languages next; optional country-only
+server GeoIP may suggest a language only when the preferred language is unknown.
+Never equate nationality/country with language or override a saved choice.
+Keep BG/EN; add reviewed static FR/ES translation catalogues incrementally with
+English fallback, including login/invitation/error strings and number/date units.
+Suggest once, allow dismissal and remember choice. Use the existing language
+control, not a new navigation item. GeoIP provider and privacy/storage policy
+must be selected before adding any external IP lookup; no browser GPS required.
+Interim option: user-initiated browser translation guidance (Chrome Translate),
+not an injected third-party widget and not an automatic external proxy of the
+authenticated portal. Do not send customer/device data, credentials, tokens or
+private runtime text to translation providers. Machine assistance may translate
+public static catalogues offline, with review of technical/safety terminology.
+Tests: French/Spanish browsers, BG user abroad, country/language conflict, VPN,
+unavailable GeoIP, explicit /en, dismissed suggestion and saved preference;
+no session reset or menu changes. This is a proposal/backlog, not delivered FR/ES.
+
+Собственикът иска предложения за превод извън България, включително френски и
+испански. Неслетият PR #12 използва часова зона, НЕ GeoIP. Предложение, още
+неактивно: запазен изричен избор, после изричен езиков маршрут, после
+navigator.languages; опционално GeoIP само за държава може да предложи език,
+ако предпочитаният е неизвестен. Държавата не определя езика и не отменя избора.
+BG/EN остават; постепенно се добавят прегледани статични FR/ES речници с EN
+fallback, включително вход/покани/грешки и формати на числа/дати/единици.
+Еднократно предложение с отказ и запомняне. Използва се текущият езиков контрол,
+не нов елемент в менюто. GeoIP доставчик и политика за поверителност/съхранение
+се избират преди външна IP заявка; без GPS. Временна опция: инструкции за
+превод от браузъра по желание (Chrome Translate), без външен widget или
+автоматичен proxy на удостоверения портал. Клиентски/device данни, credentials,
+tokens и частен runtime текст не се изпращат към преводачи. Машинен превод може
+да помага за публични статични речници офлайн, с техническа/безопасностна редакция.
+Тестове: FR/ES браузър, българин в чужбина, конфликт държава/език, VPN, отказал
+GeoIP, /en, отказано предложение и запазен избор; без рестарт на сесия/промяна
+на менюто. Това е предложение/backlog, не внедрен FR/ES превод.
+
+## Menu governance / Правило за менюто — 2026-09-19
+
+AGENTS.md now requires explicit owner permission for any menu structure change
+and an explicit owner request for each new menu item, across desktop/mobile and
+submenus. Documentation only; EN/BG reviewed and git diff --check passed.
+
+AGENTS.md изисква изрично разрешение за всяка структурна промяна на менюто
+и изрично искане от собственика за нов елемент, включително mobile/подменюта.
+Само документация; EN/BG са проверени и git diff --check минава.
+
+## Header and direct login / Лента и директен вход — 2026-09-19
+
+Moved live/demo context into Devices with explicit separation from heartbeat.
+Open-source links remain in About, now available in authenticated mode too.
+Removed global role selection (server authorization unchanged) and unused global
+period state: existing section-local time selectors remain, no fictitious filter.
+Header and demo notice sign-in now start existing OIDC/PKCE directly; failure
+opens the login error/retry screen. No new auth provider or backend changes.
+Tests: 20 Node tests; 7 full Chromium tests plus two one-click login viewport
+tests (390/1280px) pass. Both builds pass; lint has two existing image warnings.
+Local master issuer/admin URL/login form pass; forced-local public discovery 200,
+admin 404. Normal-DNS public auth regression probes still fail from Mac; not
+external acceptance. Added to PR #25, not published. Full real-owner login,
+logout and expiry acceptance remains unverified.
+
+LIVE/DEMO контекстът е в Устройства, отделен от heartbeat. Open-source връзките
+остават в За нас, вече достъпен и след вход. Премахнати са общият избор на роля
+(backend правата са непроменени) и неизползваният общ период; локалните избори
+на период се запазват, без фиктивен филтър. Входът от лентата и демо съобщението
+стартира OIDC/PKCE директно; при грешка се показва екранът за повторен опит.
+Без нов auth provider или backend промени. Минават 20 Node, 7 пълни Chromium
+теста и два теста за еднократен вход на 390/1280px. Двата build-а минават;
+lint има две стари image предупреждения. Local master issuer/admin URL/login
+форма минават; forced-local public discovery 200, admin 404. Normal-DNS public
+auth пробите от Mac още не минават; това не е външно приемане. Към PR #25,
+непубликувано. Реален вход/изход/изтекла сесия със собственика остават непроверени.
+
+## Single device entry / Един вход за устройства — 2026-09-19
+
+Owner requested removal of Edge gateway from desktop/mobile navigation.
+Devices remains the single entry for existing ROCK Pi/ESP32 inventory and setup.
+Removed the unrelated hardcoded sidebar "online 8 sec ago" card as well.
+Legacy navigation requests for gateway resolve to Devices. No device records,
+API permissions or hardware configuration removed. The old demo module remains
+in source but is no longer loaded. Navigation coverage now has 18 sections.
+Included in design PR #25; publication pending.
+Validation: 20 Node and all 7 Chromium tests pass, including 18-section mobile
+navigation at 360/390/430px and imported-pair/session regression. Both builds pass.
+
+По искане на собственика Edge шлюз е премахнат от desktop/mobile менюто.
+Устройства е единственият вход за наличните ROCK Pi/ESP32 и настройките им.
+Премахната е и фиксираната sidebar карта „онлайн преди 8 сек.“. Старите
+навигационни заявки gateway водят към Устройства. Не са изтрити устройства,
+API права или хардуерни настройки. Старият демо модул остава в кода, но не
+се зарежда. Навигационните тестове вече обхващат 18 раздела.
+Промяната е към design PR #25; публикацията предстои.
+Проверки: 20 Node и всичките 7 Chromium теста минават, включително 18 раздела
+на 360/390/430px и внесена двойка/сесия. Двата build-а минават.
+
+## Provisioning appearance / Оформление на provisioning — 2026-09-19
+
+Matched live inventory, role setup and protected-access forms to existing GrideX
+settings/Edge cards, colors, borders and controls. Only scoped desktop styles
+(min-width 681px); mobile styling awaits explicit owner approval. No auth, API,
+device configuration, credential handling or hardware behavior changes.
+Build, 20 Node tests and initial Chromium regression pass; desktop fixture
+screenshot inspected. Expanded role-edit regression also passed (1.1 min);
+both desktop screenshots reviewed. Publication awaits review/mobile decision.
+Do not call this hardware commissioning.
+
+Уеднаквени са live inventory, роли и защитен достъп с картите, цветовете,
+рамките и контролите на GrideX настройки/Edge. Само desktop стилове от 681px;
+мобилното оформление чака изрично одобрение. Няма промени по auth, API,
+конфигурации, тайни или хардуерна логика. Build, 20 Node теста и първият Chromium
+тест минават. Разширеният тест за редакция също мина (1.1 мин); двете desktop
+снимки с фиктивни данни са прегледани. Публикацията чака преглед/мобилно решение.
+Това не е hardware commissioning.
+
 ## Imported pair visibility / Видимост на внесената двойка — 2026-09-19
 
 Runtime read-only DB inspection confirms two registered gateways and an active

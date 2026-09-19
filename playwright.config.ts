@@ -8,6 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
+    locale: "bg-BG",
     baseURL: "http://127.0.0.1:4173",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",

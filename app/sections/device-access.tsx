@@ -12,7 +12,7 @@ export function DeviceAccess({api,siteId,lang,gatewayId=''}:{api:GridexApiClient
   return()=>{active=false;};},[api,siteId]);
  useEffect(()=>{let active=true;if(gateway)void api.deviceAccessStatus(siteId,gateway).then(r=>{if(active){setVersion(r.version);setNotice(r.configured?'configured':'empty');}}).catch(()=>{if(active)setNotice('failed');});return()=>{active=false;};},[api,siteId,gateway]);
  if(!siteId||!gateways.length)return null;
- return <section className="card config-card" data-no-translate><h2>{t('Защитен достъп до ROCK Pi','Protected ROCK Pi access')}</h2>
+ return <section className="card config-card device-access" data-no-translate><h2>{t('Защитен достъп до ROCK Pi','Protected ROCK Pi access')}</h2>
  <p>{t('Само администратор. Ключът не се показва обратно. ESP32 се управлява през ROCK Pi. Записът НЕ тества връзката и НЕ изпълнява OTA.','Administrator only. Keys are never returned. ESP32 is managed through ROCK Pi. Saving does NOT test connectivity or perform OTA.')}</p>
  <p role="status">{notice==='configured'?t('Има записан ключ.','A key is configured.'):notice==='empty'?t('Няма записан ключ.','No key configured.'):notice==='saved'?t('Криптирано и записано.','Encrypted and saved.'):notice==='failed'?t('Операцията не успя. Презаредете преди повторен опит.','Operation failed. Reload before retrying.'):''}</p>
  <form onSubmit={async event=>{event.preventDefault();if(version===null||busy)return;const form=event.currentTarget;const data=new FormData(form);setBusy(true);

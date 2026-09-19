@@ -1,5 +1,37 @@
 # Current task
 
+Owner approved PR #25 deployment. Four optional pre-login translation suggestions
+(FR/ES/DE/IT) implemented using browser language, with persistent dismissal and
+BG/EN preference. No GeoIP or external translation requests; native dictionaries
+remain backlog. See latest HANDOFF and PR deployment evidence for final status.
+
+Собственикът одобри публикация на PR #25. Предложения преди вход за FR/ES/DE/IT
+според браузъра, запазен отказ и BG/EN избор. Без GeoIP/външни заявки за превод;
+пълните речници остават задача. Актуалният статус е в HANDOFF и PR доказателствата.
+
+Header cleanup and one-click OIDC sign-in added to PR #25. LIVE context now in
+Devices; About holds GitHub links; global role/unused period removed. Tests pass,
+publication and real-owner acceptance pending. Public route from Mac still fails.
+
+Изчистена лента и директен OIDC вход към PR #25. LIVE е в Устройства; GitHub е
+в За нас; обща роля/неработещ период са премахнати. Тестовете минават; чакат
+публикация и реално приемане. Публичният маршрут от Mac още не работи.
+
+Owner-requested removal of Edge gateway navigation and static online card:
+Devices is the only device-management menu entry on desktop and phone.
+Included in PR #25; no device/API data deleted. Publication pending.
+
+По искане на собственика Edge шлюз и статичната online карта са премахнати.
+Устройства е единственият device-management вход на компютър и телефон.
+Към PR #25; без изтрити устройства/API данни. Публикацията предстои.
+
+Provisioning visual alignment with existing GrideX design: desktop scoped CSS
+only, no behavior changes. Mobile owner approval and publication pending;
+see latest HANDOFF for tests and remaining work.
+
+Визуално уеднаквяване на provisioning с GrideX: само desktop CSS, без промени
+в поведението. Чакат мобилно одобрение и публикация; тестове/остатък в HANDOFF.
+
 2026-09-19: imported-device visibility follow-up. Real DB confirms two gateways
 and two matching imported IDs, with one administrator membership. Devices shows
 the imported pair before selection; unfinished modules link directly to Devices.

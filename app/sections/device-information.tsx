@@ -20,7 +20,7 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
     return () => controller.abort();
   }, [api, siteId, refresh]);
 
-  return <section className="card config-card" data-no-translate>
+  return <section className="card config-card device-inventory" data-no-translate>
     <h2>{t('Информация за устройствата', 'Device information')}</h2>
     <p>{t('Данни от backend за избрания Обект. Само за потвърден администратор. Регистрацията не доказва работеща връзка.', 'Backend inventory for the selected Site. Verified administrators only. Registration does not prove connectivity.')}</p>
     {!siteId ? <p>{t('Изберете Обект.', 'Select a Site.')}</p> : <>

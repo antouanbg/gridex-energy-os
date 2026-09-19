@@ -1,6 +1,56 @@
 @import "tailwindcss";
 
 :root { --ink:#10211c; --muted:#738079; --line:#e3eae6; --green:#24b56a; --green-dark:#0d593b; --lime:#b8e844; --cream:#f4f6f3; }
+.translation-suggestion { padding:18px 20px; margin-bottom:16px; color:var(--ink); }
+.translation-suggestion>strong { font-size:16px; }
+.translation-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.translation-suggestion p { color:#53685c; line-height:1.6; max-width:80ch; overflow-wrap:anywhere; }
+/* Live provisioning uses the existing GrideX settings/Edge visual language.
+   Mobile remains unchanged until owner approval. */
+@media (min-width:681px) {
+  .device-inventory.card { padding:28px; }
+  .device-inventory h2 { margin:0 0 8px; font-size:22px; letter-spacing:-.4px; color:#143f31; }
+  .device-inventory h3 { margin:0 0 12px; font-size:17px; color:#244337; }
+  .device-inventory p { color:#718078; line-height:1.65; max-width:80ch; }
+  .device-inventory>p:first-of-type { margin:0 0 20px; }
+  .device-inventory.config-card>button.primary-btn { width:auto; margin-top:0; }
+  .device-inventory [role="status"]:empty { display:none; }
+  .device-inventory>article { margin:14px 0; padding:20px; border:1px solid var(--line); border-radius:12px; background:#f8faf8; }
+  .device-inventory>article>h3 { padding-bottom:12px; border-bottom:1px solid var(--line); }
+  .device-inventory dl { display:grid; grid-template-columns:minmax(140px,1fr) minmax(0,3fr); gap:10px 20px; margin:0; font-size:14px; }
+  .device-inventory dt { color:#718078; }
+  .device-inventory dd { margin:0; color:#244337; overflow-wrap:anywhere; }
+  .device-provisioning.card { margin:24px 0; padding:24px; border:1px solid #b9ddc8; box-shadow:none; background:#fff; }
+  .device-provisioning>h2 { font-size:20px; }
+  .device-provisioning>p:first-of-type { padding:12px 16px; border-radius:10px; background:#143f31; color:#d5ef77; font-size:14px; font-weight:700; }
+  .provisioning-import { margin:20px 0; padding:20px; background:#f3f7f5; border-radius:12px; }
+  .provisioning-import p { margin:0 0 16px; font-size:14px; }
+  .provisioning-import ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:0; margin:0; list-style:none; }
+  .provisioning-import li { border:1px solid var(--line); border-left:3px solid #b8e844; border-radius:10px; padding:16px; background:#fff; color:#244337; font-size:14px; line-height:1.6; overflow-wrap:anywhere; }
+  .device-provisioning label,.device-access label { display:grid; gap:8px; color:#53685c; font-size:14px; font-weight:600; min-width:0; }
+  .device-provisioning>label { max-width:600px; margin:20px 0; }
+  .device-provisioning select,.device-access select,.device-access input:not([type="checkbox"]),.device-access textarea { width:100%; min-width:0; border:1px solid #d5e0d8; border-radius:9px; padding:12px; background:#fff; color:#31473d; font:inherit; font-size:14px; min-height:44px; }
+  .device-provisioning select:focus-visible,.device-access input:focus-visible,.device-access select:focus-visible,.device-access textarea:focus-visible,.device-inventory button:focus-visible { outline:2px solid #24b56a; outline-offset:3px; }
+  .device-provisioning select:disabled,.device-access select:disabled { background:#f3f7f5; color:#718078; }
+  .provisioning-detail { margin:20px 0; padding:20px; border:1px solid var(--line); border-radius:12px; background:#f8faf8; }
+  .provisioning-detail p { font-size:14px; margin:10px 0; }
+  .device-provisioning button:not(.primary-btn),.device-inventory>button { width:auto; margin-top:10px; padding:11px 16px; border:1px solid #d5e0d8; border-radius:9px; background:#fff; color:#244337; font-weight:700; font-size:14px; cursor:pointer; }
+  .device-provisioning button:not(.primary-btn):hover,.device-inventory>button:hover { border-color:#24b56a; background:#f3f7f5; }
+  .device-provisioning fieldset,.device-access fieldset { border:0; padding:0; margin:0; min-width:0; }
+  .device-provisioning .config-form { grid-template-columns:repeat(3,minmax(0,1fr)); padding:20px; margin:16px 0; border:1px solid var(--line); border-radius:12px; background:#f8faf8; }
+  .device-provisioning .config-form h3 { grid-column:1/-1; margin:0; }
+  .device-provisioning .config-form button { justify-self:start; grid-column:1/-1; }
+  .device-provisioning label:has(input[type="checkbox"]),.device-access label:has(input[type="checkbox"]) { display:flex; align-items:flex-start; gap:10px; padding:16px; border-radius:10px; background:#f3f7f5; margin:16px 0; font-weight:400; }
+  .device-provisioning input[type="checkbox"],.device-access input[type="checkbox"] { width:18px; height:18px; flex:0 0 18px; margin:2px 0 0; accent-color:#0d593b; }
+  .device-provisioning button:disabled { cursor:not-allowed; opacity:.5; }
+  .device-provisioning .primary-btn,.device-access .primary-btn { border-radius:9px; padding:12px 20px; min-height:44px; }
+  .device-access.card { padding:24px; margin-top:24px; border:1px solid var(--line); box-shadow:none; }
+  .device-access h2 { font-size:20px; }
+  .device-access .config-form { gap:18px; }
+  .device-access label:has(textarea),.device-access label:has(input[name="fingerprint"]),.device-access label:has(input[type="checkbox"]) { grid-column:1/-1; }
+  .device-access textarea { min-height:150px; resize:vertical; font-family:monospace; }
+  .device-access .primary-btn { justify-self:start; }
+}
 * { box-sizing:border-box; }
 body { margin:0; background:var(--cream); color:var(--ink); font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.45; }
 button { font:inherit; }

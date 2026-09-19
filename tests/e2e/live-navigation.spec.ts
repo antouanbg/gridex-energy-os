@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-test('authenticated navigation, transient refresh outage, recovery and real expiry',async({page})=>{
+test('authenticated navigation, transient refresh outage, recovery and real expiry',async({page},testInfo)=>{
   test.setTimeout(100000);
   let nonce='',refreshFailure=0,refreshes=0;
   const errors:string[]=[];
@@ -35,13 +35,13 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
     return route.fulfill({json:{invitations:[]}});
   });
   await page.goto('/');
-  await page.locator('.demo-mode-notice button').first().click();
-  await page.locator('.login-submit').click();
-  await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
-  for(const view of ['sites','devices','gateway','overview','customers','assets','battery','schedule','market','settlement','automation','loads','balance','supported','alarms','reports','settings','plans','about']) {
+  await page.locator('.quick-sign-in').click();
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
+  await expect(page.locator('[data-view-id="gateway"]')).toHaveCount(0);
+  for(const view of ['sites','devices','overview','customers','assets','battery','schedule','market','settlement','automation','loads','balance','supported','alarms','reports','settings','plans','about']) {
     await page.locator(`[data-view-id="${view}"]`).click();
     await expect(page.getByTestId('section-'+view)).toBeVisible();
-    await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
+    await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
     await expect(page.getByTestId('page-eyebrow')).not.toContainText('6 ОБЕКТА');
   }
   await page.locator('[data-view-id="sites"]').click();
@@ -57,15 +57,23 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await page.locator('[data-view-id="assets"]').click();
   await page.getByRole('button',{name:'Отвори регистрираните устройства',exact:true}).click();
   await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ESP32');
+  await expect(page.locator('.device-provisioning')).toBeVisible();
+  await page.screenshot({path:testInfo.outputPath('provisioning-desktop.png'),fullPage:true});
+  await page.getByLabel('Устройство',{exact:true}).selectOption('rock');
+  await page.getByRole('button',{name:'Създай отделна чернова за промяна',exact:true}).click();
+  await page.getByRole('button',{name:'Добави роля (макс. 2)',exact:true}).click();
+  await expect(page.locator('.device-provisioning .config-form')).toBeVisible();
+  await expect(page.locator('.device-provisioning').getByRole('button',{name:'Запиши и продължи към provisioning'})).toBeDisabled();
+  await page.screenshot({path:testInfo.outputPath('provisioning-role-desktop.png'),fullPage:true});
   refreshFailure=503;
   await page.waitForTimeout(22000);
   expect(refreshes).toBeGreaterThan(0);
-  await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   refreshFailure=0;
   await page.waitForTimeout(21000);
-  await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   refreshFailure=400;
   await page.waitForTimeout(22000);
-  await expect(page.locator('.backend-badge')).not.toHaveText('OPENREMOTE LIVE');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
   expect(errors).toEqual([]);
 });
