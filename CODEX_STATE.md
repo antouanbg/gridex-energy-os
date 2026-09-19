@@ -1,5 +1,16 @@
 # Current task
 
+SRS point-by-point acceptance plan added: 33 mapped items, evidence baseline
+across frontend/backend/edge, gaps, G0–G7 gates and acceptance-record template.
+See docs/integration/SRS_VERIFIABLE_PLAN.md and latest HANDOFF. Review only;
+uncommitted backend activation remains WIP. Next G0 reconciliation, then G1
+read-only live telemetry acceptance. No runtime or hardware actions.
+
+Добавен проверим SRS план: 33 позиции, доказателства от трите хранилища,
+липси, етапи G0–G7 и шаблон за приемане. Виж плана и последния HANDOFF.
+Само преглед; backend активацията е непубликуван WIP. Следва G0 съгласуване,
+после G1 приемане на read-only телеметрия. Без runtime/хардуерни действия.
+
 DOC-01 expanded with the owner-selected Eniris reference: inspected nested docs
 navigation and article patterns, mapped to a bilingual GrideX hierarchy and
 verification-first article template in HANDOFF. Planning only; no product menu,

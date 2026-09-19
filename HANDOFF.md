@@ -2,6 +2,32 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## SRS implementation plan / Проверим план по спецификацията — 2026-09-19
+
+Owner-requested point-by-point comparison is in
+[SRS_VERIFIABLE_PLAN.md](docs/integration/SRS_VERIFIABLE_PLAN.md).
+All 32 source subsections plus chapter 12 commissioning are mapped: 33 items,
+each with evidence, gap and acceptance gate. G0–G7 define dependencies and
+DOC-01 follows verified features. No complete SRS requirement is accepted by
+this review; existing component work is explicitly retained as partial evidence.
+Local source revisions and dirty changes are recorded; remote main/runtime were
+not revalidated. Backend activation adapter/migration remain uncommitted WIP,
+not deployed proof. Next: G0 reconcile the SRS with approved architecture, then
+G1 read-only end-to-end telemetry acceptance before physical control.
+Validation: section coverage, EN/BG parity, evidence paths and diff check.
+No source document, product UI, backend runtime, device or network changes.
+
+По искане на собственика е добавено сравнение точка по точка в свързания план.
+Всички 32 подраздела и commissioning от глава 12: 33 позиции с доказателство,
+липса и приемателен тест. G0–G7 описват зависимости, DOC-01 следва проверените
+функции. Няма прието изцяло SRS изискване от този преглед; съществуващата работа
+е запазена като частично доказателство. Записани са локални ревизии и dirty
+промени; remote main/runtime не са проверявани отново. Backend адаптерът и
+миграцията за активация остават непубликуван WIP, не доказано внедряване.
+Следва G0 съгласуване с архитектурата, после G1 read-only телеметрия от край
+до край преди физическо управление. Проверки: покритие, EN/BG, evidence пътища
+и diff check. Без промяна на Word документа, UI, runtime, устройства или мрежа.
+
 ## DOC-01 — Documentation portal / Портал за документация — 2026-09-19
 
 ### Owner-selected structure reference / Избран структурен пример
