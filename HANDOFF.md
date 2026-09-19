@@ -2,6 +2,20 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Merge compatibility check / Проверка преди merge — 2026-09-19
+
+Owner approved merging the current PRs. Added fail-closed handling of malformed
+heartbeat responses and an explicit heartbeat fixture in the navigation suite.
+The previous failing PR run is historical, not evidence of a live login outage.
+New local results: 18 browser tests and 3 API-client tests pass; Pages build passes.
+These are fixture tests, not physical MQTT receipt or owner-account acceptance.
+
+Собственикът одобри актуалните PR-и. Добавени защитена обработка на невалиден
+heartbeat отговор и изричен fixture в навигационния тест. Старият неуспешен PR
+run не доказва текущ проблем с live входа. Нови локални резултати: 18 browser
+и 3 API теста минават, Pages build минава. Това не е реален MQTT receipt или
+приемане с акаунта на собственика.
+
 ## Device heartbeat display / Heartbeat в Устройства — 2026-09-19
 
 Devices separately shows last backend-received ROCK message and last successful

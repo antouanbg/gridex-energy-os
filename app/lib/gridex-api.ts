@@ -318,7 +318,11 @@ export class GridexApiClient {
   }
 
   async deviceHeartbeats(siteId: string, signal?: AbortSignal): Promise<{ items: DeviceHeartbeat[] }> {
-    return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/device-heartbeats`, signal);
+    const result = await this.getJson<{ items: DeviceHeartbeat[] }>(`/api/v1/sites/${encodeURIComponent(siteId)}/device-heartbeats`, signal);
+    if (!result || !Array.isArray(result.items) || result.items.some(item => !item || typeof item.gatewayId !== 'string')) {
+      throw new Error('Invalid device heartbeat response');
+    }
+    return result;
   }
 
   async deviceSetup(siteId: string, signal?: AbortSignal): Promise<DeviceSetup> {

@@ -15,6 +15,10 @@ test('device heartbeat reads are authenticated, site-scoped and never fall back 
       return new Response(JSON.stringify({ items: [] }));
     };
     assert.deepEqual(await client.deviceHeartbeats('site/one'), {items: []});
+    for (const body of [{invitations: []}, {items: null}, {items: [null]}]) {
+      globalThis.fetch = async () => new Response(JSON.stringify(body));
+      await assert.rejects(client.deviceHeartbeats('site/one'), /Invalid device heartbeat response/);
+    }
     for (const status of [403,404,503]) {
       globalThis.fetch = async () => new Response('{}',{status});
       await assert.rejects(client.deviceHeartbeats('site/one'), {status});
