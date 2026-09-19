@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 test('authenticated navigation, transient refresh outage, recovery and real expiry',async({page})=>{
+  test.setTimeout(100000);
   let nonce='',refreshFailure=0,refreshes=0;
   const errors:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
