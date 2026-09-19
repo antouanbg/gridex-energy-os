@@ -22,9 +22,9 @@ export function DeviceSetupWizard({api, siteId, topology, lang}: {api:GridexApiC
   const gateway=topology.gateways.find(g=>g.id===selected);
   const importedDevice=saved?.imported?.devices?.find(d=>d.gatewayId===selected);
   const update=(index:number,patch:Partial<DeviceSetupRole>)=>{setRoles(items=>items.map((item,i)=>i===index?{...item,...patch}:item));setProvision(false);setConfirmed(false);};
-  return <section className="card config-card" data-no-translate>
+  return <section className="card config-card device-provisioning" data-no-translate>
     <h2>{t('Настройка на устройство','Device setup')}</h2>
-    {!!saved?.imported?.devices?.length&&<section aria-label={t('Внесени устройства','Imported devices')}>
+    {!!saved?.imported?.devices?.length&&<section className="provisioning-import" aria-label={t('Внесени устройства','Imported devices')}>
       <h3>{t('Запазена тестова конфигурация','Saved test configuration')}</h3>
       <p>{t('Устройствата вече са заведени към този Обект. Не е необходимо да ги добавяте или настройвате повторно. Изберете устройство от менюто за подробности.','These devices already belong to this Site. Do not add or provision them again. Select a device below for details.')}</p>
       <ul>{saved.imported.devices.map(device=>{
@@ -37,7 +37,7 @@ export function DeviceSetupWizard({api, siteId, topology, lang}: {api:GridexApiC
       const id=event.target.value;setSelected(id);setRoles(saved?.configuration.devices?.find(d=>d.gatewayId===id)?.roles||[]);setProvision(false);setConfirmed(false);setEditImported(false);setNotice('');
     }}><option value="">{t('Избери устройство','Choose device')}</option>{topology.gateways.map(g=><option key={g.id} value={g.id}>{g.name} · {g.hardwareModel}</option>)}</select></label>
     {!saved&&!notice&&<p role="status">{t('Зареждане на настройките…','Loading setup…')}</p>}
-    {importedDevice&&<section>
+    {importedDevice&&<section className="provisioning-detail">
       <h3>{t('Съществуваща тестова конфигурация — внесена','Existing test configuration — imported')}</h3>
       <p>{t('Не е необходим повторен provisioning. Източник: конфигурационният файл на ROCK Pi. Адресите са запазени криптирано.','No repeat provisioning required. Source: ROCK Pi configuration file. Addresses are stored encrypted.')}</p>
       <p>{gateway?.role==='controller'?t('ROCK Pi: polling на нода и локален Modbus listener.','ROCK Pi: node polling and local Modbus listener.'):t('ESP32: Modbus TCP през ROCK Pi; DHCP резервация.','ESP32: Modbus TCP through ROCK Pi; DHCP reservation.')}</p>

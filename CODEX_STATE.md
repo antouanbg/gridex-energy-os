@@ -1,5 +1,12 @@
 # Current task
 
+Provisioning visual alignment with existing GrideX design: desktop scoped CSS
+only, no behavior changes. Mobile owner approval and publication pending;
+see latest HANDOFF for tests and remaining work.
+
+Визуално уеднаквяване на provisioning с GrideX: само desktop CSS, без промени
+в поведението. Чакат мобилно одобрение и публикация; тестове/остатък в HANDOFF.
+
 2026-09-19: imported-device visibility follow-up. Real DB confirms two gateways
 and two matching imported IDs, with one administrator membership. Devices shows
 the imported pair before selection; unfinished modules link directly to Devices.

@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-test('authenticated navigation, transient refresh outage, recovery and real expiry',async({page})=>{
+test('authenticated navigation, transient refresh outage, recovery and real expiry',async({page},testInfo)=>{
   test.setTimeout(100000);
   let nonce='',refreshFailure=0,refreshes=0;
   const errors:string[]=[];
@@ -57,6 +57,14 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await page.locator('[data-view-id="assets"]').click();
   await page.getByRole('button',{name:'Отвори регистрираните устройства',exact:true}).click();
   await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ESP32');
+  await expect(page.locator('.device-provisioning')).toBeVisible();
+  await page.screenshot({path:testInfo.outputPath('provisioning-desktop.png'),fullPage:true});
+  await page.getByLabel('Устройство',{exact:true}).selectOption('rock');
+  await page.getByRole('button',{name:'Създай отделна чернова за промяна',exact:true}).click();
+  await page.getByRole('button',{name:'Добави роля (макс. 2)',exact:true}).click();
+  await expect(page.locator('.device-provisioning .config-form')).toBeVisible();
+  await expect(page.locator('.device-provisioning').getByRole('button',{name:'Запиши и продължи към provisioning'})).toBeDisabled();
+  await page.screenshot({path:testInfo.outputPath('provisioning-role-desktop.png'),fullPage:true});
   refreshFailure=503;
   await page.waitForTimeout(22000);
   expect(refreshes).toBeGreaterThan(0);

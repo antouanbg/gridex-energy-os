@@ -2,6 +2,23 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Provisioning appearance / Оформление на provisioning — 2026-09-19
+
+Matched live inventory, role setup and protected-access forms to existing GrideX
+settings/Edge cards, colors, borders and controls. Only scoped desktop styles
+(min-width 681px); mobile styling awaits explicit owner approval. No auth, API,
+device configuration, credential handling or hardware behavior changes.
+Build, 20 Node tests and initial Chromium regression pass; desktop fixture
+screenshot inspected. Final expanded role-edit regression and publication
+remain to be recorded. Do not call this hardware commissioning.
+
+Уеднаквени са live inventory, роли и защитен достъп с картите, цветовете,
+рамките и контролите на GrideX настройки/Edge. Само desktop стилове от 681px;
+мобилното оформление чака изрично одобрение. Няма промени по auth, API,
+конфигурации, тайни или хардуерна логика. Build, 20 Node теста и първият Chromium
+тест минават; desktop снимката с фиктивни данни е прегледана. Финалният разширен
+тест за редакция и публикацията предстоят. Това не е hardware commissioning.
+
 ## Imported pair visibility / Видимост на внесената двойка — 2026-09-19
 
 Runtime read-only DB inspection confirms two registered gateways and an active
