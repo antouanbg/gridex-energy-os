@@ -38,7 +38,8 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await page.locator('.demo-mode-notice button').first().click();
   await page.locator('.login-submit').click();
   await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');
-  for(const view of ['sites','devices','gateway','overview','customers','assets','battery','schedule','market','settlement','automation','loads','balance','supported','alarms','reports','settings','plans','about']) {
+  await expect(page.locator('[data-view-id="gateway"]')).toHaveCount(0);
+  for(const view of ['sites','devices','overview','customers','assets','battery','schedule','market','settlement','automation','loads','balance','supported','alarms','reports','settings','plans','about']) {
     await page.locator(`[data-view-id="${view}"]`).click();
     await expect(page.getByTestId('section-'+view)).toBeVisible();
     await expect(page.locator('.backend-badge')).toHaveText('OPENREMOTE LIVE');

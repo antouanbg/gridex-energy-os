@@ -11,7 +11,7 @@ import type { BatteryCostSettings, DataMode } from "./sections/types";
 const navItems = [
   ["overview", "⌂"], ["customers", "◎"], ["sites", "◇"], ["assets", "▦"], ["battery", "▣"],
   ["schedule", "▤"], ["market", "↗"], ["settlement", "¤"], ["automation", "⌘"], ["loads", "ϟ"],
-  ["balance", "≋"], ["gateway", "⌗"], ["supported", "✓"], ["devices", "⊞"], ["alarms", "△"],
+  ["balance", "≋"], ["supported", "✓"], ["devices", "⊞"], ["alarms", "△"],
   ["reports", "▥"], ["settings", "⚙"], ["plans", "★"], ["about", "○"],
 ] as const;
 
@@ -83,7 +83,6 @@ const Settlement = lazy(() => import("./sections/settlement").then(module => ({ 
 const Automation = lazy(() => import("./sections/automation").then(module => ({ default: module.Automation })));
 const FlexibleLoads = lazy(() => import("./sections/flexible-loads").then(module => ({ default: module.FlexibleLoads })));
 const Balance = lazy(() => import("./sections/balance").then(module => ({ default: module.Balance })));
-const Gateway = lazy(() => import("./sections/gateway").then(module => ({ default: module.Gateway })));
 const SupportedDevices = lazy(() => import("./sections/supported").then(module => ({ default: module.SupportedDevices })));
 const Devices = lazy(() => import("./sections/devices").then(module => ({ default: module.Devices })));
 const Alarms = lazy(() => import("./sections/alarms").then(module => ({ default: module.Alarms })));
@@ -269,7 +268,7 @@ export default function Home() {
   };
 
   const navigate = (id: string) => {
-    setView(id);
+    setView(id === 'gateway' ? 'devices' : id);
     setMobileNavOpen(false);
     setAccountMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -321,7 +320,6 @@ export default function Home() {
         <button className="mobile-menu-toggle" data-no-translate aria-controls="main-navigation" aria-expanded={mobileNavOpen} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
-          <div className="gateway"><span className="live-dot"/><div><strong>{lang==="en"?"Edge gateway":"Edge шлюз"}</strong><small>{lang==="en"?"Online · 8 sec ago":"Онлайн · преди 8 сек."}</small></div></div>
         <div className="profile-wrap" data-no-translate>
           <button className={`profile ${accountMenuOpen?"open":""}`} onClick={()=>setAccountMenuOpen(!accountMenuOpen)} aria-haspopup="menu" aria-expanded={accountMenuOpen}>
             <span>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</span>
@@ -388,9 +386,6 @@ export default function Home() {
         {view === "automation" && <Automation notify={notify} site={site} lang={lang} batteryCost={batteryCost}/>}
         {view === "loads" && <FlexibleLoads notify={notify} lang={lang}/>}
         {view === "balance" && <Balance notify={notify} lang={lang}/>}
-        {view === "gateway" && (
-          <Gateway notify={notify} lang={lang}/>
-        )}
         {view === "supported" && <SupportedDevices lang={lang}/>}
         {view === "devices" && <Devices notify={notify} lang={lang}/>}
         {view === "alarms" && <Alarms notify={notify} lang={lang}/>}

@@ -1,5 +1,13 @@
 # Current task
 
+Owner-requested removal of Edge gateway navigation and static online card:
+Devices is the only device-management menu entry on desktop and phone.
+Included in PR #25; no device/API data deleted. Publication pending.
+
+По искане на собственика Edge шлюз и статичната online карта са премахнати.
+Устройства е единственият device-management вход на компютър и телефон.
+Към PR #25; без изтрити устройства/API данни. Публикацията предстои.
+
 Provisioning visual alignment with existing GrideX design: desktop scoped CSS
 only, no behavior changes. Mobile owner approval and publication pending;
 see latest HANDOFF for tests and remaining work.

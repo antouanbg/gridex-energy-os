@@ -2,6 +2,28 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Single device entry / Един вход за устройства — 2026-09-19
+
+Owner requested removal of Edge gateway from desktop/mobile navigation.
+Devices remains the single entry for existing ROCK Pi/ESP32 inventory and setup.
+Removed the unrelated hardcoded sidebar "online 8 sec ago" card as well.
+Legacy navigation requests for gateway resolve to Devices. No device records,
+API permissions or hardware configuration removed. The old demo module remains
+in source but is no longer loaded. Navigation coverage now has 18 sections.
+Included in design PR #25; publication pending.
+Validation: 20 Node and all 7 Chromium tests pass, including 18-section mobile
+navigation at 360/390/430px and imported-pair/session regression. Both builds pass.
+
+По искане на собственика Edge шлюз е премахнат от desktop/mobile менюто.
+Устройства е единственият вход за наличните ROCK Pi/ESP32 и настройките им.
+Премахната е и фиксираната sidebar карта „онлайн преди 8 сек.“. Старите
+навигационни заявки gateway водят към Устройства. Не са изтрити устройства,
+API права или хардуерни настройки. Старият демо модул остава в кода, но не
+се зарежда. Навигационните тестове вече обхващат 18 раздела.
+Промяната е към design PR #25; публикацията предстои.
+Проверки: 20 Node и всичките 7 Chromium теста минават, включително 18 раздела
+на 360/390/430px и внесена двойка/сесия. Двата build-а минават.
+
 ## Provisioning appearance / Оформление на provisioning — 2026-09-19
 
 Matched live inventory, role setup and protected-access forms to existing GrideX

@@ -12,7 +12,6 @@ const sections = [
   "automation",
   "loads",
   "balance",
-  "gateway",
   "supported",
   "devices",
   "alarms",
@@ -53,10 +52,13 @@ for (const width of phoneWidths) {
   });
 }
 
-test("all 19 sections render through the lazy module boundary", async ({ page }) => {
+test("all 18 sections render through the lazy module boundary", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("/");
+
+  await expect(page.locator('[data-view-id="gateway"]')).toHaveCount(0);
+  await expect(page.locator('.sidebar .gateway')).toHaveCount(0);
 
   const seenTitles = new Set<string>();
   for (const section of sections) {
