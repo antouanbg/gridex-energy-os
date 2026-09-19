@@ -1,4 +1,4 @@
-import Keycloak, { type KeycloakProfile, type KeycloakTokenParsed } from "keycloak-js";
+import Keycloak, { type KeycloakTokenParsed } from "keycloak-js";
 
 import type { GridexRuntimeConfig } from "./gridex-api";
 
@@ -12,6 +12,23 @@ export type GridexAuthSession = {
 
 let keycloak: Keycloak | undefined;
 let initialisation: Promise<boolean> | undefined;
+
+export function hasGridexAuthCallback(): boolean {
+  if (typeof window === 'undefined') return false;
+  return [window.location.search.slice(1), window.location.hash.slice(1)].some(value=>{
+    const params=new URLSearchParams(value);
+    return params.has('state')&&(params.has('code')||params.has('error'));
+  });
+}
+
+async function bounded<T>(promise:Promise<T>, ms:number):Promise<T> {
+  let timer:ReturnType<typeof setTimeout>|undefined;
+  try {
+    return await Promise.race([promise,new Promise<never>((_,reject)=>{
+      timer=setTimeout(()=>reject(new Error('Identity request timed out')),ms);
+    })]);
+  } finally { clearTimeout(timer); }
+}
 export class GridexSessionExpiredError extends Error {
   readonly status = 401;
   constructor() { super('Session expired'); this.name='GridexSessionExpiredError'; }
@@ -38,12 +55,12 @@ function client(config: GridexRuntimeConfig): Keycloak {
 export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise<GridexAuthSession | null> {
   if (!config.authEnabled || config.mode === "demo") return null;
   const instance = client(config);
-  initialisation ??= instance.init({
+  initialisation ??= bounded(instance.init({
     flow: "standard",
     pkceMethod: "S256",
     // Explicit login avoids embedded-cookie checks; init still verifies callbacks.
     checkLoginIframe: false,
-  }).catch(error => {
+  }), Math.max(1000,Math.min(config.backendTimeoutMs||5000,15000))).catch(error => {
     if (keycloak === instance) {
       keycloak = undefined;
       initialisation = undefined;
@@ -84,7 +101,7 @@ export async function getGridexAccessToken(config: GridexRuntimeConfig, force = 
   return instance.token;
 }
 
-async function sessionFrom(instance: Keycloak): Promise<GridexAuthSession> {
+function sessionFrom(instance: Keycloak): GridexAuthSession {
   const parsed = instance.tokenParsed as (KeycloakTokenParsed & {
     email?: string;
     name?: string;
@@ -92,22 +109,16 @@ async function sessionFrom(instance: Keycloak): Promise<GridexAuthSession> {
     realm_access?: { roles?: string[] };
     resource_access?: Record<string, { roles?: string[] }>;
   }) | undefined;
-  let profile: KeycloakProfile | undefined;
-  try {
-    profile = await instance.loadUserProfile();
-  } catch {
-    // Profile is optional; verified ID/access-token claims remain the fallback.
-  }
+  // Verified token claims are sufficient. An optional account/profile request
+  // must never block sign-in or require account-console permissions.
   const clientRoles = instance.clientId ? parsed?.resource_access?.[instance.clientId]?.roles ?? [] : [];
   const realmRoles = parsed?.realm_access?.roles ?? [];
-  const name = profile?.firstName || profile?.lastName
-    ? [profile.firstName, profile.lastName].filter(Boolean).join(" ")
-    : parsed?.name ?? parsed?.preferred_username ?? profile?.username ?? "GrideX user";
+  const name = parsed?.name ?? parsed?.preferred_username ?? "GrideX user";
   return {
     subject: parsed?.sub ?? "",
-    email: profile?.email ?? parsed?.email ?? "",
+    email: parsed?.email ?? "",
     name,
-    preferredUsername: profile?.username ?? parsed?.preferred_username ?? "",
+    preferredUsername: parsed?.preferred_username ?? "",
     roles: [...new Set([...realmRoles, ...clientRoles])],
   };
 }

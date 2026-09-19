@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 for (const width of [390, 1280]) {
-test(`one-click PKCE login at ${width}px without API health or hidden SSO`, async ({ page }) => {
+test(`one-click PKCE login at ${width}px without API health or hidden SSO`, async ({ page },testInfo) => {
   await page.setViewportSize({width,height:900});
   const requests: string[] = [];
   page.on('request', request => requests.push(request.url()));
@@ -16,7 +16,16 @@ test(`one-click PKCE login at ${width}px without API health or hidden SSO`, asyn
     contentType: 'text/html', body: '<h1>Identity provider sign-in</h1>',
   }));
   await page.goto('/');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await expect(page.locator('header button, header select')).toHaveCount(0);
+  if(width<681)await page.locator('.mobile-menu-toggle').click();
   const login = page.locator('.quick-sign-in');
+  await expect(page.locator('.profile-wrap .language-switch')).toBeVisible();
+  await expect(page.locator('nav')).not.toContainText('Настройка и данни');
+  const loginBox=await login.boundingBox();
+  const languageBox=await page.locator('.sidebar-language').boundingBox();
+  expect(languageBox!.y).toBeGreaterThanOrEqual(loginBox!.y+loginBox!.height);
+  await page.screenshot({path:testInfo.outputPath('sidebar-controls.png')});
   await expect(login).toBeEnabled();
   await expect(page.locator('.header-actions .backend-badge')).toHaveCount(0);
   await expect(page.locator('.header-actions .open-source-badge')).toHaveCount(0);

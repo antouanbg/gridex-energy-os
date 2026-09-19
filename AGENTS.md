@@ -99,12 +99,13 @@ desktop emulation appears to pass. A user-reported mobile issue is authoritative
 - Never fall back to demo values for an authenticated user, during session
   verification or after an identity/API error. Show a loading, denied,
   unavailable or setup-required state instead. Do not replace unknown telemetry
-  with zero. Mark unfinished sections as requiring setup/data and distinguish
+  with zero. Explain required setup/data INSIDE unfinished screens only; do not
+  append status text to menu labels or tooltips. Distinguish
   missing backend integration from work the user can complete by provisioning.
 - Никога не връщай демо стойности след вход, при проверка на сесията или при
   identity/API грешка. Показвай зареждане, отказ, недостъпност или необходима
-  настройка. Не заменяй неизвестна телеметрия с нула. Означавай незавършените
-  раздели като изискващи настройка/данни и отличавай липсваща backend интеграция
+  настройка. Не заменяй неизвестна телеметрия с нула. Обяснявай необходимата
+  настройка/данни САМО вътре в раздела, без добавки към меню/tooltip. Отличавай липсваща backend интеграция
   от настройки, които потребителят може да завърши чрез провизиране.
 
 - Before publishing login or live dashboard changes, render a successfully

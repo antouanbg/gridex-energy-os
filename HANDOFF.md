@@ -2,6 +2,50 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Sidebar controls and anonymous demo / Меню и анонимно демо — 2026-09-19
+
+Owner explicitly removes ALL upper-right controls, including language, login
+progress, site selector, bell and mobile account shortcut. Language is below
+the sidebar sign-in/profile; mobile exposes both in the expanded Menu. Anonymous
+profile button launches PKCE login directly. Site selection remains in Sites
+cards, not a global dropdown. Menu titles/tooltips are restored without added
+setup labels; setup explanations remain inside the unfinished screens only.
+Anonymous visits render demo immediately. Only OIDC callback visits initially
+wait for identity; signed-in/API-error paths still never substitute demo data.
+Removed blocking optional account-profile request (verified token claims used),
+bounded Keycloak initialization and API fetch with backendTimeoutMs. Callback
+timeout resets the failed adapter for retry; no password/PKCE/TLS weakening.
+Clean public anonymous-browser reproduction worked on previous deployment; the
+owner's exact stuck session was not available. Regression tests simulate hung
+token exchange and hung API, plus mobile/desktop login, language position,
+short labels and absent header controls. Real-owner acceptance remains pending.
+No runtime, backend configuration, router or hardware changes.
+Validation: 18 Chromium tests and 20 Node tests pass; Pages and Vinext builds
+pass, lint has two pre-existing About image warnings and no errors. Anonymous
+demo, stalled callback retry and 403/503/hung API paths verified with fixtures.
+Local master auth probes pass. Normal-DNS public probes from Mac still fail;
+this is not evidence of a completed external owner login.
+
+Собственикът изрично премахва ВСИЧКИ горни десни контроли: език, прогрес на входа,
+избор на обект, камбанка и мобилен профил. Езикът е под входа/профила в менюто;
+на телефон са в разгънатото „Меню“. Анонимният бутон стартира PKCE вход директно.
+Изборът на обект остава в картите в „Обекти“, не в глобален списък. Възстановени
+кратки имена/tooltip без добавки; обясненията за настройка са само вътре в раздела.
+Анонимният посетител вижда демо веднага; начална проверка има само при OIDC
+callback. След вход/API грешка демо заместители няма. Премахната е блокираща
+незадължителна заявка за профил (ползват се проверените token claims); init/API
+чакането е ограничено с backendTimeoutMs. Timeout освобождава неуспешния adapter
+за нов опит, без отслабване на парола/PKCE/TLS. Чист публичен анонимен браузър
+работеше и на предходната версия; точната заседнала сесия не е възпроизведена.
+Тестове симулират зависнали token/API заявки, вход на телефон/компютър, позиция
+на езика, кратки менюта и празна горна лента. Реалното приемане предстои.
+Без runtime, backend конфигурационни, рутерни или хардуерни промени.
+Проверки: 18 Chromium и 20 Node теста минават; Pages/Vinext build минават,
+lint без грешки и с две стари About image предупреждения. Анонимно демо,
+повторен вход след зависнал callback и 403/503/зависнал API са fixture тестове.
+Local master auth минава; публичните normal-DNS проби от Mac още отказват.
+Това не доказва завършен външен вход с реалния акаунт.
+
 ## Authenticated data only / Само реални данни след вход — 2026-09-19
 
 Demo is now allowed only for confirmed anonymous visitors. Session checking and
