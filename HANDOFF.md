@@ -2,6 +2,20 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Current backlog / Актуален план — 2026-09-20
+
+See [CURRENT_BACKLOG](docs/CURRENT_BACKLOG.md): I18N-01 ten-language localisation
+is recorded for future implementation, with acceptance criteria and open language/
+provider choices. Consolidated remaining work distinguishes implemented heartbeat
+from pending sensor telemetry and supersedes historical frontend publication TODOs.
+Documentation only; no runtime/provider changes. Next recommended: Devices real-data
+acceptance, then ROCK temperature end-to-end; locale work remains explicitly planned.
+
+Виж [CURRENT_BACKLOG](docs/CURRENT_BACKLOG.md): записана I18N-01 за десет езика,
+приемателни критерии и избори за езици/доставчик. Списъкът отделя готов heartbeat
+от оставащите сензори и отменя старите frontend TODO за публикация. Само документация.
+Предложена следваща стъпка: приемане на Устройства, после температурата на ROCK.
+
 ## Demo cleanup / Изчистване на демо екрана — 2026-09-20
 
 Owner accepted swipe navigation and requested removal of the repeated heading

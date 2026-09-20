@@ -1,5 +1,10 @@
 # Current task
 
+2026-09-20: I18N-01 and consolidated remaining tasks recorded in
+docs/CURRENT_BACKLOG.md. Planning only; ten-language implementation not started.
+2026-09-20: I18N-01 и оставащите задачи са в docs/CURRENT_BACKLOG.md.
+Само планиране; реализацията на десет езика не е започната.
+
 2026-09-20: owner accepted mobile swipe. Removed repeated heading Demo badge
 and demo overview switch; restored visible mobile banner Sign in. Eight BG/EN
 CTA tests + 22 unit/render pass; publication evidence in PR, owner check remains.
