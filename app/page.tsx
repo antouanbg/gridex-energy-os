@@ -458,7 +458,6 @@ export default function Home() {
       <section className="content">
         <header className="page-heading">
           <div>
-            {dataMode==='demo'&&<span className="heading-demo">{lang==='en'?'Demo':'Демо'}</span>}
             <div role="navigation" aria-label={lang==='en'?'Breadcrumb':'Път до страницата'}>
               <h1 className="page-breadcrumb" data-testid="page-title">
                 {parentSection[view]&&<><a href={sectionHref(parentSection[view],selectedSiteId,dataMode==='demo')} onClick={event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(parentSection[view]);}}}>{tKey(`nav.${parentSection[view]}` as MessageKey)}</a><span className="breadcrumb-separator" aria-hidden="true">→</span></>}
@@ -474,7 +473,7 @@ export default function Home() {
         {dataMode==="demo"&&demoNoticeVisible&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
           <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"API access could not be verified. You can retry sign-in.":"Достъпът до API не може да се потвърди. Можете да опитате вход отново."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
-          <button onClick={signIn}>{lang==="en"?"Sign in":"Вход"} →</button>
+          <button className="demo-sign-in" onClick={signIn}>{lang==="en"?"Sign in":"Вход"} →</button>
           <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
 

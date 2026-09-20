@@ -2,6 +2,24 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Demo cleanup / Изчистване на демо екрана — 2026-09-20
+
+Owner accepted swipe navigation and requested removal of the repeated heading
+Demo badge and Overview representative-data switch. Removed both from demo
+screens; live status/configuration display is preserved. The explanatory demo
+notice remains, with a full-width 44px Sign in button on phones. Existing PKCE
+handler unchanged. Eight BG/EN browser cases cover 360/390/430/1280px, absence
+of removed controls, visible CTA and redirect to a mocked identity provider.
+22 unit/render tests pass, including live null battery/SOC states. Public
+deployment evidence belongs in PR; owner physical-phone acceptance remains.
+
+Собственикът прие плъзгащото меню. Премахнати са горният етикет Демо от всички
+екрани и блокът с представителни данни/превключвател в демо Преглед. Live
+статусът е запазен. Пояснението за демо остава, а Вход на телефон е на отделен
+ред с височина поне 44px. PKCE логиката е непроменена. Осем BG/EN браузърни
+теста проверяват четири размера и пренасочване към mock identity provider.
+22 unit/render теста минават. Остава приемане на реален телефон; deployment в PR.
+
 ## Mobile swipe navigation / Мобилна плъзгаща навигация — 2026-09-20
 
 Owner requested three visible section tiles with horizontal finger scrolling

@@ -4,7 +4,7 @@ for(const width of [390,1280])test(`approved hierarchy and breadcrumb ${width}`,
   await page.goto('/demo/battery/');
   await expect(page.getByTestId('page-title')).toHaveText('Обекти→Батерия');
   await expect(page.getByTestId('page-eyebrow')).toHaveText('Соларен парк Изток');
-  await expect(page.locator('.heading-demo')).toBeVisible();
+  await expect(page.locator('.heading-demo')).toHaveCount(0);
   if(width<681)await page.locator('.mobile-menu-toggle').click();
   if(width<681)await expect(page.locator('[data-view-id="market"]>span')).toBeVisible();
   await expect(page.locator('[data-view-id="sites"]')).toHaveClass(/active-parent/);

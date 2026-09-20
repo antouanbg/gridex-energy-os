@@ -1,0 +1,22 @@
+import {test,expect} from '@playwright/test';
+for(const width of [360,390,430,1280])for(const lang of ['bg','en'])test(`demo banner ${width} ${lang}`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:900});
+  await page.addInitScript(language=>localStorage.setItem('gridex.ui-language',language),lang);
+  await page.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:'window.__GRIDEX_CONFIG__={mode:"auto",authEnabled:true,apiBaseUrl:"https://api.example.invalid",realm:"gridex",oidcIssuer:"https://auth.example.invalid/auth/realms/gridex",oidcClientId:"gridex-portal"};'}));
+  await page.route('https://auth.example.invalid/**',r=>r.fulfill({contentType:'text/html',body:'<h1>Test sign-in</h1>'}));
+  await page.goto('/demo/');
+  await expect(page.locator('.hero-grid')).toBeVisible();
+  await expect(page.locator('.heading-demo')).toHaveCount(0);
+  await expect(page.locator('.status-strip')).toHaveCount(0);
+  const login=page.locator('.demo-sign-in');
+  await expect(login).toBeVisible();
+  await expect(login).toContainText(lang==='bg'?'Вход':'Sign in');
+  const box=(await login.boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x+box.width).toBeLessThanOrEqual(width);
+  if(width<681)expect(box.height).toBeGreaterThanOrEqual(44);
+  await page.screenshot({path:testInfo.outputPath('demo-banner.png')});
+  await login.click();
+  await expect(page.getByRole('heading',{name:'Test sign-in'})).toBeVisible();
+  expect(new URL(page.url()).searchParams.get('code_challenge_method')).toBe('S256');
+});
