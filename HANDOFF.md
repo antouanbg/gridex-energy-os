@@ -2,6 +2,26 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Publication confirmed / Публикация потвърдена — 2026-09-20
+
+Owner approved PR #40 merge; merged as bdefa64c283d37ba25f500d191af2ecfb52ea7d2.
+Frontend quality passed on reviewed head db8a5c1. Main Pages run 35536017627
+SUCCEEDED. Public release.json and /devices/ HTML both return bdefa64, including
+main-AwkwdVhj.js. This supersedes the branch-protection blocker below; protections
+were not changed. Backend PR #32 remains separate, not merged by this approval.
+No new runtime/auth/device changes this turn. Owner's real authenticated browser
+acceptance and physical temperature remain unverified; do not equate public
+bundle verification with a completed personal login/device telemetry test.
+
+Собственикът одобри merge на PR #40; слят е като bdefa64c283d37ba25f500d191af2ecfb52ea7d2.
+Frontend quality мина за проверения head db8a5c1. Main Pages run 35536017627 е
+УСПЕШЕН. Публичните release.json и /devices/ HTML връщат bdefa64 и bundle
+main-AwkwdVhj.js. Това отменя публикационния блокер по-долу; защитите са запазени.
+Backend PR #32 е отделен и не е сливан с това одобрение. Без нови runtime/auth/
+device промени в този ход. Реалното owner browser приемане и физическата
+температура още не са потвърдени; публичен bundle не доказва личен вход/телеметрия.
+
+
 ## Publication gate / Публикационен блокер — 2026-09-20
 
 Backend a58aebf is pushed in PR #32 and deployed (381dee9a89bb); existing frontend
