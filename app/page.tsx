@@ -408,7 +408,7 @@ export default function Home() {
             const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo')} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
+            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo')} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${parentSection[view]===id?'active-parent':''} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''} ${parentSection[id]&&parentSection[navItems[navItems.findIndex(item=>item[0]===id)+1]?.[0]]!==parentSection[id]?'nav-child-last':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
               <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </a>;
           })}
@@ -444,8 +444,17 @@ export default function Home() {
       </>}
 
       <section className="content">
-        <header>
-          <div><p className="eyebrow" data-testid="page-eyebrow">{dataMode==='live'?(view==='sites'?(lang==='en'?`PORTFOLIO / ${sitesStatus==='ready'?liveSites.length:'—'} SITES`:`ПОРТФОЛИО / ${sitesStatus==='ready'?liveSites.length:'—'} ОБЕКТА`):(liveSites.find(item=>item.id===selectedSiteId)?.name??'GrideX')):tKey(`eyebrow.${view}` as MessageKey)}</p><h1 data-testid="page-title">{view === "overview" ? (dataMode==='live'?(liveSites.find(item=>item.id===selectedSiteId)?.name??(lang==='en'?'My sites':'Моите обекти')):lang === "bg" ? "Соларен парк Изток" : site) : tKey(`title.${view}` as MessageKey)}</h1></div>
+        <header className="page-heading">
+          <div>
+            {dataMode==='demo'&&<span className="heading-demo">{lang==='en'?'Demo':'Демо'}</span>}
+            <div role="navigation" aria-label={lang==='en'?'Breadcrumb':'Път до страницата'}>
+              <h1 className="page-breadcrumb" data-testid="page-title">
+                {parentSection[view]&&<><a href={sectionHref(parentSection[view],selectedSiteId,dataMode==='demo')} onClick={event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(parentSection[view]);}}}>{tKey(`nav.${parentSection[view]}` as MessageKey)}</a><span className="breadcrumb-separator" aria-hidden="true">→</span></>}
+                <span aria-current="page">{view==='not-found'?(lang==='en'?'Page not found':'Страницата не е намерена'):tKey(`nav.${view}` as MessageKey)}</span>
+              </h1>
+            </div>
+            <p className="eyebrow page-site-context" data-testid="page-eyebrow">{dataMode==='live'?(liveSites.find(item=>item.id===selectedSiteId)?.name??'GrideX'):(lang==='bg'?'Соларен парк Изток':site)}</p>
+          </div>
         </header>
 
         {!sessionUser&&view!=='login'&&<TranslationSuggestion key={lang}/>}

@@ -2,6 +2,24 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Approved submenu presentation / Одобрен дизайн — 2026-09-20
+
+Implemented owner-approved desktop and expanded-phone hierarchy: indented
+children, thin connectors, light-green active child and subtle active parent.
+No menu labels/order/relationships changed. Header shows linked parent → current
+section, Site below and explicit Demo label. Links preserve route/mode and native
+new-tab behavior. Session/auth logic is unchanged. Added 390/1280 browser tests
+for hierarchy, parent links, refresh, long headings and overflow; updated translated
+heading expectations. Publication/CI evidence belongs in the implementation PR.
+Remaining: owner visual acceptance; earlier infrastructure gates remain unchanged.
+
+Внедрен е одобреният дизайн за desktop и отвореното меню на телефон: отстъпи,
+свързващи линии, светлозелено активно подменю и отличим родител. Няма промяна
+в имената, реда или структурата. Заглавието показва родител → раздел с линк,
+Обекта отдолу и знак Демо. Сесиите не са променяни. Добавени са браузърни
+проверки на 390/1280 px за йерархия, линкове, refresh и дълги заглавия.
+Остава визуално приемане от собственика; публикацията/CI се проследяват в PR.
+
 ## Session lifecycle audit / Проверка на жизнения цикъл на сесиите — 2026-09-20
 
 Found and corrected: logout was not propagated to other tabs; some final 401s

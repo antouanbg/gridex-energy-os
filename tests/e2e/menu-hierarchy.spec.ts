@@ -1,0 +1,25 @@
+import {test,expect} from '@playwright/test';
+for(const width of [390,1280])test(`approved hierarchy and breadcrumb ${width}`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:960});
+  await page.goto('/demo/battery/');
+  await expect(page.getByTestId('page-title')).toHaveText('Обекти→Батерия');
+  await expect(page.getByTestId('page-eyebrow')).toHaveText('Соларен парк Изток');
+  await expect(page.locator('.heading-demo')).toBeVisible();
+  if(width<681)await page.locator('.mobile-menu-toggle').click();
+  if(width<681)await expect(page.locator('[data-view-id="market"]>span')).toBeVisible();
+  await expect(page.locator('[data-view-id="sites"]')).toHaveClass(/active-parent/);
+  const child=page.locator('[data-view-id="battery"]');
+  await child.scrollIntoViewIfNeeded();
+  await expect(child).toHaveCSS('background-color','rgb(217, 239, 223)');
+  await expect(child).toHaveCSS('padding-left','46px');
+  expect(await child.evaluate(el=>getComputedStyle(el,'::before').width)).toBe('1px');
+  await page.screenshot({path:testInfo.outputPath('menu-hierarchy.png')});
+  if(width<681)await page.locator('.mobile-menu-toggle').click();
+  await page.getByRole('navigation',{name:'Път до страницата'}).getByRole('link',{name:'Обекти'}).click();
+  await expect(page).toHaveURL(/\/demo\/sites\/$/);
+  await page.goto('/demo/market/settlement/');
+  await expect(page.getByTestId('page-title')).toHaveText('Пазар→Тарифи и сетълмент');
+  await page.reload();
+  await expect(page.getByTestId('page-title')).toHaveText('Пазар→Тарифи и сетълмент');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
