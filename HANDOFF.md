@@ -2,6 +2,55 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## OpenRemote-backed frontend inventory / Инвентар за frontend от OpenRemote — 2026-09-20
+
+API DEPLOYED image 381dee9a89bb, private rollback api-inventory-8YeBtP.
+GET /sites intersects current GrideX membership with OR user-linked Site assets;
+names come from OR. GET /hardware verifies Site/gateway bindings, realm, parent
+hierarchy and user-linked assets on every request; gateway name/model/role come
+from OR. Local port/configuration data remain execution settings only.
+No OR response -> 503; incomplete binding/ownership -> 409; no local-only fallback.
+Existing heartbeat transport and configuration editing are unchanged.
+Actual owner membership/OR data handler probe returns one accessible pilot and
+two verified gateways. Identity was injected into an isolated local handler:
+this is NOT a real owner browser/JWT login. No customer data published.
+Frontend requires inventorySource=openremote; unavailable/unprovisioned states
+hide stale inventory while preserving the session. No menu/layout changes.
+Tests: 48 API, 22 frontend unit/render, 4 browser fixture flows PASS. Includes
+deep link/refresh/expiry, ownership, no-battery BG/EN, inventory outage/recovery.
+Lint has zero errors (two pre-existing image warnings); Pages/RSC builds pass.
+Local master auth gate passes; forced-local trusted TLS public issuer/master
+denial pass. Normal-DNS external ingress probes from Mac time out; external
+owner browser login/expiry and physical temperature remain NOT verified.
+Frontend publication result will be recorded after Pages deployment; backend
+runtime already serves the compatible OR inventory contract to existing clients.
+Next: owner browser acceptance, then generic provisioning/import/update guards;
+do not treat this read integration as completion of all legacy write-path debt.
+
+API е ВНЕДРЕН: 381dee9a89bb; частен rollback api-inventory-8YeBtP.
+GET /sites пресича текущото GrideX членство с OR Site assets, свързани към
+потребителя; имената идват от OR. GET /hardware проверява Site/gateway bindings,
+realm, родителите и потребителските връзки при всяка заявка; имена/модели/роли
+идват от OR. Локалните портове/конфигурация са само изпълними настройки.
+OR отказ -> 503; непълен binding/собственост -> 409; без local-only fallback.
+Heartbeat транспортът и редакцията на конфигурации са непроменени.
+Пробата с реалните членство/OR данни връща пилотния Обект и два проверени шлюза.
+Идентичността е подадена в изолиран локален handler — НЕ е реален owner browser/
+JWT вход. Няма публикувани клиентски данни.
+Frontend изисква inventorySource=openremote; при отказ/непровизиран ресурс
+скрива стария инвентар, без да прекратява сесията. Без промени в меню/оформление.
+Минават: 48 API, 22 frontend unit/render и 4 browser fixture сценария, включително
+deep link/refresh/expiry, права, BG/EN без батерия и OR отказ/възстановяване.
+Lint е без грешки (две стари image предупреждения); Pages/RSC build минава.
+Local master auth проверките минават; forced-local trusted TLS public issuer и
+забраната за master минават. Normal-DNS ingress от Mac е timeout; външен owner
+browser вход/expiry и физическа температура НЕ са потвърдени.
+Frontend публикацията ще се запише след Pages deployment; backend вече обслужва
+съвместимия OR inventory договор и за текущите клиенти.
+Следва owner browser приемане, после общи provisioning/import/update защити.
+Това read интегриране не приключва дълга по старите write пътища.
+
+
 ## Pilot inventory reconciled / Пилотен инвентар съгласуван — 2026-09-20
 
 DEPLOYED via supported OpenRemote APIs: pilot Site -> ROCK -> ESP, with the

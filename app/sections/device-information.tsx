@@ -7,11 +7,12 @@ import { DeviceSetupWizard } from './device-setup';
 
 export function DeviceInformation({ api, siteId, lang, configure = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
-  const [topology, setTopology] = useState<GridexHardwareTopology | null>(null);
+  const [loaded, setTopology] = useState<{ siteId: string; value: GridexHardwareTopology } | null>(null);
   const [status, setStatus] = useState('loading');
   const [refresh, setRefresh] = useState(0);
   const [health, setHealth] = useState<{ siteId: string; items: DeviceHeartbeat[] } | null>(null);
   const [healthError, setHealthError] = useState(false);
+  const topology = loaded?.siteId === siteId && status === 'ready' ? loaded.value : null;
   useEffect(() => {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
@@ -36,19 +37,19 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
   useEffect(() => {
     const controller = new AbortController();
     if (siteId) void api.hardware(siteId, controller.signal).then(result => {
-      if (!controller.signal.aborted) { setTopology(result); setStatus('ready'); }
+      if (!controller.signal.aborted) { setTopology({siteId,value:result}); setStatus('ready'); }
     }).catch((error: { status?: number }) => {
-      if (!controller.signal.aborted) setStatus(error.status === 403 || error.status === 404 ? 'denied' : 'failed');
+      if (!controller.signal.aborted) { setTopology(null); setStatus(error.status === 409 ? 'unprovisioned' : error.status === 403 || error.status === 404 ? 'denied' : 'failed'); }
     });
     return () => controller.abort();
   }, [api, siteId, refresh]);
 
   return <section className="card config-card device-inventory" data-no-translate>
     <h2>{t('Информация за устройствата', 'Device information')}</h2>
-    <p>{t('Данни от backend за избрания Обект. Само за потвърден администратор. Регистрацията не доказва работеща връзка.', 'Backend inventory for the selected Site. Verified administrators only. Registration does not prove connectivity.')}</p>
+    <p>{t('Инвентар от OpenRemote през backend за избрания Обект. Само за потвърден администратор. Регистрацията не доказва работеща връзка.', 'OpenRemote inventory through the backend for the selected Site. Verified administrators only. Registration does not prove connectivity.')}</p>
     {!siteId ? <p>{t('Изберете Обект.', 'Select a Site.')}</p> : <>
       <button className="primary-btn" type="button" disabled={status === 'loading'} onClick={() => { setTopology(null); setStatus('loading'); setRefresh(value => value + 1); }}>{t('Обнови', 'Refresh')}</button>
-      <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате администраторски достъп до устройствата на този Обект.', 'You do not have administrator access to this Site inventory.') : status === 'failed' ? t('Информацията е недостъпна. Опитайте отново.', 'Information unavailable. Please retry.') : ''}</p>
+      <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате администраторски достъп до устройствата на този Обект.', 'You do not have administrator access to this Site inventory.') : status === 'unprovisioned' ? t('Инвентарът изисква завършено провизиране и права в OpenRemote.', 'Inventory requires completed provisioning and access in OpenRemote.') : status === 'failed' ? t('OpenRemote инвентарът е недостъпен. Опитайте отново.', 'OpenRemote inventory is unavailable. Please retry.') : ''}</p>
       {topology && <>
         {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang} connectionLabel={id => healthLabel(health?.siteId === siteId ? health.items.find(item => item.gatewayId === id) : undefined)}/>}
         <p>{t('Конфигурация', 'Configuration')}: {topology.configuration ? `${topology.configuration.revision} · ${topology.configuration.status}` : t('Няма записана ревизия', 'No saved revision')}</p>

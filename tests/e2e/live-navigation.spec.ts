@@ -4,6 +4,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   test.setTimeout(100000);
   let nonce='',refreshFailure=0,refreshes=0;
   let heartbeatState='empty';
+  let inventoryFailure=0;
   const errors:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
@@ -36,7 +37,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
       if(heartbeatState==='denied')return route.fulfill({status:403,json:{error:'forbidden'}});
       return route.fulfill({json:{items:heartbeatState==='empty'?[]:['rock','esp'].map(gatewayId=>({gatewayId,sourceGatewayId:'rock',receivedAt:new Date().toISOString(),lastSuccessfulContactAt:new Date().toISOString(),heartbeat:heartbeatState==='online'?123:124,status:heartbeatState}))}});
     }
-    if(path.endsWith('/hardware'))return route.fulfill({json:{configuration:{revision:1,status:'draft'},gateways:[{id:'rock',name:'Test ROCK Pi',hardwareModel:'ROCK Pi E',role:'controller',ports:[]},{id:'esp',name:'Test ESP32',hardwareModel:'ESP32',role:'device-node',ports:[]}],devices:[]}});
+    if(path.endsWith('/hardware'))return inventoryFailure?route.fulfill({status:inventoryFailure,json:{error:'inventory_unavailable'}}):route.fulfill({json:{inventorySource:'openremote',configuration:{revision:1,status:'draft'},gateways:[{id:'rock',name:'Test ROCK Pi',hardwareModel:'ROCK Pi E',role:'controller',ports:[]},{id:'esp',name:'Test ESP32',hardwareModel:'ESP32',role:'device-node',ports:[]}],devices:[]}});
     if(path.endsWith('/device-setup'))return route.fulfill({json:{revision:0,configuration:{},imported:{pollMs:500,timeoutMs:400,devices:[{gatewayId:'rock',communication:'node-polling-and-local-modbus-listener'},{gatewayId:'esp',communication:'modbus-tcp-via-rockpi'}]}}});
     return route.fulfill({json:{invitations:[]}});
   });
@@ -92,6 +93,16 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await expect(page.locator('.device-provisioning .config-form')).toBeVisible();
   await expect(page.locator('.device-provisioning').getByRole('button',{name:'Запиши и продължи към provisioning'})).toBeDisabled();
   await page.screenshot({path:testInfo.outputPath('provisioning-role-desktop.png'),fullPage:true});
+  for(const status of [503,409]) {
+    inventoryFailure=status;
+    await page.getByRole('button',{name:'Обнови',exact:true}).click();
+    await expect(page.getByRole('region',{name:'Внесени устройства'})).toHaveCount(0);
+    await expect(page.locator('.device-inventory [role="status"]')).toContainText(status===503?'недостъпен':'провизиране');
+    await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
+    inventoryFailure=0;
+    await page.getByRole('button',{name:'Обнови',exact:true}).click();
+    await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ROCK Pi');
+  }
   refreshFailure=503;
   await page.waitForTimeout(22000);
   expect(refreshes).toBeGreaterThan(0);

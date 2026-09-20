@@ -18,7 +18,7 @@ for(const loss of ['site','identity'] as const)test(`session rechecks roles and 
     const path=new URL(r.request().url()).pathname;
     if(path.endsWith('/me'))return !allowed&&loss==='identity'?r.fulfill({status:403,json:{error:'forbidden'}}):r.fulfill({json:{subject:'owner',roles:[role],permissions:[],memberships:[]}});
     if(path.endsWith('/sites'))return r.fulfill({json:{sites:allowed?[{id:'lab',name:'Private Lab'}]:[]}});
-    if(path.endsWith('/hardware'))return r.fulfill({json:{gateways:[{id:'rock',name:'Private ROCK',hardwareModel:'rock-pi-e',role:'controller',ports:[]}],devices:[]}});
+    if(path.endsWith('/hardware'))return r.fulfill({json:{inventorySource:'openremote',gateways:[{id:'rock',name:'Private ROCK',hardwareModel:'rock-pi-e',role:'controller',ports:[]}],devices:[]}});
     if(path.endsWith('/device-heartbeats'))return r.fulfill({json:{items:[]}});
     if(path.endsWith('/device-setup'))return r.fulfill({json:{revision:0,configuration:{}}});
     return r.fulfill({status:503,json:{error:'unavailable'}});
