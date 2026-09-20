@@ -577,6 +577,13 @@ export class GridexApiClient {
     const headers = new Headers(init.headers);
     headers.set("Authorization", `Bearer ${token}`);
     const response=await fetch(`${this.config.apiBaseUrl}${path}`, { ...init, headers });
+    if(response.status===401) {
+      const error=await response.clone().json().catch(()=>null);
+      if(error?.error==='reauthentication_required') {
+        if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:reauth-required'));
+        throw new GridexApiError('Fresh sign-in required after server restart',401);
+      }
+    }
     // Retry a read once after an explicit refresh. Never replay writes automatically.
     if(response.status===401 && (!init.method || init.method==='GET') && !init.signal?.aborted) {
       try { token=await this.getAccessToken(true); }

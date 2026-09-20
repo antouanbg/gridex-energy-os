@@ -101,6 +101,6 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   refreshFailure=400;
   await page.waitForTimeout(22000);
-  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   expect(errors).toEqual([]);
 });

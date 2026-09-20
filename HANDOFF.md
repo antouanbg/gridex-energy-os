@@ -2,7 +2,60 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Routes and session restoration / URL и възстановяване на сесия — 2026-09-20
+
+Owner-approved navigation now uses real links and ordered child sections; Home
+is Overview. Site-scoped paths, history and session-only selected Site context;
+foreign Site links do not silently select another Site. Top-level Keycloak SSO
+restores existing sessions without iframe cookies; only non-secret release and
+return-path hints are stored, never tokens. A changed frontend release prompts
+fresh login; API restart policy uses signed auth_time and requires fresh login.
+Root callback remains unchanged to preserve the existing OIDC allowlist.
+Automatic demo fallback is removed (explicit demo config remains for fixtures).
+Pages emits static section index files plus a noindex 404 shell for dynamic
+private Site URLs: direct deep links render but retain HTTP 404 on GitHub Pages.
+Public indexable content needs dedicated static pages; private inventories are
+not SEO content. Real Remember Me was disabled with 24h session lifetime.
+Backend helper enables it from the single env, bounded to 365 days, with rollback.
+Tests: 31 backend, 21 frontend unit/render, 19 browser fixtures; final visual
+style parity correction needs rerun. Not deployed/owner-accepted yet. Outstanding:
+real account refresh/new tab/logout, restart/release re-login; normal-DNS auth
+reachability; optional future hosting rewrite for HTTP 200 dynamic routes.
+ROCK temperature and sensor metrics remain a separate unfinished task.
+
+Одобрената навигация използва линкове и групирани подраздели; Начало е Преглед.
+Site URL, history и session-only избран Обект; чужд URL не избира мълчаливо друг
+Обект. Top-level Keycloak SSO възстановява сесията без iframe cookies; пазим само
+release/return-path подсказки, не токени. Нова frontend версия изисква пресен
+вход; API restart политиката проверява подписания auth_time. Root callback е
+запазен за съществуващия OIDC allowlist. Няма автоматичен демо fallback.
+Pages генерира статични index файлове и noindex 404 shell за частните динамични
+Site URL: екранът работи, HTTP статусът при директен вход остава 404 на Pages.
+Публичното SEO съдържание изисква отделни статични страници, не частен inventory.
+Реалното Remember Me е било изключено при 24h сесия. Backend helper го включва
+от единния env с максимум 365 дни и rollback. Проверки: 31 backend, 21 frontend
+unit/render, 19 browser fixtures; последната style parity поправка чака повторен
+тест. Още не е внедрено/прието. Остават реален refresh/нов tab/изход, restart/
+release re-login, normal-DNS auth и евентуален hosting rewrite за динамични 200.
+Температурата и сензорите на ROCK остават отделна незавършена задача.
+
 ## Imported device status correction / Поправка на внесения статус — 2026-09-20
+
+Validation: 21 unit/render tests (including EN/BG null-battery), 6 browser tests,
+an additional automatic-poll regression and full GitHub CI pass. Lint has only
+two pre-existing image warnings. PR #31 merged as 0dbffca; Pages run 35494308660
+is the publication gate. Tests use fixtures; physical DB counter independently
+advanced 15437 → 15977. Pages succeeded; public HTML serves main-Bvd6vg18.js
+and the new device-information-CX4clWV1.js text was fetched successfully.
+Owner browser acceptance and temperature remain pending.
+
+Проверки: 21 unit/render теста (вкл. EN/BG без батерия), 6 browser теста,
+допълнителен automatic-poll regression и целият GitHub CI минават. Lint има само
+две стари image предупреждения. PR #31 е слят като 0dbffca; Pages run 35494308660
+е проверката за публикация. Тестовете са с fixtures; реалният DB брояч отделно
+нарасна 15437 → 15977. Pages приключи успешно; публичният HTML зарежда
+main-Bvd6vg18.js, новият текст от device-information-CX4clWV1.js е проверен.
+Owner browser приемането и температурата предстоят.
 
 The imported-configuration panel hardcoded connectivity as unverified even while
 the separate heartbeat panel received live data. It now shares the same polled

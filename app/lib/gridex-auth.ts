@@ -1,6 +1,7 @@
 import Keycloak, { type KeycloakTokenParsed } from "keycloak-js";
 
 import type { GridexRuntimeConfig } from "./gridex-api";
+import { forgetSession, rememberSession, requiresFreshLogin, previousRelease } from './session-policy';
 
 export type GridexAuthSession = {
   subject: string;
@@ -12,6 +13,21 @@ export type GridexAuthSession = {
 
 let keycloak: Keycloak | undefined;
 let initialisation: Promise<boolean> | undefined;
+const returnPathKey='gridex.auth-return-path';
+function saveReturnPath() {
+  if(hasGridexAuthCallback())return;
+  try { sessionStorage.setItem(returnPathKey,window.location.pathname+window.location.search); } catch { /* Optional storage. */ }
+}
+function restoreReturnPath() {
+  try {
+    const path=sessionStorage.getItem(returnPathKey);
+    sessionStorage.removeItem(returnPathKey);
+    if(path?.startsWith('/')&&!path.startsWith('//')&&new URL(path,window.location.origin).origin===window.location.origin) {
+      window.history.replaceState({},'',path);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  } catch { /* Invalid/unavailable storage never authorizes navigation. */ }
+}
 
 export function hasGridexAuthCallback(): boolean {
   if (typeof window === 'undefined') return false;
@@ -55,11 +71,16 @@ function client(config: GridexRuntimeConfig): Keycloak {
 export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise<GridexAuthSession | null> {
   if (!config.authEnabled || config.mode === "demo") return null;
   const instance = client(config);
+  const fresh=requiresFreshLogin()&&!hasGridexAuthCallback();
+  const restore=previousRelease()!==null || !['/','/en/','/login/','/about/'].includes(window.location.pathname);
+  if(!initialisation)saveReturnPath();
   initialisation ??= bounded(instance.init({
     flow: "standard",
     pkceMethod: "S256",
-    // Explicit login avoids embedded-cookie checks; init still verifies callbacks.
+    // Top-level SSO restores a server session without relying on third-party cookies.
+    ...(!fresh && restore ? { onLoad: 'check-sso' as const } : {}),
     checkLoginIframe: false,
+    redirectUri: `${window.location.origin}/`,
   }), Math.max(1000,Math.min(config.backendTimeoutMs||5000,15000))).catch(error => {
     if (keycloak === instance) {
       keycloak = undefined;
@@ -68,24 +89,33 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
     throw error;
   });
   const authenticated = await initialisation;
+  if(fresh) {
+    await instance.login({redirectUri:`${window.location.origin}/`,prompt:'login',maxAge:0,scope:'openid profile email'});
+    return null;
+  }
+  restoreReturnPath();
   if (!authenticated || !instance.authenticated) return null;
+  rememberSession();
   return sessionFrom(instance);
 }
 
-export async function gridexLogin(config: GridexRuntimeConfig): Promise<void> {
+export async function gridexLogin(config: GridexRuntimeConfig, fresh = false): Promise<void> {
   if (!config.authEnabled || config.mode === "demo") throw new Error("Live sign-in is disabled");
   await initialiseGridexAuth(config);
   const instance = client(config);
+  saveReturnPath();
   await instance.login({
-    redirectUri: `${window.location.origin}${window.location.pathname}`,
+    redirectUri: `${window.location.origin}/`,
     scope: "openid profile email",
+    ...((fresh || requiresFreshLogin()) ? { prompt: 'login' as const, maxAge: 0 } : {}),
   });
 }
 
 export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
-  await instance.logout({ redirectUri: `${window.location.origin}${window.location.pathname}` });
+  forgetSession();
+  await instance.logout({ redirectUri: `${window.location.origin}/` });
 }
 
 export async function getGridexAccessToken(config: GridexRuntimeConfig, force = false): Promise<string | undefined> {

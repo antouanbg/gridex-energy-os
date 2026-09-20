@@ -1,5 +1,10 @@
 # Current task
 
+2026-09-20: approved URL navigation/session restoration implemented, not deployed.
+See newest HANDOFF for tests, Pages 404-shell caveat and real-account gates.
+2026-09-20: одобрени URL/SSO промени са реализирани, още не внедрени.
+Последният HANDOFF описва тестове, Pages 404 shell и real-account проверки.
+
 2026-09-20: Fix misleading static imported-device connectivity text by sharing
 the live heartbeat status. Real MQTT receipt reconfirmed; temperature remains
 unimplemented. Tests/publication/owner acceptance tracked in HANDOFF.

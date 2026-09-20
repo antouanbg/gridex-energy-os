@@ -6,14 +6,17 @@ import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, 
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
+import { readRoute, sectionHref } from './lib/routes';
+import { releaseId } from './lib/session-policy';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
 const navItems = [
-  ["overview", "⌂"], ["customers", "◎"], ["sites", "◇"], ["assets", "▦"], ["battery", "▣"],
-  ["schedule", "▤"], ["market", "↗"], ["settlement", "¤"], ["automation", "⌘"], ["loads", "ϟ"],
-  ["balance", "≋"], ["supported", "✓"], ["devices", "⊞"], ["alarms", "△"],
+  ["overview", "⌂"], ["customers", "◎"], ["sites", "◇"], ["assets", "▦"], ["battery", "▣"], ["loads", "ϟ"],
+  ["market", "↗"], ["settlement", "¤"], ["balance", "≋"], ["automation", "⌘"], ["schedule", "▤"],
+  ["devices", "⊞"], ["supported", "✓"], ["alarms", "△"],
   ["reports", "▥"], ["settings", "⚙"], ["plans", "★"], ["about", "○"],
 ] as const;
+const parentSection:Record<string,string>={assets:'sites',battery:'sites',loads:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
 const liveViews = new Set(["overview", "sites", "devices", "profile", "login", "about"]);
@@ -98,7 +101,7 @@ export default function Home() {
     () => new GridexApiClient(runtimeConfig, force => getGridexAccessToken(runtimeConfig,force)),
     [runtimeConfig],
   );
-  const [view, setView] = useState("overview");
+  const [view, setView] = useState(() => typeof window === 'undefined' ? 'overview' : readRoute(window.location.pathname).view);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [auto, setAuto] = useState(true);
   const [site, setSite] = useState("Solar Park East");
@@ -123,14 +126,53 @@ export default function Home() {
     () => runtimeConfig.mode === "demo" ? "demo" : "checking",
   );
   const [authCallback] = useState(hasGridexAuthCallback);
-  const [authState,setAuthState] = useState<AuthState>(()=>runtimeConfig.mode !== "demo"&&authCallback ? "checking" : "anonymous");
+  const [authState,setAuthState] = useState<AuthState>(()=>runtimeConfig.mode !== "demo" ? "checking" : "anonymous");
   const [integrationError,setIntegrationError] = useState("");
   const [liveSites,setLiveSites] = useState<GridexSite[]>([]);
   const [sitesStatus,setSitesStatus] = useState<'loading'|'ready'|'error'>('loading');
-  const [selectedSiteId,setSelectedSiteId] = useState(runtimeConfig.defaultSiteId);
+  const [selectedSiteId,setSelectedSiteId] = useState(() => {
+    if(typeof window==='undefined')return '';
+    const route=readRoute(window.location.pathname);
+    try{return route.siteId || sessionStorage.getItem('gridex.selected-site') || '';}catch{return route.siteId;}
+  });
   const [liveSnapshot,setLiveSnapshot] = useState<GridexSiteSnapshot|null>(null);
   // Demo is only for confirmed anonymous visitors, never an API-error fallback.
-  const dataMode:DataMode = sessionUser || authState !== "anonymous" ? "live" : "demo";
+  const dataMode:DataMode = runtimeConfig.mode === 'demo' ? 'demo' : 'live';
+  useEffect(()=>{
+    if(selectedSiteId&&liveSites.some(site=>site.id===selectedSiteId)) {
+      try{sessionStorage.setItem('gridex.selected-site',selectedSiteId);}catch{/* Optional navigation context. */}
+    }
+  },[selectedSiteId,liveSites]);
+  useEffect(()=>{
+    const restore=()=>{const route=readRoute(window.location.pathname);setView(route.view);if(route.siteId)setSelectedSiteId(route.siteId);setMobileNavOpen(false);};
+    window.addEventListener('popstate',restore);
+    return()=>window.removeEventListener('popstate',restore);
+  },[]);
+  useEffect(()=>{
+    let pending=false;
+    const reauthenticate=()=>{
+      if(pending)return;
+      pending=true;
+      setAuthState('checking');
+      void gridexLogin(runtimeConfig,true).catch(()=>{pending=false;setAuthState('error');});
+    };
+    window.addEventListener('gridex:reauth-required',reauthenticate);
+    return()=>window.removeEventListener('gridex:reauth-required',reauthenticate);
+  },[runtimeConfig]);
+  useEffect(()=>{
+    if(authState!=='authenticated')return;
+    const controller=new AbortController();
+    const check=async()=>{
+      try {
+        const result=await fetch('/release.json',{cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(5000)])});
+        if(!result.ok)return;
+        const release=await result.json();
+        if(typeof release.id==='string'&&release.id!==releaseId())window.location.reload();
+      } catch { /* A network outage is not a logout. */ }
+    };
+    const timer=window.setInterval(()=>void check(),30000);
+    return()=>{controller.abort();window.clearInterval(timer);};
+  },[authState]);
   // Text is selected by React during render. Do not mutate rendered text nodes:
   // doing so can overwrite fresh telemetry and form values after an update.
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -176,7 +218,7 @@ export default function Home() {
       if (!active) return;
       setSessionUser(null);
       setBackendState("unknown");
-      setAuthState(authCallback?"error":"anonymous");
+      setAuthState("error");
       setIntegrationError(document.documentElement.lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
     return()=>{active=false;};
@@ -190,7 +232,9 @@ export default function Home() {
       setLiveSites(sites);
       setSitesStatus('ready');
       if (!sites.length) {setSelectedSiteId('');setLiveSnapshot(null);return;}
-      const selected=sites.find(item=>item.id===selectedSiteId)??sites[0];
+      // A deep link to an inaccessible Site must never silently open another Site.
+      const selected=selectedSiteId ? sites.find(item=>item.id===selectedSiteId) : sites[0];
+      if(!selected){setSitesStatus('error');setLiveSnapshot(null);return;}
       setSelectedSiteId(selected.id);
       setSite(selected.name);
     }).catch(error=>{
@@ -263,8 +307,10 @@ export default function Home() {
     setDemoNoticeVisible(false);
   };
 
-  const navigate = (id: string) => {
-    setView(id === 'gateway' ? 'devices' : id);
+  const navigate = (id: string, siteId = selectedSiteId) => {
+    const target=id === 'gateway' ? 'devices' : id;
+    window.history.pushState({},'',sectionHref(target,siteId));
+    setView(target);
     setMobileNavOpen(false);
     setAccountMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -307,9 +353,9 @@ export default function Home() {
             const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            return <button key={id} data-view-id={id} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""}`} onClick={() => navigate(id)}>
+            return <a key={id} href={sectionHref(id,selectedSiteId)} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
               <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
-            </button>;
+            </a>;
           })}
         </nav>
         {mobileNavOpen&&<button className="mobile-nav-scrim" aria-label={lang==="en"?"Close menu":"Затвори меню"} onClick={()=>setMobileNavOpen(false)}/>}
@@ -356,7 +402,7 @@ export default function Home() {
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-            {dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={()=>navigate('login')}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices');}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+            {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={signIn}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
