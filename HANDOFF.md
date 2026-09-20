@@ -4,6 +4,28 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## Routes and session restoration / URL и възстановяване на сесия — 2026-09-20
 
+Deployment evidence: PR #32 merged; Pages 35495986528 succeeded, release
+1f24bad49a15a60a82b536168a6e3ee6a24b375e confirmed via public release.json.
+/devices/, /market/, /settings/ return 200. Exact PR CI passed; final layout
+parity rerun passed (7 browser cases), complete suite 19, unit/render 21.
+Backend companion PR #30 merged as 801ec1d, NOT deployed/enabled. Runtime
+Remember Me/session-lifetime helper was rejected BEFORE execution by safety
+review: requires explicit owner approval of the 365-day duration. No runtime
+env/realm change occurred. Do not retry indirectly or claim persistent-browser
+Remember Me enabled. Ask owner to choose/approve duration, then apply rollback
+helper and deploy API gate. Ordinary refresh SSO fix IS published. Real owner
+refresh/reopening acceptance remains pending; fixture tests are not that proof.
+
+Публикация: PR #32 е слят; Pages 35495986528 мина, публичният release.json е
+1f24bad49a15a60a82b536168a6e3ee6a24b375e. /devices/, /market/, /settings/ връщат
+200. CI за точния PR мина; style parity повторението е 7 browser теста, целият
+пакет 19, unit/render 21. Backend PR #30 е слят като 801ec1d, НЕ е внедрен/
+активиран. Helper за Remember Me/срока е отказан ПРЕДИ изпълнение от safety
+review: нужно е изрично owner одобрение за 365 дни. Няма env/realm промяна.
+Без косвен повторен опит или твърдение за активно запомняне след браузър рестарт.
+Следва потвърждение на срока, rollback helper и API gate deployment. SSO поправката
+при обикновен refresh Е публикувана. Owner приемането предстои; fixtures не го доказват.
+
 Owner-approved navigation now uses real links and ordered child sections; Home
 is Overview. Site-scoped paths, history and session-only selected Site context;
 foreign Site links do not silently select another Site. Top-level Keycloak SSO

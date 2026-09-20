@@ -1,5 +1,12 @@
 # Current task
 
+2026-09-20 LIVE: PR #32, release 1f24bad published; section HTTP 200 verified.
+Refresh SSO tested with fixtures. Remember Me 365-day activation blocked before
+execution pending explicit duration approval; backend restart gate not deployed.
+2026-09-20 LIVE: PR #32, release 1f24bad е публикуван; section HTTP 200 проверен.
+Refresh SSO е тестван с fixtures. 365-day Remember Me е спрян преди изпълнение
+до изрично одобрение на срока; backend restart gate не е внедрен.
+
 2026-09-20: approved URL navigation/session restoration implemented, not deployed.
 See newest HANDOFF for tests, Pages 404-shell caveat and real-account gates.
 2026-09-20: одобрени URL/SSO промени са реализирани, още не внедрени.
