@@ -2,6 +2,63 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Session lifecycle audit / Проверка на жизнения цикъл на сесиите — 2026-09-20
+
+Found and corrected: logout was not propagated to other tabs; some final 401s
+left backend-online/private component state alive; the periodic check refreshed
+tokens without rereading backend roles/Site grants; retry responses skipped the
+API-restart handler. Local session termination now clears the client/token and
+private UI, stops polling and rejects late auth results. Logout publishes only
+a random non-secret invalidation signal; never tokens. Same-origin tabs react
+immediately when storage events are delivered. Failed IdP logout is not reported
+as successful. Role changes remount private sections to discard cached views.
+
+While authenticated: one in-flight verification at a time; `/me` and `/sites`
+checked every 20 seconds, plus focus/visible/online/pageshow. Browser throttling
+can delay background checks. Definitive 401/403 or removed selected Site clears
+the session UI; network/5xx errors retain identity and show verification failure.
+Token-refresh waits are bounded by backendTimeoutMs (1–15 seconds); requests do
+not send expired tokens after a failed refresh. Reads retry once, writes never.
+Restart-required is handled on both initial and retried responses.
+
+Evidence: 22 unit/render pass including EN/BG null-battery; targeted browser
+cross-tab/logout and role/Site-revocation tests pass. Full 23-case browser suite
+passes. Local auth gate passes; normal-DNS public checks still time out from Mac
+(pre-existing limitation). Final role-remount rerun and PR/Pages are delivery gates.
+No backend, session-lifetime, menu, Ethernet, MQTT or device changes.
+Remaining acceptance: real owner multi-tab/mobile resume and prolonged offline
+recovery; remote IdP revocation is bounded by token refresh/expiry, NOT instant
+server introspection. A blocked/hung underlying SDK refresh can require reload
+after connectivity recovers; UI waits time out safely. No perpetual perfect-session
+claim. This is client-session checking, not a scheduled external uptime monitor.
+
+Открити и поправени: logout не се разпространяваше към другите табове; някои
+окончателни 401 оставяха backend-online/частния UI; таймерът обновяваше токена,
+без backend роли/Обекти; повторният GET пропускаше restart-required обработката.
+Прекратяването чисти client/token и частния UI, спира polling и отхвърля закъснели
+auth резултати. Logout публикува само случаен не-секретен сигнал, никога токени.
+Табовете от същия origin реагират при storage event. Неуспешен IdP logout не се
+обявява за успешен. Смяна на роля презарежда частните компоненти без стар cache.
+
+След вход: една активна проверка; `/me` и `/sites` на 20 секунди и при
+focus/visible/online/pageshow. Браузърът може да забави фоновите проверки.
+Окончателен 401/403 или отнет избран Обект чисти сесийния UI; network/5xx пази
+идентичността и показва неуспешна проверка. Token refresh изчаква ограничено
+backendTimeoutMs (1–15 секунди); след неуспех не се праща изтекъл токен.
+GET се повтаря веднъж, записи никога. Restart-required се обработва и след retry.
+
+Доказателства: 22 unit/render минават, включително EN/BG null-battery; целевите
+browser тестове за cross-tab/logout и отнети роли/Обекти минават. Всичките 23
+browser сценария минават. Local auth gate минава; normal-DNS public проверките
+от Mac още са timeout (старо ограничение). Финален role-remount rerun и PR/Pages
+са проверките преди публикация.
+Без backend, срок на сесия, меню, Ethernet, MQTT или device промени.
+Остава реално owner multi-tab/mobile resume и продължителен offline тест; remote
+IdP revoke се открива при refresh/expiry, НЕ чрез незабавна server introspection.
+При блокирал SDK refresh може да трябва reload след възстановяване на връзката;
+UI изчакването прекъсва безопасно. Не обещаваме безкрайна/перфектна сесия.
+Това е проверка на клиентската сесия, не външен планиран uptime монитор.
+
 ## Approved menu baseline and separate Demo / Одобрено меню и отделно Демо — 2026-09-20
 
 Implementation update: `/demo/*` is now implemented with static Pages entries.

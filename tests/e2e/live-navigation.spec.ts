@@ -102,5 +102,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   refreshFailure=400;
   await page.waitForTimeout(22000);
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
+  await expect(page.locator('.quick-sign-in')).toBeVisible();
+  await expect(page.getByRole('region',{name:'Внесени устройства'})).toHaveCount(0);
   expect(errors).toEqual([]);
 });

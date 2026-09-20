@@ -571,27 +571,41 @@ export class GridexApiClient {
     try {
       token = await this.getAccessToken();
     } catch(error) {
+      if((error as {status?:number})?.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
       throw new GridexApiError("Authentication refresh unavailable", (error as {status?:number})?.status===401?401:503);
     }
-    if (!token) throw new GridexApiError("Authentication is required for live GridEx data", 401);
+    if (!token) {
+      if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+      throw new GridexApiError("Authentication is required for live GridEx data", 401);
+    }
     const headers = new Headers(init.headers);
     headers.set("Authorization", `Bearer ${token}`);
-    const response=await fetch(`${this.config.apiBaseUrl}${path}`, { ...init, headers });
-    if(response.status===401) {
-      const error=await response.clone().json().catch(()=>null);
+    let response=await fetch(`${this.config.apiBaseUrl}${path}`, { ...init, headers });
+    const checkRestart=async(candidate:Response)=>{
+      if(candidate.status!==401)return;
+      const error=await candidate.clone().json().catch(()=>null);
       if(error?.error==='reauthentication_required') {
         if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:reauth-required'));
         throw new GridexApiError('Fresh sign-in required after server restart',401);
       }
-    }
+    };
+    await checkRestart(response);
     // Retry a read once after an explicit refresh. Never replay writes automatically.
     if(response.status===401 && (!init.method || init.method==='GET') && !init.signal?.aborted) {
       try { token=await this.getAccessToken(true); }
-      catch(error) {throw new GridexApiError('Authentication refresh unavailable',(error as {status?:number})?.status===401?401:503);}
-      if(!token)throw new GridexApiError('Authentication required',401);
+      catch(error) {
+        if((error as {status?:number})?.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+        throw new GridexApiError('Authentication refresh unavailable',(error as {status?:number})?.status===401?401:503);
+      }
+      if(!token) {
+        if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+        throw new GridexApiError('Authentication required',401);
+      }
       headers.set('Authorization',`Bearer ${token}`);
-      return fetch(`${this.config.apiBaseUrl}${path}`,{...init,headers});
+      response=await fetch(`${this.config.apiBaseUrl}${path}`,{...init,headers});
+      await checkRestart(response);
     }
+    if(response.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
     return response;
   }
 }

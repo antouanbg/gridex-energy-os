@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
 
-test('deep link, refresh, SSO restore, history, release re-login and explicit logout',async({page})=>{
+test('deep link, refresh, SSO restore, history, release re-login and explicit logout',async({page,context})=>{
   let signedIn=true,nonce='',forceLogins=0,logins=0,serverRestart=false;
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
-  await page.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
-  await page.route('https://auth.example.invalid/**',r=>{
+  await context.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
+  await context.route('https://auth.example.invalid/**',r=>{
     const url=new URL(r.request().url());
     if(url.pathname.endsWith('/auth')) {
       nonce=url.searchParams.get('nonce')!;
@@ -17,7 +17,7 @@ test('deep link, refresh, SSO restore, history, release re-login and explicit lo
     const claims={sub:'owner',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce};
     return r.fulfill({json:{access_token:jwt(claims),id_token:jwt(claims),refresh_token:jwt(claims),expires_in:600,token_type:'Bearer'}});
   });
-  await page.route('https://api.example.invalid/**',r=>{
+  await context.route('https://api.example.invalid/**',r=>{
     const path=new URL(r.request().url()).pathname;
     if(serverRestart&&forceLogins<2)return r.fulfill({status:401,json:{error:'reauthentication_required'}});
     if(path.endsWith('/me'))return r.fulfill({json:{subject:'owner',roles:['administrator'],permissions:[],memberships:[]}});
@@ -58,9 +58,16 @@ test('deep link, refresh, SSO restore, history, release re-login and explicit lo
   await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
   expect(forceLogins).toBe(2);
   await expect(page).toHaveURL(/\/sites\/lab\/devices\/$/);
+  const other=await context.newPage();
+  await other.goto('/sites/lab/devices/');
+  await expect(other.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
   await page.locator('.profile').click();
   await page.locator('.account-menu-logout').click();
   await expect(page.locator('.quick-sign-in')).toBeVisible();
+  await expect(other.locator('.quick-sign-in')).toBeVisible();
+  await expect(other.getByRole('heading',{name:'ROCK',exact:true})).toHaveCount(0);
+  await expect(other.locator('.app-shell')).toHaveAttribute('data-mode','live');
+  await other.close();
   await page.reload();
   await expect(page.locator('.quick-sign-in')).toBeVisible();
   await expect(page).toHaveURL(/\/demo\/$/);

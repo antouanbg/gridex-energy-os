@@ -1,5 +1,12 @@
 # Current task
 
+2026-09-20: session audit hardening: cross-tab logout/private-state cleanup,
+bounded refresh, periodic/resume identity and Site checks, role remount,
+restart-on-retry handling. See newest HANDOFF for evidence/remaining gates.
+2026-09-20: session audit: logout между табове/изчистване на частно състояние,
+ограничено refresh изчакване, периодична/resume identity/Обект проверка,
+role remount и restart-after-retry. Доказателства/оставащи проверки в HANDOFF.
+
 2026-09-20: separate public Demo implemented, anonymous Home enters `/demo/`;
 remembered sessions/callbacks stay live. 21 browser + 21 unit/render pass;
 publication verification and owner acceptance tracked in newest HANDOFF.

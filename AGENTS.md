@@ -29,6 +29,19 @@ security/commissioning gates; control locks се пазят. Изборът е �
 
 ## Mandatory auth regression gate / Задължителна auth проверка
 
+Session acceptance must cover two-tab logout, fresh identity/role/Site-scope
+checks on resume, final 401, 403, expiry, offline recovery, stale in-flight
+responses, and restart-required responses after a GET retry. Clear private UI
+on confirmed session loss; never retry writes or persist tokens for convenience.
+Distinguish browser fixture evidence from a real owner/Keycloak session. Never
+promise instant cross-device JWT revocation without server-side enforcement.
+Приемането на сесиите включва logout в два таба, identity/роли/Обекти при
+връщане към таба, окончателен 401, 403, expiry, offline recovery, закъснели
+отговори и restart-required след GET retry. Изчиствай частния UI при потвърдена
+загуба на сесия; без повторение на записи или съхраняване на токени за удобство.
+Отличавай browser fixtures от реална owner/Keycloak сесия. Не обещавай мигновено
+отнемане на JWT между различни устройства без сървърно прилагане.
+
 After proxy, Keycloak, OIDC, frontend login changes or restart: verify local
 master discovery, admin console authServerUrl and a fresh login form all stay
 on the configured local admin origin; verify public gridex issuer/callbacks

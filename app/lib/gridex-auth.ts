@@ -13,6 +13,14 @@ export type GridexAuthSession = {
 
 let keycloak: Keycloak | undefined;
 let initialisation: Promise<boolean> | undefined;
+let locallyEnded=false;
+export const logoutSignalKey='gridex.logout-signal';
+export function clearGridexSession(): void {
+  locallyEnded=true;
+  keycloak?.clearToken();
+  keycloak=undefined;
+  initialisation=undefined;
+}
 const returnPathKey='gridex.auth-return-path';
 function saveReturnPath() {
   if(hasGridexAuthCallback())return;
@@ -89,6 +97,7 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
     throw error;
   });
   const authenticated = await initialisation;
+  if(locallyEnded||keycloak!==instance)throw new GridexSessionExpiredError();
   if(fresh) {
     await instance.login({redirectUri:`${window.location.origin}/`,prompt:'login',maxAge:0,scope:'openid profile email'});
     return null;
@@ -100,6 +109,7 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
 }
 
 export async function gridexLogin(config: GridexRuntimeConfig, fresh = false): Promise<void> {
+  locallyEnded=false;
   if (!config.authEnabled || config.mode === "demo") throw new Error("Live sign-in is disabled");
   await initialiseGridexAuth(config);
   const instance = client(config);
@@ -114,20 +124,26 @@ export async function gridexLogin(config: GridexRuntimeConfig, fresh = false): P
 export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
+  const logoutUrl=instance.createLogoutUrl({redirectUri:`${window.location.origin}/`});
   forgetSession();
-  await instance.logout({ redirectUri: `${window.location.origin}/` });
+  clearGridexSession();
+  try {localStorage.setItem(logoutSignalKey,crypto.randomUUID());}catch{/* Other tabs also verify server identity. */}
+  window.dispatchEvent(new Event('gridex:session-ended'));
+  window.location.assign(logoutUrl);
 }
 
 export async function getGridexAccessToken(config: GridexRuntimeConfig, force = false): Promise<string | undefined> {
+  if(locallyEnded)throw new GridexSessionExpiredError();
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
   if (!instance.authenticated) return undefined;
-  try { await instance.updateToken(force ? -1 : 30); }
+  try { await bounded(instance.updateToken(force ? -1 : 30),Math.max(1000,Math.min(config.backendTimeoutMs||5000,15000))); }
   catch(error) {
     // Keycloak clears authentication on a rejected refresh, not on transport/5xx failures.
     if(!instance.authenticated) throw new GridexSessionExpiredError();
     throw error;
   }
+  if(locallyEnded||keycloak!==instance)throw new GridexSessionExpiredError();
   return instance.token;
 }
 
