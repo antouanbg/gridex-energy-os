@@ -2,6 +2,121 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Approved menu baseline and separate Demo / Одобрено меню и отделно Демо — 2026-09-20
+
+### English — canonical structure
+
+Owner-approved baseline, not permission for later unsolicited menu changes.
+Paths below match `app/lib/routes.ts`; hierarchy matches `app/page.tsx`.
+
+```text
+Overview (Home)                  /
+Customers                       /customers/
+Sites                           /sites/
+  Assets                        /assets/
+  Battery                       /battery/
+  Flexible loads                /loads/
+Market                          /market/
+  Settlement                    /market/settlement/
+  Balancing                     /market/balancing/
+Automation                      /automation/
+  Schedules                     /automation/schedules/
+Devices                         /devices/
+  Supported devices             /devices/supported/
+Alarms                          /alarms/
+Reports                         /reports/
+Settings                        /settings/
+  Subscription                  /settings/subscription/
+About                           /about/
+Separate Demo section           /demo/                  [planned]
+Account: Profile / Sign in      /profile/ /login/
+Language selector               below Sign in/account
+```
+
+For an authorized selected Site, assets/battery/loads/automation/schedules/devices
+use `/sites/{siteId}` followed by their path, e.g. `/sites/{siteId}/devices/`.
+Device selection uses `?device={deviceId}`. IDs in a URL never grant access.
+Site selection belongs in Sites, device setup and connectivity in Devices;
+no separate Edge gateway entry. No top-right language/status/Site/bell controls.
+Every section/subsection has a real hyperlink: direct entry, refresh, Back/Forward
+and new tabs must preserve the section and permitted context. Live routes restore
+valid SSO; only the approved logout/revocation/restart/release policy requires login.
+
+Owner clarification: KEEP the demo site as a separate, explicitly selected
+section with demo data and hyperlinks, not as an automatic fallback of the live
+portal. Planned namespace: `/demo/` for demo Overview; prefix the corresponding
+section paths, e.g. `/demo/sites/`, `/demo/devices/`, `/demo/market/settlement/`.
+Preserve the same approved hierarchy and existing demo fixtures. No customer
+inventory, private addresses, live telemetry or real control/provisioning/email
+writes in Demo. Demo must work without login or a backend and be clearly labelled.
+Demo browsing must not clear an existing live session or overwrite its selected
+Site/device. Signing in/returning to Live loads only authorized real data; checking,
+empty, expired, denied and unavailable live states never become demo data.
+
+Status: hierarchy/real live links already implemented; isolated public `/demo/*`
+routing is a NEW recorded requirement, NOT implemented by this documentation edit.
+Next task: implement namespace + isolated demo state/data source and static Pages
+entries (direct demo URLs must return HTTP 200, not depend on the private 404 shell).
+Acceptance: EN/BG, desktop/mobile, every demo link/direct refresh/history/new tab,
+anonymous/offline demo, authenticated Live→Demo→Live with session/context preserved,
+no live-data leakage or write requests, and no demo fallback on live API/auth errors.
+
+### Български — същата структура и правила
+
+Одобрена основа, не разрешение за бъдещи непоискани промени в менюто.
+URL са от `app/lib/routes.ts`, йерархията е от `app/page.tsx`.
+
+```text
+Преглед (Начало)                 /
+Клиенти                         /customers/
+Обекти                          /sites/
+  Активи                        /assets/
+  Батерия                       /battery/
+  Управляеми товари             /loads/
+Пазар                           /market/
+  Сетълмент                     /market/settlement/
+  Балансиране                    /market/balancing/
+Логика и режими                  /automation/
+  Графици                       /automation/schedules/
+Устройства                      /devices/
+  Поддържани устройства          /devices/supported/
+Аларми                          /alarms/
+Отчети                          /reports/
+Настройки                       /settings/
+  Абонамент                     /settings/subscription/
+За нас                          /about/
+Отделен раздел Демо              /demo/                  [планиран]
+Акаунт: Профил / Вход            /profile/ /login/
+Избор на език                    под Вход/акаунта
+```
+
+При избран разрешен Обект assets/battery/loads/automation/schedules/devices
+използват `/sites/{siteId}` пред своя път, например `/sites/{siteId}/devices/`.
+Устройството се избира чрез `?device={deviceId}`. ID в URL не предоставя права.
+Обект се избира в Обекти, настройките и свързаността на устройствата са в
+Устройства; без отделен Edge шлюз. Без език/статус/Обект/камбанка горе вдясно.
+Всеки раздел/подраздел има истински линк: директен вход, refresh, Back/Forward
+и нов tab пазят раздела и разрешения контекст. Live възстановява валидна SSO
+сесия; нов вход се иска само по одобрената logout/revocation/restart/release политика.
+
+Уточнение на собственика: демо сайтът СЕ ЗАПАЗВА като отделен изрично избран
+раздел с демо данни и линкове, не като автоматичен fallback на реалния портал.
+Планирано: `/demo/` за демо Преглед; префикс пред съответните пътища, например
+`/demo/sites/`, `/demo/devices/`, `/demo/market/settlement/`. Същата одобрена
+йерархия и наличните демо fixtures. Без клиентски inventory, частни адреси,
+жива телеметрия или реални control/provisioning/email записи. Демо работи без
+вход/backend и е ясно обозначено. Не изтрива live сесия и не променя избраните
+реални Обект/устройство. Вход/връщане към Live зарежда само разрешени реални данни;
+checking/empty/expired/denied/unavailable състоянията никога не стават демо данни.
+
+Статус: йерархията/реалните live линкове са реализирани; изолираното публично
+`/demo/*` е НОВО записано изискване, НЕ е внедрено с тази документална промяна.
+Следва: namespace + изолиран демо state/data source и статични Pages входове
+(директните демо URL да са HTTP 200, без зависимост от частния 404 shell).
+Приемане: EN/BG, desktop/mobile, всички демо линкове/direct refresh/history/new tab,
+anonymous/offline демо, Live→Demo→Live след вход със запазени сесия/контекст,
+без изтичане на live данни/реални записи и без демо fallback при API/auth грешки.
+
 ## Routes and session restoration / URL и възстановяване на сесия — 2026-09-20
 
 UPDATE: owner confirmed 365-day Remember Me; backend helper now APPLIED with
