@@ -934,7 +934,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   }
   .sidebar:not(.mobile-nav-open) nav a>span {
     display:block!important; white-space:normal; line-height:1.15;
-    overflow-wrap:anywhere; font-size:10px;
+    overflow-wrap:anywhere; font-size:11px;
   }
   .sidebar:not(.mobile-nav-open) nav a>i { display:block; flex:none; width:auto; font-size:20px; }
   .sidebar:not(.mobile-nav-open) nav a::before,.sidebar:not(.mobile-nav-open) nav a::after { display:none; }
