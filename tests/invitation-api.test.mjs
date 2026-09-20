@@ -52,9 +52,11 @@ test('device inventory is site-scoped, authenticated and preserves denied access
     globalThis.fetch = async (url, init) => {
       assert.equal(url, '/api/v1/sites/site%2Fone/hardware');
       assert.equal(init.headers.get('Authorization'), 'Bearer test-token');
-      return new Response(JSON.stringify({ configuration: null, gateways: [], devices: [] }));
+      return new Response(JSON.stringify({ inventorySource: 'openremote', configuration: null, gateways: [], devices: [] }));
     };
     assert.deepEqual((await client.hardware('site/one')).gateways, []);
+    globalThis.fetch = async () => new Response(JSON.stringify({gateways:[],devices:[]}));
+    await assert.rejects(client.hardware('site/one'), {status:409});
     for (const status of [403, 404, 503]) {
       globalThis.fetch = async () => new Response('{}', { status });
       await assert.rejects(client.hardware('site/one'), { status });

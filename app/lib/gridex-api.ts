@@ -150,6 +150,8 @@ export type GridexGatewayPort = {
 };
 
 export type GridexGateway = {
+  inventorySource?: 'openremote';
+  provisioningStatus?: 'verified';
   id?: string;
   name: string;
   hardwareModel: "rock-pi-e" | "olimex-esp32-evb-ea-ind" | "olimex-esp32-evb-lab";
@@ -165,6 +167,8 @@ export type DeviceHeartbeat = {
 };
 
 export type GridexHardwareTopology = {
+  inventorySource?: 'openremote';
+  inventoryVerifiedAt?: string;
   configuration: null | { id: string; revision: number; status: string };
   gateways: GridexGateway[];
   devices: GridexDeviceConfiguration[];
@@ -314,7 +318,11 @@ export class GridexApiClient {
   }
 
   async hardware(siteId: string, signal?: AbortSignal): Promise<GridexHardwareTopology> {
-    return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/hardware`, signal);
+    const result = await this.getJson<GridexHardwareTopology>(`/api/v1/sites/${encodeURIComponent(siteId)}/hardware`, signal);
+    if(result.inventorySource !== 'openremote' || !Array.isArray(result.gateways) || !Array.isArray(result.devices)) {
+      throw new GridexApiError('OpenRemote inventory verification required', 409);
+    }
+    return result;
   }
 
   async deviceHeartbeats(siteId: string, signal?: AbortSignal): Promise<{ items: DeviceHeartbeat[] }> {
