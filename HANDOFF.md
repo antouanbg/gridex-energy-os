@@ -4,6 +4,22 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## Imported device status correction / Поправка на внесения статус — 2026-09-20
 
+Validation: 21 unit/render tests (including EN/BG null-battery), 6 browser tests,
+an additional automatic-poll regression and full GitHub CI pass. Lint has only
+two pre-existing image warnings. PR #31 merged as 0dbffca; Pages run 35494308660
+is the publication gate. Tests use fixtures; physical DB counter independently
+advanced 15437 → 15977. Pages succeeded; public HTML serves main-Bvd6vg18.js
+and the new device-information-CX4clWV1.js text was fetched successfully.
+Owner browser acceptance and temperature remain pending.
+
+Проверки: 21 unit/render теста (вкл. EN/BG без батерия), 6 browser теста,
+допълнителен automatic-poll regression и целият GitHub CI минават. Lint има само
+две стари image предупреждения. PR #31 е слят като 0dbffca; Pages run 35494308660
+е проверката за публикация. Тестовете са с fixtures; реалният DB брояч отделно
+нарасна 15437 → 15977. Pages приключи успешно; публичният HTML зарежда
+main-Bvd6vg18.js, новият текст от device-information-CX4clWV1.js е проверен.
+Owner browser приемането и температурата предстоят.
+
 The imported-configuration panel hardcoded connectivity as unverified even while
 the separate heartbeat panel received live data. It now shares the same polled
 status, including empty, stale, denied and unavailable responses. No menu,
