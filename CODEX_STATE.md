@@ -1,5 +1,14 @@
 # Current task
 
+2026-09-20: Remember Me 365 days now owner-approved/APPLIED; API restart gate
+deployed healthy. Routes/session frontend already live. Only follow-up docs
+pending main publication; owner browser acceptance and normal-DNS auth remain
+open, see HANDOFF. Older blocked notes below are historical.
+2026-09-20: Remember Me 365 дни е одобрен/ПРИЛОЖЕН; API restart gate внедрен
+healthy. Frontend URL/SSO вече live. Следва main публикация на документацията;
+owner browser приемането и normal-DNS auth остават отворени. По-старите blocked
+бележки по-долу са исторически; виж HANDOFF.
+
 2026-09-20 LIVE: PR #32, release 1f24bad published; section HTTP 200 verified.
 Refresh SSO tested with fixtures. Remember Me 365-day activation blocked before
 execution pending explicit duration approval; backend restart gate not deployed.

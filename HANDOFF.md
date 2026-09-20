@@ -4,6 +4,22 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## Routes and session restoration / URL и възстановяване на сесия — 2026-09-20
 
+UPDATE: owner confirmed 365-day Remember Me; backend helper now APPLIED with
+private rollback. API dd06bf203540 healthy, restart gate enabled; 31 backend tests
+and actual temporary PKCE login pass. Local auth/forced-local trusted TLS checks
+pass; normal-DNS public auth from Mac times out. Previous blocked status below
+is historical. Owner browser refresh/reopening/logout acceptance still pending.
+Frontend routes/session implementation remains PR #32; this follow-up changes
+documentation only. Dynamic private Site URLs retain Pages HTTP-404-shell caveat.
+
+АКТУАЛНО: собственикът потвърди 365-day Remember Me; helper вече е ПРИЛОЖЕН с
+частен rollback. API dd06bf203540 healthy, restart gate включен; 31 backend теста
+и реален временен PKCE вход минават. Local auth/forced-local TLS проверките
+минават; normal-DNS public auth от Mac е timeout. Предишният blocked статус е
+исторически. Owner browser refresh/reopening/logout приемането предстои.
+Frontend реализацията остава PR #32; тук се променя само документация.
+Динамичните частни Site URL запазват ограничението Pages HTTP-404-shell.
+
 Deployment evidence: PR #32 merged; Pages 35495986528 succeeded, release
 1f24bad49a15a60a82b536168a6e3ee6a24b375e confirmed via public release.json.
 /devices/, /market/, /settings/ return 200. Exact PR CI passed; final layout
