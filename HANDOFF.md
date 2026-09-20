@@ -2,6 +2,24 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Mobile swipe navigation / Мобилна плъзгаща навигация — 2026-09-20
+
+Owner requested three visible section tiles with horizontal finger scrolling
+through every existing destination. Implemented native overflow/touch scrolling
+with snap points; Menu remains fixed for expanded hierarchy/account access.
+Active section is revealed on route change, refresh, menu close and resize.
+Desktop, menu order/labels and auth behavior remain unchanged. Added touch
+gesture and all-destination tests at 360/390/430 px. Browser emulation does not
+replace physical phone acceptance; owner should verify swipe feel on their phone.
+Publication evidence is recorded in the implementation PR.
+
+По изрично искане: три видими раздела и хоризонтално плъзгане с пръст между
+всички съществуващи екрани. Бутонът Меню остава фиксиран за пълната йерархия
+и акаунта. Активният раздел се показва при навигация, refresh, затваряне на
+менюто и resize. Desktop, редът/имената и сесиите не са променяни. Добавени
+touch/навигационни тестове на 360/390/430 px. Остава приемане на физически
+телефон от собственика; публикацията се проследява в PR.
+
 ## Approved submenu presentation / Одобрен дизайн — 2026-09-20
 
 Implemented owner-approved desktop and expanded-phone hierarchy: indented

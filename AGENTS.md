@@ -2,6 +2,12 @@
 
 ## Approved navigation presentation — 2026-09-20
 
+Owner additionally approves a compact mobile rail with three visible sections,
+native horizontal swipe through all existing destinations, and fixed Menu button.
+Keep expanded hierarchy and desktop unchanged; preserve touch scroll and links.
+Допълнително одобрено: долна мобилна лента с три видими раздела, хоризонтално
+плъзгане между всички и фиксирано Меню. Пази desktop и разгънатата йерархия.
+
 Preserve the approved menu labels, order and parent relationships. Desktop and
 expanded phone menus show indented children with connector lines, a light-green
 active child and subtle active parent. Page headings show clickable parent →

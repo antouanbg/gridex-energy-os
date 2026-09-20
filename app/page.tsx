@@ -124,6 +124,18 @@ export default function Home() {
   );
   const [view, setView] = useState(() => typeof window === 'undefined' ? 'overview' : readRoute(window.location.pathname).view);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const navigationRef=useRef<HTMLElement>(null);
+  useEffect(()=>{
+    const revealActive=()=>{
+      const nav=navigationRef.current;
+      if(!nav||mobileNavOpen||!window.matchMedia('(max-width:680px)').matches)return;
+      const active=nav.querySelector<HTMLElement>('[aria-current="page"]');
+      if(active)nav.scrollTo({left:active.offsetLeft-nav.offsetLeft-(nav.clientWidth-active.offsetWidth)/2,behavior:'instant'});
+    };
+    revealActive();
+    window.addEventListener('resize',revealActive);
+    return()=>window.removeEventListener('resize',revealActive);
+  },[view,mobileNavOpen]);
   const [auto, setAuto] = useState(true);
   const [site, setSite] = useState("Solar Park East");
   const [lang,setLang] = useState<"bg"|"en">(
@@ -403,7 +415,7 @@ export default function Home() {
         <button className="brand" onClick={() => navigate("overview")} aria-label={lang==="en"?"GrideX Energy OS – home":"GrideX Energy OS – начало"}>
           <span>GX</span><div>GRIDEX<small>ENERGY OS</small></div>
         </button>
-        <nav id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
+        <nav ref={navigationRef} id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
           {navItems.map(([id, icon]) => {
             const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";

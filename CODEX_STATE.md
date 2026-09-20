@@ -1,5 +1,11 @@
 # Current task
 
+2026-09-20: owner-approved three-tile mobile swipe rail implemented for all
+existing sections, fixed Menu and automatic active-route visibility. Touch tests
+at 360/390/430; physical phone acceptance remains. See HANDOFF/implementation PR.
+2026-09-20: одобрена мобилна лента с три видими раздела и плъзгане между всички,
+фиксирано Меню и показване на активния раздел. Остава приемане на реален телефон.
+
 2026-09-20: approved submenu hierarchy and breadcrumb implemented, desktop +
 expanded phone. Menu structure and session logic unchanged. New 390/1280 visual
 and navigation tests; publication evidence in PR. Owner acceptance remains.
