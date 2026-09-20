@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, useRef } from "react";
 import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot } from "./lib/gridex-api";
 import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
@@ -8,6 +8,7 @@ import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
 import { readRoute, sectionHref } from './lib/routes';
 import { releaseId, previousRelease } from './lib/session-policy';
+import {clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
 const navItems = [
@@ -96,6 +97,7 @@ const SubscriptionPlans = lazy(() => import("./sections/plans").then(module => (
 const About = lazy(() => import("./sections/about").then(module => ({ default: module.About })));
 
 export default function Home() {
+  const sessionEpoch=useRef(0);
   const liveReturnPath=useMemo(()=>{
     try {
       const path=sessionStorage.getItem('gridex.live-return-path');
@@ -158,6 +160,21 @@ export default function Home() {
   // Demo is only for confirmed anonymous visitors, never an API-error fallback.
   const dataMode:DataMode = runtimeConfig.mode === 'demo' ? 'demo' : 'live';
   useEffect(()=>{
+    if(dataMode!=='live')return;
+    const ended=()=>{
+      sessionEpoch.current++;
+      clearGridexSession();
+      setSessionUser(null);setAccountMenuOpen(false);setAuthState('anonymous');
+      setBackendState('unknown');setLiveSites([]);setLiveSnapshot(null);setSelectedSiteId('');
+      setSitesStatus('loading');
+      setIntegrationError(lang==='en'?'Your session ended. Please sign in again.':'Сесията е прекратена. Моля, влезте отново.');
+    };
+    const storage=(event:StorageEvent)=>{if(event.key===logoutSignalKey&&event.newValue)ended();};
+    window.addEventListener('gridex:session-ended',ended);
+    window.addEventListener('storage',storage);
+    return()=>{window.removeEventListener('gridex:session-ended',ended);window.removeEventListener('storage',storage);};
+  },[dataMode,lang]);
+  useEffect(()=>{
     if(selectedSiteId&&liveSites.some(site=>site.id===selectedSiteId)) {
       try{sessionStorage.setItem('gridex.selected-site',selectedSiteId);}catch{/* Optional navigation context. */}
     }
@@ -173,6 +190,7 @@ export default function Home() {
       if(pending)return;
       pending=true;
       setAuthState('checking');
+      setBackendState('unknown');
       void gridexLogin(runtimeConfig,true).catch(()=>{pending=false;setAuthState('error');});
     };
     window.addEventListener('gridex:reauth-required',reauthenticate);
@@ -206,8 +224,9 @@ export default function Home() {
   useEffect(() => {
     if (runtimeConfig.mode === "demo") return;
     let active=true;
+    const epoch=sessionEpoch.current;
     initialiseGridexAuth(runtimeConfig).then(async session=>{
-      if (!active) return;
+      if (!active||epoch!==sessionEpoch.current) return;
       if (!session) {
         setSessionUser(null);
         setAuthState("anonymous");
@@ -220,21 +239,21 @@ export default function Home() {
       try {
         membershipIdentity = await apiClient.me();
       } catch {
-        if (!active) return;
+        if (!active||epoch!==sessionEpoch.current) return;
         setSessionUser(null);
         setBackendState("offline");
         setAuthState("error");
         setIntegrationError(document.documentElement.lang==="en"?"Sign-in completed, but API access could not be verified. Please retry.":"Входът приключи, но достъпът до API не може да се потвърди. Опитайте отново.");
         return;
       }
-      if (!active) return;
+      if (!active||epoch!==sessionEpoch.current) return;
       const user=sessionToUser({ ...session, roles: membershipIdentity.roles });
       setSessionUser(user);
       setAuthState("authenticated");
       setBackendState("online");
       setIntegrationError("");
     }).catch(()=>{
-      if (!active) return;
+      if (!active||epoch!==sessionEpoch.current) return;
       setSessionUser(null);
       setBackendState("unknown");
       setAuthState("error");
@@ -244,7 +263,7 @@ export default function Home() {
   },[runtimeConfig,apiClient,authCallback]);
 
   useEffect(()=>{
-    if (dataMode!=="live"||backendState!=="online") return;
+    if (dataMode!=="live"||backendState!=="online"||authState!=='authenticated') return;
     const controller=new AbortController();
     apiClient.sites(controller.signal).then(sites=>{
       if(controller.signal.aborted)return;
@@ -263,10 +282,10 @@ export default function Home() {
       setIntegrationError(lang==="en"?"The site list could not be loaded.":"Списъкът с обекти не може да бъде зареден.");
     });
     return()=>controller.abort();
-  },[apiClient,dataMode,backendState,lang,selectedSiteId]);
+  },[apiClient,dataMode,backendState,lang,selectedSiteId,authState]);
 
   useEffect(()=>{
-    if (dataMode!=="live"||!selectedSiteId||!liveSites.some(item=>item.id===selectedSiteId)) return;
+    if (dataMode!=="live"||authState!=='authenticated'||!selectedSiteId||!liveSites.some(item=>item.id===selectedSiteId)) return;
     let controller=new AbortController();
     const loadSnapshot=()=>{
       const requestController=controller;
@@ -287,26 +306,41 @@ export default function Home() {
       void loadSnapshot();
     },runtimeConfig.snapshotRefreshMs);
     return()=>{window.clearInterval(interval);controller.abort();};
-  },[apiClient,dataMode,selectedSiteId,runtimeConfig.snapshotRefreshMs,lang,liveSites]);
+  },[apiClient,dataMode,selectedSiteId,runtimeConfig.snapshotRefreshMs,lang,liveSites,authState]);
 
   useEffect(()=>{
     if(authState!=="authenticated"||backendState!=="online")return;
     let active=true;
+    let pending=false;
+    const controller=new AbortController();
     const expireSession=()=>{
         if(!active)return;
-        setSessionUser(null);
-        setLiveSites([]);setSelectedSiteId('');
-        setAuthState("anonymous");
-        setLiveSnapshot(null);
-        setIntegrationError(lang==="en"?"Your session has expired. Please sign in again.":"Сесията Ви е изтекла. Моля, логнете се отново.");
+        window.dispatchEvent(new Event('gridex:session-ended'));
       };
-    const verifySession=()=>getGridexAccessToken(runtimeConfig).then(token=>{if(!token)expireSession();}).catch(error=>{
-      if(error instanceof GridexSessionExpiredError)expireSession();
-      else if(active)setIntegrationError(lang==='en'?'Session refresh is temporarily unavailable. Retrying without signing you out.':'Обновяването на сесията временно е недостъпно. Ще опитаме отново, без да те отписваме.');
-    });
+    const verifySession=async()=>{
+      if(pending||!active)return;
+      pending=true;
+      try {
+        const identity=await apiClient.me(controller.signal);
+        const sites=await apiClient.sites(controller.signal);
+        if(!active)return;
+        setSessionUser(current=>current?sessionToUser({subject:identity.subject,email:current.email,name:current.nameEn,preferredUsername:'',roles:identity.roles}):null);
+        setLiveSites(current=>JSON.stringify(current)===JSON.stringify(sites)?current:sites);
+        if(selectedSiteId&&!sites.some(site=>site.id===selectedSiteId)) {
+          expireSession();
+        }
+      }catch(error){
+        if(error instanceof GridexSessionExpiredError||(error instanceof GridexApiError&&[401,403].includes(error.status)))expireSession();
+        else if(active)setIntegrationError(lang==='en'?'Session verification is temporarily unavailable. Retrying without signing you out.':'Проверката на сесията временно е недостъпна. Ще опитаме отново, без да те отписваме.');
+      }finally{pending=false;}
+    };
+    const resume=()=>{if(document.visibilityState==='visible')void verifySession();};
+    window.addEventListener('focus',resume);window.addEventListener('online',resume);
+    document.addEventListener('visibilitychange',resume);
+    window.addEventListener('pageshow',resume);
     const interval=window.setInterval(()=>{void verifySession();},20000);
-    return()=>{active=false;window.clearInterval(interval);};
-  },[authState,backendState,runtimeConfig,lang]);
+    return()=>{active=false;controller.abort();window.clearInterval(interval);window.removeEventListener('focus',resume);window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',resume);window.removeEventListener('pageshow',resume);};
+  },[authState,backendState,apiClient,lang,selectedSiteId]);
 
   useEffect(() => {
     const closeOnEscape = (event:KeyboardEvent) => {
@@ -342,6 +376,7 @@ export default function Home() {
         return;
       } catch {
         setIntegrationError(lang==="en"?"Sign-out could not be completed by the identity service.":"Изходът не може да бъде завършен от услугата за идентичност.");
+        return;
       }
     }
     setSessionUser(null);
@@ -425,7 +460,7 @@ export default function Home() {
         {integrationError&&dataMode==="live"&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
-          <div className="portal-view" data-testid={"section-"+view} data-view={view}>
+          <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
             {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={signIn}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}

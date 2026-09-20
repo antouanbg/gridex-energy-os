@@ -5,6 +5,26 @@ import ts from 'typescript';
 const source = await readFile(new URL('../app/lib/gridex-api.ts', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const { GridexApiClient } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
+test('final 401 ends the session; restart on retry requests fresh login; writes are never replayed',async()=>{
+  const originalFetch=globalThis.fetch,originalWindow=globalThis.window;
+  try {
+    const events=[];
+    globalThis.window={dispatchEvent:event=>events.push(event.type)};
+    let requests=0;
+    const client=new GridexApiClient({mode:'auto',apiBaseUrl:''},async()=>'fixture');
+    globalThis.fetch=async()=>{requests++;return new Response('{}',{status:401});};
+    await assert.rejects(client.me(),{status:401});
+    assert.equal(requests,2);assert.deepEqual(events,['gridex:session-ended']);
+    requests=0;events.length=0;
+    globalThis.fetch=async()=>{requests++;return new Response(JSON.stringify({error:requests===2?'reauthentication_required':'authentication_required'}),{status:401});};
+    await assert.rejects(client.me(),{status:401});
+    assert.equal(requests,2);assert.deepEqual(events,['gridex:reauth-required']);
+    requests=0;events.length=0;
+    globalThis.fetch=async()=>{requests++;return new Response('{}',{status:401});};
+    await assert.rejects(client.invite('org',{email:'test@example.invalid',role:'customer',siteIds:[]}),{status:401});
+    assert.equal(requests,1);assert.deepEqual(events,['gridex:session-ended']);
+  }finally{globalThis.fetch=originalFetch;globalThis.window=originalWindow;}
+});
 test('device heartbeat reads are authenticated, site-scoped and never fall back to demo', async () => {
   const original = globalThis.fetch;
   try {
