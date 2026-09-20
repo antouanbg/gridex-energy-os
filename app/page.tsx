@@ -7,7 +7,7 @@ import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
 import { readRoute, sectionHref } from './lib/routes';
-import { releaseId } from './lib/session-policy';
+import { releaseId, previousRelease } from './lib/session-policy';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
 const navItems = [
@@ -96,7 +96,26 @@ const SubscriptionPlans = lazy(() => import("./sections/plans").then(module => (
 const About = lazy(() => import("./sections/about").then(module => ({ default: module.About })));
 
 export default function Home() {
-  const runtimeConfig = useMemo(() => getGridexRuntimeConfig(), []);
+  const liveReturnPath=useMemo(()=>{
+    try {
+      const path=sessionStorage.getItem('gridex.live-return-path');
+      if(path?.startsWith('/')&&!path.startsWith('//')&&!path.startsWith('/demo')&&new URL(path,window.location.origin).origin===window.location.origin)return path;
+    }catch{/* Optional navigation context. */}
+    return previousRelease()===null?'/login/':'/';
+  },[]);
+  const runtimeConfig = useMemo(() => {
+    const config=getGridexRuntimeConfig();
+    if(typeof window==='undefined')return config;
+    const path=window.location.pathname;
+    const demo=/^\/demo(?:\/|$)/.test(path);
+    const publicHome=['/','/en/'].includes(path)&&previousRelease()===null&&!hasGridexAuthCallback();
+    return demo||publicHome?{...config,mode:'demo' as const}:config;
+  }, []);
+  useEffect(()=>{
+    if(runtimeConfig.mode==='demo'&&!/^\/demo(?:\/|$)/.test(window.location.pathname)) {
+      window.history.replaceState({},'',sectionHref(readRoute(window.location.pathname).view,'',true));
+    }
+  },[runtimeConfig]);
   const apiClient = useMemo(
     () => new GridexApiClient(runtimeConfig, force => getGridexAccessToken(runtimeConfig,force)),
     [runtimeConfig],
@@ -309,7 +328,7 @@ export default function Home() {
 
   const navigate = (id: string, siteId = selectedSiteId) => {
     const target=id === 'gateway' ? 'devices' : id;
-    window.history.pushState({},'',sectionHref(target,siteId));
+    window.history.pushState({},'',sectionHref(target,siteId,dataMode==='demo'));
     setView(target);
     setMobileNavOpen(false);
     setAccountMenuOpen(false);
@@ -334,11 +353,12 @@ export default function Home() {
     try {
       setAuthState("checking");
       setIntegrationError("");
-      await gridexLogin(runtimeConfig);
+      await gridexLogin(getGridexRuntimeConfig());
     } catch {
       setAuthState("error");
       setIntegrationError(lang==="en"?"The sign-in service did not respond. Please try again.":"Услугата за вход не отговори. Моля, опитайте отново.");
-      navigate('login');
+      if(dataMode==='demo')window.location.assign('/login/');
+      else navigate('login');
     }
   };
 
@@ -353,10 +373,15 @@ export default function Home() {
             const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            return <a key={id} href={sectionHref(id,selectedSiteId)} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
+            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo')} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
               <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </a>;
           })}
+          <a data-testid="mode-link" href={dataMode==='demo'?liveReturnPath:'/demo/'} onClick={()=>{
+            try {
+              if(dataMode==='live')sessionStorage.setItem('gridex.live-return-path',window.location.pathname+window.location.search);
+            }catch{/* Optional non-secret navigation context. */}
+          }}><i>◇</i><span>{dataMode==='demo'?(lang==='en'?'Live portal':'Реален портал'):(lang==='en'?'Demo':'Демо')}</span></a>
         </nav>
         {mobileNavOpen&&<button className="mobile-nav-scrim" aria-label={lang==="en"?"Close menu":"Затвори меню"} onClick={()=>setMobileNavOpen(false)}/>}
         <button className="mobile-menu-toggle" data-no-translate aria-controls="main-navigation" aria-expanded={mobileNavOpen} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>

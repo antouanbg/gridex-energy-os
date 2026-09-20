@@ -13,7 +13,7 @@ test('a stalled callback times out and a new sign-in can open the provider',asyn
     return new Promise<void>(()=>{});
   });
   await page.goto('/');
-  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
   await page.locator('.quick-sign-in').click();
   await expect(page.getByRole('heading',{name:'Данните от акаунта са недостъпни'})).toBeVisible();
   await expect(page.locator('.demo-mode-notice')).toHaveCount(0);

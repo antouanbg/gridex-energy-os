@@ -16,7 +16,7 @@ let initialisation: Promise<boolean> | undefined;
 const returnPathKey='gridex.auth-return-path';
 function saveReturnPath() {
   if(hasGridexAuthCallback())return;
-  try { sessionStorage.setItem(returnPathKey,window.location.pathname+window.location.search); } catch { /* Optional storage. */ }
+  try { sessionStorage.setItem(returnPathKey,window.location.pathname.startsWith('/demo')?'/':window.location.pathname+window.location.search); } catch { /* Optional storage. */ }
 }
 function restoreReturnPath() {
   try {
@@ -72,7 +72,7 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
   if (!config.authEnabled || config.mode === "demo") return null;
   const instance = client(config);
   const fresh=requiresFreshLogin()&&!hasGridexAuthCallback();
-  const restore=previousRelease()!==null || !['/','/en/','/login/','/about/'].includes(window.location.pathname);
+  const restore=previousRelease()!==null || (!window.location.pathname.startsWith('/demo')&&!['/','/en/','/login/','/about/'].includes(window.location.pathname));
   if(!initialisation)saveReturnPath();
   initialisation ??= bounded(instance.init({
     flow: "standard",

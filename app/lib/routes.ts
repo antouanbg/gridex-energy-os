@@ -8,12 +8,14 @@ export const sectionPaths: Record<string, string> = {
   plans: '/settings/subscription/', about: '/about/', profile: '/profile/', login: '/login/',
 };
 const siteViews = new Set(['assets', 'battery', 'schedule', 'automation', 'loads', 'devices']);
-export function sectionHref(view: string, siteId = ''): string {
+export function sectionHref(view: string, siteId = '', demo = false): string {
   const path = sectionPaths[view === 'gateway' ? 'devices' : view] || '/';
+  if(demo)return '/demo'+path;
   return siteId && siteViews.has(view) ? `/sites/${encodeURIComponent(siteId)}${path}` : path;
 }
 export function readRoute(pathname: string): { view: string; siteId: string } {
   let path = pathname.replace(/^\/en(?=\/|$)/, '') || '/';
+  path = path.replace(/^\/demo(?=\/|$)/, '') || '/';
   let siteId = '';
   const scoped = path.match(/^\/sites\/([^/]+)(\/.*)$/);
   if (scoped) {

@@ -16,7 +16,8 @@ test(`one-click PKCE login at ${width}px without API health or hidden SSO`, asyn
     contentType: 'text/html', body: '<h1>Identity provider sign-in</h1>',
   }));
   await page.goto('/');
-  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await expect(page).toHaveURL(/\/demo\/$/);
   await expect(page.locator('header button, header select')).toHaveCount(0);
   if(width<681)await page.locator('.mobile-menu-toggle').click();
   const login = page.locator('.quick-sign-in');

@@ -34,6 +34,16 @@ test('deep link, refresh, SSO restore, history, release re-login and explicit lo
   await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
   await expect(page).toHaveURL(/\/sites\/lab\/devices\/$/);
   expect(logins).toBe(0);
+  await page.getByTestId('mode-link').click();
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await page.locator('[data-view-id="devices"]').click();
+  await expect(page).toHaveURL(/\/demo\/devices\/$/);
+  await expect(page.locator('main')).not.toContainText('LIVE ·');
+  await page.getByTestId('mode-link').click();
+  await expect(page).toHaveURL(/\/sites\/lab\/devices\/$/);
+  await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
+  expect(logins).toBe(0);
   await expect(page.locator('[data-view-id="battery"]')).toHaveAttribute('href','/sites/lab/battery/');
   await page.locator('[data-view-id="market"]').click();
   await expect(page).toHaveURL(/\/market\/$/);
@@ -53,6 +63,7 @@ test('deep link, refresh, SSO restore, history, release re-login and explicit lo
   await expect(page.locator('.quick-sign-in')).toBeVisible();
   await page.reload();
   await expect(page.locator('.quick-sign-in')).toBeVisible();
-  await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator('.demo-mode-notice')).toBeVisible();
   expect(forceLogins).toBe(2);
 });

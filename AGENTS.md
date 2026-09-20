@@ -94,12 +94,14 @@ validated and fail safe. Use the manufacturer protocol as authoritative.
 
 Canonical approved menu/URL tree: HANDOFF.md, "Approved menu baseline and separate
 Demo" (2026-09-20). Keep Demo as an explicit separate `/demo/*` section with demo
-data and real hyperlinks, never an automatic live fallback. Isolation/routing
-implementation is still pending; do not claim documentation as deployment.
+data and real hyperlinks, never an automatic live fallback. New anonymous Home
+visitors enter Demo; remembered live sessions/callbacks restore Live. Check the
+latest HANDOFF for implementation/publication evidence, not historical plans.
 Канонично одобрено меню/URL: HANDOFF.md, „Approved menu baseline and separate
 Demo“ (2026-09-20). Демо остава изричен отделен `/demo/*` раздел с демо данни
-и истински линкове, никога автоматичен live fallback. Реализацията на изолация/
-routing предстои; документацията не е внедряване.
+и истински линкове, никога автоматичен live fallback. Нови анонимни посетители
+на Начало влизат в Демо; запомнени сесии/callback възстановяват Live. Виж
+последния HANDOFF за реализация/публикация, не историческите планове.
 
 2026-09-20 owner approval: Overview is Home. Every section/subsection needs a
 real hyperlink and stable URL. Refresh/history/new tabs preserve section and

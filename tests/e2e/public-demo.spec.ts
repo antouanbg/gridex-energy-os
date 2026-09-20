@@ -1,0 +1,32 @@
+import {test,expect} from '@playwright/test';
+
+for(const width of [390,1280])test(`public demo isolated routes at ${width}px`,async({page,context},testInfo)=>{
+  await page.setViewportSize({width,height:900});
+  const external:string[]=[];
+  await page.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
+  await page.route(/https:\/\/(api|auth)\.example\.invalid/,r=>{external.push(r.request().url());return r.abort();});
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await expect(page.getByTestId('section-overview')).toContainText('248.6');
+  if(width<681)await page.locator('.mobile-menu-toggle').click();
+  await expect(page.locator('[data-view-id="devices"]')).toHaveAttribute('href','/demo/devices/');
+  await page.locator('[data-view-id="devices"]').click();
+  await expect(page).toHaveURL(/\/demo\/devices\/$/);
+  await page.reload();
+  await expect(page.getByTestId('section-devices')).toBeVisible();
+  await expect(page.locator('.demo-mode-notice')).toBeVisible();
+  await page.screenshot({path:testInfo.outputPath('demo-devices.png'),fullPage:true});
+  const tab=await context.newPage();
+  await tab.goto('/demo/market/settlement/');
+  await expect(tab.getByTestId('section-settlement')).toBeVisible();
+  await tab.close();
+  if(width<681)await page.locator('.mobile-menu-toggle').click();
+  await page.locator('[data-view-id="market"]').click();
+  await page.goBack();
+  await expect(page.getByTestId('section-devices')).toBeVisible();
+  if(width<681)await page.locator('.mobile-menu-toggle').click();
+  await page.locator('.sidebar-language').click();
+  await expect(page.locator('.demo-mode-notice')).toContainText('This is Demo mode');
+  expect(external).toEqual([]);
+});

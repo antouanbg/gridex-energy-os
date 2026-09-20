@@ -4,6 +4,35 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## Approved menu baseline and separate Demo / Одобрено меню и отделно Демо — 2026-09-20
 
+Implementation update: `/demo/*` is now implemented with static Pages entries.
+First-time visitors to Home (no remembered live session and no OIDC callback)
+enter `/demo/` immediately, without API/identity requests. Remembered live
+sessions and callbacks stay on the live restoration path. Explicit live URLs
+never fall back to demo on error/expiry. Demo sign-in returns to live Home;
+Live→Demo→Live preserves the prior URL and Site/device query in session storage,
+never tokens. Demo has the existing synthetic screens; their controls do not
+call real provisioning APIs. Build creates a static file for every demo section.
+Tests: 21 browser cases and 21 unit/render cases passed; mobile screenshot reviewed.
+Final return-link refinement passed a separate 3-case targeted rerun. Mandatory
+auth gate: local master/admin/form pass; normal-DNS public checks still time out
+from Mac (pre-existing, not proof of external availability). Lint: no errors,
+two pre-existing image warnings. Publication/owner browser acceptance pending
+until the PR/Pages result; no backend, MQTT or Ethernet configuration changes.
+
+Актуална реализация: `/demo/*` вече е реализирано със статични Pages входове.
+Нов посетител на Начало (без запомнена live сесия и без OIDC callback) влиза
+веднага в `/demo/`, без API/identity заявки. Запомнените сесии/callback остават
+в реалния SSO поток. Изричните live URL не стават демо при грешка/изтичане.
+Входът от Демо връща реалното Начало; Live→Demo→Live пази предишния URL и
+Обект/device query в session storage, никога токени. Демо ползва наличните
+примерни екрани; контролите не викат реални provisioning API. Build генерира
+статичен файл за всеки демо раздел. 21 browser и 21 unit/render теста минаха;
+проверена е mobile снимка. Финалният return-link мина 3 отделни повторни теста.
+Auth gate: local master/admin/form минават; normal-DNS public проверките от Mac
+още са timeout (стар проблем, не доказва външна достъпност).
+Lint: без грешки, две стари image предупреждения. Публикацията/owner приемането
+чака PR/Pages резултата. Без backend, MQTT или Ethernet промени.
+
 ### English — canonical structure
 
 Owner-approved baseline, not permission for later unsolicited menu changes.
@@ -53,8 +82,8 @@ Demo browsing must not clear an existing live session or overwrite its selected
 Site/device. Signing in/returning to Live loads only authorized real data; checking,
 empty, expired, denied and unavailable live states never become demo data.
 
-Status: hierarchy/real live links already implemented; isolated public `/demo/*`
-routing is a NEW recorded requirement, NOT implemented by this documentation edit.
+Original planning status (superseded by implementation update above): isolated
+public `/demo/*` was a new recorded requirement, not yet implemented.
 Next task: implement namespace + isolated demo state/data source and static Pages
 entries (direct demo URLs must return HTTP 200, not depend on the private 404 shell).
 Acceptance: EN/BG, desktop/mobile, every demo link/direct refresh/history/new tab,
@@ -109,8 +138,8 @@ URL са от `app/lib/routes.ts`, йерархията е от `app/page.tsx`.
 реални Обект/устройство. Вход/връщане към Live зарежда само разрешени реални данни;
 checking/empty/expired/denied/unavailable състоянията никога не стават демо данни.
 
-Статус: йерархията/реалните live линкове са реализирани; изолираното публично
-`/demo/*` е НОВО записано изискване, НЕ е внедрено с тази документална промяна.
+Първоначален план (заменен от актуалната реализация по-горе): изолираното
+публично `/demo/*` е било ново записано, още нереализирано изискване.
 Следва: namespace + изолиран демо state/data source и статични Pages входове
 (директните демо URL да са HTTP 200, без зависимост от частния 404 shell).
 Приемане: EN/BG, desktop/mobile, всички демо линкове/direct refresh/history/new tab,
