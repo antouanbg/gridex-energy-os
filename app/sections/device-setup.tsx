@@ -4,7 +4,7 @@ import type { GridexApiClient, GridexHardwareTopology, DeviceSetup, DeviceSetupR
 import type { UiLanguage } from '../i18n/messages';
 import { DeviceAccess } from './device-access';
 
-export function DeviceSetupWizard({api, siteId, topology, lang}: {api:GridexApiClient; siteId:string; topology:GridexHardwareTopology; lang:UiLanguage}) {
+export function DeviceSetupWizard({api, siteId, topology, lang, connectionLabel}: {api:GridexApiClient; siteId:string; topology:GridexHardwareTopology; lang:UiLanguage; connectionLabel?: (gatewayId: string) => string}) {
   const t=(bg:string,en:string)=>lang==='en'?en:bg;
   const [saved,setSaved]=useState<DeviceSetup|null>(null);
   const [selected,setSelected]=useState('');
@@ -29,7 +29,7 @@ export function DeviceSetupWizard({api, siteId, topology, lang}: {api:GridexApiC
       <p>{t('Устройствата вече са заведени към този Обект. Не е необходимо да ги добавяте или настройвате повторно. Изберете устройство от менюто за подробности.','These devices already belong to this Site. Do not add or provision them again. Select a device below for details.')}</p>
       <ul>{saved.imported.devices.map(device=>{
         const item=topology.gateways.find(g=>g.id===device.gatewayId);
-        return item?<li key={device.gatewayId}>{item.name} · {item.hardwareModel} — {t('конфигурация внесена; връзката не е потвърдена','configuration imported; connectivity unverified')}</li>:null;
+        return item?<li key={device.gatewayId}>{item.name} · {item.hardwareModel} — {t('конфигурация внесена','configuration imported')} · {connectionLabel?.(device.gatewayId) ?? t('Няма потвърден статус на връзката','No confirmed connection status')}</li>:null;
       })}</ul>
     </section>}
     <p>{t('1. Устройство → 2. До две роли и партньор → 3. Provisioning','1. Device → 2. Up to two roles and peer → 3. Provisioning')}</p>
@@ -42,7 +42,7 @@ export function DeviceSetupWizard({api, siteId, topology, lang}: {api:GridexApiC
       <p>{t('Не е необходим повторен provisioning. Източник: конфигурационният файл на ROCK Pi. Адресите са запазени криптирано.','No repeat provisioning required. Source: ROCK Pi configuration file. Addresses are stored encrypted.')}</p>
       <p>{gateway?.role==='controller'?t('ROCK Pi: polling на нода и локален Modbus listener.','ROCK Pi: node polling and local Modbus listener.'):t('ESP32: Modbus TCP през ROCK Pi; DHCP резервация.','ESP32: Modbus TCP through ROCK Pi; DHCP reservation.')}</p>
       <p>Polling: {saved?.imported?.pollMs} ms · Timeout: {saved?.imported?.timeoutMs} ms</p>
-      <p>{t('Live телеметрията не е потвърдена. Одобренията за батерията са изключени. Няма приложени хардуерни промени.','Live telemetry is not verified. Battery commissioning approvals are off. No hardware changes applied.')}</p>
+      <p>{connectionLabel?.(selected) ?? t('Няма потвърден статус на връзката','No confirmed connection status')}. {t('Статусът на връзката идва от heartbeat, не от внесената конфигурация. Той не потвърждава готовност за управление на батерията.','Connection status comes from heartbeat, not the imported configuration. It does not confirm readiness for battery control.')}</p>
       <button type="button" onClick={()=>setEditImported(v=>!v)}>{editImported?t('Затвори новата чернова','Close new draft'):t('Създай отделна чернова за промяна','Create a separate change draft')}</button>
     </section>}
     {gateway&&(!importedDevice||editImported)&&<form onSubmit={async event=>{
