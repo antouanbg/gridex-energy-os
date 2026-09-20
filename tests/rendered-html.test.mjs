@@ -170,7 +170,7 @@ test("uses a safe backend-aware demo and OIDC integration state", async () => {
   assert.match(auth, /flow:\s*"standard"/);
   assert.match(auth, /pkceMethod:\s*"S256"/);
   assert.doesNotMatch(auth, /(?:localStorage|sessionStorage)\.setItem\([^\n]*(?:instance\.token|refreshToken|idToken)/);
-  assert.match(auth, /sessionStorage\.setItem\(returnPathKey,window\.location\.pathname\+window\.location\.search\)/);
+  assert.match(auth, /sessionStorage\.setItem\(returnPathKey,window\.location\.pathname\.startsWith\('\/demo'\)\?'\/':window\.location\.pathname\+window\.location\.search\)/);
   assert.match(api, /subscribeSiteEvents/);
   assert.match(api, /commands\/power/);
   assert.match(plan, /Frontend acceptance criteria/);

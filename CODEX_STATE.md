@@ -1,5 +1,12 @@
 # Current task
 
+2026-09-20: separate public Demo implemented, anonymous Home enters `/demo/`;
+remembered sessions/callbacks stay live. 21 browser + 21 unit/render pass;
+publication verification and owner acceptance tracked in newest HANDOFF.
+2026-09-20: отделното публично Демо е реализирано, анонимно Начало влиза в
+`/demo/`; запомнени сесии/callback остават live. 21 browser + 21 unit/render
+минават; публикацията/owner приемането са в последния HANDOFF.
+
 2026-09-20: complete approved menu/URL tree recorded in HANDOFF. Owner retains
 Demo as separate `/demo/*`, hyperlinks + demo data, isolated from live sessions
 and writes. Documentation only; implementation/acceptance is the next task.

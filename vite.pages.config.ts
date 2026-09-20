@@ -18,6 +18,9 @@ export default defineConfig({
       const root=resolve(import.meta.dirname,'dist-pages');
       const html=readFileSync(resolve(root,'index.html'),'utf8');
       for(const path of Object.values(sectionPaths)) {
+        const demoDirectory=resolve(root,'./demo'+path);
+        mkdirSync(demoDirectory,{recursive:true});
+        writeFileSync(resolve(demoDirectory,'index.html'),html);
         if(path==='/')continue;
         const directory=resolve(root,'.'+path);
         mkdirSync(directory,{recursive:true});
