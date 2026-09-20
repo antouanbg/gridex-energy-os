@@ -1,5 +1,24 @@
 # Current task
 
+## Publication gate / Публикационен блокер — 2026-09-20
+
+Backend a58aebf is pushed in PR #32 and deployed (381dee9a89bb); existing frontend
+already receives OR-backed /sites and /hardware without requiring a new bundle.
+Frontend 38295b4 is pushed in PR #40. Pages run 35535292127 built successfully
+but environment protection REJECTED deployment from feat/routes-session-restoration.
+No protection settings changed; no merge performed. New frontend validation/error
+messages are NOT public yet. Need owner merge approval for PR #40, then verify
+main Pages deployment and public revision. Real owner browser acceptance pending.
+
+Backend a58aebf е в PR #32 и е внедрен (381dee9a89bb); текущият frontend вече
+получава OR данни от /sites и /hardware и без нов bundle.
+Frontend 38295b4 е в PR #40. Pages run 35535292127 build мина, но environment
+защитата ОТКАЗА deployment от feat/routes-session-restoration. Защитата не е
+променяна; няма merge. Новите frontend проверки/съобщения още НЕ са публични.
+Нужно е owner одобрение за merge на PR #40, после проверка на main Pages
+deployment и публичната ревизия. Реалното owner browser приемане предстои.
+
+
 ## OpenRemote-backed frontend inventory / Инвентар за frontend от OpenRemote — 2026-09-20
 
 API DEPLOYED image 381dee9a89bb, private rollback api-inventory-8YeBtP.
