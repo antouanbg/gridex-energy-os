@@ -1,5 +1,18 @@
 # GrideX Energy OS — Working Rules
 
+## Approved navigation presentation — 2026-09-20
+
+Preserve the approved menu labels, order and parent relationships. Desktop and
+expanded phone menus show indented children with connector lines, a light-green
+active child and subtle active parent. Page headings show clickable parent →
+current section, with Site context below. Keep this consistent in BG/EN and
+Demo/live; changes to menu structure still require explicit owner approval.
+
+Запазвайте имената, реда и йерархията. Подменютата на desktop и в отвореното
+телефонно меню са с отстъп/линия; активното дете е светлозелено, родителят —
+леко подчертан. Заглавие: кликаем родител → раздел; Обектът е отдолу.
+Промяна на структурата изисква изрично одобрение.
+
 ## Approved per-Site transports / Одобрени транспорти по Обект — 2026-09-19
 
 Owner explicitly approves implementation and publication of both selectable

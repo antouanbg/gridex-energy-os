@@ -1,5 +1,11 @@
 # Current task
 
+2026-09-20: approved submenu hierarchy and breadcrumb implemented, desktop +
+expanded phone. Menu structure and session logic unchanged. New 390/1280 visual
+and navigation tests; publication evidence in PR. Owner acceptance remains.
+2026-09-20: одобреният дизайн на подменюта и пълен път е реализиран за desktop
+и телефон. Структурата/сесиите са непроменени; тестове 390/1280 px, приемане предстои.
+
 2026-09-20: session audit hardening: cross-tab logout/private-state cleanup,
 bounded refresh, periodic/resume identity and Site checks, role remount,
 restart-on-retry handling. See newest HANDOFF for evidence/remaining gates.

@@ -78,10 +78,12 @@ test("all 18 sections render through the lazy module boundary", async ({ page })
 
 test("navigation updates translated headings and interactive range values", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByTestId("page-title")).toHaveText("Соларен парк Изток");
+  await expect(page.getByTestId("page-title")).toHaveText("Преглед");
+  await expect(page.getByTestId("page-eyebrow")).toHaveText("Соларен парк Изток");
 
   await page.getByRole("button", { name: "Language" }).click();
-  await expect(page.getByTestId("page-title")).toHaveText("Solar Park East");
+  await expect(page.getByTestId("page-title")).toHaveText("Overview");
+  await expect(page.getByTestId("page-eyebrow")).toHaveText("Solar Park East");
 
   await openSection(page, "automation");
   const firstRange = page.locator(".mode-range input[type=range]").first();
