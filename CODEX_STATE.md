@@ -1,5 +1,11 @@
 # Current task
 
+2026-09-20: owner accepted mobile swipe. Removed repeated heading Demo badge
+and demo overview switch; restored visible mobile banner Sign in. Eight BG/EN
+CTA tests + 22 unit/render pass; publication evidence in PR, owner check remains.
+2026-09-20: плъзгането е прието. Махнати горен Демо етикет и демо превключвател;
+Вход в банера е видим на телефон. 8 BG/EN + 22 unit/render теста минават.
+
 2026-09-20: owner-approved three-tile mobile swipe rail implemented for all
 existing sections, fixed Menu and automatic active-route visibility. Touch tests
 at 360/390/430; physical phone acceptance remains. See HANDOFF/implementation PR.

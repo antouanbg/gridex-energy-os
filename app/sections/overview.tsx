@@ -124,11 +124,11 @@ export function Overview({ auto, setAuto, navigate, notify, lang, dataMode, snap
   const batterySoc=isLive&&snapshot?.battery?.socPct!=null?snapshot.battery.socPct.toFixed(1):isLive?"—":"72";
   if(isLive&&!snapshot)return <section className="card config-card" role="status"><h2>{t('Очаква реални данни','Awaiting real data')}</h2><p>{t('За прегледа са необходими избран обект, конфигурирани устройства и получена телеметрия. Ако устройствата вече са настроени, провери връзката им — не е нужно повторно провизиране.','The overview requires a selected site, configured devices and received telemetry. If devices are already configured, check their connection; do not provision them again.')}</p><button className="primary-btn" onClick={()=>navigate('devices')}>{t('Към устройства','Go to devices')}</button></section>;
   return <>
-    <div className="status-strip">
+    {isLive&&<div className="status-strip">
       <span><i className="live-dot"/>{dataMode==="live"?t("Свързано с OpenRemote","Connected to OpenRemote"):t("Представителни демо данни","Representative demo data")}</span>
       <span>{t("Последни данни","Latest data")} <b>{isLive?(snapshot?new Date(snapshot.timestamp).toLocaleTimeString(lang==="en"?"en-GB":"bg-BG"):'—'):"14:32:08"}</b></span>
       <button disabled={isLive} title={isLive?t("Режимът се управлява през защитената конфигурационна команда","Mode is controlled through the protected configuration command"):undefined} onClick={() => setAuto(!auto)}><i className={auto ? "toggle on" : "toggle"}/><span><strong>{isLive?(snapshot?.strategy?.mode??t("Режим от OpenRemote","Mode from OpenRemote")):auto ? "Автоматичен режим" : "Ръчен режим"}</strong><small>{isLive?t("Защитена live конфигурация","Protected live configuration"):"Оптимизация по пазарна цена"}</small></span></button>
-    </div>
+    </div>}
     <section className="hero-grid">
       <article className="flow-card card" data-no-translate>
         <PanelTitle eyebrow={t("ЕНЕРГИЕН ПОТОК","ENERGY FLOW")} title={t("В реално време","Real-time energy flow")} action={<span className={`pill ${dataMode==="live"?"green":"amber"}`}>● {dataMode==="live"?t("На живо","Live"):t("Демо","Demo")}</span>}/>

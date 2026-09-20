@@ -11,7 +11,6 @@
 .page-breadcrumb a:focus-visible { outline:2px solid #24b56a; outline-offset:4px; border-radius:4px; }
 .page-breadcrumb .breadcrumb-separator { color:#96ada0; font-size:.7em; }
 .page-heading .page-site-context { margin:9px 0 0; font-size:13px; letter-spacing:.2px; text-transform:none; font-weight:500; color:#6a8074; }
-.heading-demo { display:inline-block; margin-bottom:10px; padding:4px 9px; border:1px solid #edcf86; border-radius:6px; background:#fff6de; color:#805e12; font-size:11px; font-weight:800; letter-spacing:.7px; text-transform:uppercase; }
 .translation-suggestion { padding:18px 20px; margin-bottom:16px; color:var(--ink); }
 .translation-suggestion>strong { font-size:16px; }
 .translation-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
@@ -909,7 +908,8 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .metric strong,.metric strong small,.energy-asset span>strong b { white-space:nowrap; }
   .demo-mode-notice { grid-template-columns:36px minmax(0,1fr) 38px!important; min-height:56px; padding:9px 10px; }
   .demo-mode-notice>i { width:36px; height:36px; }
-  .demo-mode-notice small,.demo-mode-notice>button:not(.demo-notice-close) { display:none; }
+  .demo-mode-notice small { display:none; }
+  .demo-mode-notice>.demo-sign-in { display:block; grid-column:1/-1; grid-row:2; width:100%; min-height:44px; }
   .demo-mode-notice>.demo-notice-close { grid-column:auto; width:38px; min-height:38px; padding:0; }
 }
 
