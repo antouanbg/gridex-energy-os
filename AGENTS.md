@@ -92,6 +92,15 @@ validated and fail safe. Use the manufacturer protocol as authoritative.
 
 ## Menu structure — owner approval required / Структура на менюто — само с разрешение
 
+Canonical approved menu/URL tree: HANDOFF.md, "Approved menu baseline and separate
+Demo" (2026-09-20). Keep Demo as an explicit separate `/demo/*` section with demo
+data and real hyperlinks, never an automatic live fallback. Isolation/routing
+implementation is still pending; do not claim documentation as deployment.
+Канонично одобрено меню/URL: HANDOFF.md, „Approved menu baseline and separate
+Demo“ (2026-09-20). Демо остава изричен отделен `/demo/*` раздел с демо данни
+и истински линкове, никога автоматичен live fallback. Реализацията на изолация/
+routing предстои; документацията не е внедряване.
+
 2026-09-20 owner approval: Overview is Home. Every section/subsection needs a
 real hyperlink and stable URL. Refresh/history/new tabs preserve section and
 authorized Site context; recover SSO without password prompts on refresh.

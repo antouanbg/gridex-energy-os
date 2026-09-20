@@ -1,5 +1,12 @@
 # Current task
 
+2026-09-20: complete approved menu/URL tree recorded in HANDOFF. Owner retains
+Demo as separate `/demo/*`, hyperlinks + demo data, isolated from live sessions
+and writes. Documentation only; implementation/acceptance is the next task.
+2026-09-20: пълната одобрена меню/URL схема е записана в HANDOFF. Демо остава
+отделно `/demo/*`, с линкове и демо данни, изолирано от live сесии/записи.
+Само документация; следва реализация и приемателни проверки.
+
 2026-09-20: Remember Me 365 days now owner-approved/APPLIED; API restart gate
 deployed healthy. Routes/session frontend already live. Only follow-up docs
 pending main publication; owner browser acceptance and normal-DNS auth remain
