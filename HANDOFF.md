@@ -2,6 +2,48 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Imported device status correction / Поправка на внесения статус — 2026-09-20
+
+The imported-configuration panel hardcoded connectivity as unverified even while
+the separate heartbeat panel received live data. It now shares the same polled
+status, including empty, stale, denied and unavailable responses. No menu,
+layout, authentication or hardware changes. Real database receipt at 06:20 UTC:
+ROCK 06:20:47, ESP contact 06:20:53, counter 15437. This proves ingestion at that
+instant, not owner-browser acceptance. Pages publication and owner acceptance
+must be verified separately. Temperature/sensor metrics remain UNIMPLEMENTED;
+next extend ROCK payload, backend storage/API and existing Devices display,
+then deploy ROCK and verify actual readings. Never substitute sample values.
+
+Панелът за внесена конфигурация показваше постоянно непотвърдена връзка дори
+при живи heartbeat данни в отделния панел. Вече споделя същия обновяван статус,
+включително празен/остарял/отказан/недостъпен отговор. Без меню, оформление,
+auth или hardware промени. Реална база към 06:20 UTC: ROCK 06:20:47, ESP контакт
+06:20:53, брояч 15437. Това доказва получаване тогава, не owner-browser приемане.
+Публикация и приемане се проверяват отделно. Температурата/сензорите още НЕ СА
+реализирани: следват ROCK payload, backend база/API, текущият Devices екран,
+внедряване на ROCK и проверка на реални измервания. Без примерни заместители.
+
+## Approved dual transport plan / Одобрен план за два транспорта — 2026-09-19
+
+Owner approval recorded for per-Site WireGuard-private OR direct MQTT-mTLS.
+Canonical execution checklist: backend docs/PER_SITE_TRANSPORT_AND_ENROLLMENT.md
+on branch docs/per-site-transport. Twelve TODO items cover contract, persistence,
+existing broker/worker, ingress, certificate lifecycle, first-boot claim, approved
+configuration application, UI, signed firmware, ROCK-initiated ESP OTA, fleet
+operations and end-to-end release acceptance. No new menu; no SSH requirement.
+This change is documentation only: no listener, runtime env, migration, device
+or router changed. Next: versioned transport contract, then persistence/worker.
+Heartbeat implementation is merged; physical delivery still needs acceptance.
+
+Записано е одобрение за избор по Обект: WireGuard-private ИЛИ direct MQTT-mTLS.
+Каноничният план е backend docs/PER_SITE_TRANSPORT_AND_ENROLLMENT.md в branch
+docs/per-site-transport. 12 TODO задачи: договор, база, broker/worker, входове,
+сертификати, first-boot claim, одобрено прилагане, UI, подписан firmware, ESP OTA
+от ROCK, управление на много обекти и end-to-end приемане. Без ново меню и SSH
+зависимост. Само документация: без listener/env/миграция/device/router промени.
+Следва versioned transport договор, после база/worker. Heartbeat кодът е слят;
+физическата доставка още изисква приемане.
+
 ## Merge compatibility check / Проверка преди merge — 2026-09-19
 
 Owner approved merging the current PRs. Added fail-closed handling of malformed

@@ -3,6 +3,7 @@ import {test,expect} from '@playwright/test';
 test('authenticated navigation, transient refresh outage, recovery and real expiry',async({page},testInfo)=>{
   test.setTimeout(100000);
   let nonce='',refreshFailure=0,refreshes=0;
+  let heartbeatState='empty';
   const errors:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
@@ -30,7 +31,11 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
     if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',roles:['administrator'],permissions:['site:read'],memberships:[]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:'test-site',name:'Test Lab',organisationId:'test-org'}]}});
     if(path.endsWith('/snapshot'))return route.fulfill({status:503,json:{error:'unavailable'}});
-    if(path.endsWith('/device-heartbeats'))return route.fulfill({json:{items:[]}});
+    if(path.endsWith('/device-heartbeats')) {
+      if(heartbeatState==='failed')return route.fulfill({status:503,json:{error:'unavailable'}});
+      if(heartbeatState==='denied')return route.fulfill({status:403,json:{error:'forbidden'}});
+      return route.fulfill({json:{items:heartbeatState==='empty'?[]:['rock','esp'].map(gatewayId=>({gatewayId,sourceGatewayId:'rock',receivedAt:new Date().toISOString(),lastSuccessfulContactAt:new Date().toISOString(),heartbeat:heartbeatState==='online'?123:124,status:heartbeatState}))}});
+    }
     if(path.endsWith('/hardware'))return route.fulfill({json:{configuration:{revision:1,status:'draft'},gateways:[{id:'rock',name:'Test ROCK Pi',hardwareModel:'ROCK Pi E',role:'controller',ports:[]},{id:'esp',name:'Test ESP32',hardwareModel:'ESP32',role:'device-node',ports:[]}],devices:[]}});
     if(path.endsWith('/device-setup'))return route.fulfill({json:{revision:0,configuration:{},imported:{pollMs:500,timeoutMs:400,devices:[{gatewayId:'rock',communication:'node-polling-and-local-modbus-listener'},{gatewayId:'esp',communication:'modbus-tcp-via-rockpi'}]}}});
     return route.fulfill({json:{invitations:[]}});
@@ -59,6 +64,19 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await expect(page.getByTestId('section-devices')).toBeVisible();
   await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ROCK Pi');
   await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ESP32');
+  const imported=page.getByRole('region',{name:'Внесени устройства'});
+  await expect(imported).toContainText('Връзката още не е потвърдена');
+  for(const state of ['online','stale','failed','denied','online']) {
+    heartbeatState=state;
+    await page.getByRole('button',{name:'Обнови',exact:true}).click();
+    await expect(imported).toContainText(state==='online'?'Има връзка':state==='stale'?'Остарял статус':'Проверката е недостъпна');
+    await expect(imported).not.toContainText('конфигурация внесена; връзката не е потвърдена');
+  }
+  heartbeatState='stale';
+  await expect(imported).toContainText('Остарял статус',{timeout:15000});
+  heartbeatState='online';
+  await page.getByRole('button',{name:'Обнови',exact:true}).click();
+  await expect(imported).toContainText('Има връзка');
   await page.getByLabel('Устройство',{exact:true}).selectOption('rock');
   await expect(page.getByText('Не е необходим повторен provisioning.',{exact:false})).toBeVisible();
   await page.getByLabel('Устройство',{exact:true}).selectOption('esp');

@@ -1,5 +1,32 @@
 # GrideX Energy OS — Working Rules
 
+## Approved per-Site transports / Одобрени транспорти по Обект — 2026-09-19
+
+Owner explicitly approves implementation and publication of both selectable
+modes: wireguard_private (ROCK → Site Router → VPN → MQTT) and mqtt_mtls_direct
+(ROCK → Internet → controlled MQTT mTLS ingress). This supersedes older blanket
+VPN-only/public-MQTT prohibitions for that scoped ingress only. Same identity,
+topic ACLs, telemetry/heartbeat contract and Site permissions in both modes.
+One active mode per ROCK; no automatic downgrade. Router remains the VPN peer;
+ESP/OT/admin/DB remain non-public. No SSH dependency for the intended enrolment
+or OTA process. Follow the canonical backend plan
+[PER_SITE_TRANSPORT_AND_ENROLLMENT](https://github.com/antouanbg/gridex-openremote-backend/blob/docs/per-site-transport/docs/PER_SITE_TRANSPORT_AND_ENROLLMENT.md).
+Do not confuse approval or Git publication with deployed, tested connectivity.
+Activation follows its security and commissioning gates; preserve control locks.
+UI selection belongs inside existing Site/Devices settings, not a new menu item.
+
+Собственикът изрично одобрява реализация и публикуване на избираемите режими
+wireguard_private (ROCK → рутер → VPN → MQTT) и mqtt_mtls_direct (ROCK → Интернет
+→ контролиран MQTT mTLS вход). Старите общи VPN-only/public-MQTT забрани се
+отменят само за този ограничен вход. Идентичност, topic ACL, heartbeat/telemetry
+договор и Site права са еднакви. Един активен режим на ROCK, без автоматичен
+downgrade. VPN peer остава рутерът; ESP/OT/admin/DB не стават публични. Целевият
+provisioning/OTA процес не зависи от SSH. Следвай каноничния backend план по-горе.
+Одобрение/Git публикация не означават внедрена/тествана връзка. Активиране след
+security/commissioning gates; control locks се пазят. Изборът е вътре в текущите
+настройки Обект/Устройства, не ново меню.
+
+
 ## Mandatory auth regression gate / Задължителна auth проверка
 
 After proxy, Keycloak, OIDC, frontend login changes or restart: verify local
