@@ -2,6 +2,49 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Pilot inventory reconciled / Пилотен инвентар съгласуван — 2026-09-20
+
+DEPLOYED via supported OpenRemote APIs: pilot Site -> ROCK -> ESP, with the
+existing temperature asset reparented under ROCK (same ID/history writer).
+All four assets have verified owner links. Owner lacked OR read:assets: granted
+that role with restricted_user, NOT unrestricted asset/admin writes. Existing
+GrideX administrator membership unchanged. New tokens may be needed to see roles.
+Site binding and two gateway bindings are projections of verified OR resources
+(migration 009), not independently provisioned inventory. No physical activation,
+Ethernet, certificates, MQTT configuration or BESS control changes.
+Private backups: inventory-or-XXk1AE before asset creation; inventory-or-ypRcM2
+before owner role assignment. Both database dumps passed pg_restore --list;
+OR/owner snapshots are private. Final read-back: inventory-or-dHQvbb.
+A partial SQL audit failure was corrected; retry reused the same OR IDs.
+Eight verification tests + 37 API regression tests PASS; live snapshot validates
+hierarchy, owner links, bindings and history writer restricted to its one asset.
+Sandbox HTTP tests initially failed EPERM; approved local-port rerun passed.
+NOT claimed: owner browser acceptance, physical temperature receipt, or generic
+UI/import provisioning enforcement. Those remain pending under the canonical
+backend plan. Do not resume local-only bootstrap scripts. Documentation rules
+published in backend PR #32, frontend PR #40 and edge PR #20; not merged here.
+
+ВНЕДРЕНО през OpenRemote API: пилотен Обект -> ROCK -> ESP; съществуващият
+температурен asset е преместен под ROCK със същия ID/history writer.
+Проверени са връзките на четирите assets към собственика. Липсващото OR
+read:assets право е добавено с restricted_user, БЕЗ неограничени asset/admin
+записи. GrideX администраторското членство е запазено. За новите роли може да
+е нужен нов token. Site binding и двата gateway bindings (миграция 009) са
+проекции на потвърдени OR ресурси, не отделно провизиран инвентар.
+Без физическо активиране, Ethernet, сертификати, MQTT настройки или BESS промени.
+Частни backups: inventory-or-XXk1AE преди assets и inventory-or-ypRcM2 преди
+owner ролите; двата database dump-а са проверени с pg_restore --list.
+OR/owner snapshots са частни; последна проверка inventory-or-dHQvbb.
+Поправен е частичен SQL audit отказ; повторението използва същите OR IDs.
+8 verification + 37 API regression теста МИНАВАТ; реалният snapshot потвърждава
+йерархия, owner links, bindings и writer само до неговия температурен asset.
+Първият HTTP тест е блокиран от sandbox EPERM; разрешеното повторение минава.
+НЕ са потвърдени: owner browser приемане, физическа температура и универсална
+UI/import защита. Те остават задачи по backend плана. Без local-only bootstrap.
+Правилата са публикувани в backend PR #32, frontend PR #40 и edge PR #20;
+тук не са merge-вани.
+
+
 ## Strategic invariant: OpenRemote-only inventory / Стратегическо правило — 2026-09-20
 
 Owner-confirmed: OpenRemote is the ONLY authoritative place for all operational
