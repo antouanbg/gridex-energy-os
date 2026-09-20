@@ -1,4 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
+// Explicit demo fixtures only; the production portal no longer falls back to demo.
+test.beforeEach(async({page})=>{
+  await page.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:'window.__GRIDEX_CONFIG__={mode:"demo",authEnabled:false};'}));
+});
 
 const sections = [
   "overview",

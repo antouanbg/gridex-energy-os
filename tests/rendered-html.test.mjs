@@ -71,7 +71,7 @@ test("keeps typography readable and mobile navigation inside the viewport", asyn
   assert.match(css, /max-height:calc\(100vh - 110px\)/);
   assert.match(css, /\.header-actions select\s*\{\s*display:none!important;/);
   assert.match(css, /\.content small,\.content em\s*\{\s*font-size:12px!important;/);
-  assert.match(css, /\.sidebar nav button span,\.mobile-menu-toggle span\s*\{\s*font-size:12px;/);
+  assert.match(css, /\.sidebar nav :is\(button,a\) span,\.mobile-menu-toggle span\s*\{\s*font-size:12px;/);
   assert.match(css, /Mobile readability and overlap guard/);
   assert.match(css, /\.content small,\.content em\s*\{\s*font-size:13px!important;/);
   assert.match(css, /@media\(max-width:420px\)\{[\s\S]*\.energy-flow-map\s*\{\s*grid-template-columns:1fr;/);
@@ -160,16 +160,17 @@ test("uses a safe backend-aware demo and OIDC integration state", async () => {
   ]);
   const html = await response.text();
 
-  assert.match(html, /Това е Демо режим/);
+  assert.doesNotMatch(html, /Това е Демо режим/);
   assert.doesNotMatch(html, /Свързване…/);
   assert.match(config, /mode:\s*"auto"/);
   assert.match(config, /backendHealthRefreshMs/);
-  assert.match(page, /sessionUser \|\| authState !== "anonymous" \? "live" : "demo"/);
+  assert.match(page, /runtimeConfig.mode === 'demo' \? 'demo' : 'live'/);
   assert.match(page, /API достъпът не е потвърден/);
   assert.match(page, /ИЗИСКВА НАСТРОЙКА И ДАННИ/);
   assert.match(auth, /flow:\s*"standard"/);
   assert.match(auth, /pkceMethod:\s*"S256"/);
-  assert.doesNotMatch(auth, /localStorage|sessionStorage/);
+  assert.doesNotMatch(auth, /(?:localStorage|sessionStorage)\.setItem\([^\n]*(?:instance\.token|refreshToken|idToken)/);
+  assert.match(auth, /sessionStorage\.setItem\(returnPathKey,window\.location\.pathname\+window\.location\.search\)/);
   assert.match(api, /subscribeSiteEvents/);
   assert.match(api, /commands\/power/);
   assert.match(plan, /Frontend acceptance criteria/);

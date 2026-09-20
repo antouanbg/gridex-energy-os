@@ -92,6 +92,25 @@ validated and fail safe. Use the manufacturer protocol as authoritative.
 
 ## Menu structure — owner approval required / Структура на менюто — само с разрешение
 
+2026-09-20 owner approval: Overview is Home. Every section/subsection needs a
+real hyperlink and stable URL. Refresh/history/new tabs preserve section and
+authorized Site context; recover SSO without password prompts on refresh.
+Remember Me survives browser reopening within configured security lifetime.
+Explicit logout/revocation ends access; frontend deployment/API restart requires
+fresh authentication and returns to the prior URL. Never persist tokens in Web
+Storage. No automatic demo fallback. Approved children: Sites→Assets/Battery/Loads;
+Market→Settlement/Balancing; Automation→Schedules; Devices→Supported;
+Settings→Subscription. About stays at the bottom. No new Edge gateway menu.
+
+Одобрение 2026-09-20: Преглед е Начало. Всеки раздел/подраздел има истински линк
+и постоянен URL. Refresh/history/нов tab пазят раздела и разрешения Обект; SSO
+се възстановява без парола при refresh. Remember Me важи и след отваряне на
+браузъра в конфигурирания защитен срок. Изход/отнемане прекратяват достъпа;
+frontend deployment/API restart изискват пресен вход и връщат същия URL.
+Без токени в Web Storage и автоматичен демо fallback. Одобрени подменюта:
+Обекти→Активи/Батерия/Товари; Пазар→Сетълмент/Балансиране; Логика→Графици;
+Устройства→Поддържани; Настройки→Абонамент. За нас е долу. Без Edge шлюз меню.
+
 - Do not change menu structure, grouping, order, labels, hierarchy, visibility
   or navigation destinations without the project owner's explicit permission.
   This applies to desktop, mobile, account menus and submenus.

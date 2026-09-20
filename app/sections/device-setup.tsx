@@ -7,13 +7,22 @@ import { DeviceAccess } from './device-access';
 export function DeviceSetupWizard({api, siteId, topology, lang, connectionLabel}: {api:GridexApiClient; siteId:string; topology:GridexHardwareTopology; lang:UiLanguage; connectionLabel?: (gatewayId: string) => string}) {
   const t=(bg:string,en:string)=>lang==='en'?en:bg;
   const [saved,setSaved]=useState<DeviceSetup|null>(null);
-  const [selected,setSelected]=useState('');
+  const [selected,setSelected]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('device')||'');
   const [roles,setRoles]=useState<DeviceSetupRole[]>([]);
   const [notice,setNotice]=useState('');
   const [busy,setBusy]=useState(false);
   const [provision,setProvision]=useState(false);
   const [confirmed,setConfirmed]=useState(false);
   const [editImported,setEditImported]=useState(false);
+  useEffect(()=>{
+    const restore=()=>{
+      const id=new URLSearchParams(window.location.search).get('device')||'';
+      setSelected(id);setRoles(saved?.configuration.devices?.find(d=>d.gatewayId===id)?.roles||[]);
+      setProvision(false);setConfirmed(false);setEditImported(false);
+    };
+    window.addEventListener('popstate',restore);
+    return()=>window.removeEventListener('popstate',restore);
+  },[saved]);
   useEffect(()=>{
     const abort=new AbortController();
     void api.deviceSetup(siteId,abort.signal).then(value=>{if(!abort.signal.aborted)setSaved(value);}).catch(()=>{if(!abort.signal.aborted)setNotice('failed');});
@@ -35,6 +44,7 @@ export function DeviceSetupWizard({api, siteId, topology, lang, connectionLabel}
     <p>{t('1. Устройство → 2. До две роли и партньор → 3. Provisioning','1. Device → 2. Up to two roles and peer → 3. Provisioning')}</p>
     <label>{t('Устройство','Device')}<select aria-label={t('Устройство','Device')} disabled={!saved||busy} value={selected} onChange={event=>{
       const id=event.target.value;setSelected(id);setRoles(saved?.configuration.devices?.find(d=>d.gatewayId===id)?.roles||[]);setProvision(false);setConfirmed(false);setEditImported(false);setNotice('');
+      const url=new URL(window.location.href);if(id)url.searchParams.set('device',id);else url.searchParams.delete('device');window.history.pushState({},'',url.pathname+url.search);
     }}><option value="">{t('Избери устройство','Choose device')}</option>{topology.gateways.map(g=><option key={g.id} value={g.id}>{g.name} · {g.hardwareModel}</option>)}</select></label>
     {!saved&&!notice&&<p role="status">{t('Зареждане на настройките…','Loading setup…')}</p>}
     {importedDevice&&<section className="provisioning-detail">

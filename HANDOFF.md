@@ -2,6 +2,43 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Routes and session restoration / URL и възстановяване на сесия — 2026-09-20
+
+Owner-approved navigation now uses real links and ordered child sections; Home
+is Overview. Site-scoped paths, history and session-only selected Site context;
+foreign Site links do not silently select another Site. Top-level Keycloak SSO
+restores existing sessions without iframe cookies; only non-secret release and
+return-path hints are stored, never tokens. A changed frontend release prompts
+fresh login; API restart policy uses signed auth_time and requires fresh login.
+Root callback remains unchanged to preserve the existing OIDC allowlist.
+Automatic demo fallback is removed (explicit demo config remains for fixtures).
+Pages emits static section index files plus a noindex 404 shell for dynamic
+private Site URLs: direct deep links render but retain HTTP 404 on GitHub Pages.
+Public indexable content needs dedicated static pages; private inventories are
+not SEO content. Real Remember Me was disabled with 24h session lifetime.
+Backend helper enables it from the single env, bounded to 365 days, with rollback.
+Tests: 31 backend, 21 frontend unit/render, 19 browser fixtures; final visual
+style parity correction needs rerun. Not deployed/owner-accepted yet. Outstanding:
+real account refresh/new tab/logout, restart/release re-login; normal-DNS auth
+reachability; optional future hosting rewrite for HTTP 200 dynamic routes.
+ROCK temperature and sensor metrics remain a separate unfinished task.
+
+Одобрената навигация използва линкове и групирани подраздели; Начало е Преглед.
+Site URL, history и session-only избран Обект; чужд URL не избира мълчаливо друг
+Обект. Top-level Keycloak SSO възстановява сесията без iframe cookies; пазим само
+release/return-path подсказки, не токени. Нова frontend версия изисква пресен
+вход; API restart политиката проверява подписания auth_time. Root callback е
+запазен за съществуващия OIDC allowlist. Няма автоматичен демо fallback.
+Pages генерира статични index файлове и noindex 404 shell за частните динамични
+Site URL: екранът работи, HTTP статусът при директен вход остава 404 на Pages.
+Публичното SEO съдържание изисква отделни статични страници, не частен inventory.
+Реалното Remember Me е било изключено при 24h сесия. Backend helper го включва
+от единния env с максимум 365 дни и rollback. Проверки: 31 backend, 21 frontend
+unit/render, 19 browser fixtures; последната style parity поправка чака повторен
+тест. Още не е внедрено/прието. Остават реален refresh/нов tab/изход, restart/
+release re-login, normal-DNS auth и евентуален hosting rewrite за динамични 200.
+Температурата и сензорите на ROCK остават отделна незавършена задача.
+
 ## Imported device status correction / Поправка на внесения статус — 2026-09-20
 
 Validation: 21 unit/render tests (including EN/BG null-battery), 6 browser tests,
