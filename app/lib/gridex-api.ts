@@ -141,6 +141,10 @@ export type GridexDeviceLive = {
   measurements: Record<string, number | null>;
 };
 
+export type RockTelemetryPoint = { x: number; y: number };
+export type RockTelemetryItem = { assetId: string; metric: string; unit: string; points: RockTelemetryPoint[] };
+export type RockTelemetryResponse = { from: number; to: number; items: RockTelemetryItem[] };
+
 export type GridexGatewayPort = {
   id?: string;
   name: string;
@@ -330,6 +334,12 @@ export class GridexApiClient {
     if (!result || !Array.isArray(result.items) || result.items.some(item => !item || typeof item.gatewayId !== 'string')) {
       throw new Error('Invalid device heartbeat response');
     }
+    return result;
+  }
+
+  async rockTelemetry(siteId: string, signal?: AbortSignal): Promise<RockTelemetryResponse> {
+    const result = await this.getJson<RockTelemetryResponse>(`/api/v1/sites/${encodeURIComponent(siteId)}/history`, signal);
+    if (!result || !Array.isArray(result.items)) throw new Error('Invalid telemetry response');
     return result;
   }
 
