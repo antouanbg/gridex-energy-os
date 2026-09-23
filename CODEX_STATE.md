@@ -2,18 +2,29 @@
 
 ## ROCK telemetry frontend / ROCK телеметрия на сайта — 2026-09-24
 
+Publication verified: PR #42 CI passed (36 browser tests), merged as
+`085076190eec05f8dad04638aea5ab8dd3c85b55`; Pages run `35923639360`
+succeeded and public release.json matched that commit. Physical backend
+Timescale counts reached 56 each for five ROCK metrics. Authenticated owner
+Devices acceptance and CPU temperature remain open, not implied by deployment.
+
+Публикацията е проверена: PR #42 CI мина (36 browser теста), merge commit
+`085076190eec05f8dad04638aea5ab8dd3c85b55`; Pages run `35923639360`
+успя и публичният release.json съвпадна. В Timescale има по 56 реални записа
+за пет ROCK показателя. Реалният owner екран „Устройства“ и CPU температурата
+остават непотвърдени от самата публикация.
+
 Backend Timescale receives five physical ROCK metrics. Devices UI code for
-authenticated Site-scoped history existed on an unpublished feature branch;
-clean publication branch from main prepared. Local builds, lint and tests pass,
-including populated/empty/denied/unavailable API fixture coverage. Public
-Pages release and real owner browser acceptance remain separate gates; CPU
-temperature missing. See newest HANDOFF entry.
+authenticated Site-scoped history was published through PR #42. Local builds,
+lint and tests pass, including populated/empty/denied/unavailable API fixture
+coverage. Public Pages release is verified above; real owner browser acceptance
+remains separate. CPU temperature is missing. See newest HANDOFF entry.
 
 Timescale получава пет реални ROCK показателя. Кодът на „Устройства“ за
-автентикирана история по Обект беше в непубликуван клон; подготвен е чист клон
-от main. Локални build/lint/тестове минават, включително сценарии с налични,
-празни, отказани и недостъпни данни. Публичната Pages версия и реалният
-собственически browser тест са отделни проверки; CPU температура липсва.
+автентикирана история по Обект е публикуван през PR #42. Локални build/lint/
+тестове минават, включително сценарии с налични, празни, отказани и недостъпни
+данни. Публичната Pages версия е проверена по-горе; реалният собственически
+browser тест остава отделен. CPU температура липсва.
 
 ## Publication gate / Публикационен блокер — 2026-09-20
 

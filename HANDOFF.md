@@ -4,15 +4,35 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## ROCK telemetry Devices publication / Публикуване в „Устройства“ — 2026-09-24
 
+Publication update: PR #42 passed lint/build/browser CI (36 browser tests),
+merged as `085076190eec05f8dad04638aea5ab8dd3c85b55`, and main Pages run
+`35923639360` succeeded. Public `https://gridex.tech/release.json` returned
+that exact commit; `/devices/` serves the new bundle. The running backend API
+image contains `/history`, and read-only Timescale counts later reached 56 for
+each of five physical ROCK metrics. These are publication and data-path
+checks, not a real authenticated owner browser check. Owner should open
+Devices for GrideX Test Lab and confirm the ROCK values/refresh; CPU
+temperature needs the separate physical sensor opt-in and datapoint check.
+
+Публикация: PR #42 мина lint/build/browser CI (36 browser теста), слят е като
+`085076190eec05f8dad04638aea5ab8dd3c85b55`, а Pages run `35923639360`
+успя. Публичният `https://gridex.tech/release.json` върна същия commit;
+`/devices/` сервира новия bundle. Работещият backend API има `/history`, а
+Timescale по-късно достигна 56 реални ROCK записа за всеки от пет показателя.
+Това доказва публикация и пътя на данните, но не и вход през реален owner
+браузър. Собственикът трябва да отвори „Устройства“ за GrideX Test Lab и да
+потвърди стойностите/обновяването; CPU температурата изисква отделно физическо
+включване на сензора и проверка на datapoint.
+
 The Site-scoped Devices card requests authenticated `/api/v1/sites/{siteId}/history`
 and renders only the latest OpenRemote datapoint per metric; no demo fallback.
 Backend Timescale has growing physical ROCK data for five metrics, but the
 frontend commit was only on `feat/rock-telemetry-ui`, not public `main`. A clean
 publication branch from main carries that UI without the unrelated docs commit.
 Local Pages/RSC builds, 22 existing tests and lint (zero errors, two old image
-warnings) passed; an additional API test now covers populated, empty, invalid,
-denied and unavailable history. CI/merge/Pages release and real owner browser
-acceptance must be recorded separately. CPU temperature has no datapoints yet.
+warnings) passed; an additional API test covers populated, empty, invalid,
+denied and unavailable history. CI/merge/Pages results are recorded above;
+real owner browser acceptance remains separate. CPU temperature has no datapoints yet.
 
 Картата в „Устройства“ заявява автентикирано
 `/api/v1/sites/{siteId}/history` и показва само последната OpenRemote стойност
@@ -22,8 +42,8 @@ ROCK записи за пет показателя, но frontend commit беш�
 несвързания документационен commit. Локалните Pages/RSC build, 22 стари теста
 и lint (нула грешки, две стари image предупреждения) минаха; нов API тест
 покрива налични, празни, невалидни, отказани и недостъпни данни.
-CI/merge/Pages публикацията и реалният собственически browser тест се записват
-отделно. CPU температура още няма datapoints.
+CI/merge/Pages резултатите са по-горе; реалният собственически browser тест
+остава отделен. CPU температура още няма datapoints.
 
 ## Publication gate / Публикационен блокер — 2026-09-20
 
