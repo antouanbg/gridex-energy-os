@@ -2,6 +2,29 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## ROCK telemetry Devices publication / Публикуване в „Устройства“ — 2026-09-24
+
+The Site-scoped Devices card requests authenticated `/api/v1/sites/{siteId}/history`
+and renders only the latest OpenRemote datapoint per metric; no demo fallback.
+Backend Timescale has growing physical ROCK data for five metrics, but the
+frontend commit was only on `feat/rock-telemetry-ui`, not public `main`. A clean
+publication branch from main carries that UI without the unrelated docs commit.
+Local Pages/RSC builds, 22 existing tests and lint (zero errors, two old image
+warnings) passed; an additional API test now covers populated, empty, invalid,
+denied and unavailable history. CI/merge/Pages release and real owner browser
+acceptance must be recorded separately. CPU temperature has no datapoints yet.
+
+Картата в „Устройства“ заявява автентикирано
+`/api/v1/sites/{siteId}/history` и показва само последната OpenRemote стойност
+за всеки показател, без демо заместител. В Timescale има нарастващи реални
+ROCK записи за пет показателя, но frontend commit беше само в
+`feat/rock-telemetry-ui`, не в публичния `main`. Чист клон от main носи UI без
+несвързания документационен commit. Локалните Pages/RSC build, 22 стари теста
+и lint (нула грешки, две стари image предупреждения) минаха; нов API тест
+покрива налични, празни, невалидни, отказани и недостъпни данни.
+CI/merge/Pages публикацията и реалният собственически browser тест се записват
+отделно. CPU температура още няма datapoints.
+
 ## Publication gate / Публикационен блокер — 2026-09-20
 
 Backend a58aebf is pushed in PR #32 and deployed (381dee9a89bb); existing frontend

@@ -1,5 +1,20 @@
 # Current task
 
+## ROCK telemetry frontend / ROCK телеметрия на сайта — 2026-09-24
+
+Backend Timescale receives five physical ROCK metrics. Devices UI code for
+authenticated Site-scoped history existed on an unpublished feature branch;
+clean publication branch from main prepared. Local builds, lint and tests pass,
+including populated/empty/denied/unavailable API fixture coverage. Public
+Pages release and real owner browser acceptance remain separate gates; CPU
+temperature missing. See newest HANDOFF entry.
+
+Timescale получава пет реални ROCK показателя. Кодът на „Устройства“ за
+автентикирана история по Обект беше в непубликуван клон; подготвен е чист клон
+от main. Локални build/lint/тестове минават, включително сценарии с налични,
+празни, отказани и недостъпни данни. Публичната Pages версия и реалният
+собственически browser тест са отделни проверки; CPU температура липсва.
+
 ## Publication gate / Публикационен блокер — 2026-09-20
 
 Backend a58aebf is pushed in PR #32 and deployed (381dee9a89bb); existing frontend
