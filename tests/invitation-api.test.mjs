@@ -63,6 +63,27 @@ test('device inventory is site-scoped, authenticated and preserves denied access
     }
   } finally { globalThis.fetch = original; }
 });
+test('ROCK telemetry reads only authenticated Site history and never substitutes demo values', async () => {
+  const original = globalThis.fetch;
+  try {
+    const client = new GridexApiClient({ mode: 'auto', apiBaseUrl: '' }, async () => 'test-token');
+    const received = {from: 1, to: 2, items: [{metric: 'uptimeSeconds', unit: 's', points: [{x: 2, y: 60}]}]};
+    globalThis.fetch = async (url, init) => {
+      assert.equal(url, '/api/v1/sites/site%2Fone/history');
+      assert.equal(init.headers.get('Authorization'), 'Bearer test-token');
+      return new Response(JSON.stringify(received));
+    };
+    assert.deepEqual(await client.rockTelemetry('site/one'), received);
+    globalThis.fetch = async () => new Response(JSON.stringify({from: 1, to: 2, items: []}));
+    assert.deepEqual((await client.rockTelemetry('site/one')).items, []);
+    globalThis.fetch = async () => new Response(JSON.stringify({items: null}));
+    await assert.rejects(client.rockTelemetry('site/one'), /Invalid telemetry response/);
+    for (const status of [403, 404, 503]) {
+      globalThis.fetch = async () => new Response('{}', {status});
+      await assert.rejects(client.rockTelemetry('site/one'), {status});
+    }
+  } finally { globalThis.fetch = original; }
+});
 test('invitation API sends bearer identity and explicit scope; rejects unavailable enrollment', async () => {
   const original = globalThis.fetch;
   const calls = [];
