@@ -106,7 +106,7 @@ function RockTelemetryCard({ telemetry, error, lang }: { telemetry: RockTelemetr
     <h3>{t('Телеметрия на ROCK Pi', 'ROCK Pi telemetry')}</h3>
     <p>{error ? t('Телеметрията още не е достъпна.', 'Telemetry is not available yet.') : telemetry?.items.length ? t('Последните записани измервания от OpenRemote.', 'Latest measurements recorded in OpenRemote.') : t('Очаква се първото измерване.', 'Waiting for the first measurement.')}</p>
     <dl>
-      {telemetry?.items.map(item => { const point = item.points[item.points.length - 1]; return <span key={item.metric}><dt>{labels[item.metric] || item.metric}</dt><dd>{point ? `${point.y.toFixed(item.unit === 'bytes' || item.unit === 's' ? 0 : 1)} ${unitLabels[item.unit] || item.unit}` : '—'}</dd></span>; })}
+      {telemetry?.items.map(item => { const point = item.points.reduce<(typeof item.points)[number] | undefined>((latest, current) => !latest || current.x > latest.x ? current : latest, undefined); return <span key={item.metric}><dt>{labels[item.metric] || item.metric}</dt><dd>{point ? `${point.y.toFixed(item.unit === 'bytes' || item.unit === 's' ? 0 : 1)} ${unitLabels[item.unit] || item.unit}` : '—'}</dd></span>; })}
     </dl>
     <small>{t('Другите системни показатели се записват по разрешения sensor profile и ще се добавят към този екран без Grafana.', 'Other system metrics are stored by the approved sensor profile and will appear here without Grafana.')}</small>
   </article>;
