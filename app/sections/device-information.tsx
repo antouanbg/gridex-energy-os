@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import type { DeviceHeartbeat, GridexApiClient, GridexHardwareTopology } from '../lib/gridex-api';
+import type { DeviceHeartbeat, GridexApiClient, GridexHardwareTopology, RockTelemetryResponse } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { DeviceSetupWizard } from './device-setup';
 
@@ -12,6 +12,8 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
   const [refresh, setRefresh] = useState(0);
   const [health, setHealth] = useState<{ siteId: string; items: DeviceHeartbeat[] } | null>(null);
   const [healthError, setHealthError] = useState(false);
+  const [telemetry, setTelemetry] = useState<RockTelemetryResponse | null>(null);
+  const [telemetryError, setTelemetryError] = useState(false);
   const topology = loaded?.siteId === siteId && status === 'ready' ? loaded.value : null;
   useEffect(() => {
     const controller = new AbortController();
@@ -27,6 +29,20 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
     };
     if (siteId) void poll();
     return () => { controller.abort(); clearTimeout(timer); };
+  }, [api, siteId, refresh]);
+  useEffect(() => {
+    const controller = new AbortController();
+    const poll = async () => {
+      try {
+        const result = await api.rockTelemetry(siteId, controller.signal);
+        if (!controller.signal.aborted) { setTelemetry(result); setTelemetryError(false); }
+      } catch {
+        if (!controller.signal.aborted) { setTelemetry(null); setTelemetryError(true); }
+      }
+    };
+    if (siteId) void poll();
+    const timer = setInterval(() => { if (siteId) void poll(); }, 30000);
+    return () => { controller.abort(); clearInterval(timer); };
   }, [api, siteId, refresh]);
   const time = (value?: string | null) => value ? new Date(value).toLocaleString(lang === 'en' ? 'en-GB' : 'bg-BG') : t('Няма потвърдено съобщение', 'No confirmed message');
   const healthLabel = (item?: DeviceHeartbeat) => healthError ? t('Проверката е недостъпна', 'Status check unavailable')
@@ -51,6 +67,7 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
       <button className="primary-btn" type="button" disabled={status === 'loading'} onClick={() => { setTopology(null); setStatus('loading'); setRefresh(value => value + 1); }}>{t('Обнови', 'Refresh')}</button>
       <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате администраторски достъп до устройствата на този Обект.', 'You do not have administrator access to this Site inventory.') : status === 'unprovisioned' ? t('Инвентарът изисква завършено провизиране и права в OpenRemote.', 'Inventory requires completed provisioning and access in OpenRemote.') : status === 'failed' ? t('OpenRemote инвентарът е недостъпен. Опитайте отново.', 'OpenRemote inventory is unavailable. Please retry.') : ''}</p>
       {topology && <>
+        <RockTelemetryCard telemetry={telemetry} error={telemetryError} lang={lang} />
         {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang} connectionLabel={id => healthLabel(health?.siteId === siteId ? health.items.find(item => item.gatewayId === id) : undefined)}/>}
         <p>{t('Конфигурация', 'Configuration')}: {topology.configuration ? `${topology.configuration.revision} · ${topology.configuration.status}` : t('Няма записана ревизия', 'No saved revision')}</p>
         {!topology.gateways.length && <p>{t('Няма регистрирани шлюзове или нодове.', 'No registered gateways or nodes.')}</p>}
@@ -79,4 +96,18 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
       </>}
     </>}
   </section>;
+}
+
+function RockTelemetryCard({ telemetry, error, lang }: { telemetry: RockTelemetryResponse | null; error: boolean; lang: UiLanguage }) {
+  const t = (bg: string, en: string) => lang === 'en' ? en : bg;
+  const labels: Record<string, string> = { cpuTemperatureC: t('Температура на процесора', 'CPU temperature'), uptimeSeconds: t('Време на работа', 'Uptime'), load1: t('Натоварване (1 мин.)', 'Load (1 min)'), memoryAvailableBytes: t('Свободна памет', 'Available memory'), storageDataFreeBytes: t('Свободно дисково пространство', 'Free storage'), journalSizeBytes: t('Размер на telemetry journal', 'Telemetry journal size') };
+  const unitLabels: Record<string, string> = { Cel: '°C', s: 's', load: '', bytes: 'B' };
+  return <article className="telemetry-card" data-no-translate>
+    <h3>{t('Телеметрия на ROCK Pi', 'ROCK Pi telemetry')}</h3>
+    <p>{error ? t('Телеметрията още не е достъпна.', 'Telemetry is not available yet.') : telemetry?.items.length ? t('Последните записани измервания от OpenRemote.', 'Latest measurements recorded in OpenRemote.') : t('Очаква се първото измерване.', 'Waiting for the first measurement.')}</p>
+    <dl>
+      {telemetry?.items.map(item => { const point = item.points[item.points.length - 1]; return <span key={item.metric}><dt>{labels[item.metric] || item.metric}</dt><dd>{point ? `${point.y.toFixed(item.unit === 'bytes' || item.unit === 's' ? 0 : 1)} ${unitLabels[item.unit] || item.unit}` : '—'}</dd></span>; })}
+    </dl>
+    <small>{t('Другите системни показатели се записват по разрешения sensor profile и ще се добавят към този екран без Grafana.', 'Other system metrics are stored by the approved sensor profile and will appear here without Grafana.')}</small>
+  </article>;
 }
