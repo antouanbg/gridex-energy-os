@@ -2,6 +2,43 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Profile redesign and documentation / Профил и документация — 2026-09-24
+
+Requested: bring Profile into the portal's visual system, remove empty
+placeholders and explain every visible setting. Add Documentation inside the
+account button and contextual links from Profile. The initial first-party
+guide lives at `/help/`; it does not claim the proposed external documentation
+domain is live. Full coverage for EVERY existing menu and submenu is a tracked
+follow-up in `docs/USER_DOCUMENTATION_PLAN.md`, with fields, permissions,
+data provenance, empty/error states and BG/EN acceptance. No main-navigation
+structure changed. Verify desktop/mobile, active login, anonymous guide access,
+deep-link refresh and actual opt-in persistence before claiming acceptance.
+
+Implementation check: local Pages build and changed-file ESLint passed. The
+full Chromium suite passed 38/38, including a new fixture test for signed-in
+Profile, saved opt-in after refresh, documentation deep links, anonymous help
+and 390px mobile menu/overflow. This is fixture evidence, not acceptance in
+the owner's real Keycloak session. `tsc --noEmit` still reports pre-existing
+errors in gateway/supported/API worker outside this change. Publication and
+real-owner visual approval remain pending.
+
+По искане на собственика: Профил да следва дизайна на портала, без празни
+placeholder-и и с обяснение на всяка настройка. „Документация“ е в бутона на
+профила; контекстните линкове водят към първото ръководство `/help/`.
+Предложеният външен домейн още не се представя като активен. Документацията
+за ВСЯКО съществуващо меню и подменю е задача в
+`docs/USER_DOCUMENTATION_PLAN.md`, с полета, права, произход на данните,
+празни/грешни състояния и приемане на BG/EN. Главното меню не е променяно.
+Проверка: desktop/mobile, реален вход, достъп до помощта без вход, refresh на
+дълбок линк и съхранена настройка за имейл.
+
+Проверка: Pages build и ESLint на променените файлове минаха. Пълният
+Chromium набор мина 38/38, включително нов fixture тест за Профил с вход,
+запазена отметка след refresh, директни линкове, помощ без вход и 390px
+мобилно меню/ширина. Това не е проверка с реалната Keycloak сесия на
+собственика. `tsc --noEmit` още пада върху стари грешки в gateway/supported/
+API worker извън промяната. Публикуване и реално визуално одобрение предстоят.
+
 ## Event email preference and Devices warning / Имейли и знак в „Устройства“ — 2026-09-24
 
 EN update: Profile has one persistent checkbox for email on ALL future event

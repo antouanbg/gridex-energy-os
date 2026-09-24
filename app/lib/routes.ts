@@ -5,7 +5,7 @@ export const sectionPaths: Record<string, string> = {
   settlement: '/market/settlement/', automation: '/automation/', loads: '/loads/',
   balance: '/market/balancing/', supported: '/devices/supported/', devices: '/devices/',
   alarms: '/alarms/', reports: '/reports/', settings: '/settings/',
-  plans: '/settings/subscription/', about: '/about/', profile: '/profile/', login: '/login/',
+  plans: '/settings/subscription/', about: '/about/', profile: '/profile/', login: '/login/', help: '/help/',
 };
 const siteViews = new Set(['assets', 'battery', 'schedule', 'automation', 'loads', 'devices']);
 export function sectionHref(view: string, siteId = '', demo = false): string {
