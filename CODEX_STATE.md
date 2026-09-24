@@ -1,5 +1,26 @@
 # Current task
 
+## Devices heartbeat warning / Предупреждение за устройства — 2026-09-24
+
+EN update: Added one persistent future ALL-event email opt-in checkbox to the
+authenticated Profile, off by default and absent from demo. Only heartbeat
+outages are wired today; future producers must honor the same consent. Depends on backend
+PR #33 endpoint; no publication before backend deployment and live checks.
+
+BG обновяване: Добавен е постоянен checkbox в удостоверения Профил за ВСИЧКИ
+бъдещи видове събития, изключен по подразбиране и скрит в демото. Засега
+реално е свързан само heartbeat; бъдещите източници трябва да ползват същото
+съгласие. Зависи от backend
+PR #33; без публикация преди backend внедряване и реална проверка.
+
+EN: Existing Devices navigation item now shows an offline heartbeat badge
+only in authenticated live mode. Local Pages build passed; not published or
+real-owner/mobile accepted. Next: verify live account + phone and publish PR.
+
+BG: Съществуващото меню „Устройства“ вече показва знак за offline heartbeat
+само в удостоверен реален режим. Локалният Pages build мина; няма публикация
+или приемане от реалния собственик/телефон. Следва live проверка и PR.
+
 ## CPU temperature data available / Има данни за CPU температура — 2026-09-24
 
 Supersedes CPU-pending status below. Physical ROCK CPU data are fresh in

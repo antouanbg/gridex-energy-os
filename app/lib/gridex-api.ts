@@ -170,6 +170,8 @@ export type DeviceHeartbeat = {
   heartbeat: number | null; status: 'unknown' | 'online' | 'stale' | 'offline';
 };
 
+export type HeartbeatEmailPreference = { enabled: boolean; email: string | null; scope: 'all_events' };
+
 export type GridexHardwareTopology = {
   inventorySource?: 'openremote';
   inventoryVerifiedAt?: string;
@@ -335,6 +337,18 @@ export class GridexApiClient {
       throw new Error('Invalid device heartbeat response');
     }
     return result;
+  }
+
+  async heartbeatEmailPreference(signal?: AbortSignal): Promise<HeartbeatEmailPreference> {
+    return this.getJson<HeartbeatEmailPreference>('/api/v1/me/email-notifications',signal);
+  }
+
+  async setHeartbeatEmailPreference(enabled: boolean): Promise<HeartbeatEmailPreference> {
+    const response=await this.authorizedFetch('/api/v1/me/email-notifications',{
+      method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled}),
+    });
+    if(!response.ok)throw new GridexApiError(`Heartbeat email preference failed: ${response.status}`,response.status);
+    return response.json();
   }
 
   async rockTelemetry(siteId: string, signal?: AbortSignal): Promise<RockTelemetryResponse> {

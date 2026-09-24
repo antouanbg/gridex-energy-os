@@ -2,6 +2,45 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Event email preference and Devices warning / Имейли и знак в „Устройства“ — 2026-09-24
+
+EN update: Profile has one persistent checkbox for email on ALL future event
+types, off by default, using the verified identity email. It is not per-incident
+approval or a new menu item. Only missed-heartbeat has a connected producer
+today; future producers must honor the same preference. The checkbox is hidden
+in demo. Backend PR #33 provides the general endpoint; publish only after that
+endpoint is deployed. Owner-browser opt-in, cross-Site authorization and a real
+outage remain acceptance gates.
+
+BG обновяване: В Профил има един постоянен checkbox за мейли за ВСИЧКИ бъдещи
+видове събития. Изключен е по подразбиране и използва потвърдения имейл от backend
+идентичността. Това е обща потребителска настройка за всички достъпни Обекти,
+не одобрение за инцидент и не ново меню. В демото checkbox не се показва.
+Endpoint-ът е в backend PR #33; UI не се публикува преди неговото внедряване.
+Засега реален източник има само липсата на heartbeat; бъдещите източници трябва
+да проверяват същата настройка.
+Приемането изисква реален вход, права между Обекти и истински инцидент.
+
+EN: Implemented locally, not published or owner-browser verified. In an
+authenticated live session the existing Devices nav item polls the scoped
+heartbeat API every 10 seconds and shows `!` when an item is offline. No new
+menu item, no demo warning, no fabricated offline status on API error. The
+same nav item serves desktop and mobile; no responsive layout change. Pages
+build and changed-file ESLint passed. Full `tsc --noEmit` still fails on
+pre-existing gateway/supported/API worker errors outside this diff. Next: test
+signed-in real Site and mobile visibility, then publish
+through PR after backend alert activation is coordinated.
+
+BG: Реализирано локално, не е публикувано или проверено в браузъра на
+собственика. В реална удостоверена сесия съществуващото меню „Устройства“
+проверява Site-scoped heartbeat API през 10 секунди и показва `!` при offline.
+Няма ново меню, демо предупреждение или измислен offline при API грешка. Един
+и същ елемент е за desktop и mobile, без промяна в адаптивното оформление.
+Pages build и ESLint на променения файл минаха. Пълният `tsc --noEmit` още
+пада върху стари грешки в gateway/supported/API worker извън тази промяна.
+Следва проверка с реален Обект и на телефон, после PR и
+публикация, съгласувана с backend известията.
+
 ## CPU temperature now reaches history / CPU температурата вече се записва — 2026-09-24
 
 Supersedes the CPU-pending line below. The operator enabled the physical ROCK
