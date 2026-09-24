@@ -19,8 +19,9 @@ full Chromium suite passed 38/38, including a new fixture test for signed-in
 Profile, saved opt-in after refresh, documentation deep links, anonymous help
 and 390px mobile menu/overflow. This is fixture evidence, not acceptance in
 the owner's real Keycloak session. `tsc --noEmit` still reports pre-existing
-errors in gateway/supported/API worker outside this change. Publication and
-real-owner visual approval remain pending.
+errors in gateway/supported/API worker outside this change. PR #47 merged;
+GitHub Pages deployment succeeded. Public `/profile/` and `/help/` returned
+HTTP 200. Real-owner Keycloak visual approval remains pending.
 
 По искане на собственика: Профил да следва дизайна на портала, без празни
 placeholder-и и с обяснение на всяка настройка. „Документация“ е в бутона на
@@ -37,7 +38,9 @@ Chromium набор мина 38/38, включително нов fixture тес
 запазена отметка след refresh, директни линкове, помощ без вход и 390px
 мобилно меню/ширина. Това не е проверка с реалната Keycloak сесия на
 собственика. `tsc --noEmit` още пада върху стари грешки в gateway/supported/
-API worker извън промяната. Публикуване и реално визуално одобрение предстоят.
+API worker извън промяната. PR #47 е слят и GitHub Pages внедряването мина;
+публичните `/profile/` и `/help/` върнаха HTTP 200. Реалното визуално
+одобрение през Keycloak сесията на собственика остава.
 
 ## Event email preference and Devices warning / Имейли и знак в „Устройства“ — 2026-09-24
 

@@ -8,10 +8,18 @@ Complete documentation for each existing menu/submenu is tracked in
 `docs/USER_DOCUMENTATION_PLAN.md`; external docs domain is not live. Preserve
 main navigation. Do not report visual/browser acceptance without testing.
 
+PR #47 merged; Pages deployment succeeded; public `/profile/` and `/help/`
+returned HTTP 200. Fixture browser suite passed 38/38. Owner Keycloak visual
+acceptance and complete guides for other menus remain open.
+
 Собственикът поиска подобрен Профил, обяснения и „Документация“ в бутона на
 профила. Първо ръководство: `/help/`. Покритието на всяко съществуващо
 меню/подменю е задача в `docs/USER_DOCUMENTATION_PLAN.md`; външният домейн
 още не е активен. Пази главното меню и не обявявай визуално приемане без тест.
+
+PR #47 е слят; Pages публикува успешно; `/profile/` и `/help/` върнаха HTTP 200.
+Fixture браузърните тестове минаха 38/38. Остават проверка от собственика с
+реален вход и пълните ръководства за останалите менюта.
 
 ## Devices heartbeat warning / Предупреждение за устройства — 2026-09-24
 
