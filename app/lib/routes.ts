@@ -1,6 +1,6 @@
 // Every section has a stable URL. Site identifiers are context, never authority.
 export const sectionPaths: Record<string, string> = {
-  overview: '/', customers: '/customers/', sites: '/sites/', assets: '/assets/',
+  overview: '/', customers: '/customers/', members: '/customers/users/', sites: '/sites/', assets: '/assets/',
   battery: '/battery/', schedule: '/automation/schedules/', market: '/market/',
   settlement: '/market/settlement/', automation: '/automation/', loads: '/loads/',
   balance: '/market/balancing/', supported: '/devices/supported/', devices: '/devices/',

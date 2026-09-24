@@ -2,6 +2,26 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Invitation submenu / Подменю за покани — 2026-09-24 (staged, not live)
+
+BG: По изрично искане на собственика „Клиенти и договори → Потребители и
+покани“ има собствен URL `/customers/users/`. Само удостоверен администратор
+на организация вижда формата за покана на член с изричен избор на роля и
+разрешени Обекти; получателят приема поканата от „Профил“. Демо режим не
+изпраща имейли. Глобален администратор ще кани първия администратор на нова
+организация от същото място, но тази форма и API още не са включени: чака се
+изборът за OpenRemote realm на новите организации и реален тест с акаунта на
+собственика. Никакви организации или права не се създават само във frontend.
+Build и два Playwright fixture теста минават; няма доказателство за публикуване
+или реален Mailgun/Keycloak тест.
+
+EN: The owner-approved Customers & contracts → Users & invitations submenu
+has its own `/customers/users/` URL. An authenticated organisation admin can
+select a member role and permitted Sites; recipients accept in Profile. Demo
+sends no mail. New-organisation invitations from a global admin remain blocked
+pending the OpenRemote realm decision and real owner-account testing. This is
+staged code, not a live rollout. Build and two mocked browser tests pass.
+
 ## Profile redesign and documentation / Профил и документация — 2026-09-24
 
 Requested: bring Profile into the portal's visual system, remove empty

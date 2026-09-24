@@ -1,5 +1,22 @@
 # Current task
 
+## Invitations / Покани — 2026-09-24
+
+BG: Подготвено е изрично одобреното подменю „Клиенти и договори → Потребители
+и покани“ (`/customers/users/`) за администратори на организация. Поканата
+избира роля и разрешени Обекти; приемането остава в Профил. Build и 2 fixture
+Playwright теста минават. НЕ е публикувано; не е тествано с реален акаунт.
+Поканата за първи администратор на нова организация още няма работещ поток;
+чака решението за OpenRemote realm и backend API.
+
+EN: Approved invitation submenu and member role/Site selection are staged;
+build and two mocked browser tests pass. Not published or owner-tested. The
+global new-organisation invitation needs the realm decision and backend API.
+
+Next: choose OpenRemote realm model, implement and prove the global workflow,
+then real-session/mobile acceptance and publication. Do not treat mocked tests
+as a production result.
+
 ## Profile help and documentation coverage / Помощ и документация — 2026-09-24
 
 Owner requested polished Profile, contextual explanations and a Documentation
