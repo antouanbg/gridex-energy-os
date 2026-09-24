@@ -2,21 +2,23 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
-## Devices menu heartbeat warning / Предупреждение в меню „Устройства“ — 2026-09-24
+## Event email preference and Devices warning / Имейли и знак в „Устройства“ — 2026-09-24
 
-EN update: Profile now has a persistent checkbox to opt in/out of future
-missed-heartbeat emails. It is off by default and uses the verified identity
-email returned by the backend. This is a global user preference for every
-accessible Site, not approval per incident or an extra menu item. The checkbox
-does not appear in demo mode. Backend PR #33 provides the endpoint; the UI
-must not be published before that endpoint is deployed. Owner-browser opt-in,
-cross-Site authorization and a real outage remain acceptance gates.
+EN update: Profile has one persistent checkbox for email on ALL future event
+types, off by default, using the verified identity email. It is not per-incident
+approval or a new menu item. Only missed-heartbeat has a connected producer
+today; future producers must honor the same preference. The checkbox is hidden
+in demo. Backend PR #33 provides the general endpoint; publish only after that
+endpoint is deployed. Owner-browser opt-in, cross-Site authorization and a real
+outage remain acceptance gates.
 
-BG обновяване: В Профил има постоянен checkbox за бъдещи мейли при липса на
-heartbeat. Изключен е по подразбиране и използва потвърдения имейл от backend
+BG обновяване: В Профил има един постоянен checkbox за мейли за ВСИЧКИ бъдещи
+видове събития. Изключен е по подразбиране и използва потвърдения имейл от backend
 идентичността. Това е обща потребителска настройка за всички достъпни Обекти,
 не одобрение за инцидент и не ново меню. В демото checkbox не се показва.
 Endpoint-ът е в backend PR #33; UI не се публикува преди неговото внедряване.
+Засега реален източник има само липсата на heartbeat; бъдещите източници трябва
+да проверяват същата настройка.
 Приемането изисква реален вход, права между Обекти и истински инцидент.
 
 EN: Implemented locally, not published or owner-browser verified. In an

@@ -305,7 +305,7 @@ export default function Home() {
       try{
         const result=await apiClient.deviceHeartbeats(selectedSiteId,controller.signal);
         if(!controller.signal.aborted)setDeviceWarning({siteId:selectedSiteId,warning:result.items.some(item=>item.status==='offline')});
-      }catch{/* Device status is unavailable; do not invent an offline warning. */}
+      }catch{if(!controller.signal.aborted)setDeviceWarning(null);}
     };
     void poll();
     const timer=window.setInterval(()=>void poll(),10000);
@@ -629,11 +629,11 @@ function HeartbeatEmailOptIn({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
     catch{setState('error');}
   };
   return <div className="heartbeat-email-opt-in">
-    <h3>{t('Известия за връзката с устройствата','Device connection alerts')}</h3>
+    <h3>{t('Имейл известия за събития','Email event notifications')}</h3>
     <label><input type="checkbox" checked={preference?.enabled===true} disabled={state!=='ready'||!preference?.email}
       onChange={event=>void change(event.target.checked)}/>
-      <span>{t('Изпращай ми мейл при всяко бъдещо прекъсване на heartbeat','Email me for every future missed-heartbeat event')}</span></label>
-    <p>{t('Един мейл за прекъсване на устройство от Обект, до който имате достъп. Ново известие след възстановяване и ново прекъсване. Можете да изключите по всяко време.','One email per outage of a device in a Site you can access. A new alert follows recovery and another outage. You can turn this off anytime.')}</p>
+      <span>{t('Получавай имейл за всички бъдещи събития','Email me about all future events')}</span></label>
+    <p>{t('Една обща настройка за Вашите обекти. Засега се изпращат известия при прекъсване на heartbeat; следващите видове събития ще използват същия избор. За всяко прекъсване се изпраща само един имейл. Можете да изключите по всяко време.','One setting for your Sites. Missed-heartbeat alerts are available now; future event types will use the same choice. Only one email is sent per outage. You can turn this off anytime.')}</p>
     {preference?.email&&<small>{t('Получател','Recipient')}: {preference.email}</small>}
     <p role="status">{state==='error'?t('Настройката не е достъпна. Опитайте отново след презареждане.','The setting is unavailable. Retry after reloading.'):
       state==='saving'?t('Записване…','Saving…'):state==='loading'?t('Зареждане…','Loading…'):''}</p>

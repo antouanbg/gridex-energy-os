@@ -170,7 +170,7 @@ export type DeviceHeartbeat = {
   heartbeat: number | null; status: 'unknown' | 'online' | 'stale' | 'offline';
 };
 
-export type HeartbeatEmailPreference = { enabled: boolean; email: string | null };
+export type HeartbeatEmailPreference = { enabled: boolean; email: string | null; scope: 'all_events' };
 
 export type GridexHardwareTopology = {
   inventorySource?: 'openremote';
@@ -340,11 +340,11 @@ export class GridexApiClient {
   }
 
   async heartbeatEmailPreference(signal?: AbortSignal): Promise<HeartbeatEmailPreference> {
-    return this.getJson<HeartbeatEmailPreference>('/api/v1/me/heartbeat-email',signal);
+    return this.getJson<HeartbeatEmailPreference>('/api/v1/me/email-notifications',signal);
   }
 
   async setHeartbeatEmailPreference(enabled: boolean): Promise<HeartbeatEmailPreference> {
-    const response=await this.authorizedFetch('/api/v1/me/heartbeat-email',{
+    const response=await this.authorizedFetch('/api/v1/me/email-notifications',{
       method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled}),
     });
     if(!response.ok)throw new GridexApiError(`Heartbeat email preference failed: ${response.status}`,response.status);
