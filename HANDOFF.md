@@ -10,8 +10,10 @@ in °C, and one-minute load as a number explicitly described as NOT a CPU
 percentage. Each reading includes its recorded time and a short explanation.
 Last recorded values are not labelled live merely because the page loaded;
 connection state remains separate. Formatter unit tests and local Pages build
-passed. This is local work only: external authenticated owner/browser review
-and publication are pending. No data, units, sensor configuration or menu
+passed. Commit `a8a3b17` is pushed on `docs/profile-deployment-evidence`,
+but no PR or main deployment exists yet: GitHub CLI/browser are not signed in,
+and direct main push was denied as bypassing the PR process. External
+authenticated owner/browser review is also pending. No data, units, sensor configuration or menu
 structure changed.
 
 BG: „Устройства“ вече форматира записаните в OpenRemote ROCK измервания:
@@ -20,8 +22,11 @@ BG: „Устройства“ вече форматира записаните 
 че НЕ е процент от CPU. Всяка стойност има време на измерване и кратко
 обяснение. Последна записана стойност не се обявява за „на живо“ само защото
 страницата е заредила; статусът на връзката остава отделен. Unit тестовете
-на форматера и локалният Pages build минаха. Промяната е само локална:
-публикуване и проверка през реален собственически браузър предстоят. Не са
+на форматера и локалният Pages build минаха. Commit `a8a3b17` е публикуван
+само в клона `docs/profile-deployment-evidence`; няма PR или внедряване в main,
+защото GitHub CLI/браузърът нямат активен вход, а директният push към main е
+отказан като заобикаляне на PR процеса. Проверка през реален собственически
+браузър предстои. Не са
 променени данни, единици, настройки на сензори или структура на менюто.
 
 ## Device loss email wording — 2026-09-24 / Текст за загубена връзка
