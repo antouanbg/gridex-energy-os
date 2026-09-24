@@ -2,6 +2,22 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Realm decision / Решение за realm — 2026-09-24
+
+BG: Собственикът потвърди отделен OpenRemote realm за ВСЯКА нова клиентска
+организация; текущият `gridex` е само пилотен. Без промяна към общ realm или
+локално активиране без изрично ново одобрение. Глобалната покана през
+„Клиенти и договори → Потребители и покани“ остава незавършена, докато
+backend реализира и тества multi-realm провизиране, вход и първи администратор.
+Подменюто за покани към членове на съществуваща организация е подготвено,
+но не е публикувано от този клон.
+
+EN: The owner approved one OpenRemote realm for each new customer
+organisation; `gridex` is only the pilot. Never silently switch to a shared
+realm or activate local-only organisations. Global invitations need tested
+multi-realm provisioning/login and first-admin binding; existing-member UI is
+staged but not published from this branch.
+
 ## Invitation submenu / Подменю за покани — 2026-09-24 (staged, not live)
 
 BG: По изрично искане на собственика „Клиенти и договори → Потребители и
@@ -10,7 +26,7 @@ BG: По изрично искане на собственика „Клиент
 разрешени Обекти; получателят приема поканата от „Профил“. Демо режим не
 изпраща имейли. Глобален администратор ще кани първия администратор на нова
 организация от същото място, но тази форма и API още не са включени: чака се
-изборът за OpenRemote realm на новите организации и реален тест с акаунта на
+провизирането на отделен OpenRemote realm за новите организации и реален тест с акаунта на
 собственика. Никакви организации или права не се създават само във frontend.
 Build и два Playwright fixture теста минават; няма доказателство за публикуване
 или реален Mailgun/Keycloak тест.
@@ -19,7 +35,7 @@ EN: The owner-approved Customers & contracts → Users & invitations submenu
 has its own `/customers/users/` URL. An authenticated organisation admin can
 select a member role and permitted Sites; recipients accept in Profile. Demo
 sends no mail. New-organisation invitations from a global admin remain blocked
-pending the OpenRemote realm decision and real owner-account testing. This is
+pending per-organisation OpenRemote realm provisioning and real owner-account testing. This is
 staged code, not a live rollout. Build and two mocked browser tests pass.
 
 ## Profile redesign and documentation / Профил и документация — 2026-09-24

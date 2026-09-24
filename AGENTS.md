@@ -1,5 +1,25 @@
 # GrideX Energy OS — Working Rules
 
+## Organisation isolation / Изолация на организациите — 2026-09-24
+
+Owner-approved invariant: one OpenRemote realm (tenant) for EACH customer
+organisation. The current `gridex` realm is the pilot, not a shared realm for
+new customers. The frontend must neither present local-only organisations as
+active nor grant cross-organisation access. Platform administration may start
+new-organisation invitations across realms; organisation administrators invite
+only within their own realm and authorised Sites. Multi-realm login and
+onboarding are not implemented merely by this documentation. Do not switch to
+a shared realm or alter this boundary without explicit owner approval.
+
+Потвърдено от собственика: ОТДЕЛЕН OpenRemote realm (tenant) за ВСЯКА клиентска
+организация. `gridex` е пилотният realm, не общ realm за новите клиенти.
+Frontend не представя местна/непровизирана организация като активна и не дава
+достъп между организации. Глобалният администратор започва покани за нови
+организации; администраторът на организация кани само в собствения realm и за
+разрешените Обекти. Multi-realm входът/поканите още не са реализирани само с
+този документ. Не преминавай към общ realm и не променяй границата без
+изрично одобрение на собственика.
+
 ## Strategic invariant: OpenRemote-only inventory / Стратегическо правило — 2026-09-20
 
 Owner-confirmed: OpenRemote is the ONLY authoritative place for all operational

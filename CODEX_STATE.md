@@ -1,5 +1,15 @@
 # Current task
 
+## Owner realm decision / Решение за realm — 2026-09-24
+
+BG: ВСЯКА нова клиентска организация има отделен OpenRemote realm; `gridex`
+остава пилотен. Без промяна без изрично одобрение. Глобалната покана и
+multi-realm входът още не са реализирани.
+
+EN: Each new customer organisation gets its own OpenRemote realm. `gridex` is
+the pilot only. Do not change this without explicit owner approval. Global
+invitation and multi-realm login remain outstanding.
+
 ## Invitations / Покани — 2026-09-24
 
 BG: Подготвено е изрично одобреното подменю „Клиенти и договори → Потребители
@@ -7,13 +17,13 @@ BG: Подготвено е изрично одобреното подменю �
 избира роля и разрешени Обекти; приемането остава в Профил. Build и 2 fixture
 Playwright теста минават. НЕ е публикувано; не е тествано с реален акаунт.
 Поканата за първи администратор на нова организация още няма работещ поток;
-чака решението за OpenRemote realm и backend API.
+чака реализацията на отделен OpenRemote realm и backend API.
 
 EN: Approved invitation submenu and member role/Site selection are staged;
 build and two mocked browser tests pass. Not published or owner-tested. The
-global new-organisation invitation needs the realm decision and backend API.
+global new-organisation invitation needs per-realm provisioning and backend API.
 
-Next: choose OpenRemote realm model, implement and prove the global workflow,
+Next: implement the approved per-organisation realm model and prove the global workflow,
 then real-session/mobile acceptance and publication. Do not treat mocked tests
 as a production result.
 
