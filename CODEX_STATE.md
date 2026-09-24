@@ -4,22 +4,23 @@
 
 EN update: Added one persistent future ALL-event email opt-in checkbox to the
 authenticated Profile, off by default and absent from demo. Only heartbeat
-outages are wired today; future producers must honor the same consent. Depends on backend
-PR #33 endpoint; no publication before backend deployment and live checks.
+outages are wired today; future producers must honor the same consent. Backend
+PR #33 is merged/deployed; frontend PR #45 merged and Pages deployment passed.
+Real owner-browser opt-in remains unverified.
 
 BG обновяване: Добавен е постоянен checkbox в удостоверения Профил за ВСИЧКИ
 бъдещи видове събития, изключен по подразбиране и скрит в демото. Засега
 реално е свързан само heartbeat; бъдещите източници трябва да ползват същото
-съгласие. Зависи от backend
-PR #33; без публикация преди backend внедряване и реална проверка.
+съгласие. Backend PR #33 е слят/внедрен, frontend PR #45 е слят и Pages е
+публикуван. Реалната проверка с вход на собственика остава.
 
 EN: Existing Devices navigation item now shows an offline heartbeat badge
-only in authenticated live mode. Local Pages build passed; not published or
-real-owner/mobile accepted. Next: verify live account + phone and publish PR.
+only in authenticated live mode. Published through PR #45; not yet
+real-owner/mobile accepted. Next: verify live account + phone.
 
 BG: Съществуващото меню „Устройства“ вече показва знак за offline heartbeat
-само в удостоверен реален режим. Локалният Pages build мина; няма публикация
-или приемане от реалния собственик/телефон. Следва live проверка и PR.
+само в удостоверен реален режим. Публикувано през PR #45; приемането от
+реалния собственик/телефон остава. Следва live проверка.
 
 ## CPU temperature data available / Има данни за CPU температура — 2026-09-24
 
