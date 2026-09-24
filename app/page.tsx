@@ -520,7 +520,7 @@ export default function Home() {
         {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify}/>}
-        {view === "profile" && <UserProfile lang={lang} user={sessionUser} navigate={navigate} signOut={signOut}/>}
+        {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
         {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang}/>}
             </>}
@@ -606,8 +606,36 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
   </div>;
 }
 
-function UserProfile({lang,user,navigate,signOut}:{lang:UiLanguage;user:DemoUser|null;navigate:(id:string)=>void;signOut:()=>void}) {
+function UserProfile({lang,user,api,live,navigate,signOut}:{lang:UiLanguage;user:DemoUser|null;api:GridexApiClient;live:boolean;navigate:(id:string)=>void;signOut:()=>void}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   if (!user) return <section className="empty-profile card" data-no-translate><h2>{t("Няма активна сесия","No active session")}</h2><button className="primary-btn" onClick={()=>navigate("login")}>{t("Към входа","Go to sign in")}</button></section>;
-  return <section className="card" data-no-translate><h2>{lang==='en'?user.nameEn:user.nameBg}</h2><p>{user.email}</p><p>{lang==='en'?user.roleEn:user.roleBg}</p><button onClick={()=>navigate('sites')}>{t('Моите обекти','My sites')}</button><button onClick={signOut}>{t('Изход','Sign out')}</button><p>{t('Статистиката и историята на действията очакват свързване на реални данни.','Statistics and activity history require real data integration.')}</p></section>;
+  return <section className="card" data-no-translate><h2>{lang==='en'?user.nameEn:user.nameBg}</h2><p>{user.email}</p><p>{lang==='en'?user.roleEn:user.roleBg}</p>{live&&<HeartbeatEmailOptIn api={api} lang={lang}/>}<button onClick={()=>navigate('sites')}>{t('Моите обекти','My sites')}</button><button onClick={signOut}>{t('Изход','Sign out')}</button><p>{t('Статистиката и историята на действията очакват свързване на реални данни.','Statistics and activity history require real data integration.')}</p></section>;
+}
+
+function HeartbeatEmailOptIn({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
+  const [preference,setPreference]=useState<{enabled:boolean;email:string|null}|null>(null);
+  const [state,setState]=useState<'loading'|'ready'|'error'|'saving'>('loading');
+  useEffect(()=>{
+    const controller=new AbortController();
+    void api.heartbeatEmailPreference(controller.signal).then(value=>{
+      if(!controller.signal.aborted){setPreference(value);setState('ready');}
+    }).catch(()=>{if(!controller.signal.aborted)setState('error');});
+    return()=>controller.abort();
+  },[api]);
+  const t=(bg:string,en:string)=>lang==='en'?en:bg;
+  const change=async(enabled:boolean)=>{
+    setState('saving');
+    try{setPreference(await api.setHeartbeatEmailPreference(enabled));setState('ready');}
+    catch{setState('error');}
+  };
+  return <div className="heartbeat-email-opt-in">
+    <h3>{t('Известия за връзката с устройствата','Device connection alerts')}</h3>
+    <label><input type="checkbox" checked={preference?.enabled===true} disabled={state!=='ready'||!preference?.email}
+      onChange={event=>void change(event.target.checked)}/>
+      <span>{t('Изпращай ми мейл при всяко бъдещо прекъсване на heartbeat','Email me for every future missed-heartbeat event')}</span></label>
+    <p>{t('Един мейл за прекъсване на устройство от Обект, до който имате достъп. Ново известие след възстановяване и ново прекъсване. Можете да изключите по всяко време.','One email per outage of a device in a Site you can access. A new alert follows recovery and another outage. You can turn this off anytime.')}</p>
+    {preference?.email&&<small>{t('Получател','Recipient')}: {preference.email}</small>}
+    <p role="status">{state==='error'?t('Настройката не е достъпна. Опитайте отново след презареждане.','The setting is unavailable. Retry after reloading.'):
+      state==='saving'?t('Записване…','Saving…'):state==='loading'?t('Зареждане…','Loading…'):''}</p>
+  </div>;
 }

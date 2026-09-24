@@ -4,6 +4,21 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## Devices menu heartbeat warning / Предупреждение в меню „Устройства“ — 2026-09-24
 
+EN update: Profile now has a persistent checkbox to opt in/out of future
+missed-heartbeat emails. It is off by default and uses the verified identity
+email returned by the backend. This is a global user preference for every
+accessible Site, not approval per incident or an extra menu item. The checkbox
+does not appear in demo mode. Backend PR #33 provides the endpoint; the UI
+must not be published before that endpoint is deployed. Owner-browser opt-in,
+cross-Site authorization and a real outage remain acceptance gates.
+
+BG обновяване: В Профил има постоянен checkbox за бъдещи мейли при липса на
+heartbeat. Изключен е по подразбиране и използва потвърдения имейл от backend
+идентичността. Това е обща потребителска настройка за всички достъпни Обекти,
+не одобрение за инцидент и не ново меню. В демото checkbox не се показва.
+Endpoint-ът е в backend PR #33; UI не се публикува преди неговото внедряване.
+Приемането изисква реален вход, права между Обекти и истински инцидент.
+
 EN: Implemented locally, not published or owner-browser verified. In an
 authenticated live session the existing Devices nav item polls the scoped
 heartbeat API every 10 seconds and shows `!` when an item is offline. No new

@@ -2,6 +2,14 @@
 
 ## Devices heartbeat warning / Предупреждение за устройства — 2026-09-24
 
+EN update: Added persistent future heartbeat-email opt-in checkbox to the
+authenticated Profile, off by default and absent from demo. Depends on backend
+PR #33 endpoint; no publication before backend deployment and live checks.
+
+BG обновяване: Добавен е постоянен checkbox в удостоверения Профил за бъдещи
+heartbeat мейли, изключен по подразбиране и скрит в демото. Зависи от backend
+PR #33; без публикация преди backend внедряване и реална проверка.
+
 EN: Existing Devices navigation item now shows an offline heartbeat badge
 only in authenticated live mode. Local Pages build passed; not published or
 real-owner/mobile accepted. Next: verify live account + phone and publish PR.
