@@ -65,6 +65,13 @@ function keycloakServerUrl(issuer: string): string {
   return issuer.slice(0, index);
 }
 
+function authRedirect(config: GridexRuntimeConfig): string {
+  const url = new URL('/', window.location.origin);
+  // Keep the tenant hint in the callback even when browser storage is denied.
+  if (config.realm !== 'gridex') url.searchParams.set('realm', config.realm);
+  return url.toString();
+}
+
 function client(config: GridexRuntimeConfig): Keycloak {
   if (!keycloak) {
     keycloak = new Keycloak({
@@ -88,7 +95,7 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
     // Top-level SSO restores a server session without relying on third-party cookies.
     ...(!fresh && restore ? { onLoad: 'check-sso' as const } : {}),
     checkLoginIframe: false,
-    redirectUri: `${window.location.origin}/`,
+    redirectUri: authRedirect(config),
   }), Math.max(1000,Math.min(config.backendTimeoutMs||5000,15000))).catch(error => {
     if (keycloak === instance) {
       keycloak = undefined;
@@ -99,7 +106,7 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
   const authenticated = await initialisation;
   if(locallyEnded||keycloak!==instance)throw new GridexSessionExpiredError();
   if(fresh) {
-    await instance.login({redirectUri:`${window.location.origin}/`,prompt:'login',maxAge:0,scope:'openid profile email'});
+    await instance.login({redirectUri:authRedirect(config),prompt:'login',maxAge:0,scope:'openid profile email'});
     return null;
   }
   restoreReturnPath();
@@ -115,7 +122,7 @@ export async function gridexLogin(config: GridexRuntimeConfig, fresh = false): P
   const instance = client(config);
   saveReturnPath();
   await instance.login({
-    redirectUri: `${window.location.origin}/`,
+    redirectUri: authRedirect(config),
     scope: "openid profile email",
     ...((fresh || requiresFreshLogin()) ? { prompt: 'login' as const, maxAge: 0 } : {}),
   });
@@ -124,7 +131,7 @@ export async function gridexLogin(config: GridexRuntimeConfig, fresh = false): P
 export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
-  const logoutUrl=instance.createLogoutUrl({redirectUri:`${window.location.origin}/`});
+  const logoutUrl=instance.createLogoutUrl({redirectUri:authRedirect(config)});
   forgetSession();
   clearGridexSession();
   try {localStorage.setItem(logoutSignalKey,crypto.randomUUID());}catch{/* Other tabs also verify server identity. */}

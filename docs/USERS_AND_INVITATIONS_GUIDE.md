@@ -1,8 +1,9 @@
 # Users & invitations / Потребители и покани
 
-Status / Статус: prepared guide for the unpublished
-`/customers/users/` submenu. This page is not evidence that the feature is
-available on `gridex.tech`.
+Status / Статус: guide for the staged `/customers/users/` submenu. The
+new-organisation form remains disabled until dedicated realm setup and email
+delivery are configured and accepted in a real session. This page is not
+evidence that the feature is available on `gridex.tech`.
 
 ## Български
 
@@ -10,6 +11,15 @@ available on `gridex.tech`.
 `/customers/users/`. Менюто е за влязъл администратор на организация. В демо
 режим се показва само обяснение и не се изпраща поща. Получателят вижда и
 приема чакащите покани в „Профил“, не в административния екран.
+
+Глобалният администратор вижда допълнителна форма „Нова организация“ тук.
+Въвежда име, уникален кратък код (realm) и имейл на първия администратор.
+Ако сървърът не е подготвен, полетата са изключени. При успешно изпращане
+се създава отделен OpenRemote realm, но организацията и правата НЕ се
+активират, преди поканеният да потвърди имейла, да влезе в своя realm и
+да приеме поканата от „Профил“. Нужен е скорошен вход на глобалния админ.
+„Последни покани“ показва състояния и позволява отмяна на чакаща покана.
+При грешка не изпращайте нова покана с друг код, преди съгласуване.
 
 За покана на член избери организацията, въведи имейла, избери роля от падащото
 меню и маркирай поне един разрешен Обект. Наличните роли са „Наблюдател“
@@ -26,8 +36,8 @@ available on `gridex.tech`.
 услуга не приемай, че писмото е изпратено; обнови и провери състоянието.
 Невлязъл потребител и потребител без администраторски права не могат да
 изпращат покани. Глобалната покана за първи администратор на **нова**
-организация още не е активна: новата организация трябва да има собствен
-OpenRemote realm, чието провизиране и multi-realm вход предстоят.
+организация е подготвена в кода, но реално изпращане и приемане още не са
+потвърдени с нова организация.
 
 ## English
 
@@ -35,6 +45,15 @@ OpenRemote realm, чието провизиране и multi-realm вход пр
 `/customers/users/`. The menu is for signed-in organisation administrators.
 Demo shows an explanation only and sends no email. Recipients view and accept
 pending invitations in Profile, not on the administrative screen.
+
+A platform administrator sees an additional “New organisation” form here:
+organisation name, unique short realm code and first administrator's email.
+It stays disabled until dedicated setup and email delivery are ready. Sending
+creates a separate OpenRemote realm, but organisation and rights become active
+only after the recipient verifies their email, signs in to that realm and
+accepts in Profile. A recent admin sign-in is required. “Recent invitations”
+shows state and can revoke a pending request. If delivery fails, do not retry
+under another realm code before reconciliation.
 
 To invite a member, choose the organisation, enter an email, select a role
 from the dropdown and check at least one permitted Site. Available roles are
@@ -50,5 +69,5 @@ Wait for rights, Sites and invitations to load. With no available Sites,
 sending is disabled. On an error or unavailable service, do not assume email
 was sent; refresh and verify state. Anonymous and non-admin users cannot send
 invitations. The global invitation for the first administrator of a **new**
-organisation is not active yet: every new organisation requires its own
-OpenRemote realm, and provisioning/multi-realm login remain to be implemented.
+organisation is staged, but real delivery and acceptance with a new tenant
+remain unverified.

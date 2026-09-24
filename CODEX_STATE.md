@@ -1,5 +1,21 @@
 # Current task
 
+## Global admin invitation implementation / Покана от глобален администратор — 2026-09-24
+
+BG: Подготвена е формата в одобреното `/customers/users/` и приемането в
+Профил с избор на отделен realm в URL. `gridex` остава пилотният realm и
+глобалният администратор не се премества. Chromium тестовете са 41/41
+(включително три fixture теста за покани);
+реално изпращане/вход и публикуване не са потвърдени. Backend setup е opt-in
+и изисква отделен master client, SMTP, миграция 012 и owner subject.
+
+EN: The approved submenu now stages a first-admin invitation form and Profile
+acceptance with an explicit realm URL. The platform admin remains in pilot
+`gridex`. Chromium checks are 41/41 (including three mocked invitation
+checks), but real delivery/sign-in and
+publication are unverified. Backend activation is opt-in and requires a
+dedicated master client, SMTP, migration 012 and verified owner subject.
+
 ## Mandatory menu documentation / Задължителна документация за меню — 2026-09-24
 
 BG: Собственикът изисква всяка промяна на меню/подменю да върви с BG/EN

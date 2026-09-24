@@ -2,6 +2,29 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Global organisation invitations — 2026-09-24 (staged)
+
+BG: По изричното решение на собственика глобалният администратор остава в
+пилотния `gridex` realm. В одобреното подменю `/customers/users/` е
+подготвена отделна форма за първия администратор на нова организация. URL
+`?realm=<код>` избира само предварително разрешен realm на същия auth origin;
+пренасочването при вход пази realm параметъра. Поканеният приема в „Профил“.
+Демо не изпраща нищо. Chromium наборът минава 41/41 (включително три fixture
+теста за покани), но реално изпращане,
+първи вход, роли и изолация на нов realm още не са доказани. Функцията остава
+изключена до dedicated master setup client, SMTP за новите realm-и, проверен
+owner subject, backend миграция 012 и реално приемане. Не твърди, че е live.
+
+EN: The platform administrator stays in the pilot `gridex` realm. The approved
+`/customers/users/` submenu has a separate first-admin invitation form.
+`?realm=<slug>` selects only an allowed realm at the configured auth origin;
+the login redirect preserves that hint. Acceptance lives in Profile. Demo
+sends nothing. The Chromium suite passes 41/41 (including three mocked
+invitation tests), but real delivery, first
+login, roles and tenant isolation are unverified. Keep disabled until the
+dedicated master setup client, per-realm SMTP, verified owner subject, backend
+migration 012 and real acceptance are ready. Not a live claim.
+
 ## Menu documentation gate / Документация за менюта — 2026-09-24
 
 BG: Собственикът изисква при всяка промяна по меню или подменю едновременно да

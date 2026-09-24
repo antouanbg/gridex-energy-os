@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { GridexApiError, type GridexApiClient, type GridexUser, type GridexSite, type GridexInvitation } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
+import { OrganisationInvitationAdmin, OrganisationInvitationAcceptance } from './organisation-invitations';
 
 const copy = {
   en: { title: 'Organisation access', manageTitle: 'Users & invitations', loading: 'Loading access…', unavailable: 'Email invitations are not enabled yet. Mailgun and identity setup must be completed.',
@@ -9,14 +10,14 @@ const copy = {
     invite: 'Invite by email', email: 'Work email', org: 'Organisation', role: 'Role', sites: 'Permitted sites', send: 'Send invitation', accept: 'Accept invitation',
     accepted: 'Invitation accepted. Reload to load your sites.', reload: 'Reload portal', sent: 'Email dispatch confirmed. Membership starts only after acceptance.',
     revoke: 'Revoke invitation', revoked: 'Invitation revoked.', pending: 'Your invitations', expiry: 'Expires', busy: 'Working…',
-    noadmin: 'Only an organisation administrator can invite members.', globalPending: 'New-organisation invitations are not active yet. OpenRemote organisation provisioning must be completed first.', noSites: 'No sites are available for this organisation.',
+    noadmin: 'Only an organisation administrator can invite members.', noSites: 'No sites are available for this organisation.',
     viewer: 'Viewer — read only', operator: 'Operator — operational actions', energy_manager: 'Energy manager — strategies and configuration', integrator: 'Integrator — device configuration' },
   bg: { title: 'Достъп до организации', manageTitle: 'Потребители и покани', loading: 'Зареждане на правата…', unavailable: 'Поканите по имейл още не са включени. Нужни са Mailgun и настройки за идентификация.',
     failed: 'Заявката е неуспешна. Обновете и опитайте пак; не приемайте, че имейлът е изпратен.', empty: 'Няма чакащи покани. Самата регистрация не дава достъп до обекти.',
     invite: 'Покана по имейл', email: 'Служебен имейл', org: 'Организация', role: 'Роля', sites: 'Разрешени обекти', send: 'Изпрати покана', accept: 'Приеми покана',
     accepted: 'Поканата е приета. Презаредете, за да заредите обектите.', reload: 'Презареди портала', sent: 'Изпращането е потвърдено. Членството започва само след приемане.',
     revoke: 'Отмени поканата', revoked: 'Поканата е отменена.', pending: 'Вашите покани', expiry: 'Валидна до', busy: 'Обработка…',
-    noadmin: 'Само администратор на организация може да кани членове.', globalPending: 'Поканите за нова организация още не са активни. Първо трябва да се завърши провизирането в OpenRemote.', noSites: 'Няма налични обекти за тази организация.',
+    noadmin: 'Само администратор на организация може да кани членове.', noSites: 'Няма налични обекти за тази организация.',
     viewer: 'Наблюдател — само четене', operator: 'Оператор — оперативни действия', energy_manager: 'Енергиен мениджър — стратегии и конфигурация', integrator: 'Интегратор — настройки на устройства' },
 };
 const roles = ['viewer', 'operator', 'energy_manager', 'integrator'] as const;
@@ -64,9 +65,8 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
   }
   const admins = me?.memberships?.filter(m => m.role === 'administrator') ?? [];
   const visibleSites = sites.filter(s => s.organisationId === org);
-  return <section className="card config-card" data-no-translate aria-label={mode==='manage'?t.manageTitle:t.title}>
+  return <><section className="card config-card" data-no-translate aria-label={mode==='manage'?t.manageTitle:t.title}>
     <h2>{mode==='manage'?t.manageTitle:t.title}</h2>
-    {mode==='manage' && me?.permissions.includes('platform:manage') && admins.length>0 && <p>{t.globalPending}</p>}
     {loading && <p role="status">{t.loading}</p>}
     {notice && <p role="status">{t[notice]}</p>}
     {!loading && <>
@@ -82,7 +82,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         })}>{busy ? t.busy : t.accept}</button>
       </article>)}
       {accepted && <button type="button" className="secondary-btn" onClick={() => window.location.reload()}>{t.reload}</button>}</>}
-      {mode==='manage'&&(!admins.length ? <p>{me?.permissions.includes('platform:manage') ? t.globalPending : t.noadmin}</p> : <form onSubmit={event => {
+      {mode==='manage'&&(!admins.length ? !me?.permissions.includes('platform:manage') && <p>{t.noadmin}</p> : <form onSubmit={event => {
         event.preventDefault();
         if (!available || !selected.length) return;
         void action(async () => {
@@ -111,5 +111,8 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         setSent(null); setNotice('revoked');
       })}>{t.revoke}</button>}
     </>}
-  </section>;
+  </section>
+    {mode==='manage'&&me?.permissions.includes('platform:manage')&&<OrganisationInvitationAdmin api={api} lang={lang}/>}
+    {mode==='accept'&&<OrganisationInvitationAcceptance api={api} lang={lang}/>}
+  </>;
 }
