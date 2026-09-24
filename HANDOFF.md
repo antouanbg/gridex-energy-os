@@ -2,6 +2,12 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## PR reconciliation checkpoint / Проверка на PR — 2026-09-24
+
+PR #49: latest main incorporated; lint has zero errors and two existing image warnings; Pages build and 41/41 Chromium tests passed locally. GitHub CI/merge remain separate checks. Older PRs #11–#14 and #41 conflict with current code or decision documents; do not overwrite newer navigation, session or inventory work. Reconcile these separately. New-organisation onboarding still requires backend activation and real-user acceptance.
+
+PR #49: последният main е включен; lint без грешки и с две съществуващи image предупреждения; Pages build и 41/41 Chromium теста минаха локално. GitHub CI/merge са отделни проверки. Старите PR #11–#14 и #41 конфликтуват с текущ код или решения; без презаписване на новата навигация, сесии и инвентар. Следва отделно съгласуване. Новите организации още изискват backend активиране и реално потребителско приемане.
+
 ## Existing owner clarification / Съществуващ собственик — 2026-09-24
 
 Live backend and Phase2 history confirm `antouan.bg@gmail.com` already
