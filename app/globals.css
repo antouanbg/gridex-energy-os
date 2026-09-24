@@ -15,6 +15,14 @@
 .translation-suggestion>strong { font-size:16px; }
 .translation-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
 .translation-suggestion p { color:#53685c; line-height:1.6; max-width:80ch; overflow-wrap:anywhere; }
+.device-inventory .telemetry-card { border-color:#cfe7d7; background:linear-gradient(145deg,#f0faf3,#fff 72%); }
+.device-inventory .rock-metric-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:16px 0; }
+.device-inventory .rock-metric { min-width:0; padding:16px; border:1px solid #dcebe0; border-radius:12px; background:#fff; }
+.device-inventory .rock-metric dt { color:#4e695a; font-size:13px; font-weight:700; }
+.device-inventory .rock-metric dd { margin:8px 0; color:#143f31; font-size:clamp(20px,2vw,28px); line-height:1.2; font-weight:800; overflow-wrap:anywhere; }
+.device-inventory .rock-metric p { margin:0 0 12px; color:#5d7567; font-size:12px; line-height:1.5; }
+.device-inventory .rock-metric small { color:#75877c; font-size:11px; }
+@media (max-width:680px) { .device-inventory .rock-metric-grid { grid-template-columns:1fr; } }
 /* Live provisioning uses the existing GrideX settings/Edge visual language.
    Mobile remains unchanged until owner approval. */
 @media (min-width:681px) {

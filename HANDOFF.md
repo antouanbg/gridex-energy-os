@@ -2,6 +2,42 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Human-readable ROCK telemetry — 2026-09-24 / Разбираема телеметрия на ROCK
+
+EN: Devices now formats OpenRemote-recorded ROCK measurements for people:
+uptime as days/hours/minutes, byte counts as decimal kB/MB/GB, temperature
+in °C, and one-minute load as a number explicitly described as NOT a CPU
+percentage. Each reading includes its recorded time and a short explanation.
+Last recorded values are not labelled live merely because the page loaded;
+connection state remains separate. Formatter unit tests and local Pages build
+passed. This is local work only: external authenticated owner/browser review
+and publication are pending. No data, units, sensor configuration or menu
+structure changed.
+
+BG: „Устройства“ вече форматира записаните в OpenRemote ROCK измервания:
+време на работа в дни/часове/минути, байтове като десетични кБ/МБ/ГБ,
+температура в °C, а едноминутното натоварване като число с изрично пояснение,
+че НЕ е процент от CPU. Всяка стойност има време на измерване и кратко
+обяснение. Последна записана стойност не се обявява за „на живо“ само защото
+страницата е заредила; статусът на връзката остава отделен. Unit тестовете
+на форматера и локалният Pages build минаха. Промяната е само локална:
+публикуване и проверка през реален собственически браузър предстоят. Не са
+променени данни, единици, настройки на сензори или структура на менюто.
+
+## Device loss email wording — 2026-09-24 / Текст за загубена връзка
+
+EN: The Profile opt-in now explicitly names ROCK Pi and ESP32 connection loss;
+the Profile guide explains independent incidents and suppression of duplicate
+ESP mail when ROCK itself is offline. Local Pages build passed. This wording is
+not yet published; live owner opt-in and physical outage/recovery still need
+acceptance. No menu structure changed.
+
+BG: Настройката в Профил вече изрично назовава загуба на връзка с ROCK Pi и
+ESP32; ръководството обяснява отделните инциденти и липсата на дублиран ESP
+имейл при спрял ROCK. Локалното Pages изграждане мина. Текстът още не е
+публикуван; реално включване от собственика и физически тест на прекъсване/
+възстановяване предстоят. Менюто не е променено.
+
 ## Profile redesign and documentation / Профил и документация — 2026-09-24
 
 Requested: bring Profile into the portal's visual system, remove empty

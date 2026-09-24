@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { DeviceHeartbeat, GridexApiClient, GridexHardwareTopology, RockTelemetryResponse } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
+import { formatRockMetric, formatRockMetricTime, rockMetricDescription, rockMetricOrder } from '../lib/telemetry-display';
 import { DeviceSetupWizard } from './device-setup';
 
 export function DeviceInformation({ api, siteId, lang, configure = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean }) {
@@ -100,14 +101,26 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
 
 function RockTelemetryCard({ telemetry, error, lang }: { telemetry: RockTelemetryResponse | null; error: boolean; lang: UiLanguage }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
-  const labels: Record<string, string> = { cpuTemperatureC: t('Температура на процесора', 'CPU temperature'), uptimeSeconds: t('Време на работа', 'Uptime'), load1: t('Натоварване (1 мин.)', 'Load (1 min)'), memoryAvailableBytes: t('Свободна памет', 'Available memory'), storageDataFreeBytes: t('Свободно дисково пространство', 'Free storage'), journalSizeBytes: t('Размер на telemetry journal', 'Telemetry journal size') };
-  const unitLabels: Record<string, string> = { Cel: '°C', s: 's', load: '', bytes: 'B' };
+  const items = [...(telemetry?.items || [])].sort((a, b) => {
+    const rank = (metric: string) => { const index = rockMetricOrder.findIndex(value => value === metric); return index < 0 ? rockMetricOrder.length : index; };
+    return rank(a.metric) - rank(b.metric);
+  });
   return <article className="telemetry-card" data-no-translate>
     <h3>{t('Телеметрия на ROCK Pi', 'ROCK Pi telemetry')}</h3>
     <p>{error ? t('Телеметрията още не е достъпна.', 'Telemetry is not available yet.') : telemetry?.items.length ? t('Последните записани измервания от OpenRemote.', 'Latest measurements recorded in OpenRemote.') : t('Очаква се първото измерване.', 'Waiting for the first measurement.')}</p>
-    <dl>
-      {telemetry?.items.map(item => { const point = item.points.reduce<(typeof item.points)[number] | undefined>((latest, current) => !latest || current.x > latest.x ? current : latest, undefined); return <span key={item.metric}><dt>{labels[item.metric] || item.metric}</dt><dd>{point ? `${point.y.toFixed(item.unit === 'bytes' || item.unit === 's' ? 0 : 1)} ${unitLabels[item.unit] || item.unit}` : '—'}</dd></span>; })}
+    <dl className="rock-metric-grid">
+      {items.map(item => {
+        const point = item.points.reduce<(typeof item.points)[number] | undefined>((latest, current) => !latest || current.x > latest.x ? current : latest, undefined);
+        const description = rockMetricDescription(item.metric, lang);
+        const measuredAt = point ? formatRockMetricTime(point.x, lang) : null;
+        return <div className="rock-metric" key={item.metric}>
+          <dt>{description.title}</dt>
+          <dd>{point ? formatRockMetric(item.metric, point.y, item.unit, lang) : '—'}</dd>
+          <p>{description.detail}</p>
+          <small>{measuredAt ? `${t('Измерено', 'Measured')}: ${measuredAt}` : t('Няма запис с дата', 'No dated reading')}</small>
+        </div>;
+      })}
     </dl>
-    <small>{t('Другите системни показатели се записват по разрешения sensor profile и ще се добавят към този екран без Grafana.', 'Other system metrics are stored by the approved sensor profile and will appear here without Grafana.')}</small>
+    <small>{t('Това са последните записани стойности, не гаранция за текуща връзка. Статусът на връзката е показан отделно по-долу.', 'These are the latest recorded readings, not proof of a current connection. Connection status is shown separately below.')}</small>
   </article>;
 }
