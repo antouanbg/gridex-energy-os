@@ -233,6 +233,39 @@ frontend deployment/API restart изискват пресен вход и връ
   получи одобрение преди изпълнение. Одобрението важи само за поисканата
   промяна; останалата навигация се запазва.
 
+## Mandatory documentation for every changed menu / Документация за всяко променено меню — 2026-09-24
+
+Whenever an owner-approved change affects ANY menu or submenu (including
+account and mobile navigation), create or update its user-facing BG/EN guide
+in the SAME change before reporting completion. This includes changes to
+labels, URL, grouping, visibility, permissions, fields, actions, states or
+data source—not just newly added items. Explain what the section does, who
+can see/use it, each important control, Demo versus Live behavior, the URL,
+empty/loading/error states, and any unfinished integration. Record the owner's
+decision, rationale, exact affected menu tree and publication/acceptance
+status in HANDOFF; keep `docs/USER_DOCUMENTATION_PLAN.md` in sync. Link the
+guide from the in-portal Documentation/help entry when the menu is published.
+Verify the guide against the actual UI/API and update relevant tests. A plan
+entry or HANDOFF note ALONE is not a substitute for the user guide. Do not
+claim a menu change finished if its guide is missing, stale or describes
+unreleased behavior as live. This documentation rule does not grant permission
+to change menu structure; the explicit owner-approval rule above still applies.
+
+При ВСЯКА одобрена промяна в меню или подменю (включително профилно и мобилно)
+създай или обнови потребителско ръководство на BG/EN в СЪЩАТА промяна, преди
+да обявиш задачата за завършена. Това важи за име, URL, групиране, видимост,
+права, полета, действия, състояния и източник на данни, не само за нов елемент.
+Обясни предназначение, кой има достъп, важните контроли, Демо срещу Live,
+адреса, празно/зареждане/грешка и незавършените интеграции. Запиши решението
+на собственика, мотивите, точната засегната йерархия и статуса на публикуване/
+приемане в HANDOFF; синхронизирай `docs/USER_DOCUMENTATION_PLAN.md`. При
+публикуване свържи ръководството от „Документация“ в портала. Провери го спрямо
+реалните UI/API и обнови тестовете. Само план или HANDOFF НЕ заместват
+потребителското ръководство. Не обявявай менюто за готово, ако ръководството
+липсва, остаряло е или представя невнедрено поведение като работещо. Това
+правило НЕ разрешава само по себе си промяна на меню — изричното одобрение
+по-горе остава задължително.
+
 ## Mobile layout approval / Одобрение за мобилното оформление
 
 Before changing any mobile layout, responsive CSS, mobile navigation, font size,

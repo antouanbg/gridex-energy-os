@@ -27,7 +27,7 @@ guide against the actual shipped UI and API before marking it complete.
 | --- | --- | --- |
 | Преглед | `/` | Pending |
 | Клиенти и договори | `/customers/` | Pending |
-| Потребители и покани / Users & invitations | `/customers/users/` | Pending; explain organisation-admin role/Site grants, recipient acceptance, and the not-yet-active global new-organisation flow |
+| Потребители и покани / Users & invitations | `/customers/users/` | Draft BG/EN guide: `docs/USERS_AND_INVITATIONS_GUIDE.md`; verify against live UI/API and link from portal help when published |
 | Обекти | `/sites/` | Pending |
 | Енергийни активи | `/assets/` | Pending |
 | Батерия | `/battery/` | Pending |

@@ -1,5 +1,17 @@
 # Current task
 
+## Mandatory menu documentation / Задължителна документация за меню — 2026-09-24
+
+BG: Собственикът изисква всяка промяна на меню/подменю да върви с BG/EN
+потребителско ръководство и записано решение в HANDOFF, в същия клон.
+Правилото е в AGENTS.md; чернова за „Потребители и покани“ е в
+`docs/USERS_AND_INVITATIONS_GUIDE.md`. При публикуване остава да се свърже
+от помощта в портала и да се валидира спрямо реалния UI/API.
+
+EN: Every menu/submenu change requires a same-change BG/EN user guide and
+HANDOFF decision. The staged invitation menu has a draft guide; portal-help
+linking and live UI/API validation remain for publication.
+
 ## Owner realm decision / Решение за realm — 2026-09-24
 
 BG: ВСЯКА нова клиентска организация има отделен OpenRemote realm; `gridex`

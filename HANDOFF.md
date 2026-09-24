@@ -2,6 +2,24 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Menu documentation gate / Документация за менюта — 2026-09-24
+
+BG: Собственикът изисква при всяка промяна по меню или подменю едновременно да
+се създава/обновява потребителска BG/EN документация и да се записва самото
+решение. Правилото е в `AGENTS.md`; планът за всички раздели е в
+`docs/USER_DOCUMENTATION_PLAN.md`. За подготвеното, непубликувано подменю
+„Потребители и покани“ е създадена чернова
+`docs/USERS_AND_INVITATIONS_GUIDE.md`. При публикуването ѝ трябва да се
+свърже от вътрешната „Документация“ и да се провери с реални права/екрани.
+Това не разрешава нови менюта без отделно одобрение.
+
+EN: Every menu/submenu change must include an updated BG/EN user guide and a
+recorded owner decision in the same change. `AGENTS.md` enforces the gate;
+`docs/USER_DOCUMENTATION_PLAN.md` tracks coverage. A draft guide now covers
+the staged Users & invitations submenu. Link it from in-portal Documentation
+and verify against real permissions/UI on publication. This rule does not
+grant approval for future navigation changes.
+
 ## Realm decision / Решение за realm — 2026-09-24
 
 BG: Собственикът потвърди отделен OpenRemote realm за ВСЯКА нова клиентска
