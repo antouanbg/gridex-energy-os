@@ -1,5 +1,17 @@
 # Current task
 
+## CPU temperature data available / Има данни за CPU температура — 2026-09-24
+
+Supersedes CPU-pending status below. Physical ROCK CPU data are fresh in
+OpenRemote TimescaleDB and readable through the datapoint API (21/hour,
+latest 52.083 °C at check). Published Devices UI can render the sixth metric;
+real owner-browser visual acceptance remains unverified. See HANDOFF.
+
+Заменя по-стария CPU-pending статус. Реални ROCK CPU данни са пресни в
+OpenRemote TimescaleDB и се четат през datapoint API (21/час, последно
+52.083 °C при проверката). Публикуваният екран „Устройства“ може да покаже
+шестия показател; реалната owner browser проверка остава непотвърдена.
+
 ## ROCK telemetry frontend / ROCK телеметрия на сайта — 2026-09-24
 
 Publication verified: PR #42 CI passed (36 browser tests), merged as
