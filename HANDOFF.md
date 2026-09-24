@@ -2,6 +2,28 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Devices menu heartbeat warning / Предупреждение в меню „Устройства“ — 2026-09-24
+
+EN: Implemented locally, not published or owner-browser verified. In an
+authenticated live session the existing Devices nav item polls the scoped
+heartbeat API every 10 seconds and shows `!` when an item is offline. No new
+menu item, no demo warning, no fabricated offline status on API error. The
+same nav item serves desktop and mobile; no responsive layout change. Pages
+build and changed-file ESLint passed. Full `tsc --noEmit` still fails on
+pre-existing gateway/supported/API worker errors outside this diff. Next: test
+signed-in real Site and mobile visibility, then publish
+through PR after backend alert activation is coordinated.
+
+BG: Реализирано локално, не е публикувано или проверено в браузъра на
+собственика. В реална удостоверена сесия съществуващото меню „Устройства“
+проверява Site-scoped heartbeat API през 10 секунди и показва `!` при offline.
+Няма ново меню, демо предупреждение или измислен offline при API грешка. Един
+и същ елемент е за desktop и mobile, без промяна в адаптивното оформление.
+Pages build и ESLint на променения файл минаха. Пълният `tsc --noEmit` още
+пада върху стари грешки в gateway/supported/API worker извън тази промяна.
+Следва проверка с реален Обект и на телефон, после PR и
+публикация, съгласувана с backend известията.
+
 ## CPU temperature now reaches history / CPU температурата вече се записва — 2026-09-24
 
 Supersedes the CPU-pending line below. The operator enabled the physical ROCK

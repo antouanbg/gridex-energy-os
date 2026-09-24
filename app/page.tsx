@@ -98,6 +98,7 @@ const About = lazy(() => import("./sections/about").then(module => ({ default: m
 
 export default function Home() {
   const sessionEpoch=useRef(0);
+  const [deviceWarning,setDeviceWarning]=useState<{siteId:string;warning:boolean}|null>(null);
   const liveReturnPath=useMemo(()=>{
     try {
       const path=sessionStorage.getItem('gridex.live-return-path');
@@ -297,6 +298,21 @@ export default function Home() {
   },[apiClient,dataMode,backendState,lang,selectedSiteId,authState]);
 
   useEffect(()=>{
+    if(dataMode!=='live'||authState!=='authenticated'||backendState!=='online'||!selectedSiteId||
+      !liveSites.some(item=>item.id===selectedSiteId))return;
+    const controller=new AbortController();
+    const poll=async()=>{
+      try{
+        const result=await apiClient.deviceHeartbeats(selectedSiteId,controller.signal);
+        if(!controller.signal.aborted)setDeviceWarning({siteId:selectedSiteId,warning:result.items.some(item=>item.status==='offline')});
+      }catch{/* Device status is unavailable; do not invent an offline warning. */}
+    };
+    void poll();
+    const timer=window.setInterval(()=>void poll(),10000);
+    return()=>{controller.abort();window.clearInterval(timer);};
+  },[apiClient,authState,backendState,dataMode,selectedSiteId,liveSites]);
+
+  useEffect(()=>{
     if (dataMode!=="live"||authState!=='authenticated'||!selectedSiteId||!liveSites.some(item=>item.id===selectedSiteId)) return;
     let controller=new AbortController();
     const loadSnapshot=()=>{
@@ -417,10 +433,11 @@ export default function Home() {
         </button>
         <nav ref={navigationRef} id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
           {navItems.map(([id, icon]) => {
-            const badge=dataMode==='live'?'':id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
+            const hasDeviceWarning=dataMode==='live'&&authState==='authenticated'&&backendState==='online'&&deviceWarning?.siteId===selectedSiteId&&deviceWarning.warning;
+            const badge=dataMode==='live'?(id==='devices'&&hasDeviceWarning?'!':''):id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo')} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${parentSection[view]===id?'active-parent':''} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''} ${parentSection[id]&&parentSection[navItems[navItems.findIndex(item=>item[0]===id)+1]?.[0]]!==parentSection[id]?'nav-child-last':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
+            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo')} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={id==='devices'&&hasDeviceWarning?(lang==='en'?'Devices — heartbeat warning':'Устройства — предупреждение: липсва heartbeat'):tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${parentSection[view]===id?'active-parent':''} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''} ${parentSection[id]&&parentSection[navItems[navItems.findIndex(item=>item[0]===id)+1]?.[0]]!==parentSection[id]?'nav-child-last':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
               <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </a>;
           })}

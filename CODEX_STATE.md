@@ -1,5 +1,15 @@
 # Current task
 
+## Devices heartbeat warning / Предупреждение за устройства — 2026-09-24
+
+EN: Existing Devices navigation item now shows an offline heartbeat badge
+only in authenticated live mode. Local Pages build passed; not published or
+real-owner/mobile accepted. Next: verify live account + phone and publish PR.
+
+BG: Съществуващото меню „Устройства“ вече показва знак за offline heartbeat
+само в удостоверен реален режим. Локалният Pages build мина; няма публикация
+или приемане от реалния собственик/телефон. Следва live проверка и PR.
+
 ## CPU temperature data available / Има данни за CPU температура — 2026-09-24
 
 Supersedes CPU-pending status below. Physical ROCK CPU data are fresh in
