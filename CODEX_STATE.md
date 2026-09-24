@@ -1,5 +1,18 @@
 # Current task
 
+## Profile help and documentation coverage / Помощ и документация — 2026-09-24
+
+Owner requested polished Profile, contextual explanations and a Documentation
+entry inside the account button. Initial first-party guide: `/help/`.
+Complete documentation for each existing menu/submenu is tracked in
+`docs/USER_DOCUMENTATION_PLAN.md`; external docs domain is not live. Preserve
+main navigation. Do not report visual/browser acceptance without testing.
+
+Собственикът поиска подобрен Профил, обяснения и „Документация“ в бутона на
+профила. Първо ръководство: `/help/`. Покритието на всяко съществуващо
+меню/подменю е задача в `docs/USER_DOCUMENTATION_PLAN.md`; външният домейн
+още не е активен. Пази главното меню и не обявявай визуално приемане без тест.
+
 ## Devices heartbeat warning / Предупреждение за устройства — 2026-09-24
 
 EN update: Added one persistent future ALL-event email opt-in checkbox to the

@@ -6,6 +6,7 @@ import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, 
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
+import { ProfileHelp } from './sections/profile-help';
 import { readRoute, sectionHref } from './lib/routes';
 import { releaseId, previousRelease } from './lib/session-policy';
 import {clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
@@ -20,7 +21,7 @@ const navItems = [
 const parentSection:Record<string,string>={assets:'sites',battery:'sites',loads:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
-const liveViews = new Set(["overview", "sites", "devices", "profile", "login", "about"]);
+const liveViews = new Set(["overview", "sites", "devices", "profile", "login", "about", "help"]);
 
 type DemoUser = {
   nameBg:string;
@@ -465,10 +466,11 @@ export default function Home() {
         <div className="account-menu" role="menu" data-no-translate>
           {sessionUser?<>
             <div className="account-menu-head"><span>{lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg}</span><div><strong>{lang==="en"?sessionUser.nameEn:sessionUser.nameBg}</strong><small>{sessionUser.email}</small></div></div>
-            <button role="menuitem" onClick={()=>navigate("profile")}><i>◎</i><span><strong>{lang==="en"?"Profile & statistics":"Профил и статистика"}</strong><small>{lang==="en"?"Activity, permissions and sessions":"Активност, права и сесии"}</small></span><b>›</b></button>
+            <button role="menuitem" onClick={()=>navigate("profile")}><i>◎</i><span><strong>{lang==="en"?"User profile":"Потребителски профил"}</strong><small>{lang==="en"?"Access, alerts and session":"Достъп, известия и сесия"}</small></span><b>›</b></button>
+            <button role="menuitem" onClick={()=>navigate("help")}><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"Profile settings explained":"Обяснение на настройките"}</small></span><b>›</b></button>
             <button role="menuitem" onClick={()=>navigate("login")}><i>⇄</i><span><strong>{lang==="en"?"Switch account":"Смяна на профил"}</strong><small>{lang==="en"?"Open the sign-in page":"Отвори страницата за вход"}</small></span><b>›</b></button>
             <button className="account-menu-logout" role="menuitem" onClick={signOut}><i>↪</i><span><strong>{lang==="en"?"Sign out":"Изход"}</strong><small>{lang==="en"?"End this portal session":"Прекрати тази сесия"}</small></span></button>
-          </>:<button role="menuitem" onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button>}
+          </>:<><button role="menuitem" onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button><button role="menuitem" onClick={()=>navigate("help")}><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"How the profile works":"Как работи профилът"}</small></span><b>›</b></button></>}
         </div>
       </>}
 
@@ -478,7 +480,7 @@ export default function Home() {
             <div role="navigation" aria-label={lang==='en'?'Breadcrumb':'Път до страницата'}>
               <h1 className="page-breadcrumb" data-testid="page-title">
                 {parentSection[view]&&<><a href={sectionHref(parentSection[view],selectedSiteId,dataMode==='demo')} onClick={event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(parentSection[view]);}}}>{tKey(`nav.${parentSection[view]}` as MessageKey)}</a><span className="breadcrumb-separator" aria-hidden="true">→</span></>}
-                <span aria-current="page">{view==='not-found'?(lang==='en'?'Page not found':'Страницата не е намерена'):tKey(`nav.${view}` as MessageKey)}</span>
+                <span aria-current="page">{view==='not-found'?(lang==='en'?'Page not found':'Страницата не е намерена'):view==='help'?(lang==='en'?'Documentation':'Документация'):tKey(`nav.${view}` as MessageKey)}</span>
               </h1>
             </div>
             <p className="eyebrow page-site-context" data-testid="page-eyebrow">{dataMode==='live'?(liveSites.find(item=>item.id===selectedSiteId)?.name??'GrideX'):(lang==='bg'?'Соларен парк Изток':site)}</p>
@@ -494,12 +496,12 @@ export default function Home() {
           <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
 
-        {integrationError&&dataMode==="live"&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
+        {integrationError&&dataMode==="live"&&!['profile','help','about','login'].includes(view)&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-            {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={signIn}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+            {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={signIn}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
@@ -520,6 +522,7 @@ export default function Home() {
         {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify}/>}
+        {view === "help" && <ProfileHelp lang={lang} live={dataMode==='live'}/>}
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
         {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang}/>}
@@ -608,11 +611,35 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
 
 function UserProfile({lang,user,api,live,navigate,signOut}:{lang:UiLanguage;user:DemoUser|null;api:GridexApiClient;live:boolean;navigate:(id:string)=>void;signOut:()=>void}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
-  if (!user) return <section className="empty-profile card" data-no-translate><h2>{t("Няма активна сесия","No active session")}</h2><button className="primary-btn" onClick={()=>navigate("login")}>{t("Към входа","Go to sign in")}</button></section>;
-  return <section className="card" data-no-translate><h2>{lang==='en'?user.nameEn:user.nameBg}</h2><p>{user.email}</p><p>{lang==='en'?user.roleEn:user.roleBg}</p>{live&&<HeartbeatEmailOptIn api={api} lang={lang}/>}<button onClick={()=>navigate('sites')}>{t('Моите обекти','My sites')}</button><button onClick={signOut}>{t('Изход','Sign out')}</button><p>{t('Статистиката и историята на действията очакват свързване на реални данни.','Statistics and activity history require real data integration.')}</p></section>;
+  if (!user) return <section className="empty-profile card" data-no-translate><span aria-hidden="true">◎</span><h2>{t("Няма активна сесия","No active session")}</h2><p>{t('Влезте, за да видите профила и настройките си.','Sign in to view your profile and preferences.')}</p><button className="primary-btn" onClick={()=>navigate("login")}>{t("Към входа","Go to sign in")}</button></section>;
+  const helpHref=sectionHref('help','',!live);
+  return <section className="user-profile-page" data-no-translate>
+    <div className="card user-hero">
+      <span className="user-avatar-large" aria-hidden="true">{lang==='en'?user.initialsEn:user.initialsBg}<i/></span>
+      <div><p>{t('МОЯТ ПРОФИЛ','MY PROFILE')}</p><h2>{lang==='en'?user.nameEn:user.nameBg}</h2><span>{user.email}</span><div><b>{t('Активен профил','Active account')}</b></div></div>
+      <a className="profile-action light" href={helpHref}>{t('Помощ за профила','Profile guide')} <span aria-hidden="true">↗</span></a>
+    </div>
+    <div className="profile-dashboard">
+      <article className="card profile-panel">
+        <div className="profile-panel-heading"><div><span className="profile-kicker">01 / {t('ДОСТЪП','ACCESS')}</span><h3>{t('Идентичност и права','Identity and access')}</h3></div><a href={`${helpHref}#identity`} aria-label={t('Обяснение за идентичността','Identity explained')}>?</a></div>
+        <dl className="profile-facts">
+          <div><dt>{t('Имейл на профила','Account email')}</dt><dd>{user.email}</dd></div>
+          <div><dt>{t('Роля','Role')}</dt><dd>{lang==='en'?user.roleEn:user.roleBg} <a href={`${helpHref}#access`}>{t('Какво означава?','What does this mean?')}</a></dd></div>
+        </dl>
+        <p className="profile-panel-note">{t('Името, имейлът и ролята идват от защитения Ви вход. Тук не се въвежда парола.','Your name, email and role come from your secure sign-in. Passwords are not entered here.')}</p>
+        <button className="profile-action subtle" type="button" onClick={()=>navigate('sites')}>{t('Моите обекти','My Sites')} <span aria-hidden="true">→</span></button>
+      </article>
+      {live&&<HeartbeatEmailOptIn api={api} lang={lang} helpHref={helpHref}/>}
+      <article className="card profile-panel profile-session-panel">
+        <div className="profile-panel-heading"><div><span className="profile-kicker">03 / {t('СИГУРНОСТ','SECURITY')}</span><h3>{t('Сесия','Session')}</h3></div><a href={`${helpHref}#session`} aria-label={t('Обяснение за сесията','Session explained')}>?</a></div>
+        <div className="profile-session-state"><span className="live-dot"/><div><strong>{t('Влезли сте в портала','Signed in to the portal')}</strong><small>{t('Изход прекратява тази сесия в браузъра.','Sign out ends this browser session.')}</small></div></div>
+        <button className="profile-action outline" type="button" onClick={signOut}>{t('Изход','Sign out')} <span aria-hidden="true">↪</span></button>
+      </article>
+    </div>
+  </section>;
 }
 
-function HeartbeatEmailOptIn({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
+function HeartbeatEmailOptIn({api,lang,helpHref}:{api:GridexApiClient;lang:UiLanguage;helpHref:string}) {
   const [preference,setPreference]=useState<{enabled:boolean;email:string|null}|null>(null);
   const [state,setState]=useState<'loading'|'ready'|'error'|'saving'>('loading');
   useEffect(()=>{
@@ -628,14 +655,16 @@ function HeartbeatEmailOptIn({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
     try{setPreference(await api.setHeartbeatEmailPreference(enabled));setState('ready');}
     catch{setState('error');}
   };
-  return <div className="heartbeat-email-opt-in">
-    <h3>{t('Имейл известия за събития','Email event notifications')}</h3>
-    <label><input type="checkbox" checked={preference?.enabled===true} disabled={state!=='ready'||!preference?.email}
+  return <article className="card profile-panel heartbeat-email-opt-in">
+    <div className="profile-panel-heading"><div><span className="profile-kicker">02 / {t('ИЗВЕСТИЯ','NOTIFICATIONS')}</span><h3>{t('Имейл известия','Email notifications')}</h3></div><a href={`${helpHref}#email-notifications`} aria-label={t('Обяснение за известията','Notifications explained')}>?</a></div>
+    <p className="profile-panel-intro">{t('Една настройка за бъдещите събития във Вашите обекти.','One preference for future events at your Sites.')}</p>
+    <label className="profile-notification-choice" htmlFor="profile-email-events"><input id="profile-email-events" type="checkbox" aria-label={t('Получавай имейл за всички бъдещи събития','Email me about all future events')} checked={preference?.enabled===true} disabled={state!=='ready'||!preference?.email}
       onChange={event=>void change(event.target.checked)}/>
-      <span>{t('Получавай имейл за всички бъдещи събития','Email me about all future events')}</span></label>
-    <p>{t('Една обща настройка за Вашите обекти. Засега се изпращат известия при прекъсване на heartbeat; следващите видове събития ще използват същия избор. За всяко прекъсване се изпраща само един имейл. Можете да изключите по всяко време.','One setting for your Sites. Missed-heartbeat alerts are available now; future event types will use the same choice. Only one email is sent per outage. You can turn this off anytime.')}</p>
-    {preference?.email&&<small>{t('Получател','Recipient')}: {preference.email}</small>}
-    <p role="status">{state==='error'?t('Настройката не е достъпна. Опитайте отново след презареждане.','The setting is unavailable. Retry after reloading.'):
-      state==='saving'?t('Записване…','Saving…'):state==='loading'?t('Зареждане…','Loading…'):''}</p>
-  </div>;
+      <span><strong>{t('Получавай имейл за всички бъдещи събития','Email me about all future events')}</strong><small>{t('Включвате веднъж; не одобрявате всеки отделен имейл.','Enable once; no approval for each individual email.')}</small></span></label>
+    <div className="profile-notification-details"><span>{t('Работи сега','Available now')}</span><strong>{t('Прекъсване на heartbeat · 1 имейл на прекъсване','Missed heartbeat · 1 email per outage')}</strong></div>
+    <p className="profile-panel-note">{t('Останалите видове събития ще използват същия избор, след като бъдат внедрени. Минали събития не се изпращат.','Other event types will use this choice once implemented. Past events are not emailed.')}</p>
+    {preference?.email?<small className="profile-recipient">{t('Получател','Recipient')}: <strong>{preference.email}</strong></small>:state==='ready'&&<small className="profile-recipient warning">{t('Първо потвърдете имейла в профила си.','Verify your account email first.')}</small>}
+    {state!=='ready'&&<p className="profile-save-state" role="status">{state==='error'?t('Настройката е недостъпна. Презаредете страницата и опитайте отново.','Setting unavailable. Reload and try again.'):state==='saving'?t('Записване…','Saving…'):t('Зареждане…','Loading…')}</p>}
+    <a className="profile-inline-help" href={`${helpHref}#email-notifications`}>{t('Как работят известията?','How do notifications work?')} <span aria-hidden="true">↗</span></a>
+  </article>;
 }
