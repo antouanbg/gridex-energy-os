@@ -2,6 +2,20 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Existing owner clarification / Съществуващ собственик — 2026-09-24
+
+Live backend and Phase2 history confirm `antouan.bg@gmail.com` already
+administers active GrideX organisation in `gridex`, including Test Lab/ROCK/ESP.
+Global invitations extend this account; they do not require owner onboarding
+or a replacement organisation. Existing Keycloak Mailgun REST/BCC is available;
+the prior SMTP prerequisite was incorrect. Additional platform binding remains
+to be deployed. Existing organisation admin access is not in question.
+
+Собственикът вече е администратор на активната организация GrideX в `gridex`.
+Новите глобални покани надграждат този акаунт. Без повторно завеждане на
+собственика/организацията. Наличната поща е Mailgun API с BCC, не е нужно SMTP.
+Допълнителното глобално право още изисква внедряване.
+
 ## Global organisation invitations — 2026-09-24 (staged)
 
 BG: По изричното решение на собственика глобалният администратор остава в
@@ -12,7 +26,7 @@ BG: По изричното решение на собственика глоб�
 Демо не изпраща нищо. Chromium наборът минава 41/41 (включително три fixture
 теста за покани), но реално изпращане,
 първи вход, роли и изолация на нов realm още не са доказани. Функцията остава
-изключена до dedicated master setup client, SMTP за новите realm-и, проверен
+изключена до dedicated master setup client, проверка на наличния Mailgun модул, проверен
 owner subject, backend миграция 012 и реално приемане. Не твърди, че е live.
 
 EN: The platform administrator stays in the pilot `gridex` realm. The approved
@@ -22,7 +36,7 @@ the login redirect preserves that hint. Acceptance lives in Profile. Demo
 sends nothing. The Chromium suite passes 41/41 (including three mocked
 invitation tests), but real delivery, first
 login, roles and tenant isolation are unverified. Keep disabled until the
-dedicated master setup client, per-realm SMTP, verified owner subject, backend
+dedicated master setup client, existing Mailgun-provider check, verified owner subject, backend
 migration 012 and real acceptance are ready. Not a live claim.
 
 ## Menu documentation gate / Документация за менюта — 2026-09-24

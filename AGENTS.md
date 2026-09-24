@@ -1,5 +1,19 @@
 # GrideX Energy OS — Working Rules
 
+## Existing owner identity / Съществуващ администратор — 2026-09-24
+
+The existing `antouan.bg@gmail.com` account administers GrideX in realm
+`gridex`. Preserve its organisation and device access when adding the
+platform-admin invitation UI. “New organisation” is for invited customer
+organisations, never a requirement to re-register the owner. Platform rights
+come from the backend's verified subject binding, not an email comparison.
+
+`antouan.bg@gmail.com` вече управлява организация GrideX в realm `gridex`.
+Запази организацията и достъпа му до устройствата при добавяне на глобалното
+меню за покани. „Нова организация“ е за новите клиенти, не за повторна
+регистрация на собственика. Глобалните права идват от backend проверка на
+subject, не от сравнение на имейл във frontend.
+
 ## Organisation isolation / Изолация на организациите — 2026-09-24
 
 Owner-approved invariant: one OpenRemote realm (tenant) for EACH customer

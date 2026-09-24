@@ -1,5 +1,18 @@
 # Current task
 
+## Existing owner / Съществуващ собственик — 2026-09-24
+
+`antouan.bg@gmail.com` already administers active GrideX organisation in realm
+`gridex`, verified against live membership and Phase2 history. Extend this
+identity for platform invitations, preserving Test Lab/ROCK/ESP. Owner
+re-registration is not required. Mailgun REST with BCC is already deployed;
+the previous request for SMTP credentials was incorrect. Platform binding
+and onboarding deployment remain pending.
+
+Съществуващата организация GrideX и администраторът ѝ са потвърдени. Новото
+глобално право се добавя към същия акаунт; не се създава друг. Mailgun API и
+BCC вече работят; SMTP изискването е отменено. Внедряването още предстои.
+
 ## Global admin invitation implementation / Покана от глобален администратор — 2026-09-24
 
 BG: Подготвена е формата в одобреното `/customers/users/` и приемането в
@@ -7,14 +20,14 @@ BG: Подготвена е формата в одобреното `/customers/u
 глобалният администратор не се премества. Chromium тестовете са 41/41
 (включително три fixture теста за покани);
 реално изпращане/вход и публикуване не са потвърдени. Backend setup е opt-in
-и изисква отделен master client, SMTP, миграция 012 и owner subject.
+и изисква отделен master client, миграция 012 и owner subject.
 
 EN: The approved submenu now stages a first-admin invitation form and Profile
 acceptance with an explicit realm URL. The platform admin remains in pilot
 `gridex`. Chromium checks are 41/41 (including three mocked invitation
 checks), but real delivery/sign-in and
 publication are unverified. Backend activation is opt-in and requires a
-dedicated master client, SMTP, migration 012 and verified owner subject.
+dedicated master client, migration 012 and verified owner subject.
 
 ## Mandatory menu documentation / Задължителна документация за меню — 2026-09-24
 
