@@ -2,6 +2,24 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## CPU temperature now reaches history / CPU температурата вече се записва — 2026-09-24
+
+Supersedes the CPU-pending line below. The operator enabled the physical ROCK
+thermal sensor; independent OpenRemote TimescaleDB and datapoint API checks
+found fresh CPU temperature (21 readings/hour, latest 52.083 °C at check).
+The already published Devices UI lists all six configured system metrics and
+selects the newest point by timestamp. This is not a real owner-browser
+acceptance test: the owner must confirm the CPU row and five other values in
+GrideX Test Lab → Devices, including refresh and no stale/demo substitution.
+
+Заменя реда по-долу за чакаща CPU температура. Операторът включи thermal
+сензора на физическия ROCK; независими TimescaleDB и OpenRemote datapoint API
+проверки намериха пресни CPU стойности (21 измервания/час, последно 52.083 °C
+при проверката). Публикуваният екран „Устройства“ изброява и шестте настроени
+показателя и избира най-новата точка по време. Това не е реален owner browser
+тест: собственикът трябва да потвърди CPU реда и останалите пет стойности в
+GrideX Test Lab → Устройства, включително refresh без стари/демо данни.
+
 ## ROCK telemetry Devices publication / Публикуване в „Устройства“ — 2026-09-24
 
 Publication update: PR #42 passed lint/build/browser CI (36 browser tests),
