@@ -1,5 +1,19 @@
 # GrideX Energy OS — Working Rules
 
+## Working prompt language — Bulgarian / Език на работните prompt-и — български
+
+The owner works with Codex prompts in Bulgarian. Keep user-facing prompts,
+requests for input, and task instructions in Bulgarian. Do not translate or
+replace the owner's Bulgarian prompt with English. Preserve the original
+Bulgarian text when recording a request. This language rule does not change
+repository requirements for bilingual product/technical documentation.
+
+Собственикът работи с Codex prompt-и на български. Формулирай на български
+въпросите към потребителя, исканията за информация и инструкциите към агента.
+Не превеждай и не подменяй prompt-а на собственика с английски. Запазвай
+оригиналния български текст при записване на задачата. Това не променя
+изискванията на репотата за двуезична продуктова/техническа документация.
+
 ## Cross-chat architecture check — mandatory / Проверка на другите чатове — 2026-09-24
 
 Before proposing or implementing architecture or new functionality, inspect
