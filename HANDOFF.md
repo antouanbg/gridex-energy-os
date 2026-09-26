@@ -23,6 +23,13 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 покана още не е изпратена или приета. Сертификатът за docs е с ръчно DNS-01
 и няма автоматично подновяване; виж `gridex-docs/README.md`.
 
+Повторен Docusaurus build временно показа 404 поради заменена `build/`
+директория и стар Docker bind mount. Поправено е със скрипта
+`gridex-docs/scripts/deploy-local.sh`: build → recreate само docs контейнера →
+локална BG/EN HTTPS проверка. Скриптът е изпълнен успешно. `npm audit` намери
+една high build зависимост; override до `serialize-javascript@7.1.2` я
+премахна. Остават 17 moderate транзитивни зависимости за отделен преглед.
+
 ## Организации, права и първа страница на документацията — 2026-09-26
 
 По последното решение на собственика съществуващият му човешки акаунт е
