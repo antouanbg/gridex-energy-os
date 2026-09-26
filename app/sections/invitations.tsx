@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { GridexApiError, type GridexApiClient, type GridexUser, type GridexSite, type GridexInvitation } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { OrganisationInvitationAdmin, OrganisationInvitationAcceptance } from './organisation-invitations';
+import { documentationLink } from '../lib/documentation';
 
 const copy = {
   en: { title: 'Organisation access', manageTitle: 'Users & invitations', loading: 'Loading access…', unavailable: 'Email invitations are not enabled yet. Mailgun and identity setup must be completed.',
@@ -65,8 +66,16 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
   }
   const admins = me?.memberships?.filter(m => m.role === 'administrator') ?? [];
   const visibleSites = sites.filter(s => s.organisationId === org);
-  return <><section className="card config-card" data-no-translate aria-label={mode==='manage'?t.manageTitle:t.title}>
-    <h2>{mode==='manage'?t.manageTitle:t.title}</h2>
+  return <div className="invitation-page" data-no-translate>
+    {mode==='manage'&&<header className="invitation-hero card">
+      <div><span className="profile-kicker">GRIDEX · {lang==='en'?'ACCESS CONTROL':'УПРАВЛЕНИЕ НА ДОСТЪПА'}</span>
+        <h2>{t.manageTitle}</h2><p>{lang==='en'?'Invite the first administrator of a new organisation or manage access within yours. Rights are activated only after acceptance.':'Поканете първия администратор на нова организация или управлявайте достъпа във Вашата. Правата се активират едва след приемане на поканата.'}</p></div>
+      <a className="profile-action" href={documentationLink('members',lang).href} target="_blank" rel="noopener noreferrer">{lang==='en'?'How invitations work':'Как работят поканите'} <span aria-hidden="true">↗</span></a>
+    </header>}
+    {mode==='manage'&&me?.permissions.includes('platform:manage')&&<OrganisationInvitationAdmin api={api} lang={lang}/>}
+    {(mode==='accept'||admins.length>0||!me?.permissions.includes('platform:manage'))&&<section className="card config-card invitation-panel" aria-label={mode==='manage'?t.manageTitle:t.title}>
+    <span className="profile-kicker">{mode==='manage'?(lang==='en'?'YOUR ORGANISATION':'ВАШАТА ОРГАНИЗАЦИЯ'):(lang==='en'?'PENDING ACCESS':'ЧАКАЩ ДОСТЪП')}</span>
+    <h2>{mode==='manage'?t.invite:t.title}</h2>
     {loading && <p role="status">{t.loading}</p>}
     {notice && <p role="status">{t[notice]}</p>}
     {!loading && <>
@@ -91,10 +100,10 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
           setSent({ id: result.id, org }); setNotice('sent'); setEmail(''); setSelected([]);
         });
       }}>
-        <h3>{t.invite}</h3>
+        <p className="invitation-panel-intro">{lang==='en'?'Choose a role and grant access only to the Sites this person needs.':'Изберете роля и дайте достъп само до Обектите, които са нужни на този човек.'}</p>
         <fieldset disabled={busy || !available} className="config-form">
           <label>{t.org}<select value={org} onChange={event => { setOrg(event.target.value); setSelected([]); }}>
-            {admins.map(m => <option key={m.organisationId} value={m.organisationId}>{m.organisationId}</option>)}
+            {admins.map(m => <option key={m.organisationId} value={m.organisationId}>{me?.realm || m.organisationId}</option>)}
           </select></label>
           <label>{t.email}<input type="email" autoComplete="email" required maxLength={254} value={email} onChange={event => setEmail(event.target.value)}/></label>
           <label>{t.role}<select value={role} onChange={event => setRole(event.target.value)}>{roles.map(r => <option key={r} value={r}>{t[r]}</option>)}</select></label>
@@ -111,8 +120,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         setSent(null); setNotice('revoked');
       })}>{t.revoke}</button>}
     </>}
-  </section>
-    {mode==='manage'&&me?.permissions.includes('platform:manage')&&<OrganisationInvitationAdmin api={api} lang={lang}/>}
+  </section>}
     {mode==='accept'&&<OrganisationInvitationAcceptance api={api} lang={lang}/>}
-  </>;
+  </div>;
 }

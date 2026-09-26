@@ -47,14 +47,14 @@ test('profile explains and persists email preference; help is reachable on deskt
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.locator('.mobile-menu-toggle').click();
   await page.locator('.sidebar.mobile-nav-open .profile').click();
-  await page.getByRole('menuitem',{name:/Документация/}).click();
-  await expect(page).toHaveURL(/\/help\/$/);
-  await expect(page.getByRole('heading',{name:'Ръководство за профила'})).toBeVisible();
+  await expect(page.getByRole('menuitem',{name:/Документация/})).toHaveAttribute('href','https://doc.gridex.tech/');
+  await page.goto('/help/');
+  await expect(page.getByRole('heading',{name:'Достъп до GrideX и профил'})).toBeVisible();
 });
 
 test('first-party profile guide is readable without a login',async({page})=>{
   await page.goto('/demo/help/');
-  await expect(page.getByRole('heading',{name:'Ръководство за профила'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Достъп до GrideX и профил'})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Какво прави отметката'})).toBeVisible();
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
 });

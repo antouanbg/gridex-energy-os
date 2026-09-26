@@ -61,21 +61,22 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
       try { setItems((await api.organisationInvitations()).invitations); } catch { /* The previous state remains visible. */ }
     } finally { setBusy(false); }
   }
-  return <section className="card config-card" data-no-translate aria-label={t.heading}>
-    <h3>{t.heading}</h3><p>{t.description}</p>
-    {!enabled && <p role="status">{t.disabled}</p>}
-    {notice && <p role="status">{notice}</p>}
-    <form onSubmit={submit} className="config-form">
+  return <section className="card config-card invitation-panel invitation-platform" data-no-translate aria-label={t.heading}>
+    <div className="invitation-panel-head"><div><span className="profile-kicker">{lang==='en'?'PLATFORM ADMINISTRATION':'АДМИНИСТРАЦИЯ НА ПЛАТФОРМАТА'}</span><h2>{t.heading}</h2><p>{t.description}</p></div><span className="invitation-panel-mark" aria-hidden="true">↗</span></div>
+    <div className="invitation-steps" aria-label={lang==='en'?'Invitation steps':'Стъпки на поканата'}><span><b>01</b>{lang==='en'?'Enter organisation':'Въведете организация'}</span><span><b>02</b>{lang==='en'?'Send invitation':'Изпратете покана'}</span><span><b>03</b>{lang==='en'?'Administrator accepts':'Администраторът приема'}</span></div>
+    {!enabled && <p className="invitation-status" role="status">{t.disabled}</p>}
+    {notice && <p className="invitation-status" role="status">{notice}</p>}
+    <form onSubmit={submit} className="invitation-form">
       <fieldset disabled={!enabled || busy}>
-        <label>{t.name}<input required minLength={3} maxLength={120} value={name} onChange={event => setName(event.target.value)}/></label>
-        <label>{t.realm}<input required minLength={3} maxLength={31} pattern="[a-z][a-z0-9-]{2,30}" value={realm} onChange={event => setRealm(event.target.value.toLowerCase())}/></label>
-        <label>{t.email}<input required type="email" maxLength={254} value={email} onChange={event => setEmail(event.target.value)}/></label>
+        <label>{t.name}<input required minLength={3} maxLength={120} autoComplete="organization" value={name} onChange={event => setName(event.target.value)}/></label>
+        <label>{t.realm}<input required minLength={3} maxLength={31} pattern="[a-z][a-z0-9-]{2,30}" value={realm} onChange={event => setRealm(event.target.value.toLowerCase())}/><small>{lang==='en'?'Lowercase letters, numbers and hyphens; cannot be changed after invitation.':'Малки латински букви, цифри и тирета; не се променя след поканата.'}</small></label>
+        <label>{t.email}<input required type="email" autoComplete="email" maxLength={254} value={email} onChange={event => setEmail(event.target.value)}/></label>
         <button type="submit" className="primary-btn">{busy ? t.sending : t.send}</button>
       </fieldset>
     </form>
-    <h4>{t.existing}</h4>
+    <div className="invitation-history"><h3>{t.existing}</h3><span>{lang==='en'?'No access is granted before acceptance.':'Няма достъп преди приемане на поканата.'}</span></div>
     {enabled && !items.length && <p>{t.empty}</p>}
-    {items.map(item => <article key={item.id}>
+    {items.map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong> · {item.realm} · {item.email}
       <p>{t.state}: {item.state} · {t.expires}: {new Date(item.expiresAt).toLocaleString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</p>
       {['reserved','realm_ready','identity_ready','sent','delivery_failed','provisioning_failed'].includes(item.state)

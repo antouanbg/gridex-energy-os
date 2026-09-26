@@ -7,6 +7,7 @@ import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
 import { ProfileHelp } from './sections/profile-help';
+import { documentationLink } from './lib/documentation';
 import { readRoute, sectionHref } from './lib/routes';
 import { releaseId, previousRelease } from './lib/session-policy';
 import {clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
@@ -432,6 +433,9 @@ export default function Home() {
     }
   };
 
+  const pageDocumentation = documentationLink(view, lang);
+  const documentationHome = documentationLink('help', lang).href;
+
   return (
     <main className="app-shell" data-mode={dataMode}>
       <aside className={`sidebar ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
@@ -474,10 +478,10 @@ export default function Home() {
           {sessionUser?<>
             <div className="account-menu-head"><span>{lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg}</span><div><strong>{lang==="en"?sessionUser.nameEn:sessionUser.nameBg}</strong><small>{sessionUser.email}</small></div></div>
             <button role="menuitem" onClick={()=>navigate("profile")}><i>◎</i><span><strong>{lang==="en"?"User profile":"Потребителски профил"}</strong><small>{lang==="en"?"Access, alerts and session":"Достъп, известия и сесия"}</small></span><b>›</b></button>
-            <button role="menuitem" onClick={()=>navigate("help")}><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"Profile settings explained":"Обяснение на настройките"}</small></span><b>›</b></button>
+            <a role="menuitem" href={documentationHome} target="_blank" rel="noopener noreferrer"><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"Open the GrideX guides":"Отвори ръководствата"}</small></span><b>›</b></a>
             <button role="menuitem" onClick={()=>navigate("login")}><i>⇄</i><span><strong>{lang==="en"?"Switch account":"Смяна на профил"}</strong><small>{lang==="en"?"Open the sign-in page":"Отвори страницата за вход"}</small></span><b>›</b></button>
             <button className="account-menu-logout" role="menuitem" onClick={signOut}><i>↪</i><span><strong>{lang==="en"?"Sign out":"Изход"}</strong><small>{lang==="en"?"End this portal session":"Прекрати тази сесия"}</small></span></button>
-          </>:<><button role="menuitem" onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button><button role="menuitem" onClick={()=>navigate("help")}><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"How the profile works":"Как работи профилът"}</small></span><b>›</b></button></>}
+          </>:<><button role="menuitem" onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button><a role="menuitem" href={documentationHome} target="_blank" rel="noopener noreferrer"><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"How to get access":"Как се получава достъп"}</small></span><b>›</b></a></>}
         </div>
       </>}
 
@@ -492,6 +496,7 @@ export default function Home() {
             </div>
             <p className="eyebrow page-site-context" data-testid="page-eyebrow">{dataMode==='live'?(liveSites.find(item=>item.id===selectedSiteId)?.name??'GrideX'):(lang==='bg'?'Соларен парк Изток':site)}</p>
           </div>
+          <a className="page-help-link" href={pageDocumentation.href} target="_blank" rel="noopener noreferrer" aria-label={pageDocumentation.ready?(lang==='en'?'Help for this page (opens in a new tab)':'Помощ за тази страница (отваря се в нов раздел)'):(lang==='en'?'Help pending for this page (opens in a new tab)':'Очаква се помощ за тази страница (отваря се в нов раздел)')}><span aria-hidden="true">?</span><span><strong>{lang==='en'?'Help':'Помощ'}</strong><small>{pageDocumentation.ready?(lang==='en'?'Read the guide ↗':'Прочети ръководството ↗'):(lang==='en'?'Expected to be completed ↗':'Очаква се да се попълни ↗')}</small></span></a>
         </header>
 
         {!sessionUser&&view!=='login'&&<TranslationSuggestion key={lang}/>}
@@ -603,7 +608,8 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
       <div className={`login-demo-chip ${backendAvailable?"ready":"offline"}`}>{t("СИГУРЕН ВХОД","SECURE SIGN-IN")}</div>
       <p>{t("ДОБРЕ ДОШЛИ","WELCOME BACK")}</p>
       <h2>{t("Вход в портала","Sign in to the portal")}</h2>
-      <p>{t("Регистрацията е с покана по имейл от администратор на организация. След потвърждение на имейла задайте парола в Keycloak и приемете поканата в профила си.","Registration requires an email invitation from your organisation administrator. Verify your email, set your password in Keycloak and accept the invitation in your profile.")}</p>
+      <p>{t("Реалният достъп е само с покана. Първият администратор на нова организация получава покана от администратора на платформата; останалите потребители — от своя организационен администратор. След потвърждение на имейла задайте парола и приемете поканата в профила си.","Live access is invitation-only. The first administrator of a new organisation is invited by the platform administrator; other users are invited by their organisation administrator. Verify your email, set a password and accept the invitation in your profile.")}</p>
+      <a className="profile-inline-help" href={documentationLink('login',lang).href} target="_blank" rel="noopener noreferrer">{t('Как се получава достъп?','How do I get access?')} <span aria-hidden="true">↗</span></a>
       <span className="login-intro">{t("Използвайте служебния си GrideX профил. Ще бъдете пренасочени към защитения OpenRemote / Keycloak вход.","Use your GrideX work account. You will be redirected to the secure OpenRemote / Keycloak sign-in.")}</span>
       {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
       <div className={`login-connection-state ${backendAvailable?"online":"offline"}`}><i/>

@@ -1,5 +1,29 @@
 # GrideX Energy OS — Working Rules
 
+## Invitation and rights UX / Покани и права — 2026-09-26
+
+Keep the owner-approved existing route Customers & contracts → Users &
+invitations (`/customers/users/`); do not add or rearrange main navigation.
+The public `/help/` page and `docs/ORGANISATIONS_AND_ACCESS.md` explain that
+live access is invitation-only. Anonymous Demo is sample data. A human
+platform administrator with backend-verified subject may invite the first
+administrator of a new, separate-realm organisation. The backend-only setup
+client is never a human sign-in. An organisation administrator invites members
+only inside their organisation, with explicit member role and Site scope; the
+UI must not infer global power from an email, an `admin` label or a browser
+claim. The member invitation flow cannot delegate administrator role. The
+recipient verifies email, sets password and accepts in Profile before access.
+Never show a pending organisation as active. First real customer onboarding
+is still not end-to-end verified. The zero-Site member-invite frontend fix is
+local/unpublished. Update public BG/EN documentation with any flow change.
+
+Български: реалният достъп е само с покана; демото е пример. Пази одобрения
+адрес `/customers/users/` без ново меню. Глобалният администратор е човешкият
+акаунт с проверено от backend право, а setup client е само служебен за backend.
+Администраторът на организация кани само в своя realm, с изрични роля и Обекти.
+Поканата не дава достъп до приемане. Не показвай чакаща организация като
+активна и не обявявай първия реален клиент за проверен преди теста.
+
 ## Working prompt language — Bulgarian / Език на работните prompt-и — български
 
 The owner works with Codex prompts in Bulgarian. Keep user-facing prompts,
