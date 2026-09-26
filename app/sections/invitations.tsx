@@ -10,14 +10,14 @@ const copy = {
     invite: 'Invite by email', email: 'Work email', org: 'Organisation', role: 'Role', sites: 'Permitted sites', send: 'Send invitation', accept: 'Accept invitation',
     accepted: 'Invitation accepted. Reload to load your sites.', reload: 'Reload portal', sent: 'Email dispatch confirmed. Membership starts only after acceptance.',
     revoke: 'Revoke invitation', revoked: 'Invitation revoked.', pending: 'Your invitations', expiry: 'Expires', busy: 'Working…',
-    noadmin: 'Only an organisation administrator can invite members.', noSites: 'No sites are available for this organisation.',
+    noadmin: 'Only an organisation administrator can invite members.', noSites: 'No sites yet. You may invite a member without site access; grant access explicitly when sites are created.',
     viewer: 'Viewer — read only', operator: 'Operator — operational actions', energy_manager: 'Energy manager — strategies and configuration', integrator: 'Integrator — device configuration' },
   bg: { title: 'Достъп до организации', manageTitle: 'Потребители и покани', loading: 'Зареждане на правата…', unavailable: 'Поканите по имейл още не са включени. Нужни са Mailgun и настройки за идентификация.',
     failed: 'Заявката е неуспешна. Обновете и опитайте пак; не приемайте, че имейлът е изпратен.', empty: 'Няма чакащи покани. Самата регистрация не дава достъп до обекти.',
     invite: 'Покана по имейл', email: 'Служебен имейл', org: 'Организация', role: 'Роля', sites: 'Разрешени обекти', send: 'Изпрати покана', accept: 'Приеми покана',
     accepted: 'Поканата е приета. Презаредете, за да заредите обектите.', reload: 'Презареди портала', sent: 'Изпращането е потвърдено. Членството започва само след приемане.',
     revoke: 'Отмени поканата', revoked: 'Поканата е отменена.', pending: 'Вашите покани', expiry: 'Валидна до', busy: 'Обработка…',
-    noadmin: 'Само администратор на организация може да кани членове.', noSites: 'Няма налични обекти за тази организация.',
+    noadmin: 'Само администратор на организация може да кани членове.', noSites: 'Още няма обекти. Може да поканите човек без достъп до обекти; дайте му права изрично, когато създадете обект.',
     viewer: 'Наблюдател — само четене', operator: 'Оператор — оперативни действия', energy_manager: 'Енергиен мениджър — стратегии и конфигурация', integrator: 'Интегратор — настройки на устройства' },
 };
 const roles = ['viewer', 'operator', 'energy_manager', 'integrator'] as const;
@@ -84,7 +84,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
       {accepted && <button type="button" className="secondary-btn" onClick={() => window.location.reload()}>{t.reload}</button>}</>}
       {mode==='manage'&&(!admins.length ? !me?.permissions.includes('platform:manage') && <p>{t.noadmin}</p> : <form onSubmit={event => {
         event.preventDefault();
-        if (!available || !selected.length) return;
+        if (!available || !org) return;
         void action(async () => {
           const result = await api.invite(org, { email, role, siteIds: selected });
           if (result.state !== 'sent') throw new Error('Dispatch not confirmed');
@@ -102,7 +102,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
             {!visibleSites.length && <p>{t.noSites}</p>}
             {visibleSites.map(site => <label key={site.id}><input type="checkbox" checked={selected.includes(site.id)} onChange={event => setSelected(ids => event.target.checked ? [...ids, site.id] : ids.filter(id => id !== site.id))}/>{site.name}</label>)}
           </fieldset>
-          <button className="primary-btn" type="submit" disabled={!selected.length}>{busy ? t.busy : t.send}</button>
+          <button className="primary-btn" type="submit" disabled={!org}>{busy ? t.busy : t.send}</button>
         </fieldset>
       </form>)}
       {sent && <button className="secondary-btn" type="button" disabled={busy} onClick={() => void action(async () => {
