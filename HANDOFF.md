@@ -2,6 +2,103 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## PR reconciliation checkpoint / Проверка на PR — 2026-09-24
+
+PR #49: latest main incorporated; lint has zero errors and two existing image warnings; Pages build and 41/41 Chromium tests passed locally. GitHub CI/merge remain separate checks. Older PRs #11–#14 and #41 conflict with current code or decision documents; do not overwrite newer navigation, session or inventory work. Reconcile these separately. New-organisation onboarding still requires backend activation and real-user acceptance.
+
+PR #49: последният main е включен; lint без грешки и с две съществуващи image предупреждения; Pages build и 41/41 Chromium теста минаха локално. GitHub CI/merge са отделни проверки. Старите PR #11–#14 и #41 конфликтуват с текущ код или решения; без презаписване на новата навигация, сесии и инвентар. Следва отделно съгласуване. Новите организации още изискват backend активиране и реално потребителско приемане.
+
+## Existing owner clarification / Съществуващ собственик — 2026-09-24
+
+Live backend and Phase2 history confirm `antouan.bg@gmail.com` already
+administers active GrideX organisation in `gridex`, including Test Lab/ROCK/ESP.
+Global invitations extend this account; they do not require owner onboarding
+or a replacement organisation. Existing Keycloak Mailgun REST/BCC is available;
+the prior SMTP prerequisite was incorrect. Additional platform binding remains
+to be deployed. Existing organisation admin access is not in question.
+
+Собственикът вече е администратор на активната организация GrideX в `gridex`.
+Новите глобални покани надграждат този акаунт. Без повторно завеждане на
+собственика/организацията. Наличната поща е Mailgun API с BCC, не е нужно SMTP.
+Допълнителното глобално право още изисква внедряване.
+
+## Global organisation invitations — 2026-09-24 (staged)
+
+BG: По изричното решение на собственика глобалният администратор остава в
+пилотния `gridex` realm. В одобреното подменю `/customers/users/` е
+подготвена отделна форма за първия администратор на нова организация. URL
+`?realm=<код>` избира само предварително разрешен realm на същия auth origin;
+пренасочването при вход пази realm параметъра. Поканеният приема в „Профил“.
+Демо не изпраща нищо. Chromium наборът минава 41/41 (включително три fixture
+теста за покани), но реално изпращане,
+първи вход, роли и изолация на нов realm още не са доказани. Функцията остава
+изключена до dedicated master setup client, проверка на наличния Mailgun модул, проверен
+owner subject, backend миграция 012 и реално приемане. Не твърди, че е live.
+
+EN: The platform administrator stays in the pilot `gridex` realm. The approved
+`/customers/users/` submenu has a separate first-admin invitation form.
+`?realm=<slug>` selects only an allowed realm at the configured auth origin;
+the login redirect preserves that hint. Acceptance lives in Profile. Demo
+sends nothing. The Chromium suite passes 41/41 (including three mocked
+invitation tests), but real delivery, first
+login, roles and tenant isolation are unverified. Keep disabled until the
+dedicated master setup client, existing Mailgun-provider check, verified owner subject, backend
+migration 012 and real acceptance are ready. Not a live claim.
+
+## Menu documentation gate / Документация за менюта — 2026-09-24
+
+BG: Собственикът изисква при всяка промяна по меню или подменю едновременно да
+се създава/обновява потребителска BG/EN документация и да се записва самото
+решение. Правилото е в `AGENTS.md`; планът за всички раздели е в
+`docs/USER_DOCUMENTATION_PLAN.md`. За подготвеното, непубликувано подменю
+„Потребители и покани“ е създадена чернова
+`docs/USERS_AND_INVITATIONS_GUIDE.md`. При публикуването ѝ трябва да се
+свърже от вътрешната „Документация“ и да се провери с реални права/екрани.
+Това не разрешава нови менюта без отделно одобрение.
+
+EN: Every menu/submenu change must include an updated BG/EN user guide and a
+recorded owner decision in the same change. `AGENTS.md` enforces the gate;
+`docs/USER_DOCUMENTATION_PLAN.md` tracks coverage. A draft guide now covers
+the staged Users & invitations submenu. Link it from in-portal Documentation
+and verify against real permissions/UI on publication. This rule does not
+grant approval for future navigation changes.
+
+## Realm decision / Решение за realm — 2026-09-24
+
+BG: Собственикът потвърди отделен OpenRemote realm за ВСЯКА нова клиентска
+организация; текущият `gridex` е само пилотен. Без промяна към общ realm или
+локално активиране без изрично ново одобрение. Глобалната покана през
+„Клиенти и договори → Потребители и покани“ остава незавършена, докато
+backend реализира и тества multi-realm провизиране, вход и първи администратор.
+Подменюто за покани към членове на съществуваща организация е подготвено,
+но не е публикувано от този клон.
+
+EN: The owner approved one OpenRemote realm for each new customer
+organisation; `gridex` is only the pilot. Never silently switch to a shared
+realm or activate local-only organisations. Global invitations need tested
+multi-realm provisioning/login and first-admin binding; existing-member UI is
+staged but not published from this branch.
+
+## Invitation submenu / Подменю за покани — 2026-09-24 (staged, not live)
+
+BG: По изрично искане на собственика „Клиенти и договори → Потребители и
+покани“ има собствен URL `/customers/users/`. Само удостоверен администратор
+на организация вижда формата за покана на член с изричен избор на роля и
+разрешени Обекти; получателят приема поканата от „Профил“. Демо режим не
+изпраща имейли. Глобален администратор ще кани първия администратор на нова
+организация от същото място, но тази форма и API още не са включени: чака се
+провизирането на отделен OpenRemote realm за новите организации и реален тест с акаунта на
+собственика. Никакви организации или права не се създават само във frontend.
+Build и два Playwright fixture теста минават; няма доказателство за публикуване
+или реален Mailgun/Keycloak тест.
+
+EN: The owner-approved Customers & contracts → Users & invitations submenu
+has its own `/customers/users/` URL. An authenticated organisation admin can
+select a member role and permitted Sites; recipients accept in Profile. Demo
+sends no mail. New-organisation invitations from a global admin remain blocked
+pending per-organisation OpenRemote realm provisioning and real owner-account testing. This is
+staged code, not a live rollout. Build and two mocked browser tests pass.
+
 ## Profile redesign and documentation / Профил и документация — 2026-09-24
 
 Requested: bring Profile into the portal's visual system, remove empty

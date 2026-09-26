@@ -25,6 +25,7 @@ export type GridexRuntimeConfig = {
 
 export type GridexUser = {
   subject: string;
+  realm?: string;
   email?: string;
   name?: string;
   preferredUsername?: string;
@@ -34,6 +35,8 @@ export type GridexUser = {
 };
 
 export type GridexInvitation = { id: string; organisationId: string; role: string; siteIds: string[]; expiresAt: string };
+export type OrganisationOnboardingInvitation = { id: string; organisationId: string; realm: string; name: string; expiresAt: string };
+export type CreatedOrganisationInvitation = { id: string; realm: string; name: string; email: string; state: string; expiresAt: string; createdAt: string };
 
 export type GridexSite = {
   id: string;
@@ -260,7 +263,23 @@ const defaults: GridexRuntimeConfig = {
 
 export function getGridexRuntimeConfig(): GridexRuntimeConfig {
   if (typeof window === "undefined") return defaults;
-  return { ...defaults, ...window.__GRIDEX_CONFIG__ };
+  const configured = { ...defaults, ...window.__GRIDEX_CONFIG__ };
+  const requested = new URLSearchParams(window.location.search).get('realm');
+  const validRealm = (value: string | null): value is string => Boolean(value && /^[a-z][a-z0-9-]{2,30}$/.test(value));
+  let selected = validRealm(requested) ? requested : null;
+  try {
+    if (selected) localStorage.setItem('gridex.selected-realm', selected);
+    else {
+      const remembered = localStorage.getItem('gridex.selected-realm');
+      if (validRealm(remembered)) selected = remembered;
+    }
+  } catch { /* Realm selection is convenience, never authorization. */ }
+  if (!selected || selected === configured.realm) return configured;
+  const marker = '/realms/';
+  const boundary = configured.oidcIssuer.lastIndexOf(marker);
+  if (boundary < 0) return configured;
+  return { ...configured, realm: selected,
+    oidcIssuer: `${configured.oidcIssuer.slice(0, boundary + marker.length)}${selected}` };
 }
 
 export class GridexApiClient {
@@ -304,6 +323,21 @@ export class GridexApiClient {
   }
   async revokeInvitation(organisationId: string, id: string): Promise<{ revoked: boolean }> {
     return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations/${encodeURIComponent(id)}/revoke`, {});
+  }
+  async organisationInvitations(signal?: AbortSignal): Promise<{ enabled: boolean; invitations: CreatedOrganisationInvitation[] }> {
+    return this.getJson('/api/v1/platform/organisation-invitations', signal);
+  }
+  async inviteOrganisation(body: { name: string; realm: string; email: string }): Promise<{ id: string; realm: string; state: string }> {
+    return this.postJson('/api/v1/platform/organisation-invitations', body);
+  }
+  async revokeOrganisationInvitation(id: string): Promise<{ revoked: boolean }> {
+    return this.postJson(`/api/v1/platform/organisation-invitations/${encodeURIComponent(id)}/revoke`, {});
+  }
+  async myOrganisationOnboarding(signal?: AbortSignal): Promise<{ invitations: OrganisationOnboardingInvitation[] }> {
+    return this.getJson('/api/v1/me/organisation-onboarding', signal);
+  }
+  async acceptOrganisationOnboarding(id: string): Promise<{ accepted: boolean; realm: string }> {
+    return this.postJson(`/api/v1/organisation-onboarding/${encodeURIComponent(id)}/accept`, {});
   }
 
   async userPreferences(signal?: AbortSignal): Promise<GridexUserPreferences> {

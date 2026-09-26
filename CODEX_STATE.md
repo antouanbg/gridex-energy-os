@@ -1,5 +1,73 @@
 # Current task
 
+## Existing owner / Съществуващ собственик — 2026-09-24
+
+`antouan.bg@gmail.com` already administers active GrideX organisation in realm
+`gridex`, verified against live membership and Phase2 history. Extend this
+identity for platform invitations, preserving Test Lab/ROCK/ESP. Owner
+re-registration is not required. Mailgun REST with BCC is already deployed;
+the previous request for SMTP credentials was incorrect. Platform binding
+and onboarding deployment remain pending.
+
+Съществуващата организация GrideX и администраторът ѝ са потвърдени. Новото
+глобално право се добавя към същия акаунт; не се създава друг. Mailgun API и
+BCC вече работят; SMTP изискването е отменено. Внедряването още предстои.
+
+## Global admin invitation implementation / Покана от глобален администратор — 2026-09-24
+
+BG: Подготвена е формата в одобреното `/customers/users/` и приемането в
+Профил с избор на отделен realm в URL. `gridex` остава пилотният realm и
+глобалният администратор не се премества. Chromium тестовете са 41/41
+(включително три fixture теста за покани);
+реално изпращане/вход и публикуване не са потвърдени. Backend setup е opt-in
+и изисква отделен master client, миграция 012 и owner subject.
+
+EN: The approved submenu now stages a first-admin invitation form and Profile
+acceptance with an explicit realm URL. The platform admin remains in pilot
+`gridex`. Chromium checks are 41/41 (including three mocked invitation
+checks), but real delivery/sign-in and
+publication are unverified. Backend activation is opt-in and requires a
+dedicated master client, migration 012 and verified owner subject.
+
+## Mandatory menu documentation / Задължителна документация за меню — 2026-09-24
+
+BG: Собственикът изисква всяка промяна на меню/подменю да върви с BG/EN
+потребителско ръководство и записано решение в HANDOFF, в същия клон.
+Правилото е в AGENTS.md; чернова за „Потребители и покани“ е в
+`docs/USERS_AND_INVITATIONS_GUIDE.md`. При публикуване остава да се свърже
+от помощта в портала и да се валидира спрямо реалния UI/API.
+
+EN: Every menu/submenu change requires a same-change BG/EN user guide and
+HANDOFF decision. The staged invitation menu has a draft guide; portal-help
+linking and live UI/API validation remain for publication.
+
+## Owner realm decision / Решение за realm — 2026-09-24
+
+BG: ВСЯКА нова клиентска организация има отделен OpenRemote realm; `gridex`
+остава пилотен. Без промяна без изрично одобрение. Глобалната покана и
+multi-realm входът още не са реализирани.
+
+EN: Each new customer organisation gets its own OpenRemote realm. `gridex` is
+the pilot only. Do not change this without explicit owner approval. Global
+invitation and multi-realm login remain outstanding.
+
+## Invitations / Покани — 2026-09-24
+
+BG: Подготвено е изрично одобреното подменю „Клиенти и договори → Потребители
+и покани“ (`/customers/users/`) за администратори на организация. Поканата
+избира роля и разрешени Обекти; приемането остава в Профил. Build и 2 fixture
+Playwright теста минават. НЕ е публикувано; не е тествано с реален акаунт.
+Поканата за първи администратор на нова организация още няма работещ поток;
+чака реализацията на отделен OpenRemote realm и backend API.
+
+EN: Approved invitation submenu and member role/Site selection are staged;
+build and two mocked browser tests pass. Not published or owner-tested. The
+global new-organisation invitation needs per-realm provisioning and backend API.
+
+Next: implement the approved per-organisation realm model and prove the global workflow,
+then real-session/mobile acceptance and publication. Do not treat mocked tests
+as a production result.
+
 ## Profile help and documentation coverage / Помощ и документация — 2026-09-24
 
 Owner requested polished Profile, contextual explanations and a Documentation

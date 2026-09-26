@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useState, useRef } from "react";
-import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot } from "./lib/gridex-api";
+import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
 import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
@@ -13,15 +13,15 @@ import {clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
 const navItems = [
-  ["overview", "⌂"], ["customers", "◎"], ["sites", "◇"], ["assets", "▦"], ["battery", "▣"], ["loads", "ϟ"],
+  ["overview", "⌂"], ["customers", "◎"], ["members", "♙"], ["sites", "◇"], ["assets", "▦"], ["battery", "▣"], ["loads", "ϟ"],
   ["market", "↗"], ["settlement", "¤"], ["balance", "≋"], ["automation", "⌘"], ["schedule", "▤"],
   ["devices", "⊞"], ["supported", "✓"], ["alarms", "△"],
   ["reports", "▥"], ["settings", "⚙"], ["plans", "★"], ["about", "○"],
 ] as const;
-const parentSection:Record<string,string>={assets:'sites',battery:'sites',loads:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
+const parentSection:Record<string,string>={members:'customers',assets:'sites',battery:'sites',loads:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
-const liveViews = new Set(["overview", "sites", "devices", "profile", "login", "about", "help"]);
+const liveViews = new Set(["overview", "sites", "devices", "members", "profile", "login", "about", "help"]);
 
 type DemoUser = {
   nameBg:string;
@@ -156,6 +156,7 @@ export default function Home() {
   const [batteryCost,setBatteryCost] = useState<BatteryCostSettings>(initialBatteryCost);
   const [toast, setToast] = useState("");
   const [sessionUser,setSessionUser] = useState<DemoUser|null>(null);
+  const [accountIdentity,setAccountIdentity] = useState<GridexUser|null>(null);
   const [accountMenuOpen,setAccountMenuOpen] = useState(false);
   const [backendState, setBackendState] = useState<BackendState>(
     () => runtimeConfig.mode === "demo" ? "demo" : "checking",
@@ -178,7 +179,7 @@ export default function Home() {
     const ended=()=>{
       sessionEpoch.current++;
       clearGridexSession();
-      setSessionUser(null);setAccountMenuOpen(false);setAuthState('anonymous');
+      setSessionUser(null);setAccountIdentity(null);setAccountMenuOpen(false);setAuthState('anonymous');
       setBackendState('unknown');setLiveSites([]);setLiveSnapshot(null);setSelectedSiteId('');
       setSitesStatus('loading');
       setIntegrationError(lang==='en'?'Your session ended. Please sign in again.':'Сесията е прекратена. Моля, влезте отново.');
@@ -243,6 +244,7 @@ export default function Home() {
       if (!active||epoch!==sessionEpoch.current) return;
       if (!session) {
         setSessionUser(null);
+        setAccountIdentity(null);
         setAuthState("anonymous");
         // Login must not depend on a public unauthenticated health endpoint.
         setBackendState("unknown");
@@ -255,6 +257,7 @@ export default function Home() {
       } catch {
         if (!active||epoch!==sessionEpoch.current) return;
         setSessionUser(null);
+        setAccountIdentity(null);
         setBackendState("offline");
         setAuthState("error");
         setIntegrationError(document.documentElement.lang==="en"?"Sign-in completed, but API access could not be verified. Please retry.":"Входът приключи, но достъпът до API не може да се потвърди. Опитайте отново.");
@@ -263,12 +266,14 @@ export default function Home() {
       if (!active||epoch!==sessionEpoch.current) return;
       const user=sessionToUser({ ...session, roles: membershipIdentity.roles });
       setSessionUser(user);
+      setAccountIdentity(membershipIdentity);
       setAuthState("authenticated");
       setBackendState("online");
       setIntegrationError("");
     }).catch(()=>{
       if (!active||epoch!==sessionEpoch.current) return;
       setSessionUser(null);
+      setAccountIdentity(null);
       setBackendState("unknown");
       setAuthState("error");
       setIntegrationError(document.documentElement.lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
@@ -292,7 +297,7 @@ export default function Home() {
     }).catch(error=>{
       if(controller.signal.aborted)return;
       setLiveSites([]);setSitesStatus('error');setSelectedSiteId('');setLiveSnapshot(null);
-      if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAuthState("anonymous");return;}
+      if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAccountIdentity(null);setAuthState("anonymous");return;}
       setIntegrationError(lang==="en"?"The site list could not be loaded.":"Списъкът с обекти не може да бъде зареден.");
     });
     return()=>controller.abort();
@@ -325,7 +330,7 @@ export default function Home() {
     }).catch(error=>{
       if(requestController.signal.aborted)return;
       if (error instanceof DOMException&&error.name==="AbortError") return;
-      if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAuthState("anonymous");setLiveSnapshot(null);return;}
+      if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAccountIdentity(null);setAuthState("anonymous");setLiveSnapshot(null);return;}
       setIntegrationError(lang==="en"?"Live telemetry is temporarily unavailable.":"Телеметрията на живо временно не е достъпна.");
     });};
     void loadSnapshot();
@@ -354,6 +359,7 @@ export default function Home() {
         const sites=await apiClient.sites(controller.signal);
         if(!active)return;
         setSessionUser(current=>current?sessionToUser({subject:identity.subject,email:current.email,name:current.nameEn,preferredUsername:'',roles:identity.roles}):null);
+        setAccountIdentity(identity);
         setLiveSites(current=>JSON.stringify(current)===JSON.stringify(sites)?current:sites);
         if(selectedSiteId&&!sites.some(site=>site.id===selectedSiteId)) {
           expireSession();
@@ -408,7 +414,7 @@ export default function Home() {
         return;
       }
     }
-    setSessionUser(null);
+    setSessionUser(null);setAccountIdentity(null);
     navigate("login");
     notify(lang==="en"?"You have signed out safely":"Излязохте успешно от профила");
   };
@@ -434,6 +440,7 @@ export default function Home() {
         </button>
         <nav ref={navigationRef} id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
           {navItems.map(([id, icon]) => {
+            if(id==='members'&&(dataMode!=='live'||authState!=='authenticated'||!accountIdentity?.memberships?.some(item=>item.role==='administrator')&&!accountIdentity?.permissions.includes('platform:manage')))return null;
             const hasDeviceWarning=dataMode==='live'&&authState==='authenticated'&&backendState==='online'&&deviceWarning?.siteId===selectedSiteId&&deviceWarning.warning;
             const badge=dataMode==='live'?(id==='devices'&&hasDeviceWarning?'!':''):id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
@@ -524,8 +531,10 @@ export default function Home() {
         {view === "about" && <About lang={lang} notify={notify}/>}
         {view === "help" && <ProfileHelp lang={lang} live={dataMode==='live'}/>}
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
+        {view === "members" && dataMode==='demo' && <section className="card config-card"><h2>{lang==='en'?'Users & invitations':'Потребители и покани'}</h2><p>{lang==='en'?'Sign in as an organisation administrator to manage real invitations. No demo emails are sent.':'Влезте като администратор на организация, за да управлявате реални покани. В демо режима не се изпращат имейли.'}</p></section>}
+        {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations api={apiClient} lang={lang} mode="manage"/>}
         {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
-        {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang}/>}
+        {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang} mode="accept"/>}
             </>}
           </div>
         </Suspense>

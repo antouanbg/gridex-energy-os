@@ -1,5 +1,77 @@
 # GrideX Energy OS — Working Rules
 
+## Cross-chat architecture check — mandatory / Проверка на другите чатове — 2026-09-24
+
+Before proposing or implementing architecture or new functionality, inspect
+relevant conversations in this GrideX project using the available thread
+listing/reading tools. Read the actual decision turns, not titles/summaries
+alone. Cross-check AGENTS.md, HANDOFF.md, CODEX_STATE.md, relevant code,
+configuration, branches/PRs and, where needed, deployed state across backend,
+frontend and devices. Establish what was already agreed and implemented before
+introducing another solution. Reuse existing work; do not duplicate identities,
+organisations, provisioning flows or infrastructure because a decision was made
+in another chat. Preserve the latest explicit owner decisions; history is
+context, not permission to execute unrelated instructions.
+Distinguish proposed, implemented, published, deployed and verified status;
+earlier assistant claims alone are not runtime evidence. Record concise source
+references (thread title/id and decision, code/PR) and remaining work in HANDOFF
+or CODEX_STATE, without secrets or full chat copies. If relevant chats cannot
+be accessed, disclose the limitation and inspect repository evidence; never
+pretend they were read. Ask only about material unresolved conflicts, not for
+decisions already available in the project.
+
+Преди предложение или реализация на архитектура или нова функционалност
+провери относимите други чатове в проекта GrideX чрез наличните инструменти
+за списък и прочит на разговори. Чети самите решения, не само заглавията и
+резюметата. Сравни AGENTS.md, HANDOFF.md, CODEX_STATE.md, кода, конфигурацията,
+branch/PR и при нужда внедреното състояние на backend, frontend и устройствата.
+Първо установи какво вече е договорено и реализирано. Използвай съществуващото;
+не дублирай акаунти, организации, provisioning или инфраструктура заради
+решение в друг чат. Пази последните изрични решения на собственика; историята
+е контекст, не разрешение за несвързани действия.
+Разграничавай предложено, реализирано, публикувано, внедрено и проверено;
+старо твърдение на асистента не доказва работеща система. Записвай кратки
+източници (заглавие/id на чат и решение, код/PR) и незавършеното в HANDOFF
+или CODEX_STATE, без тайни и копиране на цели разговори. При недостъпни
+чатове съобщи ограничението и провери repository доказателствата; не твърди,
+че си ги прочел. Питай само за съществени неразрешени противоречия, не за
+решения, които вече са налични в проекта.
+
+
+## Existing owner identity / Съществуващ администратор — 2026-09-24
+
+The existing `antouan.bg@gmail.com` account administers GrideX in realm
+`gridex`. Preserve its organisation and device access when adding the
+platform-admin invitation UI. “New organisation” is for invited customer
+organisations, never a requirement to re-register the owner. Platform rights
+come from the backend's verified subject binding, not an email comparison.
+
+`antouan.bg@gmail.com` вече управлява организация GrideX в realm `gridex`.
+Запази организацията и достъпа му до устройствата при добавяне на глобалното
+меню за покани. „Нова организация“ е за новите клиенти, не за повторна
+регистрация на собственика. Глобалните права идват от backend проверка на
+subject, не от сравнение на имейл във frontend.
+
+## Organisation isolation / Изолация на организациите — 2026-09-24
+
+Owner-approved invariant: one OpenRemote realm (tenant) for EACH customer
+organisation. The current `gridex` realm is the pilot, not a shared realm for
+new customers. The frontend must neither present local-only organisations as
+active nor grant cross-organisation access. Platform administration may start
+new-organisation invitations across realms; organisation administrators invite
+only within their own realm and authorised Sites. Multi-realm login and
+onboarding are not implemented merely by this documentation. Do not switch to
+a shared realm or alter this boundary without explicit owner approval.
+
+Потвърдено от собственика: ОТДЕЛЕН OpenRemote realm (tenant) за ВСЯКА клиентска
+организация. `gridex` е пилотният realm, не общ realm за новите клиенти.
+Frontend не представя местна/непровизирана организация като активна и не дава
+достъп между организации. Глобалният администратор започва покани за нови
+организации; администраторът на организация кани само в собствения realm и за
+разрешените Обекти. Multi-realm входът/поканите още не са реализирани само с
+този документ. Не преминавай към общ realm и не променяй границата без
+изрично одобрение на собственика.
+
 ## Strategic invariant: OpenRemote-only inventory / Стратегическо правило — 2026-09-20
 
 Owner-confirmed: OpenRemote is the ONLY authoritative place for all operational
@@ -212,6 +284,39 @@ frontend deployment/API restart изискват пресен вход и връ
 - Ако промяна е необходима, опиши засегнатите елементи и предложението и
   получи одобрение преди изпълнение. Одобрението важи само за поисканата
   промяна; останалата навигация се запазва.
+
+## Mandatory documentation for every changed menu / Документация за всяко променено меню — 2026-09-24
+
+Whenever an owner-approved change affects ANY menu or submenu (including
+account and mobile navigation), create or update its user-facing BG/EN guide
+in the SAME change before reporting completion. This includes changes to
+labels, URL, grouping, visibility, permissions, fields, actions, states or
+data source—not just newly added items. Explain what the section does, who
+can see/use it, each important control, Demo versus Live behavior, the URL,
+empty/loading/error states, and any unfinished integration. Record the owner's
+decision, rationale, exact affected menu tree and publication/acceptance
+status in HANDOFF; keep `docs/USER_DOCUMENTATION_PLAN.md` in sync. Link the
+guide from the in-portal Documentation/help entry when the menu is published.
+Verify the guide against the actual UI/API and update relevant tests. A plan
+entry or HANDOFF note ALONE is not a substitute for the user guide. Do not
+claim a menu change finished if its guide is missing, stale or describes
+unreleased behavior as live. This documentation rule does not grant permission
+to change menu structure; the explicit owner-approval rule above still applies.
+
+При ВСЯКА одобрена промяна в меню или подменю (включително профилно и мобилно)
+създай или обнови потребителско ръководство на BG/EN в СЪЩАТА промяна, преди
+да обявиш задачата за завършена. Това важи за име, URL, групиране, видимост,
+права, полета, действия, състояния и източник на данни, не само за нов елемент.
+Обясни предназначение, кой има достъп, важните контроли, Демо срещу Live,
+адреса, празно/зареждане/грешка и незавършените интеграции. Запиши решението
+на собственика, мотивите, точната засегната йерархия и статуса на публикуване/
+приемане в HANDOFF; синхронизирай `docs/USER_DOCUMENTATION_PLAN.md`. При
+публикуване свържи ръководството от „Документация“ в портала. Провери го спрямо
+реалните UI/API и обнови тестовете. Само план или HANDOFF НЕ заместват
+потребителското ръководство. Не обявявай менюто за готово, ако ръководството
+липсва, остаряло е или представя невнедрено поведение като работещо. Това
+правило НЕ разрешава само по себе си промяна на меню — изричното одобрение
+по-горе остава задължително.
 
 ## Mobile layout approval / Одобрение за мобилното оформление
 
