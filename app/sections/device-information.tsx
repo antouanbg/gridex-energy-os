@@ -87,7 +87,7 @@ export function DeviceInformation({ api, siteId, lang, configure = false, canCom
       <button className="primary-btn" type="button" disabled={status === 'loading'} onClick={() => { setTopology(null); setStatus('loading'); setRefresh(value => value + 1); }}>{t('Обнови', 'Refresh')}</button>
       <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате достъп до устройствата на този Обект.', 'You do not have access to this Site inventory.') : status === 'unprovisioned' ? t('Инвентарът изисква завършено провизиране и права в OpenRemote.', 'Inventory requires completed provisioning and access in OpenRemote.') : status === 'failed' ? t('OpenRemote инвентарът е недостъпен. Опитайте отново.', 'OpenRemote inventory is unavailable. Please retry.') : ''}</p>
       {topology && <>
-        {canCommission&&<article className="device-provisioning device-access">
+        {canCommission&&<article className="device-access">
           <h3>{t('Добави потвърдено GrideX устройство','Add an approved GrideX device')}</h3>
           <p>{t('Инвентарът се създава през OpenRemote. Това не стартира комишънинг, мрежови настройки или команди.','Inventory is created through OpenRemote. This does not start commissioning, network changes or commands.')}</p>
           <p><a href="https://doc.gridex.tech/organisations-and-access/#sites-and-devices" target="_blank" rel="noopener noreferrer">{t('Помощ за устройствата и ролите','Help with devices and roles')} ↗</a></p>
