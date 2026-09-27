@@ -2,6 +2,35 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Потвърден клиентски процес за Обекти и устройства — 2026-09-27
+
+Последно изрично решение в „EMS OpenRemote architecture Phase3“: само GrideX
+ROCK Pi E и OLIMEX ESP32-EVB са избор за хардуер в съществуващия раздел
+„Устройства“. Обект създава само администраторът на организацията. Друг
+одобрен потребител вижда само разрешения му Обект; интеграторът и
+администраторът подготвят конфигурацията. Commissioning и пускане засега са
+само за администратора. Супер администраторът вижда всички потребители и
+права, без да смесва клиентския инвентар. Максимум две роли на устройство;
+ESP се настройва през ROCK. Външните протоколни референции не са GrideX
+production драйвери.
+
+Текуща промяна: изборът в съществуващия setup показва само вече проверени
+в OpenRemote ROCK/ESP; черновата е за интегратор/администратор, а защитеният
+достъп до ROCK — само за администратор. Help и публичното BG/EN ръководство
+са обновени. **Не е завършено** добавянето на нов клиентски Обект/устройство:
+frontend няма форма, backend няма Site POST и tenant-aware OR provisioning.
+Проверки: `npm run build:pages` и Chromium `live-navigation.spec.ts` 1/1
+минаха. Общият `tsc --noEmit` още пада от предходни несвързани грешки
+(gateway/supported, jose/Fetcher, membershipIdentity); не е green gate.
+Публичният Docusaurus guide е локално внедрен с `GRIDEX_DOCS_DEPLOYED`,
+но frontend/backend кодът тук не е внедрен и няма real-customer тест.
+Следва OR-авторитетно създаване с точен realm/owner link, идемпотентно
+съгласуване, отрицателни cross-tenant тестове и live browser приемане.
+
+EN: Only confirmed ROCK/ESP hardware. Organisation admin creates Sites and
+alone commissions; Site-scoped integrators may draft settings. Platform admin
+sees all users/rights, not pooled inventory. New customer creation is pending.
+
 ## Одобрение за всяка нова функция; frontend устройства — 2026-09-27
 
 Последното изрично решение: за всяка нова функционалност извън вече

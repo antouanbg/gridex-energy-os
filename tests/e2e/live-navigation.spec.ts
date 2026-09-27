@@ -29,7 +29,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   });
   await page.route('https://api.example.invalid/**',route=>{
     const path=new URL(route.request().url()).pathname;
-    if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',roles:['administrator'],permissions:['site:read'],memberships:[]}});
+    if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',roles:['administrator'],permissions:['site:read','hardware:manage'],memberships:[{organisationId:'test-org',role:'administrator',allSites:true}]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:'test-site',name:'Test Lab',organisationId:'test-org'}]}});
     if(path.endsWith('/snapshot'))return route.fulfill({status:503,json:{error:'unavailable'}});
     if(path.endsWith('/device-heartbeats')) {
@@ -37,7 +37,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
       if(heartbeatState==='denied')return route.fulfill({status:403,json:{error:'forbidden'}});
       return route.fulfill({json:{items:heartbeatState==='empty'?[]:['rock','esp'].map(gatewayId=>({gatewayId,sourceGatewayId:'rock',receivedAt:new Date().toISOString(),lastSuccessfulContactAt:new Date().toISOString(),heartbeat:heartbeatState==='online'?123:124,status:heartbeatState}))}});
     }
-    if(path.endsWith('/hardware'))return inventoryFailure?route.fulfill({status:inventoryFailure,json:{error:'inventory_unavailable'}}):route.fulfill({json:{inventorySource:'openremote',configuration:{revision:1,status:'draft'},gateways:[{id:'rock',name:'Test ROCK Pi',hardwareModel:'ROCK Pi E',role:'controller',ports:[]},{id:'esp',name:'Test ESP32',hardwareModel:'ESP32',role:'device-node',ports:[]}],devices:[]}});
+    if(path.endsWith('/hardware'))return inventoryFailure?route.fulfill({status:inventoryFailure,json:{error:'inventory_unavailable'}}):route.fulfill({json:{inventorySource:'openremote',configuration:{revision:1,status:'draft'},gateways:[{id:'rock',name:'Test ROCK Pi',hardwareModel:'rock-pi-e',role:'controller',ports:[]},{id:'esp',name:'Test ESP32',hardwareModel:'olimex-esp32-evb-ea-ind',role:'device-node',ports:[]}],devices:[]}});
     if(path.endsWith('/device-setup'))return route.fulfill({json:{revision:0,configuration:{},imported:{pollMs:500,timeoutMs:400,devices:[{gatewayId:'rock',communication:'node-polling-and-local-modbus-listener'},{gatewayId:'esp',communication:'modbus-tcp-via-rockpi'}]}}});
     return route.fulfill({json:{invitations:[]}});
   });

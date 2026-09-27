@@ -5,7 +5,7 @@ import type { DeviceHeartbeat, GridexApiClient, GridexHardwareTopology, RockTele
 import type { UiLanguage } from '../i18n/messages';
 import { DeviceSetupWizard } from './device-setup';
 
-export function DeviceInformation({ api, siteId, lang, configure = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean }) {
+export function DeviceInformation({ api, siteId, lang, configure = false, canCommission = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean; canCommission?: boolean }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
   const [loaded, setTopology] = useState<{ siteId: string; value: GridexHardwareTopology } | null>(null);
   const [status, setStatus] = useState('loading');
@@ -62,13 +62,13 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
 
   return <section className="card config-card device-inventory" data-no-translate>
     <h2>{t('Информация за устройствата', 'Device information')}</h2>
-    <p>{t('Инвентар от OpenRemote през backend за избрания Обект. Само за потвърден администратор. Регистрацията не доказва работеща връзка.', 'OpenRemote inventory through the backend for the selected Site. Verified administrators only. Registration does not prove connectivity.')}</p>
+    <p>{t('Инвентар от OpenRemote през backend за разрешения Ви Обект. Настройките са за интегратор или администратор; пускането е само за администратор. Регистрацията не доказва работеща връзка.', 'OpenRemote inventory through the backend for your authorised Site. Settings require an integrator or administrator; activation is administrator-only. Registration does not prove connectivity.')}</p>
     {!siteId ? <p>{t('Изберете Обект.', 'Select a Site.')}</p> : <>
       <button className="primary-btn" type="button" disabled={status === 'loading'} onClick={() => { setTopology(null); setStatus('loading'); setRefresh(value => value + 1); }}>{t('Обнови', 'Refresh')}</button>
-      <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате администраторски достъп до устройствата на този Обект.', 'You do not have administrator access to this Site inventory.') : status === 'unprovisioned' ? t('Инвентарът изисква завършено провизиране и права в OpenRemote.', 'Inventory requires completed provisioning and access in OpenRemote.') : status === 'failed' ? t('OpenRemote инвентарът е недостъпен. Опитайте отново.', 'OpenRemote inventory is unavailable. Please retry.') : ''}</p>
+      <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате достъп до устройствата на този Обект.', 'You do not have access to this Site inventory.') : status === 'unprovisioned' ? t('Инвентарът изисква завършено провизиране и права в OpenRemote.', 'Inventory requires completed provisioning and access in OpenRemote.') : status === 'failed' ? t('OpenRemote инвентарът е недостъпен. Опитайте отново.', 'OpenRemote inventory is unavailable. Please retry.') : ''}</p>
       {topology && <>
         <RockTelemetryCard telemetry={telemetry} error={telemetryError} lang={lang} />
-        {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang} connectionLabel={id => healthLabel(health?.siteId === siteId ? health.items.find(item => item.gatewayId === id) : undefined)}/>}
+        {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang} canCommission={canCommission} connectionLabel={id => healthLabel(health?.siteId === siteId ? health.items.find(item => item.gatewayId === id) : undefined)}/>}
         <p>{t('Конфигурация', 'Configuration')}: {topology.configuration ? `${topology.configuration.revision} · ${topology.configuration.status}` : t('Няма записана ревизия', 'No saved revision')}</p>
         {!topology.gateways.length && <p>{t('Няма регистрирани шлюзове или нодове.', 'No registered gateways or nodes.')}</p>}
         {topology.gateways.map((gateway, index) => {
