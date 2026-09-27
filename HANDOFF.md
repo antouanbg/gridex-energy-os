@@ -11,6 +11,34 @@ BG: Отделна функционалност по искане на собс�
 Deployment checkpoint: Manager v2 and API with migration 013 are now healthy in the existing runtime. Private backup `organisation-access-vzUVs1`; organisation/membership/Site counts unchanged and no access operation or email triggered. Local master discovery/admin/login, forced-local trusted TLS public issuer, Manager and all ingress denials pass. Normal-DNS public auth probes time out from this Mac, as previously recorded; this is not proof of external acceptance. Frontend/docs source publication is next. Backend PR is based on the existing live-onboarding branch because its setup-client/docs-proxy commits have not reached main; this task does not merge that unrelated backlog.
 
 Внедряване: Manager v2 и API с миграция 013 работят healthy. Частен backup `organisation-access-vzUVs1`; броят организации/членства/Обекти е непроменен; няма операция по спиране или писмо. Local master discovery/admin/login, принудителните локални trusted-TLS проверки за публичния issuer, Manager и всички забрани минават. Normal-DNS auth пробите от този Mac дават timeout, както е документирано и преди; външно приемане не се твърди. Следват frontend/docs публикации. Backend PR стъпва на текущия live-onboarding клон, защото setup-client/docs-proxy промените още не са в main; тази задача не слива този отделен backlog.
+## Customer/platform realm separation and refresh state — 2026-09-27
+
+EN: The owner reports that the first customer received the action email and can
+sign in, but the same browser intermittently showed no session and selected the
+customer realm for the platform owner. Root cause in the portal: the realm hint
+was stored in browser-wide `localStorage`. This change ignores/removes that old
+key, keeps explicit customer realm hints only in tab-scoped `sessionStorage`,
+and clears the hint on sign-out. Generic new-tab login defaults to `gridex`.
+During live session checks the account control now says “Checking session…”;
+temporary verification failure is not represented as a confirmed sign-out.
+No token is persisted. Five focused Chromium tests, including two-tab realm
+isolation, route refresh, timeout and permission changes, passed. Source-only
+until PR/Pages publication and real owner/customer browser acceptance.
+The customer's empty inventory is a separate unfinished provisioning problem:
+the new realm has no Site yet; do not show pilot devices or invent local ones.
+Follow `docs/LOGIN_REALM_ISOLATION.md` and the OpenRemote-only inventory rule.
+
+BG: Собственикът потвърди полученото писмо и входа на първия клиент, но от
+същия браузър понякога се виждаше „няма сесия“ и клиентски realm се избираше
+при входа на платформения собственик. Порталът пазеше realm-а общо за целия
+браузър в `localStorage`. Поправката премахва стария ключ, пази изричния
+клиентски избор само в текущата вкладка и го изчиства при изход. Общият вход
+от нова вкладка започва в `gridex`. Докато се проверява реална сесия,
+контролът показва „Проверка на сесията…“; временна грешка не се представя
+като потвърден изход. Няма записване на токени. Пет целеви Chromium теста
+минаха. Кодът чака PR/Pages и реален браузърен тест. Празният клиентски
+инвентар е отделно незавършено провизиране: новият realm още няма Обект;
+не се показват пилотните устройства и не се измислят локални записи.
 
 ## Помощ за покана от клиентска организация — 2026-09-27
 

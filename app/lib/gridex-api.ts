@@ -271,12 +271,15 @@ export function getGridexRuntimeConfig(): GridexRuntimeConfig {
   const validRealm = (value: string | null): value is string => Boolean(value && /^[a-z][a-z0-9-]{2,30}$/.test(value));
   let selected = validRealm(requested) ? requested : null;
   try {
-    if (selected) localStorage.setItem('gridex.selected-realm', selected);
+    // A customer's realm must never become a browser-wide default for another
+    // tab or the platform owner's next login. Keep the hint in this tab only.
+    localStorage.removeItem('gridex.selected-realm');
+    if (selected) sessionStorage.setItem('gridex.selected-realm', selected);
     else {
-      const remembered = localStorage.getItem('gridex.selected-realm');
+      const remembered = sessionStorage.getItem('gridex.selected-realm');
       if (validRealm(remembered)) selected = remembered;
     }
-  } catch { /* Realm selection is convenience, never authorization. */ }
+  } catch { /* Explicit realm URL still works without browser storage. */ }
   if (!selected || selected === configured.realm) return configured;
   const marker = '/realms/';
   const boundary = configured.oidcIssuer.lastIndexOf(marker);

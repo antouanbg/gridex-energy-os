@@ -9,6 +9,23 @@ BG: Отделна функционалност по искане на собс�
 Deployment checkpoint: Manager v2 and API with migration 013 are now healthy in the existing runtime. Private backup `organisation-access-vzUVs1`; organisation/membership/Site counts unchanged and no access operation or email triggered. Local master discovery/admin/login, forced-local trusted TLS public issuer, Manager and all ingress denials pass. Normal-DNS public auth probes time out from this Mac, as previously recorded; this is not proof of external acceptance. Frontend/docs source publication is next. Backend PR is based on the existing live-onboarding branch because its setup-client/docs-proxy commits have not reached main; this task does not merge that unrelated backlog.
 
 Внедряване: Manager v2 и API с миграция 013 работят healthy. Частен backup `organisation-access-vzUVs1`; броят организации/членства/Обекти е непроменен; няма операция по спиране или писмо. Local master discovery/admin/login, принудителните локални trusted-TLS проверки за публичния issuer, Manager и всички забрани минават. Normal-DNS auth пробите от този Mac дават timeout, както е документирано и преди; външно приемане не се твърди. Следват frontend/docs публикации. Backend PR стъпва на текущия live-onboarding клон, защото setup-client/docs-proxy промените още не са в main; тази задача не слива този отделен backlog.
+## Realm separation and refresh correction — 2026-09-27
+
+Customer realm selection is now tab-scoped instead of browser-wide, and
+sign-out clears it. Live session checking/error states no longer claim a
+confirmed anonymous session. Pages build and five focused Chromium tests pass;
+PR, Pages publication and real owner/customer sign-in remain pending. Public
+Manager and Keycloak branding repairs are tracked in backend HANDOFF. The new
+organisation's Sites/devices still need OpenRemote-only provisioning; do not
+mask the empty state with pilot inventory. See frontend HANDOFF and
+`docs/LOGIN_REALM_ISOLATION.md`.
+
+Клиентският realm вече е ограничен до вкладката, а изходът го изчиства.
+Проверка/грешка на реалната сесия не се показва като доказан анонимен вход.
+Pages build и пет целеви Chromium теста минаха; PR/Pages и реален вход от
+двата акаунта предстоят. Публичният Manager и Keycloak са описани в backend
+HANDOFF. Празните Обекти/устройства на клиента искат провизиране само през
+OpenRemote; не се подменят с пилотния инвентар.
 
 ## Помощ за клиентски администратори — 2026-09-27
 
