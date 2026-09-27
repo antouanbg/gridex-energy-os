@@ -15,6 +15,7 @@ async function session(page:Page,platform:boolean, state:{suspended:boolean;stat
     if(path.endsWith('/me'))return r.fulfill({json:{subject:'owner',realm:'gridex',roles:['administrator'],permissions:platform?['platform:manage']:[],memberships:[]}});
     if(path.endsWith('/sites'))return r.fulfill({json:{sites:[{id:'lab',name:'Private Lab'}]}});
     if(path.endsWith('/hardware'))return r.fulfill({json:{inventorySource:'openremote',gateways:[{id:'rock',name:'Private ROCK',hardwareModel:'rock-pi-e',role:'controller',ports:[]}],devices:[]}});
+    if(path.endsWith('/snapshot'))return r.fulfill({json:{siteId:'lab',siteName:'Private Lab',timestamp:new Date().toISOString(),quality:'INVALID',battery:null,power:{gridKw:null,batteryKw:null,pvKw:null,siteLoadKw:null},strategy:null,devices:[],batteryEconomicsToday:{available:false}}});
     if(path.endsWith('/device-heartbeats'))return r.fulfill({json:{items:[]}});
     if(path.endsWith('/device-setup'))return r.fulfill({json:{revision:0,configuration:{}}});
     if(path.endsWith('/organisation-invitations'))return r.fulfill({json:{enabled:true,invitations:[]}});
@@ -46,6 +47,16 @@ for(const en of [false,true]) {
     await expect(page.getByRole('button',{name:en?'Suspend organisation':'Спри организацията',exact:true})).toBeVisible();
     expect(state.writes).toBe(2);
   });
+  test(`authenticated null battery dashboard ${en?'EN':'BG'}`,async({page})=>{
+    if(en)await page.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
+    await session(page,false,initial());await page.goto('/sites/lab/devices/');
+    await expect(page.getByRole('heading',{name:'Private ROCK',exact:true})).toBeVisible();
+    await page.locator('[data-view-id="overview"]').click();
+    await expect(page.getByText('SOH —',{exact:true})).toBeVisible();
+    await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
+    await expect(page.locator('main')).not.toContainText('NaN');
+    await expect(page.locator('main')).not.toContainText('0.0 kW');
+  });
   test(`existing session clears private content on suspension ${en?'EN':'BG'}`,async({page})=>{
     if(en)await page.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
     const state=initial();await session(page,false,state);
@@ -66,3 +77,14 @@ for(const en of [false,true]) {
     await expect(page.getByRole('button',{name:en?'Suspend organisation':'Спри организацията',exact:true})).toHaveCount(0);
   });
 }
+
+for (const unavailable of [false,true]) test(`approved organisation list distinguishes ${unavailable?'unavailable':'empty'}`,async({page})=>{
+  await session(page,true,initial());
+  await page.route('https://api.example.invalid/api/v1/platform/organisations',route=>unavailable
+    ? route.fulfill({status:503,json:{error:'organisation_access_unavailable'}})
+    : route.fulfill({json:{organisations:[]}}));
+  await page.goto('/customers/users/');
+  await expect(page.getByText(unavailable?'Управлението на достъпа е недостъпно.':'Няма одобрени клиентски организации.',{exact:true})).toBeVisible();
+  if(unavailable)await expect(page.getByText('Няма одобрени клиентски организации.',{exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Спри организацията',exact:true})).toHaveCount(0);
+});

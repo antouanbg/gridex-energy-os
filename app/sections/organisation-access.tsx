@@ -7,6 +7,7 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
   const en = lang === 'en';
   const [items, setItems] = useState<PlatformOrganisation[]>([]);
   const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [notice, setNotice] = useState('');
   const [confirm, setConfirm] = useState<PlatformOrganisation | null>(null);
   const labels: Record<string, string> = en ? {
@@ -16,11 +17,11 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
     active: 'Активна', suspended: 'Временно спряна', pending: 'Предстои', applied: 'Потвърдено', sending: 'Неясна доставка — без повторно изпращане',
     unknown: 'Неясна доставка — без повторно изпращане', queued: 'В опашка; доставката не е потвърдена', delivered: 'Доставено', failed: 'Неуспешна доставка', not_required: 'Не се изисква имейл',
   };
-  async function reload() { setItems((await api.platformOrganisations()).organisations); }
+  async function reload() { setItems((await api.platformOrganisations()).organisations); setLoaded(true); }
   useEffect(() => {
     const controller = new AbortController();
     void api.platformOrganisations(controller.signal).then(result => {
-      if (!controller.signal.aborted) setItems(result.organisations);
+      if (!controller.signal.aborted) { setItems(result.organisations); setLoaded(true); }
     }).catch(() => { if (!controller.signal.aborted) setNotice(en ? 'Organisation access management is unavailable.' : 'Управлението на достъпа е недостъпно.'); });
     return () => controller.abort();
   }, [api, en]);
@@ -44,7 +45,8 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
     <p>{en ? 'Suspension blocks access and ends sessions. Accounts and inventory are preserved. Restoration requires a fresh sign-in.' : 'Спирането блокира достъпа и прекратява сесиите. Акаунтите и инвентарът се запазват. След възстановяване е нужен нов вход.'}</p>
     {notice && <p role="status">{notice}</p>}
     <button className="secondary-btn" type="button" disabled={busy} onClick={() => { void reload().catch(() => setNotice(en ? 'Reload failed.' : 'Обновяването не успя.')); }}>{en ? 'Reload status' : 'Обнови състоянието'}</button>
-    {!items.length && <p>{en ? 'No approved customer organisations.' : 'Няма одобрени клиентски организации.'}</p>}
+    {!loaded && !notice && <p>{en ? 'Loading organisations…' : 'Зареждане на организациите…'}</p>}
+    {loaded && !items.length && <p>{en ? 'No approved customer organisations.' : 'Няма одобрени клиентски организации.'}</p>}
     {items.map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong><p>{labels[item.status]}{item.operationState ? ` · ${labels[item.operationState]}` : ''}</p>
       {item.mailState && <p>{en ? 'Suspension email' : 'Имейл за спиране'}: {labels[item.mailState]}</p>}
@@ -53,7 +55,7 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
         : <button type="button" className="secondary-btn" disabled={busy} onClick={() => setConfirm(item)}>{item.status === 'active' ? en ? 'Suspend organisation' : 'Спри организацията' : en ? 'Restore access' : 'Възстанови достъпа'}</button>}
       {item.operationState === 'applied' && item.mailState === 'pending' && <button type="button" className="secondary-btn" disabled={busy} onClick={() => void change(item, true)}>{en ? 'Complete notification' : 'Довърши уведомяването'}</button>}
       {item.mailState === 'queued' && <button type="button" className="secondary-btn" disabled={busy} onClick={() => {
-        setBusy(true); void api.checkOrganisationDelivery(item.id).then(reload).catch(() => setNotice(en ? 'Delivery check unavailable; no email was resent.' : 'Проверката на доставката е недостъпна; имейлът не е изпратен повторно.')).finally(() => setBusy(false));
+        setBusy(true); void api.checkOrganisationDelivery(item.id).then(result => { setNotice(labels[result.mailState]); return reload(); }).catch(() => setNotice(en ? 'Delivery check unavailable; no email was resent.' : 'Проверката на доставката е недостъпна; имейлът не е изпратен повторно.')).finally(() => setBusy(false));
       }}>{en ? 'Check delivery' : 'Провери доставката'}</button>}
       {confirm?.id === item.id && <div role="group" aria-label={en ? 'Confirm access change' : 'Потвърди промяната'}>
         <p>{item.status === 'active'
