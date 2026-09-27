@@ -1,5 +1,28 @@
 # GrideX Energy OS — Working Rules
 
+## Mandatory onboarding completion check / Задължителна проверка на поканите — 2026-09-27
+
+After any new-organisation email, registration or login change, test the entire
+customer path with an identity that has no membership yet: verified email →
+customer realm login → `/api/v1/me` → pending invitation visible in Profile →
+explicit Accept POST → active membership and realm-scoped Sites after reload.
+Do not infer acceptance from a delivered email, a password update, a Keycloak
+user or a successful login. A pending invitation must remain visibly pending;
+on failure show a recoverable error and retain the invite. Test desktop and
+mobile, refresh, and that the platform owner's Sites never appear in the
+customer realm. Check deployed state and audit entries before reporting success.
+If the customer has not clicked Accept, say so; do not activate on their behalf.
+
+След всяка промяна по покана, регистрация или вход тествай целия клиентски път
+с акаунт без членство: потвърден имейл → вход в клиентския realm →
+`/api/v1/me` → видима чакаща покана в Профил → изрично „Приеми“ → активно
+членство и правилно ограничени Обекти след обновяване. Получено писмо,
+нова парола, Keycloak потребител или успешен вход НЕ доказват приемане.
+Поканата остава видимо чакаща; при отказ показвай поправима грешка и я пази.
+Тествай desktop, mobile, refresh и липсата на пилотни Обекти в клиентския
+realm. Проверявай внедреното състояние и audit преди доклад за успех.
+Ако клиентът не е натиснал „Приеми“, кажи го; не активирай вместо него.
+
 ## Invitation and rights UX / Покани и права — 2026-09-26
 
 Keep the owner-approved existing route Customers & contracts → Users &

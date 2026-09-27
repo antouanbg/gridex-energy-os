@@ -2,6 +2,22 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Първа клиентска покана — проверка на приемането, 2026-09-27
+
+Регистрацията и входът не са завършено провизиране. Реалната покана е `sent`,
+валидна и свързана с точния потвърден клиент. Backend я връща като pending,
+но audit няма `activation_started` или `accepted`: няма доказана Accept POST.
+Chromium E2E тестът `tests/e2e/customer-onboarding-acceptance.spec.ts` мина:
+клиент без членство вижда поканата в `/profile/`, изпраща Accept и получава
+права след refresh. Това не замества реалното приемане. След него провери
+OpenRemote admin grant, активна организация/членство и отказ до чужди Обекти.
+Задължителният checklist е в AGENTS.md; не активирай вместо клиента.
+
+EN: The verified customer has a valid `sent` invitation, but no Accept POST
+or activation audit event. Browser E2E confirms Profile visibility without a
+membership, acceptance and post-refresh rights. Real customer acceptance and
+subsequent OpenRemote/tenant checks remain required.
+
 ## Customer/platform realm separation and refresh state — 2026-09-27
 
 EN: The owner reports that the first customer received the action email and can

@@ -1,5 +1,16 @@
 # Current task
 
+## Приемане на първата клиентска покана — 2026-09-27
+
+Реалният клиент е потвърден, но организацията не е активна: няма доказана
+Accept POST. Поканата е валидна и видима през backend. Browser E2E за
+показване в Профил, приемане и права след refresh мина. След реално натискане
+провери audit, OpenRemote grant, членство и изолация според AGENTS.md.
+
+EN: Valid customer invite remains pending; no Accept POST is evidenced.
+Browser acceptance regression passes, but real acceptance and isolation
+checks are still required.
+
 ## Realm separation and refresh correction — 2026-09-27
 
 Customer realm selection is now tab-scoped instead of browser-wide, and
