@@ -464,9 +464,9 @@ export default function Home() {
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
         <div className="profile-wrap" data-no-translate>
-          <button className={`profile ${!sessionUser?'quick-sign-in':''} ${accountMenuOpen?"open":""}`} onClick={()=>sessionUser?setAccountMenuOpen(!accountMenuOpen):void signIn()} aria-haspopup={sessionUser?"menu":undefined} aria-expanded={sessionUser?accountMenuOpen:undefined}>
+          <button className={`profile ${!sessionUser?'quick-sign-in':''} ${accountMenuOpen?"open":""}`} disabled={dataMode==='live'&&authState==='checking'} onClick={()=>sessionUser?setAccountMenuOpen(!accountMenuOpen):void signIn()} aria-haspopup={sessionUser?"menu":undefined} aria-expanded={sessionUser?accountMenuOpen:undefined}>
             <span>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</span>
-            <div><strong>{sessionUser?(lang==="en"?sessionUser.nameEn:sessionUser.nameBg):(lang==="en"?"Sign in":"Вход")}</strong><small>{sessionUser?(lang==="en"?sessionUser.roleEn:sessionUser.roleBg):(lang==="en"?"No active session":"Няма активна сесия")}</small></div><b>⋮</b>
+            <div><strong>{sessionUser?(lang==="en"?sessionUser.nameEn:sessionUser.nameBg):(lang==="en"?"Sign in":"Вход")}</strong><small>{sessionUser?(lang==="en"?sessionUser.roleEn:sessionUser.roleBg):dataMode==='live'&&authState==='checking'?(lang==="en"?"Checking session…":"Проверка на сесията…"):dataMode==='live'&&authState==='error'?(lang==="en"?"Verification unavailable":"Проверката е недостъпна"):(lang==="en"?"No active session":"Няма активна сесия")}</small></div><b>⋮</b>
           </button>
           <button className="language-switch sidebar-language" data-no-translate onClick={()=>{const next=lang==='bg'?'en':'bg';setLang(next);try{localStorage.setItem('gridex.ui-language',next);}catch{/* Storage is optional. */}}} aria-label="Language">{lang==="bg"?"EN":"BG"}</button>
         </div>
@@ -538,7 +538,7 @@ export default function Home() {
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "members" && dataMode==='demo' && <section className="card config-card"><h2>{lang==='en'?'Users & invitations':'Потребители и покани'}</h2><p>{lang==='en'?'Sign in as an organisation administrator to manage real invitations. No demo emails are sent.':'Влезте като администратор на организация, за да управлявате реални покани. В демо режима не се изпращат имейли.'}</p></section>}
         {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations api={apiClient} lang={lang} mode="manage"/>}
-        {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError}/>}
+        {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"}/>}
         {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang} mode="accept"/>}
             </>}
           </div>
@@ -589,7 +589,7 @@ function LiveModulePending({view,lang,onDevices}:{view:string;lang:UiLanguage;on
   </section>;
 }
 
-function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState,error}:{lang:UiLanguage;user:DemoUser|null;onSignIn:()=>void;onSignOut:()=>void;navigate:(id:string)=>void;backendState:BackendState;authState:AuthState;error:string}) {
+function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState,error,customerRealm}:{lang:UiLanguage;user:DemoUser|null;onSignIn:()=>void;onSignOut:()=>void;navigate:(id:string)=>void;backendState:BackendState;authState:AuthState;error:string;customerRealm:boolean}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const backendAvailable=backendState==="online";
   return <div className="login-layout" data-no-translate>
@@ -616,7 +616,8 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
         <span><strong>{authState==="checking"?t("Проверка на сесията","Checking session"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):backendState==="offline"?t("API достъпът не е потвърден","API access could not be verified"):t("Влезте за проверка на достъпа","Sign in to verify access")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
       </div>
       {error&&<div className="login-error" role="alert">{error}</div>}
-      {!user&&<button className="login-submit" type="button" disabled={backendState==="demo"} onClick={onSignIn}>{t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
+      {!user&&<button className="login-submit" type="button" disabled={backendState==="demo"||authState==="checking"} onClick={onSignIn}>{t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
+      {!user&&customerRealm&&<a className="profile-inline-help" href="/login/?realm=gridex">{t('Вход в основния GrideX акаунт','Sign in to the main GrideX account')} →</a>}
       {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
       <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{user?t('Към моите обекти','Back to my sites'):t("Към прегледа","Back to overview")}</button>
       <small className="login-disclaimer">{t("GrideX никога не приема или записва паролата на тази страница. Keycloak издава краткоживеещ token, който се държи само в паметта на браузъра.","GrideX never accepts or stores your password on this page. Keycloak issues a short-lived token that is kept only in browser memory.")}</small>
