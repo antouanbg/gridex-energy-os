@@ -1,14 +1,17 @@
 # User documentation coverage / Покритие на потребителската документация
 
-Status: planned, except the in-portal Profile and invitation/access guide at `/help/`. This is
-the checklist for the later documentation portal (`doc.gridex.tech` is a
-proposal, not an active destination). Do not link users to an unpublished
-domain. Preserve the owner-approved navigation; documentation does not add
-items to the main menu.
+Status: planned, except the in-portal Profile and invitation/access guide at
+`/help/` and the public BG/EN organisations guide at `doc.gridex.tech`.
+The public guide now includes member-invitation steps for administrators of
+existing customer organisations; first live customer acceptance remains
+unverified. Preserve the owner-approved navigation; documentation does not
+add items to the main menu.
 
-Статус: планирано, с изключение на ръководството за Профил и достъп с покана в `/help/`.
-Бъдещият портал за документация още не е активен. Не насочвай потребителя към
-несъществуващ домейн и не променяй одобреното главно меню заради документация.
+Статус: планирано, с изключение на ръководството за Профил и покани в
+`/help/` и публичната BG/EN страница за организации на `doc.gridex.tech`.
+Тя включва стъпки за администратор на съществуваща клиентска организация;
+първо реално клиентско приемане още не е проверено. Не променяй одобреното
+главно меню заради документация.
 
 For every existing section, document: purpose and intended audience; every
 visible field/control and its effect; data source and whether values are demo,
@@ -27,7 +30,7 @@ guide against the actual shipped UI and API before marking it complete.
 | --- | --- | --- |
 | Преглед | `/` | Pending |
 | Клиенти и договори | `/customers/` | Pending |
-| Потребители и покани / Users & invitations | `/customers/users/` | BG/EN guide: `docs/USERS_AND_INVITATIONS_GUIDE.md`; public access primer: `docs/ORGANISATIONS_AND_ACCESS.md` and `/help/` (local changes); verify real delivery/acceptance before completion |
+| Потребители и покани / Users & invitations | `/customers/users/` | BG/EN guide: `docs/USERS_AND_INVITATIONS_GUIDE.md`; public guide: `https://doc.gridex.tech/organisations-and-access/#invite-a-colleague` and `/help/`; verify real delivery/acceptance before completion |
 | Обекти | `/sites/` | Pending |
 | Енергийни активи | `/assets/` | Pending |
 | Батерия | `/battery/` | Pending |

@@ -1,10 +1,12 @@
 # Users & invitations / Потребители и покани
 
-Status / Статус 2026-09-26: backend setup and migration 012 are active. The
+Status / Статус 2026-09-27: backend setup and migration 012 are active. The
 global form is available to the explicitly authorised platform account in a
 recent live session. First real customer delivery, password setup, acceptance
-and tenant-isolation test are **not yet verified**. The frontend fix for member
-invitations when an organisation has zero Sites is local and unpublished.
+and tenant-isolation test are **not yet verified**. The current frontend and
+backend allow an empty Site selection for member invitations, granting no Site
+access. The new public help steps address organisation administrators, not
+the platform administrator.
 
 ## Български
 
@@ -24,7 +26,7 @@ invitations when an organisation has zero Sites is local and unpublished.
 
 За покана на член избери организацията, въведи имейла, избери роля от падащото
 меню и по желание маркирай разрешени Обекти. Ако организацията още няма Обекти,
-поканата следва да дава членство без достъп до Обекти; frontend поправката за този случай още не е публикувана.
+поканата дава членство без достъп до Обекти.
 Наличните роли са „Наблюдател“
 (четене), „Оператор“ (оперативни действия), „Енергиен мениджър“ (стратегии и
 конфигурация) и „Интегратор“ (настройки на устройства). Сегашният поток не
@@ -34,9 +36,19 @@ invitations when an organisation has zero Sites is local and unpublished.
 членство — то започва след успешно приемане. Изпратената покана може да се
 отмени в същата сесия; постоянен списък на изпратените покани още липсва.
 
+**Проверка на първа покана от администратор на клиентска организация:**
+отвори `/customers/users/` след вход в съществуващата организация; избери
+получател, роля и минималния необходим обхват по Обекти; натисни „Изпрати
+покана“ веднъж. При потвърдено изпращане получателят потвърждава имейла,
+задава парола в защитения екран, влиза в своя realm и приема от „Профил“.
+Провери достъпа само до разрешените Обекти. При грешка или неясен резултат не
+приемай, че имейлът е изпратен, и не повтаряй сляпо. Това не е потокът за
+първия администратор на нова организация.
+
 При „Зареждане“ изчакай проверката на права, Обекти и покани. Ако няма
-достъпни Обекти, не приемай, че поканата е възможна в текущо публикувания UI. При грешка или недостъпна
-услуга не приемай, че писмото е изпратено; обнови и провери състоянието.
+достъпни Обекти, изпратената покана не дава достъп до нито един Обект. При
+грешка или недостъпна услуга не приемай, че писмото е изпратено; провери
+състоянието, преди да повтаряш заявката.
 Невлязъл потребител и потребител без администраторски права не могат да
 изпращат покани. Глобалната покана за първи администратор на **нова**
 организация има включен backend поток, но реално изпращане и приемане още не са
@@ -60,9 +72,8 @@ under another realm code before reconciliation.
 
 To invite a member, choose the organisation, enter an email, select a role
 from the dropdown and optionally select permitted Sites. When an organisation
-has no Sites yet, the invitation should grant membership with no Site access;
-the frontend fix for this case is local and unpublished. Access must be granted
-explicitly later. Available roles are
+has no Sites yet, the invitation grants membership with no Site access;
+access must be granted explicitly later. Available roles are
 Viewer (read), Operator (operational actions), Energy manager (strategies and
 configuration), and Integrator (device configuration). The current flow cannot
 delegate the organisation-administrator role. Only Sites available to the
@@ -71,9 +82,18 @@ creating the invitation and again at acceptance. Sending alone grants no
 membership; acceptance is required. A sent invitation can be revoked in the
 same session. A persistent sent-invitation list is not available yet.
 
+**First member-invitation test for a customer organisation administrator:**
+open `/customers/users/` after signing in to the existing organisation;
+select the recipient, role and minimum required Site scope; select Send
+invitation once. After confirmed dispatch, the recipient verifies email,
+sets a password on the secure screen, signs in to their realm and accepts in
+Profile. Verify access only to permitted Sites. On an error or unclear
+outcome, do not assume delivery or retry blindly. This is not the first-admin
+invitation flow for a new organisation.
+
 Wait for rights, Sites and invitations to load. With no available Sites,
-do not assume the currently published UI can send the invitation. On an error or unavailable service, do not assume email
-was sent; refresh and verify state. Anonymous and non-admin users cannot send
+the sent invitation grants no Site access. On an error or unavailable service,
+do not assume email was sent; verify the state before retrying. Anonymous and non-admin users cannot send
 invitations. The global invitation for the first administrator of a **new**
 organisation has an active backend path, but real delivery and acceptance with
 a new customer remain unverified.
