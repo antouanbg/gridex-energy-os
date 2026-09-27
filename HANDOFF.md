@@ -2,6 +2,34 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Нов клиентски Обект и устройство — локално подготвени, не публикувани — 2026-09-27
+
+Последно изрично решение в Phase3: администраторът на активна организация
+създава нов Обект от `/sites/` и добавя само потвърден ROCK Pi E или OLIMEX
+ESP32-EVB от `/devices/` в нейния OpenRemote realm. ESP32 избира родител ROCK
+в същия Обект. Интеграторът настройва чернова, но не създава ресурс;
+commissioning е само за администратор. Няма ново меню или автоматичен
+хардуерен старт.
+
+Локални форми и API клиент са добавени. Нов Site се показва след проверения
+backend отговор; повторение на неясна заявка запазва ключа за идемпотентност.
+Формулярите са скрити за неадминистратори и сочат към Docusaurus help.
+BG/EN ръководство: `docs/SITES_AND_DEVICES_GUIDE.md`; coverage таблицата е
+обновена. `npm run lint` мина с две стари image предупреждения, `npm test`
+25/25; `tsc --noEmit` има предходните несвързани грешки. Няма mobile/desktop
+реален browser тест или publication.
+
+Клиентският `antouan@novacom.bg` още няма активно членство; **не** го
+„одобрявай“ ръчно. Първо негов вход към `novacom`, автоматично Accept,
+проверен OpenRemote admin grant и изолация, после тест за нов Обект и ROCK/ESP.
+Backend PR/миграция трябва да предхождат frontend deploy. Публичният
+Docusaurus guide още трябва да се публикува със състояние „не е live“ и да
+се сравни след реален тест.
+
+EN: Local forms/API for new Site and approved ROCK/ESP are prepared, not
+published. First-admin activation, real customer OpenRemote token, browser
+acceptance and coordinated backend/frontend rollout remain.
+
 ## Потвърден клиентски процес за Обекти и устройства — 2026-09-27
 
 Последно изрично решение в „EMS OpenRemote architecture Phase3“: само GrideX

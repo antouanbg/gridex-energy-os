@@ -31,7 +31,7 @@ guide against the actual shipped UI and API before marking it complete.
 | Преглед | `/` | Pending |
 | Клиенти и договори | `/customers/` | Pending |
 | Потребители и покани / Users & invitations | `/customers/users/` | BG/EN guide: `docs/USERS_AND_INVITATIONS_GUIDE.md`; public guide: `https://doc.gridex.tech/organisations-and-access/#invite-a-colleague` and `/help/`; verify real delivery/acceptance before completion |
-| Обекти | `/sites/` | Pending |
+| Обекти | `/sites/` | BG/EN guide: `docs/SITES_AND_DEVICES_GUIDE.md`; local implementation, publication and real-account acceptance pending |
 | Енергийни активи | `/assets/` | Pending |
 | Батерия | `/battery/` | Pending |
 | Управляеми товари | `/loads/` | Pending |
@@ -40,7 +40,7 @@ guide against the actual shipped UI and API before marking it complete.
 | Балансиране | `/market/balancing/` | Pending |
 | Логика и режими | `/automation/` | Pending |
 | Графици | `/automation/schedules/` | Pending |
-| Устройства | `/devices/` | Pending |
+| Устройства | `/devices/` | BG/EN guide: `docs/SITES_AND_DEVICES_GUIDE.md`; local implementation, publication and real-account acceptance pending |
 | Поддържани устройства | `/devices/supported/` | Pending |
 | Аларми | `/alarms/` | Pending |
 | Отчети и икономика | `/reports/` | Pending |

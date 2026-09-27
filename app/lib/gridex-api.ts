@@ -356,6 +356,14 @@ export class GridexApiClient {
     return payload.sites ?? payload.items ?? [];
   }
 
+  async createSite(body: { organisationId: string; name: string; timezone: string }, key: string): Promise<GridexSite> {
+    return this.postJson('/api/v1/sites', body, { 'Idempotency-Key': key });
+  }
+
+  async createGateway(siteId: string, body: { name: string; hardwareModel: GridexGateway['hardwareModel']; parentGatewayId?: string }, key: string): Promise<{id:string;siteId:string;name:string;hardwareModel:string;role:string}> {
+    return this.postJson(`/api/v1/sites/${encodeURIComponent(siteId)}/gateways`, body, { 'Idempotency-Key': key });
+  }
+
   async deviceTypes(signal?: AbortSignal): Promise<{ items: GridexDeviceType[]; hardware: Record<string, unknown> }> {
     return this.getJson("/api/v1/device-types", signal);
   }

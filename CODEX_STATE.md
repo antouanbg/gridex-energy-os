@@ -1,5 +1,19 @@
 # Current task
 
+## 2026-09-27 — нов клиентски Обект и устройство
+
+Изрично одобрено: нов Обект и потвърден GrideX ROCK/ESP за всяка активирана
+организация, създавани от нейния администратор през старите раздели.
+Локални `/sites/` и `/devices/` форми и API клиент; без ново меню или
+комишънинг. Ръководство BG/EN и help връзки са подготвени. Unit/build/lint
+минават, но реален клиентски вход и mobile/desktop acceptance, backend
+миграция и deploy липсват. Поканата на `antouan@novacom.bg` остава `sent`
+без членство; не създавай ресурс преди проверено автоматично Accept.
+
+EN: Local customer Site and approved gateway UI is prepared, not live.
+Verify invitation activation, backend migration, customer OpenRemote token
+and browser isolation before publishing.
+
 ## 2026-09-27 — потвърден клиентски процес за устройства
 
 Собственикът потвърди само GrideX ROCK Pi E/OLIMEX ESP32-EVB като хардуерен
