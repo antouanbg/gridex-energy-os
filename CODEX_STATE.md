@@ -1,5 +1,38 @@
 # Current task
 
+## Одобрена селекция на устройства и правило за функции — 2026-09-27
+
+Собственикът потвърди: изборът на устройство и роли се извършва само в GrideX
+frontend; backend записва авторитетния инвентар в OpenRemote. Не се създава
+втори самостоятелен регистър и не се измислят модели, драйвери или роли.
+Всяка нова функционалност извън вече одобрения обхват изисква конкретен въпрос
+и изрично потвърждение ПРЕДИ реализация. Правилото е отразено в AGENTS.md.
+Самостоятелното добавяне на Обекти/устройства за нов клиент все още не е
+реализирано: backend Site POST липсва, а устройственото провизиране е
+фиксирано към пилотния OpenRemote realm. Не показвай фалшиво завършен процес.
+
+EN: The owner approved device/role selection in GrideX and authoritative
+OpenRemote persistence only. Every new function beyond the approved scope
+requires an explicit question and confirmation. Customer Site/device creation
+is not yet complete; the backend lacks Site POST and tenant-aware provisioning.
+
+## Първа администраторска покана без втори бутон — 2026-09-27
+
+Последното изрично решение отменя старото ръчно „Приеми поканата“ само за
+първия администратор на нова организация. След потвърден имейл, парола и
+вход frontend извиква съществуващия проверен backend Accept endpoint за
+точно съвпадащата чакаща покана, после проверява активното членство. При
+грешка не показва активна организация. Поканите за членове засега не са
+променени. Променени са AGENTS, UI и вътрешната BG/EN помощ; local browser
+fixture 1/1 и Pages build минаха. Публикуване и проверка с реалния клиент
+предстоят; не твърди production успех.
+
+EN: The owner's latest decision removes the second manual button only for
+the first administrator. After verified email, password setup and sign-in,
+frontend calls the existing checked backend acceptance endpoint and verifies
+membership. Member invitations are unchanged. Local browser fixture and
+Pages build passed; publication and real-customer acceptance remain pending.
+
 ## Приемане на първата клиентска покана — 2026-09-27
 
 Реалният клиент е потвърден, но организацията не е активна: няма доказана

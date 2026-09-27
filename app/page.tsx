@@ -255,13 +255,28 @@ export default function Home() {
       let membershipIdentity;
       try {
         membershipIdentity = await apiClient.me();
+        // A first administrator has completed the email/password action in
+        // Keycloak. Complete only that realm's exact pending invitation via
+        // the backend's verified, idempotent onboarding transition.
+        if (runtimeConfig.realm !== 'gridex' && !membershipIdentity.memberships?.length && membershipIdentity.realm === runtimeConfig.realm) {
+          const pending = (await apiClient.myOrganisationOnboarding()).invitations
+            .filter(item => item.realm === membershipIdentity.realm);
+          if (pending.length > 1) throw new Error('Ambiguous organisation invitations');
+          if (pending.length === 1) {
+            const result = await apiClient.acceptOrganisationOnboarding(pending[0].id);
+            if (!result.accepted || result.realm !== membershipIdentity.realm) throw new Error('Organisation onboarding unconfirmed');
+            membershipIdentity = await apiClient.me();
+            if (!membershipIdentity.memberships?.some(item => item.role === 'administrator'))
+              throw new Error('Organisation administrator membership unconfirmed');
+          }
+        }
       } catch {
         if (!active||epoch!==sessionEpoch.current) return;
         setSessionUser(null);
         setAccountIdentity(null);
-        setBackendState("offline");
+        setBackendState("unknown");
         setAuthState("error");
-        setIntegrationError(document.documentElement.lang==="en"?"Sign-in completed, but API access could not be verified. Please retry.":"Входът приключи, но достъпът до API не може да се потвърди. Опитайте отново.");
+        setIntegrationError(document.documentElement.lang==="en"?"Sign-in completed, but organisation access could not be verified. Refresh to retry; your invitation remains pending.":"Входът приключи, но достъпът до организацията не може да се потвърди. Обновете, за да опитате пак; поканата остава чакаща.");
         return;
       }
       if (!active||epoch!==sessionEpoch.current) return;

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { GridexApiError, type GridexApiClient, type GridexUser, type GridexSite, type GridexInvitation } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
-import { OrganisationInvitationAdmin, OrganisationInvitationAcceptance } from './organisation-invitations';
+import { OrganisationInvitationAdmin } from './organisation-invitations';
 import { documentationLink } from '../lib/documentation';
 
 const copy = {
@@ -121,6 +121,5 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
       })}>{t.revoke}</button>}
     </>}
   </section>}
-    {mode==='accept'&&<OrganisationInvitationAcceptance api={api} lang={lang}/>}
   </div>;
 }

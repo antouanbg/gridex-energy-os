@@ -2,6 +2,32 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Одобрение за всяка нова функция; frontend устройства — 2026-09-27
+
+Последното изрично решение: за всяка нова функционалност извън вече
+одобреното задание първо конкретен въпрос и потвърждение; без измислени
+модели, роли или допълнителни стъпки. Изборът на устройства и роли е в
+съществуващото меню GrideX „Устройства“; backend записва единствения
+авторитетен инвентар в OpenRemote. Не добавяй ново меню. Правилото е в
+AGENTS.md. Първият администратор на клиентска организация вече НЕ натиска
+отделен бутон за приемане: след email/password/login frontend извиква
+съществуващия проверен backend Accept endpoint за съвпадащата покана и
+проверява членството. Поканите за членове остават непроменени. Локален Pages
+build и 1 Chromium E2E тест минаха; реална публикация и customer test още
+няма. Site/device creation за нов клиент е НЕЗАВЪРШЕНО: липсва Site POST,
+tenant-aware OpenRemote provisioning и frontend форма. Публичната BG/EN
+Docusaurus страница е обновена локално, но не е публикувана. Следва backend
+tenant provisioning с fail-closed проверки, GrideX Site/device UI според
+потвърдения каталог и реален тест с клиента.
+
+EN: Ask for explicit confirmation before any new unspecified function.
+Device/role selection belongs in the existing GrideX Devices UI; OpenRemote
+is authoritative. The first administrator no longer presses a second Accept
+button; portal calls the existing checked backend transition after sign-in.
+Member invitations are unchanged. Local build/browser test passed, but
+publication and customer acceptance remain pending. Customer Site/device
+creation remains unfinished. Public BG/EN Docusaurus update is local only.
+
 ## Първа клиентска покана — проверка на приемането, 2026-09-27
 
 Регистрацията и входът не са завършено провизиране. Реалната покана е `sent`,

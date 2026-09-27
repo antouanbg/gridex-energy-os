@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const invitationId = '11111111-1111-4111-8111-111111111111';
 
-test('verified customer with no membership can see and accept the pending organisation', async ({ page, context }) => {
+test('verified first administrator completes the matching invitation on sign-in without a second button', async ({ page, context }) => {
   let nonce = '';
   let accepted = false;
   let acceptRequests = 0;
@@ -45,13 +45,11 @@ test('verified customer with no membership can see and accept the pending organi
   });
 
   await page.goto('/profile/?realm=novacom');
-  await expect(page.getByRole('heading', { name: 'Покана за администратор на организация' })).toBeVisible();
-  await expect(page.getByText('Example Customer')).toBeVisible();
-  await expect(page.locator('[data-view-id="members"]')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Приеми поканата' }).click();
   await expect.poll(() => acceptRequests).toBe(1);
-  await expect(page.getByText('Организацията е активирана. Обновете екрана за новите права.')).toBeVisible();
-  await page.getByRole('button', { name: 'Обнови' }).click();
+  await expect(page.getByRole('button', { name: 'Приеми поканата' })).toHaveCount(0);
+  await expect(page.locator('[data-view-id="members"]')).toBeVisible();
+  await page.reload();
   await expect(page).toHaveURL(/\/profile\/\?realm=novacom$/);
+  await expect.poll(() => acceptRequests).toBe(1);
   await expect(page.locator('[data-view-id="members"]')).toBeVisible();
 });
