@@ -2,7 +2,14 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
-## Нов клиентски Обект и устройство — локално подготвени, не публикувани — 2026-09-27
+## Нов клиентски Обект и устройство — PR публикуван, не внедрен — 2026-09-27
+
+Публикация: PR [#55](https://github.com/antouanbg/gridex-energy-os/pull/55),
+последен commit `6935d8c`; backend PR [#43](https://github.com/antouanbg/gridex-openremote-backend/pull/43),
+Docusaurus PR [#4](https://github.com/antouanbg/gridex-docs/pull/4).
+Frontend CI мина: 47 браузърни теста, lint и server-render. Поправен е
+конфликт на CSS selector между новата форма и старата настройка. Това не е
+GitHub Pages deploy или приемане от реален клиент.
 
 Последно изрично решение в Phase3: администраторът на активна организация
 създава нов Обект от `/sites/` и добавя само потвърден ROCK Pi E или OLIMEX
@@ -16,8 +23,8 @@ backend отговор; повторение на неясна заявка за
 Формулярите са скрити за неадминистратори и сочат към Docusaurus help.
 BG/EN ръководство: `docs/SITES_AND_DEVICES_GUIDE.md`; coverage таблицата е
 обновена. `npm run lint` мина с две стари image предупреждения, `npm test`
-25/25; `tsc --noEmit` има предходните несвързани грешки. Няма mobile/desktop
-реален browser тест или publication.
+25/25; `tsc --noEmit` има предходните несвързани грешки. Новият поток е
+проверен с mock API на mobile/desktop; няма тест с реален клиентски акаунт.
 
 Клиентският `antouan@novacom.bg` още няма активно членство; **не** го
 „одобрявай“ ръчно. Първо негов вход към `novacom`, автоматично Accept,
@@ -26,9 +33,10 @@ Backend PR/миграция трябва да предхождат frontend depl
 Docusaurus guide още трябва да се публикува със състояние „не е live“ и да
 се сравни след реален тест.
 
-EN: Local forms/API for new Site and approved ROCK/ESP are prepared, not
-published. First-admin activation, real customer OpenRemote token, browser
-acceptance and coordinated backend/frontend rollout remain.
+EN: Forms/API for new Site and approved ROCK/ESP are published in a PR,
+not deployed. Mocked mobile/desktop browser checks and full CI passed;
+first-admin activation, real customer OpenRemote token, browser acceptance
+and coordinated backend/frontend rollout remain.
 
 ## Потвърден клиентски процес за Обекти и устройства — 2026-09-27
 
