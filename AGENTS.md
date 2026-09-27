@@ -1,5 +1,22 @@
 # GrideX Energy OS — Working Rules
 
+## Email-first multi-realm login / Вход по имейл — 2026-09-28
+
+The owner approved generic sign-in as email first, then backend realm lookup
+from valid invitations/membership, then Keycloak OIDC+PKCE in that realm.
+Never send every generic sign-in to the pilot `gridex` realm or call a
+wrong-realm rejection a bad password. Passwords are entered only in Keycloak.
+Multiple realms require a choice; tab-scoped realm isolation and backend
+authorisation remain mandatory. Before inviting into a new realm, verify its
+public auth proxy route and a complete browser login. Document/test BG and EN.
+
+Собственикът одобри общ вход с първа стъпка имейл, после backend откриване на
+realm по валидна покана/членство и накрая Keycloak OIDC+PKCE в този realm.
+Не пращай всеки към пилотния `gridex` и не наричай грешния realm „грешна
+парола“. Паролата е само в Keycloak. При няколко realm-а покажи избор;
+пази изолацията по вкладки и backend правата. Преди покана в нов realm
+провери публичния auth proxy и пълен браузърен вход. Обнови BG/EN документация.
+
 ## Owner approval for every new function / Одобрение за всяка нова функция
 
 Before adding a user-facing feature, menu action, workflow gate, permission,

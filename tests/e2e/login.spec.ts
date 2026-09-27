@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 for (const width of [390, 1280]) {
-test(`one-click PKCE login at ${width}px without API health or hidden SSO`, async ({ page },testInfo) => {
+test(`email-first PKCE login at ${width}px without API health or hidden SSO`, async ({ page },testInfo) => {
   await page.setViewportSize({width,height:900});
   const requests: string[] = [];
   page.on('request', request => requests.push(request.url()));
@@ -14,6 +14,9 @@ test(`one-click PKCE login at ${width}px without API health or hidden SSO`, asyn
   }));
   await page.route('https://auth.example.invalid/**', route => route.fulfill({
     contentType: 'text/html', body: '<h1>Identity provider sign-in</h1>',
+  }));
+  await page.route('https://api.example.invalid/api/v1/auth/login-realm', route => route.fulfill({
+    contentType:'application/json',body:JSON.stringify({realms:['novacom']}),
   }));
   await page.goto('/');
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
@@ -34,9 +37,14 @@ test(`one-click PKCE login at ${width}px without API health or hidden SSO`, asyn
   await expect(page.getByLabel('Период',{exact:true})).toHaveCount(0);
   expect(requests.filter(url => /\/health|3p-cookies|login-status-iframe|silent-check-sso/.test(url))).toEqual([]);
   await login.click();
+  await expect(page).toHaveURL(/\/login\/$/);
+  await page.getByLabel('Имейл',{exact:true}).fill('antouan@novacom.bg');
+  await page.getByRole('button',{name:/Продължи към защитения вход/}).click();
   await expect(page.getByRole('heading', { name: 'Identity provider sign-in' })).toBeVisible();
   const redirect = new URL(page.url());
   expect(redirect.origin).toBe('https://auth.example.invalid');
+  expect(redirect.pathname).toContain('/realms/novacom/');
+  expect(redirect.searchParams.get('login_hint')).toBe('antouan@novacom.bg');
   expect(redirect.searchParams.get('client_id')).toBe('gridex-portal');
   expect(redirect.searchParams.get('response_type')).toBe('code');
   expect(redirect.searchParams.get('code_challenge_method')).toBe('S256');

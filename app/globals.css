@@ -669,6 +669,12 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .login-card>label>span { display:block; margin-bottom:7px; color:#496257; font-size:13px; font-weight:800; }
 .login-card input[type=email],.password-field { width:100%; border:1px solid #cedbd4; border-radius:10px; background:white; }
 .login-card input[type=email],.password-field input { padding:13px 14px; color:#263f34; font:inherit; font-size:14px; }
+.login-email-form { display:grid; gap:10px; margin:20px 0 0; }
+.login-email-form label { color:#496257; font-size:13px; font-weight:800; }
+.login-email-form input[type=email] { width:100%; min-height:46px; }
+.login-realm-choices { display:grid; gap:8px; padding:14px; border:1px solid #cedbd4; border-radius:10px; background:#f6faf7; }
+.login-realm-choices p { margin:0; color:#496257; font-size:13px; }
+.login-realm-choices button { min-height:42px; border:1px solid #b8d5c5; border-radius:8px; background:white; color:#183c2f; font:inherit; font-weight:700; cursor:pointer; }
 .password-field { display:flex; align-items:center; overflow:hidden; }
 .password-field input { min-width:0; flex:1; border:0; outline:0; background:transparent; }
 .password-field button { width:44px; height:44px; border:0; color:#648074; background:transparent; cursor:pointer; }

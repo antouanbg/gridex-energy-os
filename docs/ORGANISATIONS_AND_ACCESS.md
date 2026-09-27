@@ -23,7 +23,10 @@ GrideX за първата покана.
 
 1. Отворете линка в имейла, потвърдете адреса и задайте парола в защитения
    екран за вход. Никой администратор не трябва да иска паролата Ви.
-2. Влезте в организацията, посочена в поканата.
+2. В `gridex.tech` натиснете „Вход“ и въведете имейла от поканата. Порталът
+   намира организацията и Ви отвежда към нейния защитен вход. Ако имате
+   достъп до повече от една организация, изберете нужната. Паролата се
+   въвежда само в Keycloak.
 3. Ако сте първият администратор на нова организация, порталът завършва
    точно Вашата покана след вход и сървърна проверка — без втори бутон.
    Поканите за колеги в съществуваща организация засега се приемат в „Профил“.
@@ -76,7 +79,9 @@ a new organisation.
 
 1. Open the email link, verify your address and set a password on the secure
    sign-in screen. Do not share your password with an administrator.
-2. Sign in to the organisation named in the invitation.
+2. Choose Sign in on `gridex.tech` and enter the invited email. The portal
+   routes you to the organisation's secure sign-in; choose an organisation
+   if your email belongs to more than one. Enter the password only in Keycloak.
 3. For the first administrator of a new organisation, the portal completes
    the matching invitation after sign-in and server verification, without a
    second button. Existing-organisation member invitations still require

@@ -2,6 +2,28 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Общ вход по имейл / Email-first realm routing — 2026-09-28
+
+Решение на собственика (т. 2): общият бутон „Вход“ в `gridex.tech` вече не
+трябва да отваря сляпо платформения realm `gridex`. Порталът първо иска
+имейл, извиква публичен ограничен POST `/api/v1/auth/login-realm`, после
+отваря правилния Keycloak realm с OIDC Authorization Code + PKCE. Парола не
+минава през GrideX backend/frontend. При няколко realm-а потребителят избира.
+Изричният realm от покана остава поддържан; избраният realm не се споделя
+между вкладките. Причината за отказа на `antouan@novacom.bg` бе насочване
+към `gridex`, докато акаунтът е в `novacom`, не грешна парола. Проверявай
+realm-а, в който е потребителят, преди да предложиш нова парола или покана.
+Автоматичното приемане на първата администраторска покана остава отделна
+проверена стъпка след успешен вход. Публичното прокси има изрични маршрути
+само за `gridex` и `novacom`; нов realm изисква отделна proxy публикация и
+тест, без безусловно отваряне на всички realm-и.
+
+EN: Generic sign-in is email-first, discovers the invited/accepted realm via a
+bounded, no-store API POST, and redirects to Keycloak for password + PKCE. A
+multi-realm email gets a choice. The old failure was a wrong realm, not a
+password. Test new realms through the explicit public proxy route before
+inviting customers. Local build/browser tests do not prove a live deployment.
+
 ## Одобрение за всяка нова функция; frontend устройства — 2026-09-27
 
 Последното изрично решение: за всяка нова функционалност извън вече

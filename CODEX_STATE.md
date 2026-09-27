@@ -1,5 +1,19 @@
 # Current task
 
+## Одобрен вход по имейл — 2026-09-28
+
+Общият вход е email-first: имейл → backend realm lookup по покана/членство →
+Keycloak на правилната организация → парола само там. При няколко realm-а
+показвай избор. Не насочвай всички към `gridex` и не обяснявай „невалидна
+парола“, преди да провериш действителния realm. Пази tab-scoped изолацията,
+първия auto-accept и fail-closed поведението. За нов realm провери публичния
+auth proxy път; сега има само `gridex` и `novacom`. Документация BG/EN и
+реални customer/browser тестове са задължителни преди обявяване на завършване.
+
+EN: Generic sign-in discovers the realm by invited email before Keycloak;
+password remains with Keycloak. Never assume the platform realm for a
+customer. Verify public proxy coverage for every new realm.
+
 ## Одобрена селекция на устройства и правило за функции — 2026-09-27
 
 Собственикът потвърди: изборът на устройство и роли се извършва само в GrideX

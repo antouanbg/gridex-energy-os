@@ -2,8 +2,13 @@
 
 ## English
 
-The generic `/login/` entry starts with the GrideX platform realm. A customer
-invitation uses its own explicit `?realm=` link. The selected realm is kept only
+The generic `/login/` entry asks for the invited email first. The portal API
+finds the organisation realm from a valid invitation or accepted membership;
+one match continues to that realm's Keycloak sign-in, while multiple matches
+offer a choice. Enter the password only in Keycloak, never in the portal.
+Unknown emails fall back to the platform realm without confirming whether an
+account exists. A customer invitation may still use its explicit `?realm=` link.
+The selected realm is kept only
 in that browser tab for refresh and route navigation; it is not a browser-wide
 default. Signing out clears the tab's realm hint. Opening a new tab for the
 platform sign-in does not reuse another customer's realm.
@@ -25,8 +30,13 @@ account holder.
 
 ## Български
 
-Общият адрес `/login/` започва в платформения realm на GrideX. Поканата за
-клиент използва свой изричен линк с `?realm=`. Избраният realm се пази само в
+Общият адрес `/login/` първо иска имейла от поканата. API намира realm-а на
+организацията по валидна покана или прието членство: при едно съвпадение
+препраща към неговия защитен Keycloak вход, а при повече предлага избор.
+Паролата се въвежда само в Keycloak, никога в портала. Непознат имейл се
+насочва към платформения realm, без да се потвърждава съществуването на
+акаунт. Линкът от клиентска покана може да съдържа изрично `?realm=`.
+Избраният realm се пази само в
 съответната вкладка за обновяване и преминаване между страници; не става обща
 настройка за целия браузър. Изходът изчиства избора. Нова вкладка за вход в
 платформата не наследява realm-а на друг клиент.
