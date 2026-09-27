@@ -4,6 +4,8 @@ import { GridexApiError, type CreatedOrganisationInvitation, type GridexApiClien
   type OrganisationOnboardingInvitation } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 
+import { OrganisationAccessAdmin } from './organisation-access';
+
 const copy = {
   bg: {
     heading: 'Нова организация', description: 'Всяка организация получава собствен OpenRemote realm. Поканата е за първия ѝ администратор.',
@@ -74,6 +76,7 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
         <button type="submit" className="primary-btn">{busy ? t.sending : t.send}</button>
       </fieldset>
     </form>
+    <OrganisationAccessAdmin api={api} lang={lang}/>
     <div className="invitation-history"><h3>{t.existing}</h3><span>{lang==='en'?'No access is granted before acceptance.':'Няма достъп преди приемане на поканата.'}</span></div>
     {enabled && !items.length && <p>{t.empty}</p>}
     {items.map(item => <article className="invitation-record" key={item.id}>

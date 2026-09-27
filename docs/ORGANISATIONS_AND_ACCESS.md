@@ -103,3 +103,31 @@ not a separate human sign-in.
 Authorised administrators use Customers & contracts → Users & invitations at
 `/customers/users/`. The demo sends no email. First real delivery and
 acceptance for a new customer organisation are not yet end-to-end verified.
+
+## Suspending and restoring an approved organisation
+
+Status: implemented and verified in an isolated OpenRemote/Keycloak environment; live activation is pending. This is separate from resending any onboarding invitation.
+
+Only the verified super administrator can use **Customers & contracts → Users & invitations → New organisation → Approved organisations**. The pilot organisation is protected and is not listed. A recent sign-in is required for changes.
+
+Choose **Suspend organisation**, review the organisation name, then confirm. Access is blocked; existing sessions and streams end. Accounts, roles, Sites and OpenRemote inventory remain intact. Members see “Your organisation is temporarily suspended. Contact the super administrator.”
+
+The verified first administrator receives one BG/EN suspension notice per suspension operation. Queued does not mean delivered. **Check delivery** checks the recipient's provider delivery event without sending again. An unknown or failed result must be investigated; repeating the button never automatically resends an uncertain email. This mandatory access notice is separate from optional event subscriptions.
+
+If a step fails, the organisation stays blocked and the existing operation remains available for reconciliation. Choose **Complete existing operation** instead of creating another request. Notification problems do not restore access. **Complete notification** can finish a notice that has not yet been attempted.
+
+Choose **Restore access** and confirm to restore the existing permissions after the realm is verified. Members must sign in again; old tokens do not regain access. Restoration sends no new invitation or password email and does not recreate accounts.
+
+## Временно спиране и възстановяване на одобрена организация
+
+Статус: реализирано и проверено в изолирана OpenRemote/Keycloak среда; активирането в живата система предстои. Това е отделно от повторно изпращане на покана.
+
+Само провереният супер администратор използва **Клиенти и договори → Потребители и покани → Нова организация → Одобрени организации**. Пилотната организация е защитена и не присъства в списъка. За промяна е нужен скорошен вход.
+
+Изберете **Спри организацията**, проверете името и потвърдете. Достъпът се блокира; текущите сесии и потоци се прекратяват. Акаунтите, ролите, Обектите и OpenRemote инвентарът се запазват. Членовете виждат „Организацията е временно спряна. Свържете се със супер администратора.“
+
+Провереният първи администратор получава едно BG/EN уведомление за всяка операция по спиране. „В опашка“ не означава доставено. **Провери доставката** проверява събитието за доставка до получателя, без повторно изпращане. Неясен или неуспешен резултат изисква проверка; повторно натискане никога не изпраща автоматично имейл с неясна доставка. Задължителното уведомление за достъп е отделно от доброволния абонамент за събития.
+
+При отказ организацията остава блокирана и съществуващата операция може да се довърши. Изберете **Довърши съществуващата операция**, вместо да създавате нова заявка. Проблем с уведомлението не възстановява достъпа. **Довърши уведомяването** довършва имейл, чието изпращане още не е започнало.
+
+Изберете **Възстанови достъпа** и потвърдете. След проверка на realm-а се връщат съществуващите права. Членовете влизат отново; старите токени не получават достъп. Възстановяването не изпраща нова покана или писмо за парола и не създава повторно акаунти.

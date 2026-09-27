@@ -1,0 +1,68 @@
+import {test,expect,type Page} from '@playwright/test';
+async function session(page:Page,platform:boolean, state:{suspended:boolean;status:string;revision:number;mailState:string;operationId:string|null;writes:number}) {
+  let nonce='';
+  const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
+  await page.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
+  await page.route('https://auth.example.invalid/**',r=>{
+    const url=new URL(r.request().url());
+    if(url.pathname.endsWith('/auth')){nonce=url.searchParams.get('nonce')!;return r.fulfill({status:302,headers:{location:url.searchParams.get('redirect_uri')+'#code=fixture&state='+url.searchParams.get('state')}});}
+    const now=Math.floor(Date.now()/1000),claims={sub:'owner',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce};
+    return r.fulfill({json:{access_token:jwt(claims),id_token:jwt(claims),refresh_token:jwt(claims),expires_in:600,token_type:'Bearer'}});
+  });
+  await page.route('https://api.example.invalid/**',r=>{
+    const path=new URL(r.request().url()).pathname;
+    if(state.suspended)return r.fulfill({status:403,json:{error:'organisation_suspended'}});
+    if(path.endsWith('/me'))return r.fulfill({json:{subject:'owner',realm:'gridex',roles:['administrator'],permissions:platform?['platform:manage']:[],memberships:[]}});
+    if(path.endsWith('/sites'))return r.fulfill({json:{sites:[{id:'lab',name:'Private Lab'}]}});
+    if(path.endsWith('/hardware'))return r.fulfill({json:{inventorySource:'openremote',gateways:[{id:'rock',name:'Private ROCK',hardwareModel:'rock-pi-e',role:'controller',ports:[]}],devices:[]}});
+    if(path.endsWith('/device-heartbeats'))return r.fulfill({json:{items:[]}});
+    if(path.endsWith('/device-setup'))return r.fulfill({json:{revision:0,configuration:{}}});
+    if(path.endsWith('/organisation-invitations'))return r.fulfill({json:{enabled:true,invitations:[]}});
+    if(path.endsWith('/platform/organisations'))return r.fulfill({json:{organisations:[{id:'11111111-1111-4111-8111-111111111111',name:'Example customer',realm:'customer',status:state.status,revision:state.revision,operationId:state.operationId,operationState:state.operationId?'applied':null,mailState:state.mailState||null}]}});
+    if(path.endsWith('/access')){state.writes++;const input=r.request().postDataJSON();state.status=input.status;state.revision++;state.operationId=input.operationId;state.mailState=input.status==='suspended'?'queued':'not_required';return r.fulfill({json:{status:state.status,mailState:state.mailState}});}
+    if(path.endsWith('/delivery')){state.mailState='delivered';return r.fulfill({json:{mailState:'delivered'}});}
+    return r.fulfill({status:503,json:{error:'unavailable'}});
+  });
+}
+const initial=()=>({suspended:false,status:'active',revision:0,mailState:'',operationId:null as string|null,writes:0});
+for(const en of [false,true]) {
+  test(`platform suspend, delivery and restore ${en?'EN':'BG'}`,async({page},info)=>{
+    if(en)await page.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
+    const state=initial();await session(page,true,state);
+    await page.goto('/customers/users/');
+    await page.getByRole('button',{name:en?'Suspend organisation':'Спри организацията',exact:true}).click();
+    expect(state.writes).toBe(0);
+    await page.getByRole('button',{name:en?'Confirm':'Потвърди',exact:true}).click();
+    await expect(page.getByRole('button',{name:en?'Restore access':'Възстанови достъпа',exact:true})).toBeVisible();
+    expect(state.writes).toBe(1);
+    await page.getByRole('button',{name:en?'Check delivery':'Провери доставката',exact:true}).click();
+    await expect(page.getByText(en?'Suspension email: Delivered':'Имейл за спиране: Доставено')).toBeVisible();
+    expect(state.writes).toBe(1);
+    await page.setViewportSize({width:390,height:844});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+    await page.screenshot({path:info.outputPath('organisation-access.png'),fullPage:true});
+    await page.getByRole('button',{name:en?'Restore access':'Възстанови достъпа',exact:true}).click();
+    await page.getByRole('button',{name:en?'Confirm':'Потвърди',exact:true}).click();
+    await expect(page.getByRole('button',{name:en?'Suspend organisation':'Спри организацията',exact:true})).toBeVisible();
+    expect(state.writes).toBe(2);
+  });
+  test(`existing session clears private content on suspension ${en?'EN':'BG'}`,async({page})=>{
+    if(en)await page.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
+    const state=initial();await session(page,false,state);
+    await page.goto('/sites/lab/devices/');
+    await expect(page.getByRole('heading',{name:'Private ROCK',exact:true})).toBeVisible();
+    const second=await page.context().newPage();
+    if(en)await second.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
+    await session(second,false,state);await second.goto('/sites/lab/devices/');
+    await expect(second.getByRole('heading',{name:'Private ROCK',exact:true})).toBeVisible();
+    state.suspended=true;await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+    await expect(second.getByRole('heading',{name:'Private ROCK',exact:true})).toHaveCount(0);
+    await expect(second.getByText(en?'Your organisation is temporarily suspended. Contact the super administrator.':'Организацията е временно спряна. Свържете се със супер администратора.',{exact:true})).toBeVisible();
+    await second.close();
+    await expect(page.getByRole('heading',{name:'Private ROCK',exact:true})).toHaveCount(0);
+    await expect(page.getByText(en?'Your organisation is temporarily suspended. Contact the super administrator.':'Организацията е временно спряна. Свържете се със супер администратора.',{exact:true})).toBeVisible();
+    await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
+    await expect(page.locator('main')).not.toContainText('Private Lab');
+    await expect(page.getByRole('button',{name:en?'Suspend organisation':'Спри организацията',exact:true})).toHaveCount(0);
+  });
+}

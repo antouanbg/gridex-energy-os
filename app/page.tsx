@@ -185,11 +185,20 @@ export default function Home() {
       setSitesStatus('loading');
       setIntegrationError(lang==='en'?'Your session ended. Please sign in again.':'Сесията е прекратена. Моля, влезте отново.');
     };
-    const storage=(event:StorageEvent)=>{if(event.key===logoutSignalKey&&event.newValue)ended();};
+    const suspend=(broadcast:boolean)=>{
+      ended();setIntegrationError(lang==='en'?'Your organisation is temporarily suspended. Contact the super administrator.':'Организацията е временно спряна. Свържете се със супер администратора.');
+      if(broadcast)try{localStorage.setItem('gridex.organisation-suspended',JSON.stringify({realm:runtimeConfig.realm,nonce:crypto.randomUUID()}));}catch{/* Other tabs recheck on resume. */}
+    };
+    const suspended=()=>suspend(true);
+    const storage=(event:StorageEvent)=>{
+      if(event.key===logoutSignalKey&&event.newValue)ended();
+      if(event.key==='gridex.organisation-suspended'&&event.newValue)try{if(JSON.parse(event.newValue).realm===runtimeConfig.realm)suspend(false);}catch{/* Ignore malformed optional browser signals. */}
+    };
     window.addEventListener('gridex:session-ended',ended);
+    window.addEventListener('gridex:organisation-suspended',suspended);
     window.addEventListener('storage',storage);
-    return()=>{window.removeEventListener('gridex:session-ended',ended);window.removeEventListener('storage',storage);};
-  },[dataMode,lang]);
+    return()=>{window.removeEventListener('gridex:organisation-suspended',suspended);window.removeEventListener('gridex:session-ended',ended);window.removeEventListener('storage',storage);};
+  },[dataMode,lang,runtimeConfig.realm]);
   useEffect(()=>{
     if(selectedSiteId&&liveSites.some(site=>site.id===selectedSiteId)) {
       try{sessionStorage.setItem('gridex.selected-site',selectedSiteId);}catch{/* Optional navigation context. */}
@@ -296,6 +305,7 @@ export default function Home() {
       setSelectedSiteId(selected.id);
       setSite(selected.name);
     }).catch(error=>{
+      if(error instanceof GridexApiError&&error.code==='organisation_suspended')return;
       if(controller.signal.aborted)return;
       setLiveSites([]);setSitesStatus('error');setSelectedSiteId('');setLiveSnapshot(null);
       if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAccountIdentity(null);setAuthState("anonymous");return;}
@@ -329,6 +339,7 @@ export default function Home() {
       setLiveSnapshot(snapshot);
       setIntegrationError("");
     }).catch(error=>{
+      if(error instanceof GridexApiError&&error.code==='organisation_suspended')return;
       if(requestController.signal.aborted)return;
       if (error instanceof DOMException&&error.name==="AbortError") return;
       if(error instanceof GridexApiError&&error.status===401){setSessionUser(null);setAccountIdentity(null);setAuthState("anonymous");setLiveSnapshot(null);return;}
@@ -366,6 +377,7 @@ export default function Home() {
           expireSession();
         }
       }catch(error){
+        if(error instanceof GridexApiError&&error.code==='organisation_suspended')return;
         if(error instanceof GridexSessionExpiredError||(error instanceof GridexApiError&&[401,403].includes(error.status)))expireSession();
         else if(active)setIntegrationError(lang==='en'?'Session verification is temporarily unavailable. Retrying without signing you out.':'Проверката на сесията временно е недостъпна. Ще опитаме отново, без да те отписваме.');
       }finally{pending=false;}
