@@ -131,8 +131,11 @@ export async function gridexLogin(config: GridexRuntimeConfig, fresh = false): P
 export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
-  const logoutUrl=instance.createLogoutUrl({redirectUri:authRedirect(config)});
+  const logoutUrl=instance.createLogoutUrl({redirectUri:new URL('/', window.location.origin).toString()});
   forgetSession();
+  // Leaving one customer realm must not select it for the next person using
+  // this tab. The next generic sign-in starts in the pilot platform realm.
+  try { sessionStorage.removeItem('gridex.selected-realm'); } catch { /* Optional storage. */ }
   clearGridexSession();
   try {localStorage.setItem(logoutSignalKey,crypto.randomUUID());}catch{/* Other tabs also verify server identity. */}
   window.dispatchEvent(new Event('gridex:session-ended'));

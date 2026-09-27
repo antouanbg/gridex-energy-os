@@ -1,5 +1,23 @@
 # Current task
 
+## Realm separation and refresh correction — 2026-09-27
+
+Customer realm selection is now tab-scoped instead of browser-wide, and
+sign-out clears it. Live session checking/error states no longer claim a
+confirmed anonymous session. Pages build and five focused Chromium tests pass;
+PR, Pages publication and real owner/customer sign-in remain pending. Public
+Manager and Keycloak branding repairs are tracked in backend HANDOFF. The new
+organisation's Sites/devices still need OpenRemote-only provisioning; do not
+mask the empty state with pilot inventory. See frontend HANDOFF and
+`docs/LOGIN_REALM_ISOLATION.md`.
+
+Клиентският realm вече е ограничен до вкладката, а изходът го изчиства.
+Проверка/грешка на реалната сесия не се показва като доказан анонимен вход.
+Pages build и пет целеви Chromium теста минаха; PR/Pages и реален вход от
+двата акаунта предстоят. Публичният Manager и Keycloak са описани в backend
+HANDOFF. Празните Обекти/устройства на клиента искат провизиране само през
+OpenRemote; не се подменят с пилотния инвентар.
+
 ## Помощ за клиентски администратори — 2026-09-27
 
 Owner уточнение: процедурата за покана на колега е за администратор на вече
