@@ -24,6 +24,17 @@ multi-realm email gets a choice. The old failure was a wrong realm, not a
 password. Test new realms through the explicit public proxy route before
 inviting customers. Local build/browser tests do not prove a live deployment.
 
+Deployment gate: live backend Compose currently points to the separate
+`feat/organisation-freeze` checkout. Integrate and safely deploy the backend
+realm lookup from that runtime line first; do not merge/publish this frontend
+alone, because its generic login would then call an absent endpoint. Keep the
+old invitation `?realm=` path as a fallback during the transition.
+
+При внедряване: текущият backend контейнер е от отделния
+`feat/organisation-freeze` checkout. Първо съвмести/внедри lookup API в него;
+не публикувай само този frontend, защото общият вход ще вика липсващ endpoint.
+Линкът от поканата с `?realm=` остава резервен път до приключване на прехода.
+
 ## Одобрение за всяка нова функция; frontend устройства — 2026-09-27
 
 Последното изрично решение: за всяка нова функционалност извън вече
