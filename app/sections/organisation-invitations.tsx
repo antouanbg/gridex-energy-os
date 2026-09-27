@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState, type FormEvent } from 'react';
-import { GridexApiError, type CreatedOrganisationInvitation, type GridexApiClient,
-  type OrganisationOnboardingInvitation } from '../lib/gridex-api';
+import { GridexApiError, type CreatedOrganisationInvitation, type GridexApiClient } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 
 const copy = {
@@ -11,11 +10,9 @@ const copy = {
     send: 'Изпрати покана', sending: 'Изпращане…', disabled: 'Поканите за нови организации още не са активирани на сървъра.',
     recent: 'За тази промяна е нужен нов вход. Влезте отново и опитайте пак.',
     failed: 'Не е потвърдено успешно изпращане. Не повтаряйте с друг код; проверете състоянието.',
-    sent: 'Заявката за имейл е приета. Организацията и правата ще се активират едва след приемане и проверки.',
+    sent: 'Заявката за имейл е приета. Организацията и правата ще се активират след потвърждаване на имейла, задаване на парола, вход и проверка от сървъра.',
     existing: 'Последни покани', revoke: 'Отмени', revoked: 'Поканата е отменена.', empty: 'Няма изпратени покани.',
-    acceptance: 'Покана за администратор на организация', accept: 'Приеми поканата',
-    accepted: 'Организацията е активирана. Обновете екрана за новите права.',
-    expires: 'Валидна до', state: 'Състояние', reload: 'Обнови',
+    expires: 'Валидна до', state: 'Състояние',
   },
   en: {
     heading: 'New organisation', description: 'Each organisation receives its own OpenRemote realm. This invitation is for its first administrator.',
@@ -23,11 +20,9 @@ const copy = {
     send: 'Send invitation', sending: 'Sending…', disabled: 'New-organisation invitations are not enabled on the server yet.',
     recent: 'This change requires a fresh sign-in. Sign in again and retry.',
     failed: 'Email delivery was not confirmed. Do not retry with another code; inspect the state.',
-    sent: 'The email request was accepted. The organisation and rights activate only after acceptance and verification.',
+    sent: 'The email request was accepted. Organisation access activates after email verification, password setup, sign-in and server checks.',
     existing: 'Recent invitations', revoke: 'Revoke', revoked: 'Invitation revoked.', empty: 'No invitations sent.',
-    acceptance: 'Organisation administrator invitation', accept: 'Accept invitation',
-    accepted: 'The organisation is active. Reload to see the new access.',
-    expires: 'Expires', state: 'State', reload: 'Reload',
+    expires: 'Expires', state: 'State',
   },
 };
 
@@ -63,7 +58,7 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
   }
   return <section className="card config-card invitation-panel invitation-platform" data-no-translate aria-label={t.heading}>
     <div className="invitation-panel-head"><div><span className="profile-kicker">{lang==='en'?'PLATFORM ADMINISTRATION':'АДМИНИСТРАЦИЯ НА ПЛАТФОРМАТА'}</span><h2>{t.heading}</h2><p>{t.description}</p></div><span className="invitation-panel-mark" aria-hidden="true">↗</span></div>
-    <div className="invitation-steps" aria-label={lang==='en'?'Invitation steps':'Стъпки на поканата'}><span><b>01</b>{lang==='en'?'Enter organisation':'Въведете организация'}</span><span><b>02</b>{lang==='en'?'Send invitation':'Изпратете покана'}</span><span><b>03</b>{lang==='en'?'Administrator accepts':'Администраторът приема'}</span></div>
+    <div className="invitation-steps" aria-label={lang==='en'?'Invitation steps':'Стъпки на поканата'}><span><b>01</b>{lang==='en'?'Enter organisation':'Въведете организация'}</span><span><b>02</b>{lang==='en'?'Send invitation':'Изпратете покана'}</span><span><b>03</b>{lang==='en'?'Administrator signs in':'Администраторът влиза'}</span></div>
     {!enabled && <p className="invitation-status" role="status">{t.disabled}</p>}
     {notice && <p className="invitation-status" role="status">{notice}</p>}
     <form onSubmit={submit} className="invitation-form">
@@ -74,7 +69,7 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
         <button type="submit" className="primary-btn">{busy ? t.sending : t.send}</button>
       </fieldset>
     </form>
-    <div className="invitation-history"><h3>{t.existing}</h3><span>{lang==='en'?'No access is granted before acceptance.':'Няма достъп преди приемане на поканата.'}</span></div>
+    <div className="invitation-history"><h3>{t.existing}</h3><span>{lang==='en'?'No access is granted before verified sign-in and backend confirmation.':'Няма достъп преди потвърден вход и проверка от сървъра.'}</span></div>
     {enabled && !items.length && <p>{t.empty}</p>}
     {items.map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong> · {item.realm} · {item.email}
@@ -88,38 +83,5 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
           }).catch(() => setNotice(t.failed)).finally(() => setBusy(false));
         }}>{t.revoke}</button>}
     </article>)}
-  </section>;
-}
-
-export function OrganisationInvitationAcceptance({ api, lang }: { api: GridexApiClient; lang: UiLanguage }) {
-  const t = copy[lang];
-  const [items, setItems] = useState<OrganisationOnboardingInvitation[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState('');
-  useEffect(() => {
-    const controller = new AbortController();
-    void api.myOrganisationOnboarding(controller.signal).then(result => {
-      if (!controller.signal.aborted) setItems(result.invitations);
-    }).catch(error => {
-      if (!controller.signal.aborted && !(error instanceof GridexApiError && [404,503].includes(error.status)))
-        setNotice(t.failed);
-    });
-    return () => controller.abort();
-  }, [api, t.failed]);
-  if (!items.length && !notice) return null;
-  return <section className="card config-card" data-no-translate aria-label={t.acceptance}>
-    <h3>{t.acceptance}</h3>{notice && <p role="status">{notice}</p>}
-    {items.map(item => <article key={item.id}>
-      <strong>{item.name}</strong> · {item.realm}
-      <p>{t.expires}: {new Date(item.expiresAt).toLocaleString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</p>
-      <button type="button" className="primary-btn" disabled={busy} onClick={() => {
-        setBusy(true); setNotice('');
-        void api.acceptOrganisationOnboarding(item.id).then(result => {
-          if (!result.accepted) throw new Error('Acceptance unconfirmed');
-          setItems(current => current.filter(row => row.id !== item.id)); setNotice(t.accepted);
-        }).catch(() => setNotice(t.failed)).finally(() => setBusy(false));
-      }}>{t.accept}</button>
-    </article>)}
-    {notice === t.accepted && <button type="button" className="secondary-btn" onClick={() => window.location.reload()}>{t.reload}</button>}
   </section>;
 }

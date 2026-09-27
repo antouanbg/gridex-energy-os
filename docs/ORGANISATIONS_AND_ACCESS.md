@@ -1,9 +1,9 @@
 # Организации и достъп / Organisations and access
 
-Статус 2026-09-26: първа публична страница на документацията. Същото кратко
-обяснение е подготвено за съществуващия адрес `/help/`. Нов отделен сайт за
-документация не е публикуван. Първата реална покана към клиент още не е
-проверена от изпращане до приемане.
+Статус 2026-09-27: публичният Docusaurus сайт е `doc.gridex.tech`.
+Получаването на първата клиентска покана и входът са докладвани от клиента;
+автоматичното завършване след вход е реализирано във frontend тестова версия,
+но още не е потвърдено в реалната внедрена среда.
 
 ## Български
 
@@ -24,9 +24,11 @@ GrideX за първата покана.
 1. Отворете линка в имейла, потвърдете адреса и задайте парола в защитения
    екран за вход. Никой администратор не трябва да иска паролата Ви.
 2. Влезте в организацията, посочена в поканата.
-3. В „Профил“ приемете чакащата покана. Изпращането на имейл само по себе си
-   не дава достъп.
-4. След приемане виждате само разрешените Ви Обекти и функции. Ако не виждате
+3. Ако сте първият администратор на нова организация, порталът завършва
+   точно Вашата покана след вход и сървърна проверка — без втори бутон.
+   Поканите за колеги в съществуваща организация засега се приемат в „Профил“.
+   Изпращането на имейл само по себе си не дава достъп.
+4. След потвърдено завършване виждате само разрешените Ви Обекти и функции. Ако не виждате
    очакван Обект, поискайте администраторът да провери правата Ви.
 
 Поканите са еднократни и ограничени във времето. Ако линкът е изтекъл или
@@ -55,8 +57,8 @@ GrideX за първата покана.
 За упълномощените администратори екранът е „Клиенти и договори → Потребители
 и покани“ (`/customers/users/`). Нов клиент въвежда своите данни едва след
 като получи покана; публичното демо не изпраща имейли. Първото реално
-изпращане и приемане за нова клиентска организация още са в процес на
-проверка, затова не ги представяме като завършен тест.
+завършване на първата клиентска организация през реалния внедрен портал още
+се проверява; не представяме тестовата версия като завършен production тест.
 
 ## English
 
@@ -75,9 +77,11 @@ a new organisation.
 1. Open the email link, verify your address and set a password on the secure
    sign-in screen. Do not share your password with an administrator.
 2. Sign in to the organisation named in the invitation.
-3. Accept the pending invitation in Profile. Email delivery alone grants no
-   access.
-4. You will see only authorised Sites and features. Ask your administrator if
+3. For the first administrator of a new organisation, the portal completes
+   the matching invitation after sign-in and server verification, without a
+   second button. Existing-organisation member invitations still require
+   acceptance in Profile. Email delivery alone grants no access.
+4. After confirmed completion you will see only authorised Sites and features. Ask your administrator if
    a Site you expect is missing.
 
 Invitations are single-use and expire. Ask for a new invitation if a link has
@@ -102,4 +106,5 @@ not a separate human sign-in.
 
 Authorised administrators use Customers & contracts → Users & invitations at
 `/customers/users/`. The demo sends no email. First real delivery and
-acceptance for a new customer organisation are not yet end-to-end verified.
+completion for a new customer organisation is not yet verified on the deployed
+portal; a local browser test alone is not production acceptance.

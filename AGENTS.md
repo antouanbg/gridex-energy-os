@@ -1,27 +1,53 @@
 # GrideX Energy OS — Working Rules
 
+## Owner approval for every new function / Одобрение за всяка нова функция
+
+Before adding a user-facing feature, menu action, workflow gate, permission,
+device choice or automatic state transition, check the owner's exact approved
+requirements and relevant previous decisions. If the behaviour is not already
+specified and approved, ask the owner a concrete question and wait for an
+explicit confirmation BEFORE implementation. Do not infer approval from a
+general goal, a previous assistant suggestion, or a technical convenience.
+Record the decision and its scope in HANDOFF/CODEX_STATE and document the
+resulting UI. Normal implementation details within a specifically approved
+feature do not require repeating the same question. Device selection and role
+assignment are performed in the GrideX frontend and persisted through the
+backend to OpenRemote, using only owner-approved device requirements; never
+invent a model, driver, role or automatic activation.
+
+Преди нова потребителска функция, действие в менюто, допълнителна стъпка,
+право, избор на устройство или автоматичен преход провери точното одобрено
+задание и решенията в другите разговори. Ако поведението не е изрично
+определено и потвърдено, задай конкретен въпрос на собственика и изчакай
+потвърждение ПРЕДИ реализация. Общата цел, предложение на асистента или
+техническо удобство не са разрешение. Запиши решението и обхвата му в
+HANDOFF/CODEX_STATE и документирай UI. Не питай повторно за обичайни детайли
+в рамките на вече одобрена функция. Изборът на устройства и роли става в
+GrideX frontend и се записва през backend в OpenRemote само по одобреното
+задание; без измислени модели, драйвери, роли или автоматично активиране.
+
 ## Mandatory onboarding completion check / Задължителна проверка на поканите — 2026-09-27
 
 After any new-organisation email, registration or login change, test the entire
 customer path with an identity that has no membership yet: verified email →
-customer realm login → `/api/v1/me` → pending invitation visible in Profile →
-explicit Accept POST → active membership and realm-scoped Sites after reload.
-Do not infer acceptance from a delivered email, a password update, a Keycloak
-user or a successful login. A pending invitation must remain visibly pending;
-on failure show a recoverable error and retain the invite. Test desktop and
-mobile, refresh, and that the platform owner's Sites never appear in the
-customer realm. Check deployed state and audit entries before reporting success.
-If the customer has not clicked Accept, say so; do not activate on their behalf.
+customer realm login → matching pending invitation → automatic backend Accept
+POST for the invited first administrator → active membership and realm-scoped
+Sites. The owner explicitly removed the second manual Accept button on
+2026-09-27. Do not infer completion from delivered mail, password update or
+login alone: verify the POST, OpenRemote grant, active membership and Site
+isolation. On failure keep the invitation pending and show a recoverable error.
+Test desktop, mobile and refresh. Do not extend automatic acceptance to other
+invitation types without the owner's explicit confirmation.
 
 След всяка промяна по покана, регистрация или вход тествай целия клиентски път
 с акаунт без членство: потвърден имейл → вход в клиентския realm →
-`/api/v1/me` → видима чакаща покана в Профил → изрично „Приеми“ → активно
-членство и правилно ограничени Обекти след обновяване. Получено писмо,
-нова парола, Keycloak потребител или успешен вход НЕ доказват приемане.
-Поканата остава видимо чакаща; при отказ показвай поправима грешка и я пази.
-Тествай desktop, mobile, refresh и липсата на пилотни Обекти в клиентския
-realm. Проверявай внедреното състояние и audit преди доклад за успех.
-Ако клиентът не е натиснал „Приеми“, кажи го; не активирай вместо него.
+съвпадаща чакаща покана → автоматична backend Accept POST заявка за първия
+поканен администратор → активно членство и правилно ограничени Обекти.
+Собственикът изрично премахна втория ръчен бутон „Приеми“ на 2026-09-27.
+Получено писмо, нова парола или успешен вход НЕ доказват завършване: провери
+POST, OpenRemote правата, членството и изолацията. При отказ остави поканата
+чакаща и покажи поправима грешка. Тествай desktop, mobile и refresh. Не
+прилагай автоматично приемане за друг вид покани без изрично потвърждение.
 
 ## Invitation and rights UX / Покани и права — 2026-09-26
 
@@ -35,7 +61,10 @@ client is never a human sign-in. An organisation administrator invites members
 only inside their organisation, with explicit member role and Site scope; the
 UI must not infer global power from an email, an `admin` label or a browser
 claim. The member invitation flow cannot delegate administrator role. The
-recipient verifies email, sets password and accepts in Profile before access.
+first administrator verifies email, sets password and signs in; the portal
+completes the matching invitation through the checked backend transition,
+without a second button. Other invitation types remain unchanged until the
+owner explicitly confirms their workflow.
 Never show a pending organisation as active. First real customer onboarding
 is still not end-to-end verified. The zero-Site member-invite frontend fix is
 local/unpublished. Update public BG/EN documentation with any flow change.
@@ -44,7 +73,9 @@ local/unpublished. Update public BG/EN documentation with any flow change.
 адрес `/customers/users/` без ново меню. Глобалният администратор е човешкият
 акаунт с проверено от backend право, а setup client е само служебен за backend.
 Администраторът на организация кани само в своя realm, с изрични роля и Обекти.
-Поканата не дава достъп до приемане. Не показвай чакаща организация като
+Първият администратор потвърждава имейла, задава парола и влиза; порталът
+завършва съвпадащата покана през проверения backend без втори бутон.
+Другите покани не се променят без изрично потвърждение. Не показвай чакаща организация като
 активна и не обявявай първия реален клиент за проверен преди теста.
 
 ## Working prompt language — Bulgarian / Език на работните prompt-и — български

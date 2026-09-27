@@ -2,8 +2,9 @@
 
 Status / Статус 2026-09-27: backend setup and migration 012 are active. The
 global form is available to the explicitly authorised platform account in a
-recent live session. First real customer delivery, password setup, acceptance
-and tenant-isolation test are **not yet verified**. The current frontend and
+recent live session. First customer delivery and login were reported by the
+owner; automatic completion and tenant isolation on the deployed portal still
+need verification. The current frontend and
 backend allow an empty Site selection for member invitations, granting no Site
 access. The new public help steps address organisation administrators, not
 the platform administrator.
@@ -19,8 +20,9 @@ the platform administrator.
 Въвежда име, уникален кратък код (realm) и имейл на първия администратор.
 Ако услугата или правата не са готови, формата не изпраща покана. При успешно изпращане
 се създава отделен OpenRemote realm, но организацията и правата НЕ се
-активират, преди поканеният да потвърди имейла, да влезе в своя realm и
-да приеме поканата от „Профил“. Нужен е скорошен вход на глобалния админ.
+активират, преди поканеният да потвърди имейла, да зададе парола, да влезе в
+своя realm и backend да завърши съвпадащата покана. Втори бутон „Приеми“ за
+първия администратор няма. Нужен е скорошен вход на глобалния админ.
 „Последни покани“ показва състояния и позволява отмяна на чакаща покана.
 При грешка не изпращайте нова покана с друг код, преди съгласуване.
 
@@ -65,8 +67,9 @@ A platform administrator sees an additional “New organisation” form here:
 organisation name, unique short realm code and first administrator's email.
 It cannot send if the service or permission check is unavailable. Sending
 creates a separate OpenRemote realm, but organisation and rights become active
-only after the recipient verifies their email, signs in to that realm and
-accepts in Profile. A recent admin sign-in is required. “Recent invitations”
+only after the recipient verifies email, sets a password, signs in to that
+realm and the backend completes the matching invitation. There is no second
+Accept button for the first administrator. A recent admin sign-in is required. “Recent invitations”
 shows state and can revoke a pending request. If delivery fails, do not retry
 under another realm code before reconciliation.
 

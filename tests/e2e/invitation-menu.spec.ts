@@ -92,7 +92,7 @@ test('platform administrator can prepare a separate-realm invitation from the ap
   await page.getByLabel('Имейл на първия администратор').fill('admin@example.com');
   await page.getByRole('button',{name:'Изпрати покана'}).click();
   await expect.poll(()=>submitted).toEqual({name:'Fixture Company',realm:'fixture-co',email:'admin@example.com'});
-  await expect(page.getByText('Организацията и правата ще се активират едва след приемане и проверки.',{exact:false})).toBeVisible();
+  await expect(page.getByText('Организацията и правата ще се активират след потвърждаване на имейла, задаване на парола, вход и проверка от сървъра.',{exact:false})).toBeVisible();
 });
 
 test('invitation page keeps the approved look, documentation link and mobile viewport',async({page,context},testInfo)=>{
