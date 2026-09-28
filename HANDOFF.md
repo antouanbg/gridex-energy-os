@@ -13,8 +13,14 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 изход при backend outage. Помощта сочи към Docusaurus раздела
 `/organisations-and-access/#openremote-manager`.
 
-Статус: кодът е локален, `npm run build:pages` мина. Публикуването чака
-backend миграция 014, защитен proxy и поправен OIDC callback за `novacom`.
+Статус: кодът е качен в PR #57, не е в `main`/Pages. `npm run build:pages`,
+`npm test` (23/23) и lint (0 грешки, 2 стари предупреждения) минаха.
+Браузърният набор е 45/45 успешни след поправка на остарял тестов селектор
+за точно една карта; desktop/mobile скрийншотовете са прегледани.
+Публикуването чака backend миграция 014, защитен proxy и поправен OIDC
+callback за `novacom`; автоматичната проверка отказа конкретния продукционен
+API rollout без допълнително потвърждение. Docs PR #5 е слят и публикуван
+с честен статус „в подготовка“.
 Преди main/Pages: тестове за роля и realm, мобилен/desktop преглед, реален
 owner/customer вход, отхвърлен директен Manager URL и изход. Не обявявай
 бутона за работещ преди тези проверки. Backend текущо е от клон
