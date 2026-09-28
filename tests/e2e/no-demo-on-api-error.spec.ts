@@ -15,10 +15,13 @@ for (const status of [403,503,0]) {
       const claims={sub:'test-user',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce,email:'test@example.invalid'};
       return route.fulfill({json:{access_token:jwt(claims),id_token:jwt(claims),refresh_token:jwt(claims),expires_in:600,token_type:'Bearer'}});
     });
-    await page.route('https://api.example.invalid/**',route=>status?route.fulfill({status,json:{error:'unavailable'}}):new Promise<void>(()=>{}));
+    await page.route('https://api.example.invalid/**',route=>new URL(route.request().url()).pathname==='/api/v1/auth/login-realm'
+      ?route.fulfill({json:{realms:['gridex']}}):status?route.fulfill({status,json:{error:'unavailable'}}):new Promise<void>(()=>{}));
     await page.goto('/');
     await page.locator('.quick-sign-in').click();
-    await expect(page.getByRole('heading',{name:'Данните от акаунта са недостъпни'})).toBeVisible();
+    await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
+    await page.locator('.login-submit').click();
+    await expect(page.getByRole('alert')).toContainText('Входът приключи, но достъпът до API не може да се потвърди.');
     for(const view of ['overview','sites','market','devices']) {
       await page.locator(`[data-view-id="${view}"]`).click();
       await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
