@@ -4,7 +4,8 @@ import type { GridexApiClient, GridexHardwareTopology, DeviceSetup, DeviceSetupR
 import type { UiLanguage } from '../i18n/messages';
 import { DeviceAccess } from './device-access';
 
-export function DeviceSetupWizard({api, siteId, topology, lang, connectionLabel}: {api:GridexApiClient; siteId:string; topology:GridexHardwareTopology; lang:UiLanguage; connectionLabel?: (gatewayId: string) => string}) {
+const confirmedHardware = new Set(['rock-pi-e', 'olimex-esp32-evb-ea-ind', 'olimex-esp32-evb-lab']);
+export function DeviceSetupWizard({api, siteId, topology, lang, canCommission = false, connectionLabel}: {api:GridexApiClient; siteId:string; topology:GridexHardwareTopology; lang:UiLanguage; canCommission?:boolean; connectionLabel?: (gatewayId: string) => string}) {
   const t=(bg:string,en:string)=>lang==='en'?en:bg;
   const [saved,setSaved]=useState<DeviceSetup|null>(null);
   const [selected,setSelected]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('device')||'');
@@ -28,7 +29,8 @@ export function DeviceSetupWizard({api, siteId, topology, lang, connectionLabel}
     void api.deviceSetup(siteId,abort.signal).then(value=>{if(!abort.signal.aborted)setSaved(value);}).catch(()=>{if(!abort.signal.aborted)setNotice('failed');});
     return()=>abort.abort();
   },[api,siteId]);
-  const gateway=topology.gateways.find(g=>g.id===selected);
+  const approvedGateways=topology.gateways.filter(g=>confirmedHardware.has(g.hardwareModel)&&((g.hardwareModel==='rock-pi-e'&&g.role==='controller')||(g.hardwareModel.startsWith('olimex-esp32-evb')&&g.role==='device-node')));
+  const gateway=approvedGateways.find(g=>g.id===selected);
   const importedDevice=saved?.imported?.devices?.find(d=>d.gatewayId===selected);
   const update=(index:number,patch:Partial<DeviceSetupRole>)=>{setRoles(items=>items.map((item,i)=>i===index?{...item,...patch}:item));setProvision(false);setConfirmed(false);};
   return <section className="card config-card device-provisioning" data-no-translate>
@@ -41,11 +43,12 @@ export function DeviceSetupWizard({api, siteId, topology, lang, connectionLabel}
         return item?<li key={device.gatewayId}>{item.name} · {item.hardwareModel} — {t('конфигурация внесена','configuration imported')} · {connectionLabel?.(device.gatewayId) ?? t('Няма потвърден статус на връзката','No confirmed connection status')}</li>:null;
       })}</ul>
     </section>}
-    <p>{t('1. Устройство → 2. До две роли и партньор → 3. Provisioning','1. Device → 2. Up to two roles and peer → 3. Provisioning')}</p>
+    <p>{t('1. Потвърдено GrideX устройство → 2. До две роли и партньор → 3. Чернова','1. Confirmed GrideX device → 2. Up to two roles and peer → 3. Draft')}</p>
+    <p>{t('Изборът по-долу е само между заведени в OpenRemote ROCK Pi E и ESP32 за този Обект. Администраторът добавя ново устройство по-горе; ролите тук се записват като чернова и не го активират.', 'The choices below contain only OpenRemote-registered ROCK Pi E and ESP32 units for this Site. The administrator adds a new device above; roles saved here are a draft and do not activate it.')}</p>
     <label>{t('Устройство','Device')}<select aria-label={t('Устройство','Device')} disabled={!saved||busy} value={selected} onChange={event=>{
       const id=event.target.value;setSelected(id);setRoles(saved?.configuration.devices?.find(d=>d.gatewayId===id)?.roles||[]);setProvision(false);setConfirmed(false);setEditImported(false);setNotice('');
       const url=new URL(window.location.href);if(id)url.searchParams.set('device',id);else url.searchParams.delete('device');window.history.pushState({},'',url.pathname+url.search);
-    }}><option value="">{t('Избери устройство','Choose device')}</option>{topology.gateways.map(g=><option key={g.id} value={g.id}>{g.name} · {g.hardwareModel}</option>)}</select></label>
+    }}><option value="">{t('Избери устройство','Choose device')}</option>{approvedGateways.map(g=><option key={g.id} value={g.id}>{g.name} · {g.hardwareModel} · {g.role==='controller'?'ROCK Pi':'ESP32'}</option>)}</select></label>
     {!saved&&!notice&&<p role="status">{t('Зареждане на настройките…','Loading setup…')}</p>}
     {importedDevice&&<section className="provisioning-detail">
       <h3>{t('Съществуваща тестова конфигурация — внесена','Existing test configuration — imported')}</h3>
@@ -86,7 +89,8 @@ export function DeviceSetupWizard({api, siteId, topology, lang, connectionLabel}
       </fieldset>
     </form>}
     <p role="status">{notice==='saved'?t('Черновата е записана в backend. Не е приложена към устройството.','Draft saved in backend. Not applied to hardware.'):notice==='failed'?t('Неуспешна операция. При промяна от друг администратор презареди страницата.','Operation failed. Reload if another administrator changed the configuration.'):''}</p>
-    {provision&&gateway?.role==='controller'&&<DeviceAccess key={selected} gatewayId={selected} api={api} siteId={siteId} lang={lang}/>}
+    {provision&&gateway?.role==='controller'&&canCommission&&<DeviceAccess key={selected} gatewayId={selected} api={api} siteId={siteId} lang={lang}/>}
+    {provision&&gateway?.role==='controller'&&!canCommission&&<p>{t('Черновата е готова за преглед. Достъпът и пускането на ROCK Pi са само за администратора на организацията.','The draft is ready for review. ROCK Pi access and activation are reserved for the organisation administrator.')}</p>}
     {provision&&gateway?.role==='device-node'&&<p>{t('ESP32 provisioning е през ROCK Pi. IP се получава по DHCP; резервацията и driver прилагането предстоят. Не въвеждай SSH ключ за ESP32.','ESP32 provisioning goes through ROCK Pi. IP is assigned by DHCP; reservation and driver application remain pending. Do not enter an SSH key for ESP32.')}</p>}
   </section>;
 }

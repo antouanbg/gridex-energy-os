@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type {FormEvent} from 'react';
 import type { DeviceHeartbeat, GridexApiClient, GridexHardwareTopology, RockTelemetryResponse } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { DeviceSetupWizard } from './device-setup';
 
-export function DeviceInformation({ api, siteId, lang, configure = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean }) {
+export function DeviceInformation({ api, siteId, lang, configure = false, canCommission = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean; canCommission?: boolean }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
   const [loaded, setTopology] = useState<{ siteId: string; value: GridexHardwareTopology } | null>(null);
   const [status, setStatus] = useState('loading');
@@ -14,6 +15,12 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
   const [healthError, setHealthError] = useState(false);
   const [telemetry, setTelemetry] = useState<RockTelemetryResponse | null>(null);
   const [telemetryError, setTelemetryError] = useState(false);
+  const [newDeviceName,setNewDeviceName]=useState('');
+  const [newDeviceModel,setNewDeviceModel]=useState<'rock-pi-e'|'olimex-esp32-evb-ea-ind'|'olimex-esp32-evb-lab'>('rock-pi-e');
+  const [parentGatewayId,setParentGatewayId]=useState('');
+  const [creating,setCreating]=useState(false);
+  const [createError,setCreateError]=useState('');
+  const createAttempt=useRef<{payload:string;key:string}|null>(null);
   const topology = loaded?.siteId === siteId && status === 'ready' ? loaded.value : null;
   useEffect(() => {
     const controller = new AbortController();
@@ -50,6 +57,19 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
     : item?.status === 'offline' ? t('Няма скорошен контакт', 'No recent contact')
     : item?.status === 'stale' ? t('Остарял статус — чакаме ново съобщение', 'Stale — waiting for a new message')
     : t('Връзката още не е потвърдена', 'Connection not yet confirmed');
+  const addDevice=async(event:FormEvent<HTMLFormElement>)=>{
+    event.preventDefault();if(creating)return;
+    const body={name:newDeviceName.trim(),hardwareModel:newDeviceModel,...(newDeviceModel==='rock-pi-e'?{}:{parentGatewayId})};
+    const payload=JSON.stringify(body);
+    if(createAttempt.current?.payload!==payload)createAttempt.current={payload,key:crypto.randomUUID()};
+    setCreating(true);setCreateError('');
+    try{
+      await api.createGateway(siteId,body,createAttempt.current.key);
+      createAttempt.current=null;setNewDeviceName('');setStatus('loading');setRefresh(value=>value+1);
+    }catch{
+      setCreateError(t('Устройството не е потвърдено в OpenRemote. Проверете връзката и опитайте отново без да сменяте данните.','The device was not verified in OpenRemote. Check the connection and retry without changing the details.'));
+    }finally{setCreating(false);}
+  };
   useEffect(() => {
     const controller = new AbortController();
     if (siteId) void api.hardware(siteId, controller.signal).then(result => {
@@ -62,13 +82,33 @@ export function DeviceInformation({ api, siteId, lang, configure = false }: { ap
 
   return <section className="card config-card device-inventory" data-no-translate>
     <h2>{t('Информация за устройствата', 'Device information')}</h2>
-    <p>{t('Инвентар от OpenRemote през backend за избрания Обект. Само за потвърден администратор. Регистрацията не доказва работеща връзка.', 'OpenRemote inventory through the backend for the selected Site. Verified administrators only. Registration does not prove connectivity.')}</p>
+    <p>{t('Инвентар от OpenRemote през backend за разрешения Ви Обект. Настройките са за интегратор или администратор; пускането е само за администратор. Регистрацията не доказва работеща връзка.', 'OpenRemote inventory through the backend for your authorised Site. Settings require an integrator or administrator; activation is administrator-only. Registration does not prove connectivity.')}</p>
     {!siteId ? <p>{t('Изберете Обект.', 'Select a Site.')}</p> : <>
       <button className="primary-btn" type="button" disabled={status === 'loading'} onClick={() => { setTopology(null); setStatus('loading'); setRefresh(value => value + 1); }}>{t('Обнови', 'Refresh')}</button>
-      <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате администраторски достъп до устройствата на този Обект.', 'You do not have administrator access to this Site inventory.') : status === 'unprovisioned' ? t('Инвентарът изисква завършено провизиране и права в OpenRemote.', 'Inventory requires completed provisioning and access in OpenRemote.') : status === 'failed' ? t('OpenRemote инвентарът е недостъпен. Опитайте отново.', 'OpenRemote inventory is unavailable. Please retry.') : ''}</p>
+      <p role="status">{status === 'loading' ? t('Зареждане…', 'Loading…') : status === 'denied' ? t('Нямате достъп до устройствата на този Обект.', 'You do not have access to this Site inventory.') : status === 'unprovisioned' ? t('Инвентарът изисква завършено провизиране и права в OpenRemote.', 'Inventory requires completed provisioning and access in OpenRemote.') : status === 'failed' ? t('OpenRemote инвентарът е недостъпен. Опитайте отново.', 'OpenRemote inventory is unavailable. Please retry.') : ''}</p>
       {topology && <>
+        {canCommission&&<article className="device-access">
+          <h3>{t('Добави потвърдено GrideX устройство','Add an approved GrideX device')}</h3>
+          <p>{t('Инвентарът се създава през OpenRemote. Това не стартира комишънинг, мрежови настройки или команди.','Inventory is created through OpenRemote. This does not start commissioning, network changes or commands.')}</p>
+          <p><a href="https://doc.gridex.tech/organisations-and-access/#sites-and-devices" target="_blank" rel="noopener noreferrer">{t('Помощ за устройствата и ролите','Help with devices and roles')} ↗</a></p>
+          <form onSubmit={addDevice}>
+            <label>{t('Устройство','Device')}<select value={newDeviceModel} onChange={event=>setNewDeviceModel(event.target.value as typeof newDeviceModel)}>
+              <option value="rock-pi-e">ROCK Pi E</option><option value="olimex-esp32-evb-ea-ind">OLIMEX ESP32-EVB-EA-IND</option><option value="olimex-esp32-evb-lab">OLIMEX ESP32-EVB Lab</option>
+            </select></label>
+            <label>{t('Име','Name')}<input required maxLength={120} value={newDeviceName} onChange={event=>setNewDeviceName(event.target.value)}/></label>
+            {newDeviceModel!=='rock-pi-e'&&<label>{t('ROCK Pi E, към който се свързва','Parent ROCK Pi E')}<select required value={parentGatewayId} onChange={event=>setParentGatewayId(event.target.value)}>
+              <option value="">{t('Изберете ROCK Pi E','Select ROCK Pi E')}</option>
+              {topology.gateways.filter(item=>item.role==='controller').map(item=><option key={item.id} value={item.id}>{item.name}</option>)}
+            </select></label>}
+            <button type="submit" className="primary-btn" disabled={creating||(newDeviceModel==='rock-pi-e'&&topology.gateways.some(item=>item.role==='controller'))}>
+              {creating?t('Добавя се…','Adding…'):t('Добави устройство','Add device')}
+            </button>
+          </form>
+          {newDeviceModel==='rock-pi-e'&&topology.gateways.some(item=>item.role==='controller')&&<p>{t('Този Обект вече има ROCK Pi E.','This Site already has a ROCK Pi E.')}</p>}
+          {createError&&<p role="alert">{createError}</p>}
+        </article>}
         <RockTelemetryCard telemetry={telemetry} error={telemetryError} lang={lang} />
-        {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang} connectionLabel={id => healthLabel(health?.siteId === siteId ? health.items.find(item => item.gatewayId === id) : undefined)}/>}
+        {configure && <DeviceSetupWizard key={siteId} api={api} siteId={siteId} topology={topology} lang={lang} canCommission={canCommission} connectionLabel={id => healthLabel(health?.siteId === siteId ? health.items.find(item => item.gatewayId === id) : undefined)}/>}
         <p>{t('Конфигурация', 'Configuration')}: {topology.configuration ? `${topology.configuration.revision} · ${topology.configuration.status}` : t('Няма записана ревизия', 'No saved revision')}</p>
         {!topology.gateways.length && <p>{t('Няма регистрирани шлюзове или нодове.', 'No registered gateways or nodes.')}</p>}
         {topology.gateways.map((gateway, index) => {

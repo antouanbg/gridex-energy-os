@@ -34,6 +34,14 @@ for(const lang of ['en','bg']) {
     assert.doesNotMatch(site,/online|Онлайн/);
   });
 }
+test('new Site action is visible only to an all-Site organisation administrator',()=>{
+  const props={sites:[],status:'ready',lang:'en',onSelect(){},onCreated(){},api:{}};
+  const denied=renderToStaticMarkup(React.createElement(LiveSites,{...props,organisations:[{organisationId:'org',role:'viewer',allSites:true}]}));
+  assert.doesNotMatch(denied,/Create Site/);
+  const admin=renderToStaticMarkup(React.createElement(LiveSites,{...props,organisations:[{organisationId:'org',role:'administrator',allSites:true}]}));
+  assert.match(admin,/Create Site/);
+  assert.match(admin,/Time zone/);
+});
 for (const lang of ['en', 'bg']) {
   for (const battery of [null, { socPct: null, sohPct: null }, { socPct: 50, sohPct: 97 }]) {
     test(`live overview renders missing battery safely (${lang}, ${JSON.stringify(battery)})`, () => {

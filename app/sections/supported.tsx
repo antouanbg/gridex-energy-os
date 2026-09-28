@@ -7,7 +7,7 @@ import type { UiLanguage } from "../i18n/messages";
 export function SupportedDevices({lang}:{lang:UiLanguage}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const [query,setQuery]=useState("");
-  const [category,setCategory]=useState<"all"|"verified"|"inverter"|"bms"|"aio"|"bridge">("all");
+  const [category,setCategory]=useState<"all"|"verified"|"inverter"|"bms"|"meter"|"aio"|"bridge">("all");
   const [protocol,setProtocol]=useState<"all"|"CAN"|"Modbus"|"RS485"|"RS232/UART">("all");
   const statusCopy={
     "manufacturer-confirmed":{label:t("Потвърдено от производителя","Manufacturer-confirmed"),detail:t("GrideX production профил","GrideX production profile")},
@@ -15,7 +15,7 @@ export function SupportedDevices({lang}:{lang:UiLanguage}) {
     "external-reference":{label:t("Външна R&D референция","External R&D reference"),detail:t("Не е production GrideX драйвер","Not a production GrideX driver")},
     "design-reference":{label:t("Архитектурна референция","Architecture reference"),detail:t("Документиран design · без готов драйвер","Documented design · no implemented driver")},
   } as const;
-  const categoryCopy={aio:t("All-in-one BESS","All-in-one BESS"),pcs:"PCS",inverter:t("Инвертор","Inverter"),bms:"Battery / BMS",bridge:t("Протоколен bridge","Protocol bridge")};
+  const categoryCopy={aio:t("All-in-one BESS","All-in-one BESS"),pcs:"PCS",inverter:t("Инвертор","Inverter"),bms:"Battery / BMS",meter:t("Електромер","Meter"),bridge:t("Протоколен bridge","Protocol bridge")};
   const normalizedQuery=query.trim().toLowerCase();
   const matches=supportedDeviceDrivers.filter(driver=>{
     const categoryMatch=category==="all"
