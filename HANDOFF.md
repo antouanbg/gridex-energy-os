@@ -2,6 +2,22 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Повторно изпращане на първа покана и правилен realm при вход — 2026-09-28
+
+Собственикът поиска бутон „Изпрати поканата наново“ непосредствено до
+„Отмени“, само ако статусът е `sent`. Бутонът извиква защитения backend
+endpoint за същата покана, обновява срока и не създава нов акаунт. При
+неясна доставка показва предупреждение и зарежда състоянието отново, без
+автоматично повторение. Интегриран е и вече одобреният от предходен чат
+email-first вход: общият „Вход“ пита за имейл и избира правилния realm;
+паролата остава само в Keycloak. Изричният `?realm=novacom` работи и без
+lookup API. Локално: build/build:pages и 7 целеви browser проверки минаха.
+**Не е публикувано на `gridex.tech` и не е изпратен нов реален имейл.**
+Преди frontend публикация backend lookup/resend трябва да е внедрен и
+проверен, после да се провери в реалния акаунт първият вход и автоматичното
+довършване. Обяснението в публичния Docusaurus раздел също трябва да се
+публикува.
+
 ## Organisation suspension / Спиране на организация — 2026-09-27
 
 EN: Implemented suspension/restoration in the existing super-admin panel, strict verified pilot-subject permission, pilot protection, revision-locked durable operations, audit and one Mailgun attempt per suspension with recipient-specific delivery verification. API responses/SSE and patched OpenRemote HTTP/WebSocket sessions enforce denial; old JWTs stay revoked after restoration. Accounts, roles and inventory are preserved. Request source: delegated owner task `01a0cea9-3cd0-7430-b309-95795bf293a6`; history reader returned empty items, so the explicit request and repository decisions were used.

@@ -29,6 +29,7 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   });
   await page.route('https://api.example.invalid/**',route=>{
     const path=new URL(route.request().url()).pathname;
+    if(path==='/api/v1/auth/login-realm')return route.fulfill({json:{realms:['gridex']}});
     if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',roles:['administrator'],permissions:['site:read'],memberships:[]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:'test-site',name:'Test Lab',organisationId:'test-org'}]}});
     if(path.endsWith('/snapshot'))return route.fulfill({status:503,json:{error:'unavailable'}});
@@ -43,6 +44,8 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   });
   await page.goto('/');
   await page.locator('.quick-sign-in').click();
+  await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
+  await page.locator('.login-submit').click();
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
   await expect(page.locator('[data-view-id="market"]')).toHaveText('↗Пазар');

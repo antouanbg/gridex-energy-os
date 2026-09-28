@@ -1,9 +1,11 @@
 # Users & invitations / Потребители и покани
 
-Status / Статус 2026-09-27: backend setup and migration 012 are active. The
+Status / Статус 2026-09-28: backend setup and migration 012 are active. The
 global form is available to the explicitly authorised platform account in a
-recent live session. First real customer delivery, password setup, acceptance
-and tenant-isolation test are **not yet verified**. The current frontend and
+recent live session. First real customer email delivery is confirmed, but
+password setup, acceptance and tenant-isolation are **not yet verified**.
+Sent-only resend and email-first login are implemented locally but not yet
+published. The current frontend and
 backend allow an empty Site selection for member invitations, granting no Site
 access. The new public help steps address organisation administrators, not
 the platform administrator.
@@ -12,16 +14,20 @@ the platform administrator.
 
 **Път:** „Клиенти и договори → Потребители и покани“; постоянен адрес
 `/customers/users/`. Менюто е за влязъл администратор на организация. В демо
-режим се показва само обяснение и не се изпраща поща. Получателят вижда и
-приема чакащите покани в „Профил“, не в административния екран.
+режим се показва само обяснение и не се изпраща поща. Поканеният **член**
+вижда и приема чакащата покана в „Профил“; първият администратор не натиска
+втори бутон след потвърждаване на имейла, парола и вход.
 
 Глобалният администратор вижда допълнителна форма „Нова организация“ тук.
 Въвежда име, уникален кратък код (realm) и имейл на първия администратор.
 Ако услугата или правата не са готови, формата не изпраща покана. При успешно изпращане
 се създава отделен OpenRemote realm, но организацията и правата НЕ се
-активират, преди поканеният да потвърди имейла, да влезе в своя realm и
-да приеме поканата от „Профил“. Нужен е скорошен вход на глобалния админ.
-„Последни покани“ показва състояния и позволява отмяна на чакаща покана.
+активират, преди поканеният да потвърди имейла, да зададе парола, да влезе
+в своя realm и backend автоматично да довърши първата покана. Нужен е скорошен вход на
+глобалния админ. „Последни покани“ показва състояния и позволява отмяна.
+Само при статус `sent` до „Отмени“ има „Изпрати поканата наново“: нов
+24-часов линк за същия акаунт и realm, без дублиране. Неясна доставка
+се проверява преди повторен опит.
 При грешка не изпращайте нова покана с друг код, преди съгласуване.
 
 За покана на член избери организацията, въведи имейла, избери роля от падащото
@@ -58,16 +64,21 @@ the platform administrator.
 
 **Path:** Customers & contracts → Users & invitations; stable URL
 `/customers/users/`. The menu is for signed-in organisation administrators.
-Demo shows an explanation only and sends no email. Recipients view and accept
-pending invitations in Profile, not on the administrative screen.
+Demo shows an explanation only and sends no email. Invited **members** accept
+pending invitations in Profile; the first administrator has no second Accept
+button after verifying email, setting a password and signing in.
 
 A platform administrator sees an additional “New organisation” form here:
 organisation name, unique short realm code and first administrator's email.
 It cannot send if the service or permission check is unavailable. Sending
 creates a separate OpenRemote realm, but organisation and rights become active
-only after the recipient verifies their email, signs in to that realm and
-accepts in Profile. A recent admin sign-in is required. “Recent invitations”
-shows state and can revoke a pending request. If delivery fails, do not retry
+only after the recipient verifies their email, sets a password and signs in
+to that realm; the backend then completes the first invitation automatically.
+A recent admin sign-in is required.
+“Recent invitations” shows state and can revoke a pending request. Only in
+`sent` state, **Resend invitation** appears beside **Revoke**: it creates a
+fresh 24-hour link for the same account and realm, without duplication.
+Uncertain delivery requires inspection before retrying. If delivery fails, do not retry
 under another realm code before reconciliation.
 
 To invite a member, choose the organisation, enter an email, select a role

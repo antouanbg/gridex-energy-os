@@ -4,6 +4,7 @@ for(const width of [360,390,430,1280])for(const lang of ['bg','en'])test(`demo b
   await page.addInitScript(language=>localStorage.setItem('gridex.ui-language',language),lang);
   await page.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:'window.__GRIDEX_CONFIG__={mode:"auto",authEnabled:true,apiBaseUrl:"https://api.example.invalid",realm:"gridex",oidcIssuer:"https://auth.example.invalid/auth/realms/gridex",oidcClientId:"gridex-portal"};'}));
   await page.route('https://auth.example.invalid/**',r=>r.fulfill({contentType:'text/html',body:'<h1>Test sign-in</h1>'}));
+  await page.route('https://api.example.invalid/api/v1/auth/login-realm',r=>r.fulfill({json:{realms:['gridex']}}));
   await page.goto('/demo/');
   await expect(page.locator('.hero-grid')).toBeVisible();
   await expect(page.locator('.heading-demo')).toHaveCount(0);
@@ -17,6 +18,9 @@ for(const width of [360,390,430,1280])for(const lang of ['bg','en'])test(`demo b
   if(width<681)expect(box.height).toBeGreaterThanOrEqual(44);
   await page.screenshot({path:testInfo.outputPath('demo-banner.png')});
   await login.click();
+  await expect(page).toHaveURL(/\/login\/$/);
+  await page.getByLabel(lang==='bg'?'Имейл':'Email',{exact:true}).fill('owner@example.invalid');
+  await page.locator('.login-submit').click();
   await expect(page.getByRole('heading',{name:'Test sign-in'})).toBeVisible();
   expect(new URL(page.url()).searchParams.get('code_challenge_method')).toBe('S256');
 });

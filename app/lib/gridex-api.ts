@@ -288,6 +288,20 @@ export function getGridexRuntimeConfig(): GridexRuntimeConfig {
     oidcIssuer: `${configured.oidcIssuer.slice(0, boundary + marker.length)}${selected}` };
 }
 
+export async function discoverGridexLoginRealms(config: GridexRuntimeConfig, email: string): Promise<string[]> {
+  const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/login-realm`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
+    cache: 'no-store', signal: AbortSignal.timeout(Math.max(1000, config.backendTimeoutMs || 5000)),
+  });
+  if (!response.ok) throw new GridexApiError('Login routing unavailable', response.status);
+  const payload = await response.json();
+  const realms = payload?.realms;
+  if (!Array.isArray(realms) || !realms.length || realms.some((realm: unknown) =>
+    typeof realm !== 'string' || !/^[a-z][a-z0-9-]{2,30}$/.test(realm)))
+    throw new GridexApiError('Invalid login routing response', 503);
+  return [...new Set(realms as string[])];
+}
+
 export class GridexApiClient {
   constructor(
     private readonly config: GridexRuntimeConfig,
@@ -347,6 +361,9 @@ export class GridexApiClient {
   }
   async revokeOrganisationInvitation(id: string): Promise<{ revoked: boolean }> {
     return this.postJson(`/api/v1/platform/organisation-invitations/${encodeURIComponent(id)}/revoke`, {});
+  }
+  async resendOrganisationInvitation(id: string): Promise<{ id: string; state: 'sent'; expiresAt: string }> {
+    return this.postJson(`/api/v1/platform/organisation-invitations/${encodeURIComponent(id)}/resend`, {});
   }
   async myOrganisationOnboarding(signal?: AbortSignal): Promise<{ invitations: OrganisationOnboardingInvitation[] }> {
     return this.getJson('/api/v1/me/organisation-onboarding', signal);

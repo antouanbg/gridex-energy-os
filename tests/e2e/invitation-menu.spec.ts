@@ -39,7 +39,7 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await page.getByLabel('Служебен имейл').fill('new@example.com');
   await page.getByLabel('Роля').selectOption('operator');
   await page.getByLabel('Test Lab').check();
-  await page.getByRole('button',{name:'Изпрати покана'}).click();
+  await page.getByRole('button',{name:'Изпрати покана',exact:true}).click();
   await expect.poll(()=>invited).toEqual({email:'new@example.com',role:'operator',siteIds:[site]});
   await page.reload();
   await expect(page).toHaveURL(/\/customers\/users\/$/);
@@ -57,6 +57,7 @@ test('non-admin has no invitation submenu and cannot use its direct URL',async({
 test('platform administrator can prepare a separate-realm invitation from the approved submenu',async({page,context},testInfo)=>{
   let nonce='';
   let submitted: unknown;
+  let resent=false;
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
   await context.route('**/gridex-config.js',route=>route.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
   await context.route('https://auth.example.invalid/**',route=>{
@@ -74,7 +75,11 @@ test('platform administrator can prepare a separate-realm invitation from the ap
     if(path==='/api/v1/me')return route.fulfill({json:{subject:'global-admin',email:'owner@example.com',roles:['platform_admin'],permissions:['platform:manage'],memberships:[]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[]}});
     if(path==='/api/v1/me/invitations')return route.fulfill({json:{invitations:[]}});
-    if(path==='/api/v1/platform/organisation-invitations'&&route.request().method()==='GET')return route.fulfill({json:{enabled:true,invitations:[]}});
+    if(path==='/api/v1/platform/organisation-invitations'&&route.request().method()==='GET')return route.fulfill({json:{enabled:true,invitations:[{id:'11111111-1111-4111-8111-111111111111',realm:'fixture-co',name:'Fixture Company',email:'admin@example.com',state:'sent',createdAt:'2026-09-28T00:00:00Z',expiresAt:'2026-09-29T00:00:00Z'}]}});
+    if(path==='/api/v1/platform/organisation-invitations/11111111-1111-4111-8111-111111111111/resend'){
+      resent=route.request().method()==='POST';
+      return route.fulfill({json:{id:'11111111-1111-4111-8111-111111111111',state:'sent',expiresAt:'2026-09-30T00:00:00Z'}});
+    }
     if(path==='/api/v1/platform/organisation-invitations'&&route.request().method()==='POST'){
       submitted=route.request().postDataJSON();
       return route.fulfill({status:201,json:{id:'new-org',realm:'fixture-co',state:'sent',expiresInSeconds:86400}});
@@ -83,6 +88,10 @@ test('platform administrator can prepare a separate-realm invitation from the ap
   });
   await page.goto('/customers/users/');
   await expect(page.getByRole('heading',{name:'Нова организация'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Изпрати поканата наново'})).toBeVisible();
+  await page.getByRole('button',{name:'Изпрати поканата наново'}).click();
+  await expect.poll(()=>resent).toBe(true);
+  await expect(page.getByText('Срокът е подновен за 24 часа.',{exact:false})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('platform-invitation-desktop.png'),fullPage:true});
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
@@ -90,7 +99,7 @@ test('platform administrator can prepare a separate-realm invitation from the ap
   await page.getByLabel('Име на организацията').fill('Fixture Company');
   await page.getByLabel('Кратък код (realm)').fill('fixture-co');
   await page.getByLabel('Имейл на първия администратор').fill('admin@example.com');
-  await page.getByRole('button',{name:'Изпрати покана'}).click();
+  await page.getByRole('button',{name:'Изпрати покана',exact:true}).click();
   await expect.poll(()=>submitted).toEqual({name:'Fixture Company',realm:'fixture-co',email:'admin@example.com'});
   await expect(page.getByText('Организацията и правата ще се активират едва след приемане и проверки.',{exact:false})).toBeVisible();
 });
