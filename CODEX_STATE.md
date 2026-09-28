@@ -1,5 +1,12 @@
 # Current task
 
+## 2026-09-28 main/Pages reconciliation
+
+PR #61 is merged and public release.json reports f1aaa50. Code 24/24,
+focused browser 20/20, quality/Pages green. Customer Site/device PR #55
+stays unpublished until backend #43 safely provisions per realm; no new
+menu was added. See HANDOFF.
+
 ## Portal-only OpenRemote Manager — 2026-09-28
 
 The owner approved one immediate launch button inside the existing
