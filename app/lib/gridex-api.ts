@@ -38,6 +38,9 @@ export type GridexInvitation = { id: string; organisationId: string; role: strin
 export type OrganisationOnboardingInvitation = { id: string; organisationId: string; realm: string; name: string; expiresAt: string };
 export type CreatedOrganisationInvitation = { id: string; realm: string; name: string; email: string; state: string; expiresAt: string; createdAt: string };
 
+export type PlatformOrganisation = { id: string; name: string; realm: string; status: 'active' | 'suspended'; revision: number;
+  operationId?: string; target?: 'active' | 'suspended'; operationState?: 'pending' | 'applied'; mailState?: string };
+
 export type GridexSite = {
   id: string;
   organisationId: string;
@@ -236,7 +239,7 @@ export type GridexAlarm = {
 };
 
 export class GridexApiError extends Error {
-  constructor(message: string, public readonly status: number) {
+  constructor(message: string, public readonly status: number, public readonly code?: string) {
     super(message);
     this.name = "GridexApiError";
   }
@@ -353,6 +356,15 @@ export class GridexApiClient {
   }
   async revokeInvitation(organisationId: string, id: string): Promise<{ revoked: boolean }> {
     return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations/${encodeURIComponent(id)}/revoke`, {});
+  }
+  platformOrganisations(signal?: AbortSignal): Promise<{ organisations: PlatformOrganisation[] }> {
+    return this.getJson('/api/v1/platform/organisations', signal);
+  }
+  changeOrganisationAccess(id: string, body: {operationId: string; revision: number; status: 'active' | 'suspended'}): Promise<{status: string; mailState: string}> {
+    return this.postJson(`/api/v1/platform/organisations/${encodeURIComponent(id)}/access`, body);
+  }
+  checkOrganisationDelivery(id: string): Promise<{mailState: string}> {
+    return this.postJson(`/api/v1/platform/organisations/${encodeURIComponent(id)}/delivery`, {});
   }
   async organisationInvitations(signal?: AbortSignal): Promise<{ enabled: boolean; invitations: CreatedOrganisationInvitation[] }> {
     return this.getJson('/api/v1/platform/organisation-invitations', signal);
@@ -631,6 +643,11 @@ export class GridexApiClient {
       buffer = frames.pop() ?? "";
       frames.forEach((frame) => {
         const data = frame.split("\n").filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trim()).join("\n");
+        if (frame.startsWith('event: access-denied')) {
+          const denial=JSON.parse(data);
+          if(typeof window!=='undefined')window.dispatchEvent(new Event(denial.error==='organisation_suspended'?'gridex:organisation-suspended':'gridex:reauth-required'));
+          throw new GridexApiError('Organisation access ended',403,denial.error);
+        }
         if (data) onEvent(new MessageEvent("message", { data }));
       });
     }
@@ -681,6 +698,13 @@ export class GridexApiClient {
     headers.set("Authorization", `Bearer ${token}`);
     let response=await fetch(`${this.config.apiBaseUrl}${path}`, { ...init, headers });
     const checkRestart=async(candidate:Response)=>{
+      if(candidate.status===403) {
+        const denial=await candidate.clone().json().catch(()=>null);
+        if(denial?.error==='organisation_suspended') {
+          if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:organisation-suspended'));
+          throw new GridexApiError('Organisation suspended. Contact the super administrator.',403,'organisation_suspended');
+        }
+      }
       if(candidate.status!==401)return;
       const error=await candidate.clone().json().catch(()=>null);
       if(error?.error==='reauthentication_required') {
