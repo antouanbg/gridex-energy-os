@@ -305,6 +305,19 @@ export class GridexApiClient {
   async me(signal?: AbortSignal): Promise<GridexUser> {
     return this.getJson<GridexUser>("/api/v1/me", signal);
   }
+  async managerLaunch(): Promise<{ url: string; expiresInSeconds: number }> {
+    const result = await this.postJson<{ url: string; expiresInSeconds: number }>('/api/v1/me/manager-launch', {});
+    const url = new URL(result.url);
+    if (url.protocol !== 'https:' || url.origin !== new URL(this.config.oidcIssuer).origin
+        || url.pathname !== '/manager/launch' || !url.searchParams.has('ticket')) {
+      throw new Error('Invalid Manager launch destination');
+    }
+    return result;
+  }
+  async revokeManagerAccess(): Promise<void> {
+    const response = await this.authorizedFetch('/api/v1/me/manager-access/revoke', { method: 'POST' });
+    if (!response.ok) throw new GridexApiError(`Manager access revocation failed: ${response.status}`, response.status);
+  }
   async deviceAccessTopology(site: string): Promise<{gateways:{id:string;name:string;role:string}[]}> {
     return this.getJson(`/api/v1/sites/${encodeURIComponent(site)}/hardware`);
   }

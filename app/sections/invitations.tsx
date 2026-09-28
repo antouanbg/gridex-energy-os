@@ -38,6 +38,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
   const [selected, setSelected] = useState<string[]>([]);
   const [sent, setSent] = useState<{ id: string; org: string } | null>(null);
   const [accepted, setAccepted] = useState(false);
+  const [managerError, setManagerError] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
@@ -72,6 +73,21 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         <h2>{t.manageTitle}</h2><p>{lang==='en'?'Invite the first administrator of a new organisation or manage access within yours. Rights are activated only after acceptance.':'Поканете първия администратор на нова организация или управлявайте достъпа във Вашата. Правата се активират едва след приемане на поканата.'}</p></div>
       <a className="profile-action" href={documentationLink('members',lang).href} target="_blank" rel="noopener noreferrer">{lang==='en'?'How invitations work':'Как работят поканите'} <span aria-hidden="true">↗</span></a>
     </header>}
+    {mode==='manage'&&(me?.permissions.includes('platform:manage')||me?.memberships?.some(m=>m.role==='administrator'))&&
+      <section className="card config-card invitation-panel" aria-label={lang==='en'?'OpenRemote administration':'Администрация в OpenRemote'}>
+        <span className="profile-kicker">OPENREMOTE</span>
+        <h2>{lang==='en'?'Organisation administration':'Администрация на организацията'}</h2>
+        <p>{lang==='en'?'Open Manager for the organisation in your current signed-in session. The one-time link expires in one minute.':'Отворете Manager само за организацията от текущата Ви сесия. Еднократният линк изтича след една минута.'}</p>
+        {managerError&&<p role="alert">{lang==='en'?'Manager access could not be verified. Refresh your session and try again.':'Достъпът до Manager не можа да се потвърди. Обновете сесията и опитайте пак.'}</p>}
+        <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#openremote-manager`} target="_blank" rel="noopener noreferrer">{lang==='en'?'How Manager access works':'Как работи входът в Manager'} ↗</a>
+        <button type="button" className="primary-btn" disabled={busy} onClick={()=>void action(async()=>{
+          setManagerError(false);
+          try {
+            const launch=await api.managerLaunch();
+            window.location.assign(launch.url);
+          } catch(error) {setManagerError(true);throw error;}
+        })}>{busy?t.busy:(lang==='en'?'Open OpenRemote Manager':'Отвори OpenRemote Manager')}</button>
+      </section>}
     {mode==='manage'&&me?.permissions.includes('platform:manage')&&<OrganisationInvitationAdmin api={api} lang={lang}/>}
     {(mode==='accept'||admins.length>0||!me?.permissions.includes('platform:manage'))&&<section className="card config-card invitation-panel" aria-label={mode==='manage'?t.manageTitle:t.title}>
     <span className="profile-kicker">{mode==='manage'?(lang==='en'?'YOUR ORGANISATION':'ВАШАТА ОРГАНИЗАЦИЯ'):(lang==='en'?'PENDING ACCESS':'ЧАКАЩ ДОСТЪП')}</span>

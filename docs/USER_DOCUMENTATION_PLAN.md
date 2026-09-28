@@ -49,6 +49,7 @@ guide against the actual shipped UI and API before marking it complete.
 | За нас | `/about/` | Pending |
 | Потребителски профил | `/profile/` | Initial profile and invite/access guide at `/help/`; review after publication |
 | Вход в портала | `/login/` | BG/EN realm and session-state guide: `docs/LOGIN_REALM_ISOLATION.md`; external account-holder acceptance pending |
+| Администрация в OpenRemote | `/customers/users/` → бутон | BG/EN: Docusaurus `organisations-and-access/#openremote-manager`; публикация и реален тест предстоят |
 
 The anonymous Demo has separate `/demo/*` paths and must be documented as
 sample data, never as customer inventory. Future device-level help should

@@ -423,6 +423,8 @@ export default function Home() {
   const signOut = async () => {
     if (authState === "authenticated") {
       try {
+        try { await apiClient.revokeManagerAccess(); }
+        catch { /* Keycloak sign-out must remain available if the API is offline. */ }
         await gridexLogout(runtimeConfig);
         return;
       } catch {

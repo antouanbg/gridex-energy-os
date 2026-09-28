@@ -100,12 +100,15 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await page.goto('/customers/users/');
   await expect(page.locator('.invitation-hero')).toBeVisible();
   await expect(page.locator('.page-help-link')).toHaveAttribute('href','https://doc.gridex.tech/organisations-and-access/');
-  await expect(page.locator('.invitation-panel')).toBeVisible();
+  await expect(page.getByRole('region',{name:'Потребители и покани'})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Администрация в OpenRemote'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-desktop.png'),fullPage:true});
   await page.setViewportSize({width:390,height:844});
   await expect(page.locator('.invitation-hero')).toBeVisible();
   await expect(page.locator('.page-help-link')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await expect(page.getByRole('button',{name:'Изпрати покана'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-mobile.png'),fullPage:true});
 });
