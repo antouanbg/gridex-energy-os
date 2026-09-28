@@ -21,7 +21,7 @@ for (const status of [403,503,0]) {
     await page.locator('.quick-sign-in').click();
     await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
     await page.locator('.login-submit').click();
-    await expect(page.getByRole('alert')).toContainText('Входът приключи, но достъпът до API не може да се потвърди.');
+    await expect(page.getByRole('alert')).toContainText('Входът приключи, но достъпът до организацията не може да се потвърди.');
     for(const view of ['overview','sites','market','devices']) {
       await page.locator(`[data-view-id="${view}"]`).click();
       await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
