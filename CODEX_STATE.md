@@ -1,5 +1,18 @@
 # Current task
 
+## Portal-only OpenRemote Manager — 2026-09-28
+
+The owner approved one immediate launch button inside the existing
+administrator page, not a new menu item or email step. The staged button
+requests a one-time URL from the authenticated API for the current realm and
+links to the matching Docusaurus guide. It is not publicly deployed yet;
+backend migration/proxy and novacom callback must be verified first. Keep
+customer/pilot realm isolation, the approved menu structure and no-demo-data
+live behavior. See HANDOFF for acceptance checks.
+
+Одобреният бутон е в съществуващата администраторска страница. Няма ново меню
+или имейл. Публикуването и реалното приемане предстоят след backend/proxy.
+
 ## Одобрена селекция на устройства и правило за функции — 2026-09-27
 
 Собственикът потвърди: изборът на устройство и роли се извършва само в GrideX
