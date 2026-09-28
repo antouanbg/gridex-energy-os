@@ -3,15 +3,17 @@
 ## Portal-only OpenRemote Manager — 2026-09-28
 
 The owner approved one immediate launch button inside the existing
-administrator page, not a new menu item or email step. The staged button
+administrator page, not a new menu item or email step. The published button
 requests a one-time URL from the authenticated API for the current realm and
-links to the matching Docusaurus guide. It is not publicly deployed yet;
-backend migration/proxy and novacom callback must be verified first. Keep
+links to the matching Docusaurus guide. Frontend Pages/quality, backend
+migration 014 and API health, protected proxy and novacom callback are
+verified. External pilot/customer browser acceptance remains pending. Keep
 customer/pilot realm isolation, the approved menu structure and no-demo-data
 live behavior. See HANDOFF for acceptance checks.
 
-Одобреният бутон е в съществуващата администраторска страница. Няма ново меню
-или имейл. Публикуването и реалното приемане предстоят след backend/proxy.
+Одобреният бутон е публикуван в съществуващата администраторска страница.
+Няма ново меню или имейл. Backend/proxy са внедрени; реалното приемане с
+пилотен и клиентски акаунт от външна мрежа предстои.
 
 ## Одобрена селекция на устройства и правило за функции — 2026-09-27
 
