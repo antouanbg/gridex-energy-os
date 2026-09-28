@@ -12,13 +12,18 @@ test('a stalled callback times out and a new sign-in can open the provider',asyn
     }
     return new Promise<void>(()=>{});
   });
+  await page.route('https://api.example.invalid/api/v1/auth/login-realm',route=>route.fulfill({json:{realms:['gridex']}}));
   await page.goto('/');
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
   await page.locator('.quick-sign-in').click();
+  await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
+  await page.locator('.login-submit').click();
   await expect(page.getByRole('heading',{name:'Данните от акаунта са недостъпни'})).toBeVisible();
   await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
   await expect(page.locator('.quick-sign-in')).toBeEnabled();
   await expect(page.locator('main')).not.toContainText('Свързване…');
   await page.locator('.quick-sign-in').click();
+  await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
+  await page.locator('.login-submit').click();
   await expect(page.getByRole('heading',{name:'Retry sign-in'})).toBeVisible();
 });

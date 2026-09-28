@@ -1,9 +1,8 @@
 # Организации и достъп / Organisations and access
 
-Статус 2026-09-27: публичният Docusaurus сайт е `doc.gridex.tech`.
-Получаването на първата клиентска покана и входът са докладвани от клиента;
-автоматичното завършване след вход е реализирано във frontend тестова версия,
-но още не е потвърдено в реалната внедрена среда.
+Статус 2026-09-28: публичната документация е в Docusaurus на
+`doc.gridex.tech`. Първият клиент потвърди получаване на покана и вход;
+автоматичното завършване и пълната изолация още се проверяват в реалната среда.
 
 ## Български
 
@@ -23,17 +22,24 @@ GrideX за първата покана.
 
 1. Отворете линка в имейла, потвърдете адреса и задайте парола в защитения
    екран за вход. Никой администратор не трябва да иска паролата Ви.
-2. Влезте в организацията, посочена в поканата.
-3. Ако сте първият администратор на нова организация, порталът завършва
-   точно Вашата покана след вход и сървърна проверка — без втори бутон.
-   Поканите за колеги в съществуваща организация засега се приемат в „Профил“.
-   Изпращането на имейл само по себе си не дава достъп.
-4. След потвърдено завършване виждате само разрешените Ви Обекти и функции. Ако не виждате
+2. От `gridex.tech` натиснете „Вход“, въведете поканения имейл и продължете
+   към защитения екран на съответната организация. Паролата се въвежда само там.
+   Линкът от поканата може да отвори и директно правилната организация.
+3. След потвърждаване на имейла и задаване на парола първата администраторска
+   покана се довършва автоматично при вход и сървърна проверка. Не е нужен
+   втори бутон „Приеми“. Поканите за колеги още се приемат от „Профил“.
+4. След потвърдено активиране виждате само разрешените Ви Обекти и функции. Ако не виждате
    очакван Обект, поискайте администраторът да провери правата Ви.
 
-Поканите са еднократни и ограничени във времето. Ако линкът е изтекъл или
-поканата е отменена, поискайте нова; не опитвайте да се регистрирате повторно
-с друг акаунт.
+Поканите са еднократни и ограничени във времето. Ако поканата за първи
+администратор още е със статус „Изпратена“, но линкът е изтекъл, супер
+администраторът може да натисне „Изпрати поканата наново“ до „Отмени“ в
+„Клиенти и договори → Потребители и покани“. Системата изпраща нов 24-часов
+линк за **същия** акаунт и организация, без дублиране. След приемане или
+отмяна бутонът липсва. При неясен резултат от изпращането не повтаряйте
+автоматично — първо проверете състоянието. Ако забравите вече зададена
+парола, използвайте „Забравена парола“ в защитения вход на **правилната**
+организация; това е различно от повторно изпращане на покана.
 
 ### Кой какво може?
 
@@ -76,16 +82,21 @@ a new organisation.
 
 1. Open the email link, verify your address and set a password on the secure
    sign-in screen. Do not share your password with an administrator.
-2. Sign in to the organisation named in the invitation.
-3. For the first administrator of a new organisation, the portal completes
-   the matching invitation after sign-in and server verification, without a
-   second button. Existing-organisation member invitations still require
-   acceptance in Profile. Email delivery alone grants no access.
+2. Select Sign in at `gridex.tech`, enter the invited email and continue to
+   the correct organisation's protected login. Enter your password only there.
+3. The first administrator invitation completes after verified email, password
+   setup, sign-in and server checks, without a second Accept button. Member
+   invitations still require acceptance in Profile. Email alone grants no access.
 4. After confirmed completion you will see only authorised Sites and features. Ask your administrator if
    a Site you expect is missing.
 
-Invitations are single-use and expire. Ask for a new invitation if a link has
-expired or been revoked; do not create a second identity as a workaround.
+Invitations are single-use and expire. If a first-administrator invitation is
+still **sent**, the platform administrator can use **Resend invitation** beside
+**Revoke** in Customers & contracts → Users & invitations. This issues a fresh
+24-hour email link for the same user and realm; it does not create another
+account or organisation. The button is absent after acceptance or revocation.
+If delivery is unconfirmed, the administrator must check its status rather
+than retry automatically. A revoked invitation needs administrator review.
 
 ### Who can do what?
 

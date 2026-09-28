@@ -30,7 +30,7 @@ guide against the actual shipped UI and API before marking it complete.
 | --- | --- | --- |
 | Преглед | `/` | Pending |
 | Клиенти и договори | `/customers/` | Pending |
-| Потребители и покани / Users & invitations | `/customers/users/` | BG/EN guide: `docs/USERS_AND_INVITATIONS_GUIDE.md`; public guide: `https://doc.gridex.tech/organisations-and-access/#invite-a-colleague` and `/help/`; verify real delivery/acceptance before completion |
+| Потребители и покани / Users & invitations | `/customers/users/` | BG/EN guide: `docs/ORGANISATIONS_AND_ACCESS.md` and `docs/USERS_AND_INVITATIONS_GUIDE.md`; public Docusaurus guide: `https://doc.gridex.tech/organisations-and-access/` and `/help/`. New sent-only resend is documented but pending API-first deployment and real delivery/acceptance verification. |
 | Обекти | `/sites/` | Pending |
 | Енергийни активи | `/assets/` | Pending |
 | Батерия | `/battery/` | Pending |
