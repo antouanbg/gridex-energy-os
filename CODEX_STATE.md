@@ -1,5 +1,9 @@
 # Current task
 
+## 2026-09-29 — customer Sites/devices
+
+Source integration is prepared: organisation admin creates OpenRemote-backed Site and ROCK/ESP, authorised admin/integrator drafts up to two roles. Pages build, TypeScript and three Chromium tests passed. Not live: backend migration/API restart was blocked by automated risk review pending specific owner approval. Do not deploy frontend alone. See HANDOFF.
+
 ## 2026-09-28 main/Pages reconciliation
 
 PR #61 is merged and public release.json reports f1aaa50. Code 24/24,
@@ -21,6 +25,43 @@ live behavior. See HANDOFF for acceptance checks.
 Одобреният бутон е публикуван в съществуващата администраторска страница.
 Няма ново меню или имейл. Backend/proxy са внедрени; реалното приемане с
 пилотен и клиентски акаунт от външна мрежа предстои.
+
+## 2026-09-27 — нов клиентски Обект и устройство
+
+Изрично одобрено: нов Обект и потвърден GrideX ROCK/ESP за всяка активирана
+организация, създавани от нейния администратор през старите раздели.
+Локални `/sites/` и `/devices/` форми и API клиент; без ново меню или
+комишънинг. Ръководство BG/EN и help връзки са подготвени. Unit/build/lint
+минават, но реален клиентски вход и mobile/desktop acceptance, backend
+миграция и deploy липсват. Поканата на `antouan@novacom.bg` остава `sent`
+без членство; не създавай ресурс преди проверено автоматично Accept.
+
+EN: Local customer Site and approved gateway UI is prepared, not live.
+Verify invitation activation, backend migration, customer OpenRemote token
+and browser isolation before publishing.
+
+## 2026-09-27 — потвърден клиентски процес за устройства
+
+Собственикът потвърди само GrideX ROCK Pi E/OLIMEX ESP32-EVB като хардуерен
+избор; Обект създава само администратор на организацията, разрешен интегратор
+може да подготвя настройките, commissioning остава administrator-only.
+Frontend локално ограничава съществуващия setup selector до OR-проверени
+ROCK/ESP, скрива черновата от роли без `hardware:manage` и пази защитения
+ROCK достъп само за администратора. Вътрешният Help и публичният BG/EN
+Docusaurus guide са обновени; Docusaurus е локално внедрен и CSS/JS MIME
+проверката е минала. Backend правата/OR проверките са в отделното репо.
+`npm run build:pages` мина. Общият `tsc --noEmit` има предходни несвързани
+грешки в gateway/supported, липсващ jose/Fetcher и membershipIdentity; те не
+са коригирани в този обхват. Frontend не е публикуван и не е проверен с реален
+клиент. Site POST/tenant-aware OR provisioning и форма за нов хардуер липсват.
+Следва: безопасен OpenRemote-first backend create за конкретния realm, UI
+за нов клиентски Обект и устройство, отрицателни cross-tenant тестове и
+реален browser тест преди публикация. Без local-only fallback.
+
+EN: Approved hardware is ROCK/ESP only. Organisation admin creates Sites and
+commissions; Site-scoped integrator may draft. Current selector/help changes
+are local; new customer Site/device creation awaits tenant-aware OpenRemote
+provisioning and acceptance.
 
 ## Одобрена селекция на устройства и правило за функции — 2026-09-27
 

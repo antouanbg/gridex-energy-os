@@ -63,6 +63,20 @@ test('device inventory is site-scoped, authenticated and preserves denied access
     }
   } finally { globalThis.fetch = original; }
 });
+test('Site and approved gateway creation send a stable idempotency key and bearer token',async()=>{
+  const original=globalThis.fetch;
+  try{
+    const client=new GridexApiClient({mode:'auto',apiBaseUrl:''},async()=> 'customer-token');
+    const requests=[];
+    globalThis.fetch=async(url,init)=>{requests.push({url,init});return new Response(JSON.stringify({id:'resource'}),{status:201});};
+    await client.createSite({organisationId:'org',name:'Site',timezone:'Europe/Sofia'},'site-request-001');
+    await client.createGateway('site/one',{name:'ROCK',hardwareModel:'rock-pi-e'},'gateway-request-001');
+    assert.deepEqual(requests.map(item=>item.url),['/api/v1/sites','/api/v1/sites/site%2Fone/gateways']);
+    assert.equal(requests[0].init.headers.get('Idempotency-Key'),'site-request-001');
+    assert.equal(requests[1].init.headers.get('Idempotency-Key'),'gateway-request-001');
+    assert.equal(requests[0].init.headers.get('Authorization'),'Bearer customer-token');
+  }finally{globalThis.fetch=original;}
+});
 test('ROCK telemetry reads only authenticated Site history and never substitutes demo values', async () => {
   const original = globalThis.fetch;
   try {
