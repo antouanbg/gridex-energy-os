@@ -105,3 +105,16 @@ test('invitation API sends bearer identity and explicit scope; rejects unavailab
     await assert.rejects(client.invitations(), { status: 503 });
   } finally { globalThis.fetch = original; }
 });
+test('sent organisation invitation resend targets the existing ID with authenticated POST', async () => {
+  const original = globalThis.fetch;
+  try {
+    const client = new GridexApiClient({ mode: 'auto', apiBaseUrl: '' }, async () => 'owner-token');
+    globalThis.fetch = async (url, init) => {
+      assert.equal(url, '/api/v1/platform/organisation-invitations/old-id/resend');
+      assert.equal(init.method, 'POST');
+      assert.equal(init.headers.get('Authorization'), 'Bearer owner-token');
+      return new Response(JSON.stringify({ id: 'old-id', state: 'sent', expiresAt: '2026-09-30T00:00:00Z' }));
+    };
+    assert.equal((await client.resendOrganisationInvitation('old-id')).id, 'old-id');
+  } finally { globalThis.fetch = original; }
+});

@@ -12,6 +12,8 @@ const copy = {
     failed: 'Не е потвърдено успешно изпращане. Не повтаряйте с друг код; проверете състоянието.',
     sent: 'Заявката за имейл е приета. Организацията и правата ще се активират след потвърждаване на имейла, задаване на парола, вход и проверка от сървъра.',
     existing: 'Последни покани', revoke: 'Отмени', revoked: 'Поканата е отменена.', empty: 'Няма изпратени покани.',
+    resend: 'Изпрати поканата наново', resent: 'Изпратен е нов линк към същия администратор. Срокът е подновен за 24 часа.',
+    resendUnconfirmed: 'Изпращането не е потвърдено. Проверете състоянието, преди нов опит.',
     expires: 'Валидна до', state: 'Състояние',
   },
   en: {
@@ -22,6 +24,8 @@ const copy = {
     failed: 'Email delivery was not confirmed. Do not retry with another code; inspect the state.',
     sent: 'The email request was accepted. Organisation access activates after email verification, password setup, sign-in and server checks.',
     existing: 'Recent invitations', revoke: 'Revoke', revoked: 'Invitation revoked.', empty: 'No invitations sent.',
+    resend: 'Resend invitation', resent: 'A new link was sent to the same administrator. The invitation is valid for another 24 hours.',
+    resendUnconfirmed: 'Sending was not confirmed. Check the invitation status before retrying.',
     expires: 'Expires', state: 'State',
   },
 };
@@ -74,6 +78,7 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
     {items.map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong> · {item.realm} · {item.email}
       <p>{t.state}: {item.state} · {t.expires}: {new Date(item.expiresAt).toLocaleString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</p>
+      <div className="invitation-record-actions">
       {['reserved','realm_ready','identity_ready','sent','delivery_failed','provisioning_failed'].includes(item.state)
         && <button type="button" className="secondary-btn" disabled={busy} onClick={() => {
           setBusy(true); setNotice('');
@@ -82,6 +87,17 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
             setNotice(t.revoked);
           }).catch(() => setNotice(t.failed)).finally(() => setBusy(false));
         }}>{t.revoke}</button>}
+      {item.state === 'sent' && <button type="button" className="secondary-btn" disabled={busy} onClick={() => {
+        setBusy(true); setNotice('');
+        void api.resendOrganisationInvitation(item.id).then(result => {
+          setItems(current => current.map(row => row.id === item.id ? { ...row, state: result.state, expiresAt: result.expiresAt } : row));
+          setNotice(t.resent);
+        }).catch(async error => {
+          setNotice(error instanceof GridexApiError && error.status === 401 ? t.recent : t.resendUnconfirmed);
+          try { setItems((await api.organisationInvitations()).invitations); } catch { /* Keep the last known state. */ }
+        }).finally(() => setBusy(false));
+      }}>{t.resend}</button>}
+      </div>
     </article>)}
   </section>;
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useMemo, useState, useRef } from "react";
-import { getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
-import { getGridexAccessToken, gridexLogin, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
+import { lazy, Suspense, useEffect, useMemo, useState, useRef, type FormEvent } from "react";
+import { discoverGridexLoginRealms, getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexRuntimeConfig, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
+import { getGridexAccessToken, gridexLogin, gridexLoginForEmail, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
@@ -437,16 +437,19 @@ export default function Home() {
     notify(lang==="en"?"You have signed out safely":"Излязохте успешно от профила");
   };
 
-  const signIn = async () => {
+  const openLogin = () => {
+    if(dataMode==='demo') window.location.assign('/login/');
+    else navigate('login');
+  };
+  const signIn = async (email: string, realm: string) => {
     try {
       setAuthState("checking");
       setIntegrationError("");
-      await gridexLogin(getGridexRuntimeConfig());
+      await gridexLoginForEmail(runtimeConfig, realm, email);
     } catch {
       setAuthState("error");
       setIntegrationError(lang==="en"?"The sign-in service did not respond. Please try again.":"Услугата за вход не отговори. Моля, опитайте отново.");
-      if(dataMode==='demo')window.location.assign('/login/');
-      else navigate('login');
+      openLogin();
     }
   };
 
@@ -481,7 +484,7 @@ export default function Home() {
           <i>{mobileNavOpen?"×":"☰"}</i><span>{lang==="en"?"Menu":"Меню"}</span>
         </button>
         <div className="profile-wrap" data-no-translate>
-          <button className={`profile ${!sessionUser?'quick-sign-in':''} ${accountMenuOpen?"open":""}`} disabled={dataMode==='live'&&authState==='checking'} onClick={()=>sessionUser?setAccountMenuOpen(!accountMenuOpen):void signIn()} aria-haspopup={sessionUser?"menu":undefined} aria-expanded={sessionUser?accountMenuOpen:undefined}>
+          <button className={`profile ${!sessionUser?'quick-sign-in':''} ${accountMenuOpen?"open":""}`} disabled={dataMode==='live'&&authState==='checking'} onClick={()=>sessionUser?setAccountMenuOpen(!accountMenuOpen):openLogin()} aria-haspopup={sessionUser?"menu":undefined} aria-expanded={sessionUser?accountMenuOpen:undefined}>
             <span>{sessionUser?(lang==="en"?sessionUser.initialsEn:sessionUser.initialsBg):"↪"}</span>
             <div><strong>{sessionUser?(lang==="en"?sessionUser.nameEn:sessionUser.nameBg):(lang==="en"?"Sign in":"Вход")}</strong><small>{sessionUser?(lang==="en"?sessionUser.roleEn:sessionUser.roleBg):dataMode==='live'&&authState==='checking'?(lang==="en"?"Checking session…":"Проверка на сесията…"):dataMode==='live'&&authState==='error'?(lang==="en"?"Verification unavailable":"Проверката е недостъпна"):(lang==="en"?"No active session":"Няма активна сесия")}</small></div><b>⋮</b>
           </button>
@@ -498,7 +501,7 @@ export default function Home() {
             <a role="menuitem" href={documentationHome} target="_blank" rel="noopener noreferrer"><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"Open the GrideX guides":"Отвори ръководствата"}</small></span><b>›</b></a>
             <button role="menuitem" onClick={()=>navigate("login")}><i>⇄</i><span><strong>{lang==="en"?"Switch account":"Смяна на профил"}</strong><small>{lang==="en"?"Open the sign-in page":"Отвори страницата за вход"}</small></span><b>›</b></button>
             <button className="account-menu-logout" role="menuitem" onClick={signOut}><i>↪</i><span><strong>{lang==="en"?"Sign out":"Изход"}</strong><small>{lang==="en"?"End this portal session":"Прекрати тази сесия"}</small></span></button>
-          </>:<><button role="menuitem" onClick={signIn}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button><a role="menuitem" href={documentationHome} target="_blank" rel="noopener noreferrer"><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"How to get access":"Как се получава достъп"}</small></span><b>›</b></a></>}
+          </>:<><button role="menuitem" onClick={openLogin}><i>↪</i><span><strong>{lang==="en"?"Sign in":"Вход"}</strong><small>{lang==="en"?"Open secure sign-in":"Отвори защитения вход"}</small></span><b>›</b></button><a role="menuitem" href={documentationHome} target="_blank" rel="noopener noreferrer"><i>?</i><span><strong>{lang==="en"?"Documentation":"Документация"}</strong><small>{lang==="en"?"How to get access":"Как се получава достъп"}</small></span><b>›</b></a></>}
         </div>
       </>}
 
@@ -521,7 +524,7 @@ export default function Home() {
         {dataMode==="demo"&&demoNoticeVisible&&<section className={`demo-mode-notice ${backendState==="offline"?"offline":""}`} data-no-translate role="status">
           <i>{backendState==="offline"?"!":"DEMO"}</i>
           <span><strong>{lang==="en"?"This is Demo mode":"Това е Демо режим"}</strong><small>{backendState==="offline"?(lang==="en"?"API access could not be verified. You can retry sign-in.":"Достъпът до API не може да се потвърди. Можете да опитате вход отново."):(lang==="en"?"Please sign in to load your real sites and live OpenRemote data.":"Моля, логнете се, за да заредите реалните си обекти и данните на живо от OpenRemote.")}</small></span>
-          <button className="demo-sign-in" onClick={signIn}>{lang==="en"?"Sign in":"Вход"} →</button>
+          <button className="demo-sign-in" onClick={openLogin}>{lang==="en"?"Sign in":"Вход"} →</button>
           <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
 
@@ -530,7 +533,7 @@ export default function Home() {
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-            {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={signIn}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+            {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
@@ -555,7 +558,7 @@ export default function Home() {
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "members" && dataMode==='demo' && <section className="card config-card"><h2>{lang==='en'?'Users & invitations':'Потребители и покани'}</h2><p>{lang==='en'?'Sign in as an organisation administrator to manage real invitations. No demo emails are sent.':'Влезте като администратор на организация, за да управлявате реални покани. В демо режима не се изпращат имейли.'}</p></section>}
         {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations api={apiClient} lang={lang} mode="manage"/>}
-        {view === "login" && <LoginPage lang={lang} user={sessionUser} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"}/>}
+        {view === "login" && <LoginPage lang={lang} user={sessionUser} config={runtimeConfig} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"}/>}
         {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang} mode="accept"/>}
             </>}
           </div>
@@ -606,9 +609,25 @@ function LiveModulePending({view,lang,onDevices}:{view:string;lang:UiLanguage;on
   </section>;
 }
 
-function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState,error,customerRealm}:{lang:UiLanguage;user:DemoUser|null;onSignIn:()=>void;onSignOut:()=>void;navigate:(id:string)=>void;backendState:BackendState;authState:AuthState;error:string;customerRealm:boolean}) {
+function LoginPage({lang,user,config,onSignIn,onSignOut,navigate,backendState,authState,error,customerRealm}:{lang:UiLanguage;user:DemoUser|null;config:GridexRuntimeConfig;onSignIn:(email:string,realm:string)=>Promise<void>;onSignOut:()=>void;navigate:(id:string)=>void;backendState:BackendState;authState:AuthState;error:string;customerRealm:boolean}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const backendAvailable=backendState==="online";
+  const [email,setEmail]=useState('');
+  const [realmChoices,setRealmChoices]=useState<string[]>([]);
+  const [routingError,setRoutingError]=useState('');
+  const [routingBusy,setRoutingBusy]=useState(false);
+  const resolveEmail=async(event:FormEvent<HTMLFormElement>)=>{
+    event.preventDefault();
+    if(routingBusy)return;
+    setRoutingBusy(true);setRoutingError('');setRealmChoices([]);
+    try{
+      const realms=customerRealm?[config.realm]:await discoverGridexLoginRealms(config,email.trim());
+      if(realms.length===1)await onSignIn(email.trim(),realms[0]);
+      else setRealmChoices(realms);
+    }catch{
+      setRoutingError(t('Организацията не може да се провери сега. Опитайте отново.','Your organisation could not be checked now. Please try again.'));
+    }finally{setRoutingBusy(false);}
+  };
   return <div className="login-layout" data-no-translate>
     <section className="login-brand-panel">
       <div className="login-brand-mark">GX</div>
@@ -625,15 +644,25 @@ function LoginPage({lang,user,onSignIn,onSignOut,navigate,backendState,authState
       <div className={`login-demo-chip ${backendAvailable?"ready":"offline"}`}>{t("СИГУРЕН ВХОД","SECURE SIGN-IN")}</div>
       <p>{t("ДОБРЕ ДОШЛИ","WELCOME BACK")}</p>
       <h2>{t("Вход в портала","Sign in to the portal")}</h2>
-      <p>{t("Реалният достъп е само с покана. Първият администратор на нова организация получава покана от администратора на платформата; останалите потребители — от своя организационен администратор. След потвърждение на имейла задайте парола и приемете поканата в профила си.","Live access is invitation-only. The first administrator of a new organisation is invited by the platform administrator; other users are invited by their organisation administrator. Verify your email, set a password and accept the invitation in your profile.")}</p>
+      <p>{t("Реалният достъп е само с покана. Въведете имейла от поканата. След потвърждение на адреса и задаване на парола първият администратор влиза без втори бутон за приемане.","Live access is invitation-only. Enter the invited email. After verification and password setup, the first administrator signs in without a second acceptance button.")}</p>
       <a className="profile-inline-help" href={documentationLink('login',lang).href} target="_blank" rel="noopener noreferrer">{t('Как се получава достъп?','How do I get access?')} <span aria-hidden="true">↗</span></a>
-      <span className="login-intro">{t("Използвайте служебния си GrideX профил. Ще бъдете пренасочени към защитения OpenRemote / Keycloak вход.","Use your GrideX work account. You will be redirected to the secure OpenRemote / Keycloak sign-in.")}</span>
+      <span className="login-intro">{t("Ще намерим правилната организация по имейла. Паролата се въвежда само в защитения OpenRemote / Keycloak вход.","We will find the right organisation from your email. Enter your password only on the secure OpenRemote / Keycloak sign-in page.")}</span>
       {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
       <div className={`login-connection-state ${backendAvailable?"online":"offline"}`}><i/>
         <span><strong>{authState==="checking"?t("Проверка на сесията","Checking session"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):backendState==="offline"?t("API достъпът не е потвърден","API access could not be verified"):t("Влезте за проверка на достъпа","Sign in to verify access")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
       </div>
       {error&&<div className="login-error" role="alert">{error}</div>}
-      {!user&&<button className="login-submit" type="button" disabled={backendState==="demo"||authState==="checking"} onClick={onSignIn}>{t("Вход с GrideX / Keycloak","Sign in with GrideX / Keycloak")} <b>→</b></button>}
+      {!user&&<form className="login-email-form" onSubmit={resolveEmail}>
+        <label htmlFor="gridex-login-email">{t('Имейл','Email')}</label>
+        <input id="gridex-login-email" type="email" autoComplete="username" required maxLength={254} value={email}
+          onChange={event=>{setEmail(event.target.value);setRealmChoices([]);setRoutingError('');}}/>
+        {routingError&&<div className="login-error" role="alert">{routingError}</div>}
+        <button className="login-submit" type="submit" disabled={routingBusy||authState==='checking'}>{routingBusy?t('Проверка…','Checking…'):t('Продължи към защитения вход','Continue to secure sign-in')} <b>→</b></button>
+        {!!realmChoices.length&&<div className="login-realm-choices" aria-label={t('Изберете организация','Choose an organisation')}>
+          <p>{t('Този имейл е поканен в повече от една организация:','This email was invited to more than one organisation:')}</p>
+          {realmChoices.map(realm=><button type="button" key={realm} disabled={routingBusy} onClick={()=>void onSignIn(email.trim(),realm)}>{realm}</button>)}
+        </div>}
+      </form>}
       {!user&&customerRealm&&<a className="profile-inline-help" href="/login/?realm=gridex">{t('Вход в основния GrideX акаунт','Sign in to the main GrideX account')} →</a>}
       {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
       <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{user?t('Към моите обекти','Back to my sites'):t("Към прегледа","Back to overview")}</button>

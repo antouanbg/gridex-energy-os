@@ -128,6 +128,23 @@ export async function gridexLogin(config: GridexRuntimeConfig, fresh = false): P
   });
 }
 
+export async function gridexLoginForEmail(config: GridexRuntimeConfig, realm: string, email: string): Promise<void> {
+  if (!/^[a-z][a-z0-9-]{2,30}$/.test(realm) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    throw new Error('Invalid login route');
+  const marker = '/realms/';
+  const boundary = config.oidcIssuer.lastIndexOf(marker);
+  if (boundary < 0) throw new Error('Invalid identity issuer');
+  const routed = { ...config, realm, oidcIssuer: `${config.oidcIssuer.slice(0, boundary + marker.length)}${realm}` };
+  clearGridexSession();
+  locallyEnded = false;
+  const instance = client(routed);
+  await bounded(instance.init({ flow: 'standard', pkceMethod: 'S256', checkLoginIframe: false,
+    redirectUri: authRedirect(routed) }), Math.max(1000, Math.min(config.backendTimeoutMs || 5000, 15000)));
+  saveReturnPath();
+  await instance.login({ redirectUri: authRedirect(routed), scope: 'openid profile email',
+    loginHint: email, prompt: 'login', maxAge: 0 });
+}
+
 export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
