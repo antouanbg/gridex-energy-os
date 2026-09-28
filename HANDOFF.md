@@ -2,6 +2,27 @@
 
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## Main and live Pages reconciliation — 2026-09-28
+
+Owner-approved PR #61 merged the organisation suspension controls with the
+current email-first login and invitation resend into `main` at `f1aaa50`.
+Local checks: 24 code tests, 20 focused Chromium tests, lint with zero errors
+and two pre-existing image warnings. GitHub quality and Pages deployment
+succeeded; public `gridex.tech/release.json` reports the same revision.
+No menu hierarchy or mobile navigation was changed. Backend access enforcement
+is already live; real customer suspension/email delivery has not been tried.
+
+Customer Site/device creation PR #55 remains open and unpublished. Its backend
+dependency #43 lacks completed tenant-aware OpenRemote provisioning and has a
+migration-number conflict; do not advertise or publish the customer creation
+form alone. Existing live read-only inventory remains unchanged.
+
+Одобреният PR #61 е в `main` и в живия портал (ревизия `f1aaa50`).
+Преминаха 24 кодови и 20 браузърни теста; няма промяна на менюто/мобилната
+навигация. Реално спиране/имейл още не е проверено. PR #55 за създаване на
+клиентски Обекти и устройства остава отворен: зависимият backend #43 не е
+готов и има конфликт на миграцията. Не публикувай формата самостоятелно.
+
 ## Повторно изпращане на първа покана и правилен realm при вход — 2026-09-28
 
 Собственикът поиска бутон „Изпрати поканата наново“ непосредствено до
