@@ -379,6 +379,16 @@ frontend deployment/API restart изискват пресен вход и връ
 
 ## Mandatory documentation for every changed menu / Документация за всяко променено меню — 2026-09-24
 
+The English help/guide is required for EVERY new or edited documented question,
+menu, workflow or control, not only for newly added sections. Update BG and EN
+in the same change and publish both matching Docusaurus pages/links. Missing or
+stale EN means the feature is not documentation-complete; do not report it done.
+
+Английската помощ/ръководство е задължителна за ВСЕКИ нов или редактиран
+документиран въпрос, раздел, процес или контрола, не само за нови раздели.
+Обновявай BG и EN в една промяна и публикувай двата съответни адреса в
+Docusaurus. Липсваща или остаряла EN версия означава незавършена документация.
+
 Whenever an owner-approved change affects ANY menu or submenu (including
 account and mobile navigation), create or update its user-facing BG/EN guide
 in the SAME change before reporting completion. This includes changes to
