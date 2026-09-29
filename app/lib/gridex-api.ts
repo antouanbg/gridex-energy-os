@@ -62,6 +62,8 @@ export type ServiceRequest = { id: string; organisationId: string; organisationN
   subject: string; email: string; serviceCode: string; country: string | null; zone: string | null;
   state: 'open' | 'rejected'; stage: 'awaiting_platform' | 'awaiting_organisation' | 'active' | 'rejected';
   createdAt: string; events: { action: string; at: string; note: string | null }[] };
+export type SiteVisualisationHistory = { siteId: string; from: number; to: number;
+  items: { assetId: string; metric: string; unit: string; points: { x: number; y: number }[] }[] };
 export type MarketHealth = { provider: string; zones: { zone: string; country: string; status: string;
   lastAttemptAt: string; lastSuccessAt: string | null; latestDeliveryDate: string | null; errorCode: string | null }[] };
 export type DayAheadPrices = { provider: string; sourceDocumentId: string | null; service: 'day_ahead';
@@ -422,6 +424,9 @@ export class GridexApiClient {
   }
   myServices(signal?: AbortSignal): Promise<{services:{code:string;organisationId:string}[]}> {
     return this.getJson('/api/v1/me/services', signal);
+  }
+  siteVisualisationHistory(siteId:string,signal?:AbortSignal):Promise<SiteVisualisationHistory> {
+    return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/visualisations/history`,signal);
   }
   serviceCatalog(signal?: AbortSignal): Promise<{services:ServiceCatalogItem[]}> {
     return this.getJson('/api/v1/me/service-catalog', signal);

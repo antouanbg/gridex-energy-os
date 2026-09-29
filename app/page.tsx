@@ -20,10 +20,10 @@ const navItems = [
   ["devices", "⊞"], ["supported", "✓"], ["alarms", "△"],
   ["reports", "▥"], ["settings", "⚙"], ["plans", "★"], ["about", "○"],
 ] as const;
-const parentSection:Record<string,string>={members:'customers',assets:'sites',battery:'sites',loads:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
+const parentSection:Record<string,string>={members:'customers',assets:'sites',battery:'sites',loads:'sites',visualisations:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
-const liveViews = new Set(["overview", "sites", "devices", "members", "market", "profile", "login", "about", "help"]);
+const liveViews = new Set(["overview", "sites", "devices", "visualisations", "members", "market", "profile", "login", "about", "help"]);
 
 type DemoUser = {
   nameBg:string;
@@ -83,6 +83,7 @@ const DeviceInformation = lazy(() => import('./sections/device-information').the
 const Customers = lazy(() => import("./sections/customers").then(module => ({ default: module.Customers })));
 const Sites = lazy(() => import("./sections/sites").then(module => ({ default: module.Sites })));
 const LiveSites = lazy(() => import("./sections/live-sites").then(module => ({ default: module.LiveSites })));
+const SiteVisualisations = lazy(() => import("./sections/site-visualisations").then(module => ({ default: module.SiteVisualisations })));
 const Assets = lazy(() => import("./sections/assets").then(module => ({ default: module.Assets })));
 const Battery = lazy(() => import("./sections/battery").then(module => ({ default: module.Battery })));
 const Schedule = lazy(() => import("./sections/schedule").then(module => ({ default: module.Schedule })));
@@ -620,6 +621,9 @@ export default function Home() {
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
+        {view === "visualisations" && (dataMode==='live'
+          ? <SiteVisualisations key={selectedSiteId} api={apiClient} siteId={selectedSiteId} siteName={liveSites.find(item=>item.id===selectedSiteId)?.name||''} lang={lang}/>
+          : <section className="card"><h2>{lang==='en'?'Site visualisations':'Визуализации на Обект'}</h2><p>{lang==='en'?'This screen uses real OpenRemote measurements after sign-in.':'Този екран използва реални измервания от OpenRemote след вход.'}</p></section>)}
         {view === "assets" && (
           <Assets navigate={navigate} notify={notify} lang={lang}/>
         )}

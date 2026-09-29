@@ -15,6 +15,7 @@ function load(file) {
   new Function('exports', 'require', code)(exports, name => {
     if (name === './shared') return load('../app/sections/shared.tsx');
     if (name === '../lib/currency') return load('../app/lib/currency.ts');
+    if (name === '../lib/routes') return load('../app/lib/routes.ts');
     return require(name);
   });
   return exports;
