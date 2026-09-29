@@ -35,7 +35,7 @@ guide against the actual shipped UI and API before marking it complete.
 | Енергийни активи | `/assets/` | Pending |
 | Батерия | `/battery/` | Pending |
 | Управляеми товари | `/loads/` | Pending |
-| Пазар | `/market/` | Pending |
+| Пазар | `/market/` | BG/EN Docusaurus `/market-prices/`: live услуга е скрита без лично разрешение; само супер администраторът вижда ENTSO-E статус/последен час. Frontend публикация и реален приемателен тест pending. |
 | Тарифи и сетълмент | `/market/settlement/` | Pending |
 | Балансиране | `/market/balancing/` | Pending |
 | Логика и режими | `/automation/` | Pending |

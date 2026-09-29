@@ -21,6 +21,7 @@ test('deep link, refresh, SSO restore, history, release re-login and explicit lo
     const path=new URL(r.request().url()).pathname;
     if(serverRestart&&forceLogins<2)return r.fulfill({status:401,json:{error:'reauthentication_required'}});
     if(path.endsWith('/me'))return r.fulfill({json:{subject:'owner',roles:['administrator'],permissions:[],memberships:[]}});
+    if(path.endsWith('/me/services'))return r.fulfill({json:{services:[{code:'day_ahead'}]}});
     if(path.endsWith('/sites'))return r.fulfill({json:{sites:[{id:'lab',name:'Lab'}]}});
     if(path.endsWith('/hardware'))return r.fulfill({json:{inventorySource:'openremote',gateways:[{id:'rock',name:'ROCK',hardwareModel:'rock-pi-e',role:'controller',ports:[]}],devices:[]}});
     if(path.endsWith('/device-heartbeats'))return r.fulfill({json:{items:[]}});

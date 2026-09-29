@@ -1,5 +1,23 @@
 # Current task
 
+## 2026-09-29 — market entitlement UI
+
+Approved: service hidden from live member menu until both organisation and
+individual grants; no price values to customers. Platform administrator sees
+only ENTSO-E status and last successful refresh. Existing Users & invitations
+hosts both grant controls; no new menu. Backend migration 017/API and 240
+Timescale hourly rows are live, zero grants. Frontend TypeScript/27 unit pass;
+All 57 Playwright E2E pass; Pages publication and real account acceptance are
+separate gates.
+
+## 2026-09-29 — approved day-ahead Market view
+
+Use existing `/market/`, no navigation change. Market product means ENTSO-E
+product, not customer tariff; only A44 day-ahead works in phase one. New
+authenticated frontend view is local/tested, not deployed. Never substitute
+demo values for missing real publication. Backend token and real E2E are
+pending; see HANDOFF and BG/EN Docusaurus guide.
+
 ## 2026-09-29 — account switching and invitation acceptance
 
 Owner-approved flow is implemented locally in `fix/account-switch-invitations`:

@@ -51,6 +51,17 @@ export type GridexSite = {
   marketCode?: string;
 };
 
+export type MarketZone = { country: string; zone: string; eic: string; timezone: string };
+export type MarketServices = { services: { id: string; label: string; provider: string }[]; zones: MarketZone[] };
+export type ServiceGrant = { code: string; description: string; prerequisites: string[]; enabled: boolean };
+export type ServiceMember = { subject: string; role: string; email: string | null; enabled: boolean };
+export type MarketHealth = { provider: string; zones: { zone: string; country: string; status: string;
+  lastAttemptAt: string; lastSuccessAt: string | null; latestDeliveryDate: string | null; errorCode: string | null }[] };
+export type DayAheadPrices = { provider: string; sourceDocumentId: string | null; service: 'day_ahead';
+  country: string; zone: string; timezone: string; date: string; currency: 'EUR'; unit: 'MWh';
+  status: 'published' | 'partial' | 'not_published'; fetchedAt: string;
+  intervals: { startUtc: string; endUtc: string; priceEurMwh: number; resolutionMinutes: number }[] };
+
 export type GridexSiteSnapshot = {
   assetId?: string;
   siteId: string;
@@ -378,6 +389,27 @@ export class GridexApiClient {
   platformOrganisations(signal?: AbortSignal): Promise<{ organisations: PlatformOrganisation[] }> {
     return this.getJson('/api/v1/platform/organisations', signal);
   }
+  platformOrganisationServices(id: string, signal?: AbortSignal): Promise<{ services: ServiceGrant[] }> {
+    return this.getJson(`/api/v1/platform/organisations/${encodeURIComponent(id)}/services`, signal);
+  }
+  setPlatformOrganisationService(id: string, code: string, enabled: boolean): Promise<{code:string;enabled:boolean}> {
+    return this.putBody(`/api/v1/platform/organisations/${encodeURIComponent(id)}/services/${encodeURIComponent(code)}`, { enabled });
+  }
+  organisationServices(id: string, signal?: AbortSignal): Promise<{ services: ServiceGrant[] }> {
+    return this.getJson(`/api/v1/organisations/${encodeURIComponent(id)}/services`, signal);
+  }
+  serviceMembers(id: string, code: string, signal?: AbortSignal): Promise<{ members: ServiceMember[] }> {
+    return this.getJson(`/api/v1/organisations/${encodeURIComponent(id)}/services/${encodeURIComponent(code)}/members`, signal);
+  }
+  setMemberService(id: string, code: string, subject: string, enabled: boolean): Promise<{enabled:boolean}> {
+    return this.putBody(`/api/v1/organisations/${encodeURIComponent(id)}/services/${encodeURIComponent(code)}/members/${encodeURIComponent(subject)}`, {enabled});
+  }
+  myServices(signal?: AbortSignal): Promise<{services:{code:string}[]}> {
+    return this.getJson('/api/v1/me/services', signal);
+  }
+  marketStatus(signal?: AbortSignal): Promise<MarketHealth> {
+    return this.getJson('/api/v1/market/status', signal);
+  }
   changeOrganisationAccess(id: string, body: {operationId: string; revision: number; status: 'active' | 'suspended'}): Promise<{status: string; mailState: string}> {
     return this.postJson(`/api/v1/platform/organisations/${encodeURIComponent(id)}/access`, body);
   }
@@ -414,6 +446,15 @@ export class GridexApiClient {
   async sites(signal?: AbortSignal): Promise<GridexSite[]> {
     const payload = await this.getJson<{ sites?: GridexSite[]; items?: GridexSite[] }>("/api/v1/sites", signal);
     return payload.sites ?? payload.items ?? [];
+  }
+
+  async marketServices(signal?: AbortSignal): Promise<MarketServices> {
+    return this.getJson<MarketServices>('/api/v1/market/services', signal);
+  }
+
+  async dayAheadPrices(country: string, zone: string, date: string, signal?: AbortSignal): Promise<DayAheadPrices> {
+    const params = new URLSearchParams({ country, zone, date, service: 'day_ahead' });
+    return this.getJson<DayAheadPrices>(`/api/v1/market/prices?${params}`, signal);
   }
 
   async createSite(body: { organisationId: string; name: string; timezone: string }, key: string): Promise<GridexSite> {
@@ -700,6 +741,13 @@ export class GridexApiClient {
       method: "PUT",
       headers: { "Content-Type": "application/json", "If-Match": String(revision) },
       body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new GridexApiError(`GridEx API request failed: ${response.status}`, response.status);
+    return response.json();
+  }
+  private async putBody<T>(path: string, body: unknown): Promise<T> {
+    const response = await this.authorizedFetch(path, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
     });
     if (!response.ok) throw new GridexApiError(`GridEx API request failed: ${response.status}`, response.status);
     return response.json();

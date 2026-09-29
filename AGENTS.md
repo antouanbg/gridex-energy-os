@@ -1,5 +1,23 @@
 # GrideX Energy OS — Working Rules
 
+## Service permissions and market status — owner decision 2026-09-29
+
+No organisation or member gets a catalog service by default. The platform
+administrator first grants it to an approved active organisation; its own
+administrator then grants it to approved users individually. Revocation at
+organisation level removes user grants. Do not expose service content based
+only on a frontend switch. Day-ahead price values remain platform-admin-only
+even if member grants exist. The live Market screen currently shows only
+ENTSO-E connectivity and the last successful refresh to the platform admin;
+do not show sample, cached or historical prices as current.
+
+Нито организация, нито потребител получава услуга автоматично. Първо супер
+администраторът я разрешава на одобрена активна организация, после нейният
+администратор — поотделно на одобрени потребители. Отнемането на
+организационното право премахва личните права. Не разчитай само на UI за
+защитата. Ценовите стойности остават само за супер администратора; реалният
+екран „Пазар“ показва само ENTSO-E статус и последно успешно обновяване.
+
 ## Account switching and member invitations — owner decision 2026-09-29
 
 On a shared computer, generic sign-in must route from the newly entered email,

@@ -23,7 +23,8 @@ for (const status of [403,503,0]) {
     await page.locator('.login-submit').click();
     if(status===403)await expect(page.getByRole('alert')).toContainText('Входът приключи, но достъпът до организацията не може да се потвърди.');
     else await expect(page.getByRole('status')).toContainText('Проверката на сесията временно е недостъпна.');
-    for(const view of ['overview','sites','market','devices']) {
+    await expect(page.locator('[data-view-id="market"]')).toHaveCount(0);
+    for(const view of ['overview','sites','devices']) {
       await page.locator(`[data-view-id="${view}"]`).click();
       await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
       await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
