@@ -44,6 +44,9 @@ for(const [size,viewport] of [['desktop',{width:1365,height:850}],['mobile',{wid
       if(url.pathname.endsWith('/history'))return route.fulfill({json:{from:0,to:0,items:[]}});
       return route.fulfill({status:503,json:{error:'unavailable'}});
     });
+    await page.goto('/devices/?realm=novacom');
+    await expect(page.getByText('Още няма Обект. Създайте го от раздел „Обекти“.')).toBeVisible();
+    await expect(page.getByRole('button',{name:'Създай Обект'})).toHaveCount(0);
     await page.goto('/sites/?realm=novacom');
     await expect(page.getByRole('button',{name:'Създай Обект'})).toBeVisible();
     if(size==='mobile')expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();

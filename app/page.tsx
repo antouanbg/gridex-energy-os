@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useState, useRef, type FormEvent } from "react";
-import { discoverGridexLoginRealms, getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexRuntimeConfig, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
+import { discoverGridexLoginRealms, requestInvitationResend, getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexRuntimeConfig, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
 import { getGridexAccessToken, gridexLogin, gridexLoginForEmail, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
@@ -100,6 +100,7 @@ const About = lazy(() => import("./sections/about").then(module => ({ default: m
 
 export default function Home() {
   const sessionEpoch=useRef(0);
+  const verifiedIdentity=useRef<{subject:string;realm?:string;email:string;name:string}|null>(null);
   const [deviceWarning,setDeviceWarning]=useState<{siteId:string;warning:boolean}|null>(null);
   const liveReturnPath=useMemo(()=>{
     try {
@@ -180,6 +181,7 @@ export default function Home() {
     if(dataMode!=='live')return;
     const ended=()=>{
       sessionEpoch.current++;
+      verifiedIdentity.current=null;
       clearGridexSession();
       setSessionUser(null);setAccountIdentity(null);setAccountMenuOpen(false);setAuthState('anonymous');
       setBackendState('unknown');setLiveSites([]);setLiveSnapshot(null);setSelectedSiteId('');
@@ -269,6 +271,15 @@ export default function Home() {
               throw new Error('Organisation administrator membership unconfirmed');
           }
         }
+        if (runtimeConfig.realm!=='gridex'&&!membershipIdentity.memberships?.length) {
+          const pending=(await apiClient.invitations()).invitations;
+          if(pending.length>1)throw new Error('Ambiguous membership invitations');
+          if(pending.length===1){
+            const result=await apiClient.acceptInvitation(pending[0].id);
+            if(!result.accepted)throw new Error('Membership activation unconfirmed');
+            membershipIdentity=await apiClient.me();
+          }
+        }
       } catch(error) {
         if (!active||epoch!==sessionEpoch.current) return;
         if ((error instanceof GridexApiError && error.status===503) || error instanceof TypeError || (error instanceof DOMException&&error.name==='TimeoutError')) {
@@ -281,7 +292,13 @@ export default function Home() {
         return;
       }
       if (!active||epoch!==sessionEpoch.current) return;
-      const user=sessionToUser({ ...session, roles: membershipIdentity.roles });
+      if (membershipIdentity.subject !== session.subject || (membershipIdentity.email && membershipIdentity.email.toLowerCase() !== session.email.toLowerCase()) || (membershipIdentity.realm && membershipIdentity.realm !== runtimeConfig.realm)) {
+        setSessionUser(null);setAccountIdentity(null);setLiveSites([]);setLiveSnapshot(null);setAuthState('error');
+        setIntegrationError(document.documentElement.lang==='en'?'Identity mismatch. Sign in again.':'Несъответствие на профила. Влезте отново.');
+        return;
+      }
+      const user=sessionToUser({ ...session, email:membershipIdentity.email||session.email, name:membershipIdentity.name||session.name, roles: membershipIdentity.roles });
+      verifiedIdentity.current={subject:membershipIdentity.subject,realm:membershipIdentity.realm||runtimeConfig.realm,email:user.email,name:user.nameEn};
       setSessionUser(user);setAccountIdentity(membershipIdentity);setAuthState('authenticated');
       setBackendState('online');setSessionCheckError(false);setIntegrationError('');
     };
@@ -389,6 +406,9 @@ export default function Home() {
           if(error instanceof GridexApiError&&error.status===403&&error.code!=='organisation_suspended')expireSession();
           throw error;
         });
+        if(verifiedIdentity.current && (identity.subject!==verifiedIdentity.current.subject || (identity.realm&&identity.realm!==verifiedIdentity.current.realm) || (identity.email&&identity.email.toLowerCase()!==verifiedIdentity.current.email.toLowerCase()))) {
+          expireSession(); return;
+        }
         const sites=await apiClient.sites(controller.signal).catch(error=>{
           if(error instanceof GridexApiError&&error.status===403) {
             setAccountIdentity(identity);setLiveSites([]);setLiveSnapshot(null);
@@ -399,7 +419,11 @@ export default function Home() {
         });
         if(!active)return;
         if(!sites)return;
-        setSessionUser(current=>current?sessionToUser({subject:identity.subject,email:current.email,name:current.nameEn,preferredUsername:'',roles:identity.roles}):null);
+        const email=identity.email||verifiedIdentity.current?.email;
+        if(!email){expireSession();return;}
+        const name=identity.name||verifiedIdentity.current?.name||email;
+        verifiedIdentity.current={subject:identity.subject,realm:identity.realm||verifiedIdentity.current?.realm,email,name};
+        setSessionUser(sessionToUser({subject:identity.subject,email,name,preferredUsername:identity.preferredUsername||'',roles:identity.roles}));
         setAccountIdentity(identity);
         setLiveSites(current=>JSON.stringify(current)===JSON.stringify(sites)?current:sites);
         setSitesStatus('ready');setSessionCheckError(false);
@@ -471,6 +495,9 @@ export default function Home() {
   };
   const signIn = async (email: string, realm: string) => {
     try {
+      sessionEpoch.current++;
+      verifiedIdentity.current=null;
+      setSessionUser(null);setAccountIdentity(null);setLiveSites([]);setLiveSnapshot(null);setSelectedSiteId('');
       setAuthState("checking");
       setIntegrationError("");
       await gridexLoginForEmail(runtimeConfig, realm, email);
@@ -567,7 +594,7 @@ export default function Home() {
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:administrationDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Administrator access required':'Нужни са администраторски права'}</h2><p>{lang==='en'?'The Users and invitations section is available only to organisation or platform administrators. Your permitted Sites and Devices remain available for viewing.':'Разделът за клиенти и покани е само за администратори на организация или на платформата. Разрешените Ви Обекти и Устройства остават достъпни за преглед.'}</p></section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:administrationDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Administrator access required':'Нужни са администраторски права'}</h2><p>{lang==='en'?'The Users and invitations section is available only to organisation or platform administrators. Your permitted Sites and Devices remain available for viewing.':'Разделът за клиенти и покани е само за администратори на организация или на платформата. Разрешените Ви Обекти и Устройства остават достъпни за преглед.'}</p></section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} allowCreate={view==='sites'} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
@@ -592,8 +619,7 @@ export default function Home() {
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "members" && dataMode==='demo' && <section className="card config-card"><h2>{lang==='en'?'Users & invitations':'Потребители и покани'}</h2><p>{lang==='en'?'Sign in as an organisation administrator to manage real invitations. No demo emails are sent.':'Влезте като администратор на организация, за да управлявате реални покани. В демо режима не се изпращат имейли.'}</p></section>}
         {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations api={apiClient} lang={lang} mode="manage"/>}
-        {view === "login" && <LoginPage lang={lang} user={sessionUser} config={runtimeConfig} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"}/>}
-        {(view === 'profile' || view === 'login') && authState === 'authenticated' && backendState === 'online' && <Invitations api={apiClient} lang={lang} mode="accept"/>}
+        {view === "login" && <LoginPage lang={lang} user={sessionUser} config={runtimeConfig} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"&&new URLSearchParams(window.location.search).has('realm')}/>}
             </>}
           </div>
         </Suspense>
@@ -650,6 +676,8 @@ function LoginPage({lang,user,config,onSignIn,onSignOut,navigate,backendState,au
   const [realmChoices,setRealmChoices]=useState<string[]>([]);
   const [routingError,setRoutingError]=useState('');
   const [routingBusy,setRoutingBusy]=useState(false);
+  const [resendNotice,setResendNotice]=useState('');
+  const [resendBusy,setResendBusy]=useState(false);
   const resolveEmail=async(event:FormEvent<HTMLFormElement>)=>{
     event.preventDefault();
     if(routingBusy)return;
@@ -686,17 +714,23 @@ function LoginPage({lang,user,config,onSignIn,onSignOut,navigate,backendState,au
         <span><strong>{authState==="checking"?t("Проверка на сесията","Checking session"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):backendState==="offline"?t("API достъпът не е потвърден","API access could not be verified"):t("Влезте за проверка на достъпа","Sign in to verify access")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
       </div>
       {error&&<div className="login-error" role="alert">{error}</div>}
-      {!user&&<form className="login-email-form" onSubmit={resolveEmail}>
+      <form className="login-email-form" onSubmit={resolveEmail}>
         <label htmlFor="gridex-login-email">{t('Имейл','Email')}</label>
         <input id="gridex-login-email" type="email" autoComplete="username" required maxLength={254} value={email}
           onChange={event=>{setEmail(event.target.value);setRealmChoices([]);setRoutingError('');}}/>
         {routingError&&<div className="login-error" role="alert">{routingError}</div>}
-        <button className="login-submit" type="submit" disabled={routingBusy||authState==='checking'}>{routingBusy?t('Проверка…','Checking…'):t('Продължи към защитения вход','Continue to secure sign-in')} <b>→</b></button>
+        <button className="login-submit" type="submit" disabled={routingBusy}>{routingBusy?t('Проверка…','Checking…'):user?t('Влез с друг акаунт','Sign in with another account'):t('Продължи към защитения вход','Continue to secure sign-in')} <b>→</b></button>
         {!!realmChoices.length&&<div className="login-realm-choices" aria-label={t('Изберете организация','Choose an organisation')}>
           <p>{t('Този имейл е поканен в повече от една организация:','This email was invited to more than one organisation:')}</p>
           {realmChoices.map(realm=><button type="button" key={realm} disabled={routingBusy} onClick={()=>void onSignIn(email.trim(),realm)}>{realm}</button>)}
         </div>}
-      </form>}
+      </form>
+      {!user&&<div className="login-resend"><button type="button" className="login-secondary" disabled={resendBusy||!email.trim()} onClick={async()=>{
+        setResendBusy(true);setResendNotice('');
+        try{await requestInvitationResend(config,email.trim());setResendNotice(t('Ако има неприета покана за този имейл и не е използван еднократният опит, ще изпратим нов линк на същия адрес.','If a pending invitation exists and its one-time resend has not been used, a new link will be sent to the same address.'));}
+        catch{setResendNotice(t('Не успяхме да обработим заявката сега. Опитайте по-късно или се свържете с администратора.','The request could not be processed now. Try later or contact your administrator.'));}
+        finally{setResendBusy(false);}
+      }}>{resendBusy?t('Изпращане…','Sending…'):t('Не получих поканата — изпрати отново','Did not receive the invitation — resend')}</button>{resendNotice&&<p role="status">{resendNotice}</p>}</div>}
       {!user&&customerRealm&&<a className="profile-inline-help" href="/login/?realm=gridex">{t('Вход в основния GrideX акаунт','Sign in to the main GrideX account')} →</a>}
       {user&&<button className="login-secondary" type="button" onClick={onSignOut}>{t("Изход от текущата сесия","Sign out of the current session")}</button>}
       <button className="login-demo-return" type="button" onClick={()=>navigate("overview")}>{user?t('Към моите обекти','Back to my sites'):t("Към прегледа","Back to overview")}</button>

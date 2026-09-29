@@ -1,5 +1,15 @@
 # Current task
 
+## 2026-09-29 — account switching and invitation acceptance
+
+Owner-approved flow is implemented locally in `fix/account-switch-invitations`:
+generic sign-in clears the previous tab realm, identity mismatch clears live
+state, Sites alone show Create Site, verified member sign-in invokes checked
+acceptance without a second button, and a pending recipient can request one
+resend to the same address. Accepted invitations show recorded last login,
+not the original email expiry. Backend migration 016 and API deployment must
+precede frontend/docs publication; real three-user isolation remains to test.
+
 ## 2026-09-29 — invitation/session/viewer mobile correction
 
 Current work: persistent member-invitation status and sent-only resend,

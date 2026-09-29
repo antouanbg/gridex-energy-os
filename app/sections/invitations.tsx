@@ -11,7 +11,7 @@ const copy = {
     invite: 'Invite by email', email: 'Work email', org: 'Organisation', role: 'Role', sites: 'Permitted sites', send: 'Send invitation', accept: 'Accept invitation',
     accepted: 'Invitation accepted. Reload to load your sites.', reload: 'Reload portal', sent: 'Email dispatch confirmed. Membership starts only after acceptance.',
     revoke: 'Revoke invitation', revoked: 'Invitation revoked.', pending: 'Your invitations', expiry: 'Expires', busy: 'Working…',
-    sentHistory: 'Invitations sent by you', noSent: 'No invitations sent yet.', resend: 'Resend invitation', resent: 'A new invitation link was sent to the same email.', resendUnconfirmed: 'Sending was not confirmed. Check the status before trying again.', state: 'Status',
+    sentHistory: 'Invitations sent by you', noSent: 'No invitations sent yet.', resend: 'Resend invitation', resent: 'A new invitation link was sent to the same email.', resendUnconfirmed: 'Sending was not confirmed. Check the status before trying again.', state: 'Status', lastLogin: 'Last sign-in',
     noadmin: 'Only an organisation administrator can invite members.', noSites: 'No sites yet. You may invite a member without site access; grant access explicitly when sites are created.',
     viewer: 'Viewer — read only', operator: 'Operator — operational actions', energy_manager: 'Energy manager — strategies and configuration', integrator: 'Integrator — device configuration' },
   bg: { title: 'Достъп до организации', manageTitle: 'Потребители и покани', loading: 'Зареждане на правата…', unavailable: 'Поканите по имейл още не са включени. Нужни са Mailgun и настройки за идентификация.',
@@ -19,7 +19,7 @@ const copy = {
     invite: 'Покана по имейл', email: 'Служебен имейл', org: 'Организация', role: 'Роля', sites: 'Разрешени обекти', send: 'Изпрати покана', accept: 'Приеми покана',
     accepted: 'Поканата е приета. Презаредете, за да заредите обектите.', reload: 'Презареди портала', sent: 'Изпращането е потвърдено. Членството започва само след приемане.',
     revoke: 'Отмени поканата', revoked: 'Поканата е отменена.', pending: 'Вашите покани', expiry: 'Валидна до', busy: 'Обработка…',
-    sentHistory: 'Изпратени от Вас покани', noSent: 'Още няма изпратени покани.', resend: 'Изпрати поканата наново', resent: 'Нов линк за покана е изпратен на същия имейл.', resendUnconfirmed: 'Изпращането не е потвърдено. Проверете статуса преди нов опит.', state: 'Статус',
+    sentHistory: 'Изпратени от Вас покани', noSent: 'Още няма изпратени покани.', resend: 'Изпрати поканата наново', resent: 'Нов линк за покана е изпратен на същия имейл.', resendUnconfirmed: 'Изпращането не е потвърдено. Проверете статуса преди нов опит.', state: 'Статус', lastLogin: 'Последен вход',
     noadmin: 'Само администратор на организация може да кани членове.', noSites: 'Още няма обекти. Може да поканите човек без достъп до обекти; дайте му права изрично, когато създадете обект.',
     viewer: 'Наблюдател — само четене', operator: 'Оператор — оперативни действия', energy_manager: 'Енергиен мениджър — стратегии и конфигурация', integrator: 'Интегратор — настройки на устройства' },
 };
@@ -157,7 +157,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         {!outgoingError&&!outgoing.length&&<p>{t.noSent}</p>}
         {outgoing.map(item=><article className="invitation-record" key={item.id}>
           <strong>{item.email}</strong> · {roles.includes(item.role as typeof roles[number])?t[item.role as typeof roles[number]]:item.role}
-          <p>{t.state}: {invitationStates[item.state]?.[lang] ?? item.state} · {t.expiry}: {new Date(item.expiresAt).toLocaleString(lang==='bg'?'bg-BG':'en-GB')}</p>
+          <p>{t.state}: {invitationStates[item.state]?.[lang] ?? item.state} · {item.state==='accepted'?`${t.lastLogin}: ${item.lastLoginAt?new Date(item.lastLoginAt).toLocaleString(lang==='bg'?'bg-BG':'en-GB'):lang==='bg'?'Очаква се запис':'Not recorded yet'}`:`${t.expiry}: ${new Date(item.expiresAt).toLocaleString(lang==='bg'?'bg-BG':'en-GB')}`}</p>
           {item.state==='sent'&&<div className="invitation-record-actions">
             <button className="secondary-btn" type="button" disabled={busy} onClick={() => void action(async () => {
               const result=await api.revokeInvitation(org,item.id);

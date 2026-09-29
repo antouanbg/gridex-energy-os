@@ -16,7 +16,7 @@ const copy = {
     existing: 'Последни покани', revoke: 'Отмени', revoked: 'Поканата е отменена.', empty: 'Няма изпратени покани.',
     resend: 'Изпрати поканата наново', resent: 'Изпратен е нов линк към същия администратор. Срокът е подновен за 24 часа.',
     resendUnconfirmed: 'Изпращането не е потвърдено. Проверете състоянието, преди нов опит.',
-    expires: 'Валидна до', state: 'Състояние',
+    expires: 'Валидна до', state: 'Състояние', lastLogin: 'Последен вход', accepted: 'Приета',
   },
   en: {
     heading: 'New organisation', description: 'Each organisation receives its own OpenRemote realm. This invitation is for its first administrator.',
@@ -28,7 +28,7 @@ const copy = {
     existing: 'Recent invitations', revoke: 'Revoke', revoked: 'Invitation revoked.', empty: 'No invitations sent.',
     resend: 'Resend invitation', resent: 'A new link was sent to the same administrator. The invitation is valid for another 24 hours.',
     resendUnconfirmed: 'Sending was not confirmed. Check the invitation status before retrying.',
-    expires: 'Expires', state: 'State',
+    expires: 'Expires', state: 'State', lastLogin: 'Last sign-in', accepted: 'Accepted',
   },
 };
 
@@ -82,7 +82,7 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
     {enabled && !items.length && <p>{t.empty}</p>}
     {items.map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong> · {item.realm} · {item.email}
-      <p>{t.state}: {item.state} · {t.expires}: {new Date(item.expiresAt).toLocaleString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</p>
+      <p>{t.state}: {item.state==='accepted'?t.accepted:item.state} · {item.state==='accepted'?`${t.lastLogin}: ${item.lastLoginAt?new Date(item.lastLoginAt).toLocaleString(lang==='bg'?'bg-BG':'en-GB'):lang==='bg'?'Очаква се запис':'Not recorded yet'}`:`${t.expires}: ${new Date(item.expiresAt).toLocaleString(lang === 'bg' ? 'bg-BG' : 'en-GB')}`}</p>
       <div className="invitation-record-actions">
       {['reserved','realm_ready','identity_ready','sent','delivery_failed','provisioning_failed'].includes(item.state)
         && <button type="button" className="secondary-btn" disabled={busy} onClick={() => {
