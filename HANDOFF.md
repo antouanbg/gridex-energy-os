@@ -1,5 +1,15 @@
 # Frontend login handoff
 
+## 2026-09-29 — live checkpoint: Site графики
+
+PR #74 е в `main` (`f1efd7e`), CI мина с 58 browser теста и GitHub Pages
+deploy завърши успешно. Публичният JS съдържа `/visualisations/` и екрана
+„Визуализации“. За дълбокия URL GitHub Pages връща SPA `404.html` с
+абсолютни JS/CSS пътища; клиентският routing зарежда екрана, но HTTP
+статусът остава 404 — да се отчита при бъдещо SEO/hosting решение. Няма
+реален приемателен тест със сесия и одобрена услуга; без org/member grant
+екранът правилно отказва измервания. BG/EN help е в Docusaurus.
+
 ## 2026-09-29 — Site графики в Обекти (source checkpoint)
 
 Добавен е стабилен адрес `/sites/{id}/visualisations/` под „Обекти“, без
