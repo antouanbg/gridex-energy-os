@@ -201,8 +201,9 @@ test("loads the 18 navigation sections and live sites variant through split fron
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const lazyImports = page.match(/lazy\(\(\) => import\("\.\/sections\//g) ?? [];
 
-  assert.equal(lazyImports.length, 19);
+  assert.equal(lazyImports.length, 20);
   assert.match(page, /sections\/live-sites/);
+  assert.match(page, /sections\/live-market/);
   assert.match(page, /Suspense/);
   assert.match(page, /data-view-id/);
   assert.doesNotMatch(page, /function (Overview|Battery|Market|Gateway|SupportedDevices|About)\b/);

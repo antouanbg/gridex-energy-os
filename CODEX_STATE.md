@@ -1,5 +1,13 @@
 # Current task
 
+## 2026-09-29 — approved day-ahead Market view
+
+Use existing `/market/`, no navigation change. Market product means ENTSO-E
+product, not customer tariff; only A44 day-ahead works in phase one. New
+authenticated frontend view is local/tested, not deployed. Never substitute
+demo values for missing real publication. Backend token and real E2E are
+pending; see HANDOFF and BG/EN Docusaurus guide.
+
 ## 2026-09-29 — account switching and invitation acceptance
 
 Owner-approved flow is implemented locally in `fix/account-switch-invitations`:

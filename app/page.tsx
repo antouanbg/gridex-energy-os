@@ -22,7 +22,7 @@ const navItems = [
 const parentSection:Record<string,string>={members:'customers',assets:'sites',battery:'sites',loads:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
-const liveViews = new Set(["overview", "sites", "devices", "members", "profile", "login", "about", "help"]);
+const liveViews = new Set(["overview", "sites", "devices", "members", "market", "profile", "login", "about", "help"]);
 
 type DemoUser = {
   nameBg:string;
@@ -86,6 +86,7 @@ const Assets = lazy(() => import("./sections/assets").then(module => ({ default:
 const Battery = lazy(() => import("./sections/battery").then(module => ({ default: module.Battery })));
 const Schedule = lazy(() => import("./sections/schedule").then(module => ({ default: module.Schedule })));
 const Market = lazy(() => import("./sections/market").then(module => ({ default: module.Market })));
+const LiveMarket = lazy(() => import("./sections/live-market").then(module => ({ default: module.LiveMarket })));
 const Settlement = lazy(() => import("./sections/settlement").then(module => ({ default: module.Settlement })));
 const Automation = lazy(() => import("./sections/automation").then(module => ({ default: module.Automation })));
 const FlexibleLoads = lazy(() => import("./sections/flexible-loads").then(module => ({ default: module.FlexibleLoads })));
@@ -603,7 +604,7 @@ export default function Home() {
         )}
         {view === "battery" && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "schedule" && <Schedule notify={notify} lang={lang}/>}
-        {view === "market" && <Market lang={lang} notify={notify}/>}
+        {view === "market" && (dataMode === 'live' ? <LiveMarket api={apiClient} lang={lang}/> : <Market lang={lang} notify={notify}/>)}
         {view === "settlement" && <Settlement notify={notify} lang={lang}/>}
         {view === "automation" && <Automation notify={notify} site={site} lang={lang} batteryCost={batteryCost}/>}
         {view === "loads" && <FlexibleLoads notify={notify} lang={lang}/>}

@@ -51,6 +51,13 @@ export type GridexSite = {
   marketCode?: string;
 };
 
+export type MarketZone = { country: string; zone: string; eic: string; timezone: string };
+export type MarketServices = { services: { id: string; label: string; provider: string }[]; zones: MarketZone[] };
+export type DayAheadPrices = { provider: string; sourceDocumentId: string | null; service: 'day_ahead';
+  country: string; zone: string; timezone: string; date: string; currency: 'EUR'; unit: 'MWh';
+  status: 'published' | 'partial' | 'not_published'; fetchedAt: string;
+  intervals: { startUtc: string; endUtc: string; priceEurMwh: number; resolutionMinutes: number }[] };
+
 export type GridexSiteSnapshot = {
   assetId?: string;
   siteId: string;
@@ -414,6 +421,15 @@ export class GridexApiClient {
   async sites(signal?: AbortSignal): Promise<GridexSite[]> {
     const payload = await this.getJson<{ sites?: GridexSite[]; items?: GridexSite[] }>("/api/v1/sites", signal);
     return payload.sites ?? payload.items ?? [];
+  }
+
+  async marketServices(signal?: AbortSignal): Promise<MarketServices> {
+    return this.getJson<MarketServices>('/api/v1/market/services', signal);
+  }
+
+  async dayAheadPrices(country: string, zone: string, date: string, signal?: AbortSignal): Promise<DayAheadPrices> {
+    const params = new URLSearchParams({ country, zone, date, service: 'day_ahead' });
+    return this.getJson<DayAheadPrices>(`/api/v1/market/prices?${params}`, signal);
   }
 
   async createSite(body: { organisationId: string; name: string; timezone: string }, key: string): Promise<GridexSite> {
