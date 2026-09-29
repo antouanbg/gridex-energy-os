@@ -21,8 +21,12 @@ export function LiveMarket({ api, lang, platformAdmin, grafanaEnabled }: { api: 
     return () => abort.abort();
   }, [api, refresh, platformAdmin]);
   const stamp = (value: string | null) => value
-    ? new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'bg-BG', { dateStyle:'medium',timeStyle:'short' }).format(new Date(value))
+    ? new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'bg-BG', { dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Sofia' }).format(new Date(value))
     : t('Още няма успешно обновяване', 'No successful refresh yet');
+  const bgZone = health?.zones.find(zone => zone.country === 'BG' && zone.zone === 'BG');
+  const deliveryDate = bgZone?.latestDeliveryDate
+    ? new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'bg-BG', { dateStyle:'long',timeZone:'Europe/Sofia' }).format(new Date(`${bgZone.latestDeliveryDate}T12:00:00Z`))
+    : null;
   const latest = health?.zones.reduce<string | null>((date, zone) =>
     zone.lastSuccessAt && (!date || zone.lastSuccessAt > date) ? zone.lastSuccessAt : date, null) || null;
   const live = latest && checkedAt !== null && checkedAt - Date.parse(latest) < 2 * 60 * 60 * 1000;
@@ -49,7 +53,8 @@ export function LiveMarket({ api, lang, platformAdmin, grafanaEnabled }: { api: 
     {platformAdmin && state === 'error' && <section className="card live-market-empty" role="status"><h3>{t('Състоянието не е достъпно','Status unavailable')}</h3><p>{t('Няма да показваме стари данни като текущи.','Old data will not be presented as current.')}</p></section>}
     {platformAdmin && state === 'ready' && <section className="card live-market-empty" role="status">
       <h3>{live ? t('ENTSO-E API е активно','ENTSO-E API is live') : t('ENTSO-E API не е потвърдено като активно','ENTSO-E API is not confirmed live')}</h3>
-      <p>{t('Последно успешно обновяване','Last successful refresh')}: {stamp(latest)}</p>
+      <p>{t('Последно успешно обновяване (българско време)','Last successful refresh (Bulgaria time)')}: {stamp(latest)}</p>
+      <p>{t('Последна дата с налични BG цени','Latest date with available BG prices')}: {deliveryDate || t('Все още няма публикувани стойности','No published values yet')}</p>
       <p>{t('Последните публикувани данни по зони','Latest published data by zone')}: {health?.zones.filter(zone => zone.status === 'published').length || 0} / {health?.zones.length || 0}</p>
       <button type="button" className="secondary-btn" onClick={() => { setState('loading'); setRefresh(value => value + 1); }}>{t('Провери отново','Check again')}</button>
     </section>}
@@ -71,6 +76,8 @@ function BgDashboard({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
     <h3>{en?'Bulgaria · day-ahead charts':'България · графики ден напред'}</h3>
     <p>{en?'Protected Grafana dashboard in the GrideX portal. Market prices are wholesale EUR/MWh, not a customer tariff.':
       'Защитен Grafana дашборд в портала на GrideX. Борсовите цени са в EUR/MWh, не са клиентска тарифа.'}</p>
+    <p>{en?'Day-ahead means prices for electricity delivered on the indicated date, determined in the preceding day’s auction. The chart’s date and hour are delivery time in Bulgaria (Europe/Sofia), not the time you opened this page. It shows the past 7 days and up to 2 days ahead only where prices have been published. “Last successful refresh” is when GrideX received data from ENTSO-E; it is not the delivery date.':
+      '„Ден напред“ означава цени за електроенергия, доставяна на посочената дата, определени на търга през предходния ден. Датата и часът на графиката са за доставката по българско време (Europe/Sofia), не за момента на отваряне. Показват се последните 7 дни и до 2 дни напред само ако има публикувани цени. „Последно успешно обновяване“ е кога GrideX е получил данните от ENTSO-E, не датата на доставка.'}</p>
     <button type="button" className="primary-btn" disabled={state==='loading'} onClick={()=>void open()}>
       {state==='loading'?(en?'Opening…':'Отваряме…'):(en?'Open charts':'Отвори графиките')}
     </button>
