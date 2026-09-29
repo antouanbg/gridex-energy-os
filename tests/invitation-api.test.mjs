@@ -45,23 +45,20 @@ test('device heartbeat reads are authenticated, site-scoped and never fall back 
     }
   } finally {globalThis.fetch = original;}
 });
-test('live day-ahead market uses bearer API and does not substitute demo prices', async () => {
+test('live day-ahead screen reads authenticated provider status, not prices', async () => {
   const original = globalThis.fetch;
   try {
     const client = new GridexApiClient({ mode: 'auto', apiBaseUrl: '' }, async () => 'market-token');
     const calls = [];
     globalThis.fetch = async (url, init) => {
       calls.push({ url, init });
-      return new Response(JSON.stringify(url.includes('/services') ? { services: [], zones: [] }
-        : { status: 'not_published', intervals: [] }));
+      return new Response(JSON.stringify({provider:'ENTSO-E',zones:[]}));
     };
-    await client.marketServices();
-    assert.equal((await client.dayAheadPrices('BG', 'BG', '2026-09-29')).status, 'not_published');
-    assert.equal(calls[0].url, '/api/v1/market/services');
-    assert.equal(calls[1].url, '/api/v1/market/prices?country=BG&zone=BG&date=2026-09-29&service=day_ahead');
+    assert.equal((await client.marketStatus()).provider, 'ENTSO-E');
+    assert.equal(calls[0].url, '/api/v1/market/status');
     assert.ok(calls.every(call => call.init.headers.get('Authorization') === 'Bearer market-token'));
     globalThis.fetch = async () => new Response('{}', { status: 503 });
-    await assert.rejects(client.dayAheadPrices('BG', 'BG', '2026-09-29'), { status: 503 });
+    await assert.rejects(client.marketStatus(), { status: 503 });
   } finally { globalThis.fetch = original; }
 });
 test('device inventory is site-scoped, authenticated and preserves denied access', async () => {

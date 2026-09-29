@@ -48,10 +48,10 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await page.locator('.login-submit').click();
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
-  await expect(page.locator('[data-view-id="market"]')).toHaveText('↗Пазар');
+  await expect(page.locator('[data-view-id="market"]')).toHaveCount(0);
   await expect(page.locator('[data-view-id="devices"]')).not.toHaveAttribute('data-provisioning-required');
   await expect(page.locator('[data-view-id="gateway"]')).toHaveCount(0);
-  for(const view of ['sites','devices','overview','customers','assets','battery','schedule','market','settlement','automation','loads','balance','supported','alarms','reports','settings','plans','about']) {
+  for(const view of ['sites','devices','overview','customers','assets','battery','schedule','automation','loads','supported','alarms','reports','settings','plans','about']) {
     await page.locator(`[data-view-id="${view}"]`).click();
     await expect(page.getByTestId('section-'+view)).toBeVisible();
     await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { GridexApiError, type GridexApiClient, type PlatformOrganisation } from '../lib/gridex-api';
+import { GridexApiError, type GridexApiClient, type PlatformOrganisation, type ServiceGrant } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 
 export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; lang: UiLanguage }) {
@@ -49,6 +49,7 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
     {loaded && !items.length && <p>{en ? 'No approved customer organisations.' : 'Няма одобрени клиентски организации.'}</p>}
     {items.map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong><p>{labels[item.status]}{item.operationState ? ` · ${labels[item.operationState]}` : ''}</p>
+      {item.status === 'active' && <PlatformServiceGrants api={api} lang={lang} organisationId={item.id}/>}
       {item.mailState && <p>{en ? 'Suspension email' : 'Имейл за спиране'}: {labels[item.mailState]}</p>}
       {item.operationState === 'pending'
         ? <button type="button" className="secondary-btn" disabled={busy} onClick={() => void change(item, true)}>{en ? 'Complete existing operation' : 'Довърши съществуващата операция'}</button>
@@ -65,5 +66,37 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
         <button type="button" className="secondary-btn" onClick={() => setConfirm(null)}>{en ? 'Cancel' : 'Откажи'}</button>
       </div>}
     </article>)}
+  </div>;
+}
+
+function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;lang:UiLanguage;organisationId:string}) {
+  const en=lang==='en';
+  const [services,setServices]=useState<ServiceGrant[]|null>(null);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  useEffect(()=>{
+    const abort=new AbortController();
+    api.platformOrganisationServices(organisationId,abort.signal)
+      .then(result=>{if(!abort.signal.aborted)setServices(result.services);})
+      .catch(()=>{if(!abort.signal.aborted)setError(en?'Service permissions unavailable.':'Правата за услуги са недостъпни.');});
+    return()=>abort.abort();
+  },[api,organisationId,en]);
+  async function toggle(service:ServiceGrant){
+    setBusy(true);setError('');
+    try{
+      await api.setPlatformOrganisationService(organisationId,service.code,!service.enabled);
+      setServices((await api.platformOrganisationServices(organisationId)).services);
+    }catch{setError(en?'Change not confirmed. Reload before retrying.':'Промяната не е потвърдена. Обновете преди нов опит.');}
+    finally{setBusy(false);}
+  }
+  return <div className="service-grants">
+    <h4>{en?'Services approved for this organisation':'Разрешени услуги за организацията'}</h4>
+    <p>{en?'No user receives access automatically. The organisation administrator grants it separately.':
+      'Никой потребител не получава достъп автоматично. Администраторът на организацията го разрешава отделно.'}</p>
+    {error&&<p role="alert">{error}</p>}
+    {services?.map(service=><label key={service.code} className="service-grant-row">
+      <input type="checkbox" checked={service.enabled} disabled={busy} onChange={()=>void toggle(service)}/>
+      <span>{service.code==='day_ahead'?(en?'Day-ahead market':'Пазар „ден напред“'):service.description}</span>
+    </label>)}
   </div>;
 }

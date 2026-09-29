@@ -1,5 +1,15 @@
 # Current task
 
+## 2026-09-29 — market entitlement UI
+
+Approved: service hidden from live member menu until both organisation and
+individual grants; no price values to customers. Platform administrator sees
+only ENTSO-E status and last successful refresh. Existing Users & invitations
+hosts both grant controls; no new menu. Backend migration 017/API and 240
+Timescale hourly rows are live, zero grants. Frontend TypeScript/27 unit pass;
+All 57 Playwright E2E pass; Pages publication and real account acceptance are
+separate gates.
+
 ## 2026-09-29 — approved day-ahead Market view
 
 Use existing `/market/`, no navigation change. Market product means ENTSO-E
