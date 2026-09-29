@@ -356,6 +356,15 @@ export class GridexApiClient {
     }
     return result;
   }
+  async grafanaLaunch(): Promise<{ url: string; expiresInSeconds: number }> {
+    const result = await this.postJson<{ url: string; expiresInSeconds: number }>('/api/v1/me/grafana-launch', {});
+    const url = new URL(result.url);
+    if (url.protocol !== 'https:' || url.origin !== new URL(this.config.apiBaseUrl).origin
+        || url.pathname !== '/grafana/launch' || !url.searchParams.has('ticket')) {
+      throw new Error('Invalid dashboard launch destination');
+    }
+    return result;
+  }
   async revokeManagerAccess(): Promise<void> {
     const response = await this.authorizedFetch('/api/v1/me/manager-access/revoke', { method: 'POST' });
     if (!response.ok) throw new GridexApiError(`Manager access revocation failed: ${response.status}`, response.status);

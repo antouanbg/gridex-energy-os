@@ -529,6 +529,9 @@ export default function Home() {
   const marketEnabled=platformAdmin||(enabledServices!==null
     &&enabledServices.subject===accountIdentity?.subject
     &&enabledServices.codes.includes('day_ahead'));
+  const grafanaEnabled=platformAdmin||(enabledServices!==null
+    &&enabledServices.subject===accountIdentity?.subject
+    &&enabledServices.codes.includes('day_ahead')&&enabledServices.codes.includes('visualisations'));
   const marketDenied=dataMode==='live'&&authState==='authenticated'&&!marketEnabled
     &&['market','settlement','balance'].includes(view);
 
@@ -621,7 +624,7 @@ export default function Home() {
         )}
         {view === "battery" && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "schedule" && <Schedule notify={notify} lang={lang}/>}
-        {view === "market" && (dataMode === 'live' ? <LiveMarket api={apiClient} lang={lang} platformAdmin={platformAdmin}/> : <Market lang={lang} notify={notify}/>)}
+        {view === "market" && (dataMode === 'live' ? <LiveMarket api={apiClient} lang={lang} platformAdmin={platformAdmin} grafanaEnabled={grafanaEnabled}/> : <Market lang={lang} notify={notify}/>)}
         {view === "settlement" && <Settlement notify={notify} lang={lang}/>}
         {view === "automation" && <Automation notify={notify} site={site} lang={lang} batteryCost={batteryCost}/>}
         {view === "loads" && <FlexibleLoads notify={notify} lang={lang}/>}
