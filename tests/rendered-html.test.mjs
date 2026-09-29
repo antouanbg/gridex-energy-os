@@ -208,3 +208,12 @@ test("loads the 18 navigation sections and live sites variant through split fron
   assert.match(page, /data-view-id/);
   assert.doesNotMatch(page, /function (Overview|Battery|Market|Gateway|SupportedDevices|About)\b/);
 });
+
+test("explains delivery date separately from the ENTSO-E refresh time", async () => {
+  const market = await readFile(new URL("../app/sections/live-market.tsx", import.meta.url), "utf8");
+  assert.match(market, /latestDeliveryDate/);
+  assert.match(market, /Europe\/Sofia/);
+  assert.match(market, /Датата и часът на графиката са за доставката/);
+  assert.match(market, /Last successful refresh/);
+  assert.match(market, /не датата на доставка/);
+});
