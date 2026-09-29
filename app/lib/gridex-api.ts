@@ -52,6 +52,8 @@ export type GridexSite = {
 };
 
 export type MarketZone = { country: string; zone: string; eic: string; timezone: string };
+export type MarketCollectionZone = MarketZone & { enabled: boolean; changedAt?: string };
+export type OrganisationMarketZone = MarketZone & { collected: boolean; enabled: boolean };
 export type MarketServices = { services: { id: string; label: string; provider: string }[]; zones: MarketZone[] };
 export type ServiceGrant = { code: string; description: string; prerequisites: string[]; enabled: boolean };
 export type ServiceMember = { subject: string; role: string; email: string | null; enabled: boolean };
@@ -409,6 +411,18 @@ export class GridexApiClient {
   }
   marketStatus(signal?: AbortSignal): Promise<MarketHealth> {
     return this.getJson('/api/v1/market/status', signal);
+  }
+  marketCollectionZones(signal?: AbortSignal): Promise<{zones:MarketCollectionZone[]}> {
+    return this.getJson('/api/v1/platform/market/zones', signal);
+  }
+  setMarketCollectionZone(country:string,zone:string,enabled:boolean): Promise<{country:string;zone:string;enabled:boolean}> {
+    return this.putBody(`/api/v1/platform/market/zones/${encodeURIComponent(zone)}`, {country,enabled});
+  }
+  organisationMarketZones(id:string,signal?:AbortSignal): Promise<{zones:OrganisationMarketZone[]}> {
+    return this.getJson(`/api/v1/platform/organisations/${encodeURIComponent(id)}/market-zones`,signal);
+  }
+  setOrganisationMarketZone(id:string,country:string,zone:string,enabled:boolean): Promise<{country:string;zone:string;enabled:boolean}> {
+    return this.putBody(`/api/v1/platform/organisations/${encodeURIComponent(id)}/market-zones/${encodeURIComponent(zone)}`,{country,enabled});
   }
   changeOrganisationAccess(id: string, body: {operationId: string; revision: number; status: 'active' | 'suspended'}): Promise<{status: string; mailState: string}> {
     return this.postJson(`/api/v1/platform/organisations/${encodeURIComponent(id)}/access`, body);

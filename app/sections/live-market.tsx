@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { GridexApiError, type GridexApiClient, type MarketHealth } from '../lib/gridex-api';
+import { GridexApiError, type GridexApiClient, type MarketHealth, type MarketCollectionZone } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 
 export function LiveMarket({ api, lang, platformAdmin }: { api: GridexApiClient; lang: UiLanguage; platformAdmin: boolean }) {
@@ -46,5 +46,46 @@ export function LiveMarket({ api, lang, platformAdmin }: { api: GridexApiClient;
       <p>{t('Последните публикувани данни по зони','Latest published data by zone')}: {health?.zones.filter(zone => zone.status === 'published').length || 0} / {health?.zones.length || 0}</p>
       <button type="button" className="secondary-btn" onClick={() => { setState('loading'); setRefresh(value => value + 1); }}>{t('Провери отново','Check again')}</button>
     </section>}
+    {platformAdmin && <MarketCollectionControls api={api} lang={lang}/>}
   </div>;
+}
+
+function MarketCollectionControls({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
+  const en=lang==='en';
+  const [zones,setZones]=useState<MarketCollectionZone[]|null>(null);
+  const [selected,setSelected]=useState<MarketCollectionZone|null>(null);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  useEffect(()=>{
+    const abort=new AbortController();
+    api.marketCollectionZones(abort.signal).then(result=>{if(!abort.signal.aborted)setZones(result.zones);})
+      .catch(()=>{if(!abort.signal.aborted)setError(en?'Country settings are unavailable.':'Настройките по държави са недостъпни.');});
+    return()=>abort.abort();
+  },[api,en]);
+  async function change(zone:MarketCollectionZone) {
+    setBusy(true);setSelected(null);setError('');
+    try {
+      await api.setMarketCollectionZone(zone.country,zone.zone,!zone.enabled);
+      setZones((await api.marketCollectionZones()).zones);
+    } catch { setError(en?'Change not confirmed. Reload before retrying.':'Промяната не е потвърдена. Обновете преди нов опит.'); }
+    finally {setBusy(false);}
+  }
+  return <section className="card live-market-empty service-grants">
+    <h3>{en?'Price collection by country':'Събиране на цени по държави'}</h3>
+    <p>{en?'Only Bulgaria is enabled by default. Other bidding zones are never fetched or stored until you explicitly enable them here. Existing historical records are not deleted.':
+      'Само България е включена по подразбиране. Другите ценови зони не се заявяват и записват, докато не ги разрешите изрично тук. Вече съхранените записи не се изтриват.'}</p>
+    {error&&<p role="alert">{error}</p>}
+    {zones?.map(zone=><div key={zone.zone} className="service-grant-row">
+      <span><strong>{zone.country==='BG'?(en?'Bulgaria':'България'):zone.country} · {zone.zone}</strong> · {zone.enabled?(en?'collecting':'събира се'):(en?'off':'изключено')}</span>
+      <button type="button" className="secondary-btn" disabled={busy} onClick={()=>setSelected(zone)}>
+        {zone.enabled?(en?'Stop collection':'Спри събирането'):(en?'Enable collection':'Разреши събирането')}
+      </button>
+    </div>)}
+    {selected&&<div role="group" aria-label={en?'Confirm country collection':'Потвърди събирането по държава'}>
+      <p>{selected.enabled?(en?`Stop new price collection for ${selected.zone}? Historical records remain.`:`Да спрем ли новите цени за ${selected.zone}? Историческите записи остават.`):
+        (en?`Explicitly enable collection and storage for ${selected.zone}?`:`Изрично да разрешим заявяване и запис на цени за ${selected.zone}?`)}</p>
+      <button type="button" className="primary-btn" disabled={busy} onClick={()=>void change(selected)}>{en?'Confirm':'Потвърди'}</button>
+      <button type="button" className="secondary-btn" onClick={()=>setSelected(null)}>{en?'Cancel':'Откажи'}</button>
+    </div>}
+  </section>;
 }

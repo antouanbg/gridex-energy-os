@@ -1,5 +1,22 @@
 # GrideX Energy OS — Working Rules
 
+## Market country controls — owner decision 2026-09-29
+
+Only BG is collected by default. The verified platform administrator alone
+may explicitly enable another bidding zone in the existing Market screen and
+separately grant a collected zone to an approved organisation in the existing
+Users & invitations administration. No new main-menu item. Neither action
+enables a member or publishes price values. Keep demo separate. Never show
+historical foreign-zone rows as evidence of current collection. Grafana is
+private operator preparation, not a public portal route or a replacement for
+the approved GrideX shell; require a new owner decision before exposing it.
+
+Само BG се събира по подразбиране. Провереният супер администратор изрично
+разрешава друга зона в „Пазар“ и отделно я дава на организация в съществуващото
+„Потребители и покани“. Без ново главно меню, автоматично лично право или
+клиентски ценови стойности. Старите чужди записи не означават текущо събиране.
+Grafana остава частна операторска подготовка, без публичен маршрут.
+
 ## Service permissions and market status — owner decision 2026-09-29
 
 No organisation or member gets a catalog service by default. The platform
