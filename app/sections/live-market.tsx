@@ -7,13 +7,14 @@ import type { UiLanguage } from '../i18n/messages';
 export function LiveMarket({ api, lang, platformAdmin }: { api: GridexApiClient; lang: UiLanguage; platformAdmin: boolean }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
   const [health, setHealth] = useState<MarketHealth | null>(null);
+  const [checkedAt,setCheckedAt] = useState<number | null>(null);
   const [state, setState] = useState<'loading'|'restricted'|'error'|'ready'>('loading');
   const [refresh, setRefresh] = useState(0);
   useEffect(() => {
     if (!platformAdmin) return;
     const abort = new AbortController();
     api.marketStatus(abort.signal).then(result => {
-      if (!abort.signal.aborted) { setHealth(result); setState('ready'); }
+      if (!abort.signal.aborted) { setHealth(result);setCheckedAt(Date.now()); setState('ready'); }
     }).catch(error => {
       if (!abort.signal.aborted) setState(error instanceof GridexApiError && error.status === 403 ? 'restricted' : 'error');
     });
@@ -24,7 +25,7 @@ export function LiveMarket({ api, lang, platformAdmin }: { api: GridexApiClient;
     : t('Още няма успешно обновяване', 'No successful refresh yet');
   const latest = health?.zones.reduce<string | null>((date, zone) =>
     zone.lastSuccessAt && (!date || zone.lastSuccessAt > date) ? zone.lastSuccessAt : date, null) || null;
-  const live = latest && Date.now() - Date.parse(latest) < 2 * 60 * 60 * 1000;
+  const live = latest && checkedAt !== null && checkedAt - Date.parse(latest) < 2 * 60 * 60 * 1000;
 
   return <div className="market-page live-market">
     <section className="card live-market-hero">
