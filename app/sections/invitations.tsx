@@ -4,6 +4,7 @@ import { GridexApiError, type GridexApiClient, type GridexUser, type GridexSite,
 import type { UiLanguage } from '../i18n/messages';
 import { OrganisationInvitationAdmin } from './organisation-invitations';
 import { OrganisationServiceMembers } from './organisation-service-members';
+import { ServiceRequestsAdmin } from './service-requests-admin';
 import { documentationLink } from '../lib/documentation';
 
 const copy = {
@@ -108,7 +109,9 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         })}>{busy?t.busy:(lang==='en'?'Open OpenRemote Manager':'Отвори OpenRemote Manager')}</button>
       </section>}
     {mode==='manage'&&me?.permissions.includes('platform:manage')&&<OrganisationInvitationAdmin api={api} lang={lang}/>}
+    {mode==='manage'&&me?.permissions.includes('platform:manage')&&<ServiceRequestsAdmin api={api} lang={lang}/>}
     {mode==='manage'&&admins.map(admin=><OrganisationServiceMembers key={admin.organisationId} api={api} lang={lang} organisationId={admin.organisationId}/>)}
+    {mode==='manage'&&admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}
     {(mode==='accept'||admins.length>0||!me?.permissions.includes('platform:manage'))&&<section className="card config-card invitation-panel" aria-label={mode==='manage'?t.manageTitle:t.title}>
     <span className="profile-kicker">{mode==='manage'?(lang==='en'?'YOUR ORGANISATION':'ВАШАТА ОРГАНИЗАЦИЯ'):(lang==='en'?'PENDING ACCESS':'ЧАКАЩ ДОСТЪП')}</span>
     <h2>{mode==='manage'?t.invite:t.title}</h2>

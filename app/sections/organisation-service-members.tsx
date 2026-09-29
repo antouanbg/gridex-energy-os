@@ -43,8 +43,8 @@ export function OrganisationServiceMembers({api,lang,organisationId}: {api:Gride
     {error&&<p role="alert">{error}</p>}
     {services?.filter(service=>service.enabled).map(service=><div key={service.code}>
       <h3>{service.code==='day_ahead'?(en?'Day-ahead market':'Пазар „ден напред“'):service.description}</h3>
-      {service.code==='day_ahead'&&<p>{en?'Historical prices remain platform-administrator-only for now. This grant does not expose them.':
-        'Историческите цени засега са само за супер администратора. Това разрешение не ги показва.'}</p>}
+      {service.code==='day_ahead'&&<p>{en?'The raw archive stays platform-only. BG charts require this grant, Visualisations and the organisation’s BG zone.':
+        'Суровият архив остава само за супер администратора. BG графиките изискват това право, Графики и BG зона за организацията.'}</p>}
       {(members[service.code]||[]).map(member=><label key={member.subject} className="service-grant-row">
         <input type="checkbox" checked={member.enabled} disabled={busy} onChange={()=>void toggle(service.code,member)}/>
         <span>{member.email||member.subject} · {member.role}</span>

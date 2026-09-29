@@ -7,6 +7,7 @@ import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
 import { ProfileHelp } from './sections/profile-help';
+import { ServiceCatalog } from './sections/service-catalog';
 import { documentationLink } from './lib/documentation';
 import { readRoute, sectionHref } from './lib/routes';
 import { releaseId, previousRelease } from './lib/session-policy';
@@ -781,8 +782,9 @@ function UserProfile({lang,user,api,live,navigate,signOut}:{lang:UiLanguage;user
         <button className="profile-action subtle" type="button" onClick={()=>navigate('sites')}>{t('Моите обекти','My Sites')} <span aria-hidden="true">→</span></button>
       </article>
       {live&&<HeartbeatEmailOptIn api={api} lang={lang} helpHref={helpHref}/>}
+      {live&&<ServiceCatalog api={api} lang={lang}/>}
       <article className="card profile-panel profile-session-panel">
-        <div className="profile-panel-heading"><div><span className="profile-kicker">03 / {t('СИГУРНОСТ','SECURITY')}</span><h3>{t('Сесия','Session')}</h3></div><a href={`${helpHref}#session`} aria-label={t('Обяснение за сесията','Session explained')}>?</a></div>
+        <div className="profile-panel-heading"><div><span className="profile-kicker">04 / {t('СИГУРНОСТ','SECURITY')}</span><h3>{t('Сесия','Session')}</h3></div><a href={`${helpHref}#session`} aria-label={t('Обяснение за сесията','Session explained')}>?</a></div>
         <div className="profile-session-state"><span className="live-dot"/><div><strong>{t('Влезли сте в портала','Signed in to the portal')}</strong><small>{t('Изход прекратява тази сесия в браузъра.','Sign out ends this browser session.')}</small></div></div>
         <button className="profile-action outline" type="button" onClick={signOut}>{t('Изход','Sign out')} <span aria-hidden="true">↪</span></button>
       </article>

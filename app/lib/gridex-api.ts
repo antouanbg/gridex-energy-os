@@ -55,8 +55,13 @@ export type MarketZone = { country: string; zone: string; eic: string; timezone:
 export type MarketCollectionZone = MarketZone & { enabled: boolean; changedAt?: string };
 export type OrganisationMarketZone = MarketZone & { collected: boolean; enabled: boolean };
 export type MarketServices = { services: { id: string; label: string; provider: string }[]; zones: MarketZone[] };
-export type ServiceGrant = { code: string; description: string; prerequisites: string[]; enabled: boolean };
+export type ServiceGrant = { code: string; description: string; prerequisites: string[]; requestable: boolean; enabled: boolean };
 export type ServiceMember = { subject: string; role: string; email: string | null; enabled: boolean };
+export type ServiceCatalogItem = { code: string; description: string; requestable: boolean };
+export type ServiceRequest = { id: string; organisationId: string; organisationName: string;
+  subject: string; email: string; serviceCode: string; country: string | null; zone: string | null;
+  state: 'open' | 'rejected'; stage: 'awaiting_platform' | 'awaiting_organisation' | 'active' | 'rejected';
+  createdAt: string; events: { action: string; at: string; note: string | null }[] };
 export type MarketHealth = { provider: string; zones: { zone: string; country: string; status: string;
   lastAttemptAt: string; lastSuccessAt: string | null; latestDeliveryDate: string | null; errorCode: string | null }[] };
 export type DayAheadPrices = { provider: string; sourceDocumentId: string | null; service: 'day_ahead';
@@ -415,8 +420,35 @@ export class GridexApiClient {
   setMemberService(id: string, code: string, subject: string, enabled: boolean): Promise<{enabled:boolean}> {
     return this.putBody(`/api/v1/organisations/${encodeURIComponent(id)}/services/${encodeURIComponent(code)}/members/${encodeURIComponent(subject)}`, {enabled});
   }
-  myServices(signal?: AbortSignal): Promise<{services:{code:string}[]}> {
+  myServices(signal?: AbortSignal): Promise<{services:{code:string;organisationId:string}[]}> {
     return this.getJson('/api/v1/me/services', signal);
+  }
+  serviceCatalog(signal?: AbortSignal): Promise<{services:ServiceCatalogItem[]}> {
+    return this.getJson('/api/v1/me/service-catalog', signal);
+  }
+  myServiceRequests(signal?: AbortSignal): Promise<{requests:ServiceRequest[]}> {
+    return this.getJson('/api/v1/me/service-requests', signal);
+  }
+  requestService(organisationId:string,serviceCode:string,country?:'BG',zone?:'BG'): Promise<{id:string;created:boolean}> {
+    return this.postJson('/api/v1/me/service-requests', {organisationId,serviceCode,country,zone});
+  }
+  platformServiceRequests(signal?:AbortSignal):Promise<{requests:ServiceRequest[]}> {
+    return this.getJson('/api/v1/platform/service-requests',signal);
+  }
+  organisationServiceRequests(id:string,signal?:AbortSignal):Promise<{requests:ServiceRequest[]}> {
+    return this.getJson(`/api/v1/organisations/${encodeURIComponent(id)}/service-requests`,signal);
+  }
+  approvePlatformServiceRequest(id:string):Promise<{id:string;stage:string}> {
+    return this.postJson(`/api/v1/platform/service-requests/${encodeURIComponent(id)}/approve`,{});
+  }
+  approveOrganisationServiceRequest(organisationId:string,id:string):Promise<{id:string;stage:string}> {
+    return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/service-requests/${encodeURIComponent(id)}/approve`,{});
+  }
+  rejectServiceRequest(id:string,organisationId?:string,note=''):Promise<{id:string;stage:string}> {
+    const path=organisationId
+      ? `/api/v1/organisations/${encodeURIComponent(organisationId)}/service-requests/${encodeURIComponent(id)}/reject`
+      : `/api/v1/platform/service-requests/${encodeURIComponent(id)}/reject`;
+    return this.postJson(path,{note});
   }
   marketStatus(signal?: AbortSignal): Promise<MarketHealth> {
     return this.getJson('/api/v1/market/status', signal);
