@@ -29,8 +29,8 @@ guide against the actual shipped UI and API before marking it complete.
 | Section / Раздел | URL | Guide status |
 | --- | --- | --- |
 | Преглед | `/` | Pending |
-| Клиенти и договори | `/customers/` | Pending |
-| Потребители и покани / Users & invitations | `/customers/users/` | BG/EN guides: `docs/ORGANISATIONS_AND_ACCESS.md` and `docs/USERS_AND_INVITATIONS_GUIDE.md`; public Docusaurus guide: `https://doc.gridex.tech/organisations-and-access/` and `/help/`. Resend and real acceptance require verification. |
+| Клиенти и договори | `/customers/` | Hidden from live Viewers; administrator-only parent section. Full business guide pending. |
+| Потребители и покани / Users & invitations | `/customers/users/` | BG/EN guides: `docs/ORGANISATIONS_AND_ACCESS.md` and `docs/USERS_AND_INVITATIONS_GUIDE.md`; public Docusaurus guide: `https://doc.gridex.tech/organisations-and-access/` and `/help/`. Admin sent-list and sent-only resend documented; real-account acceptance pending. |
 | Обекти | `/sites/` | BG/EN guide: `docs/SITES_AND_DEVICES_GUIDE.md`; real-account acceptance pending. |
 | Енергийни активи | `/assets/` | Pending |
 | Батерия | `/battery/` | Pending |

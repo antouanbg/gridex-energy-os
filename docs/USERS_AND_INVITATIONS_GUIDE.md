@@ -1,10 +1,10 @@
 # Users & invitations / Потребители и покани
 
-Status / Статус 2026-09-28: backend setup and migration 012 are active. The
+Status / Статус 2026-09-29: backend setup and migration 012 are active. The
 global form is available to the explicitly authorised platform account in a
 recent live session. First customer delivery and login were reported by the
 owner; automatic completion and tenant isolation still need verification.
-Sent-only resend and email-first login are prepared for release. The frontend and
+Sent-only first-admin resend and email-first login are live. The frontend and
 backend allow an empty Site selection for member invitations, granting no Site
 access. The new public help steps address organisation administrators, not
 the platform administrator.
@@ -39,8 +39,13 @@ the platform administrator.
 позволява делегиране на роля „Администратор на организация“. Показват се само
 Обектите, до които администраторът има достъп; backend проверява това преди
 създаване на поканата и повторно при приемането ѝ. Самото изпращане не дава
-членство — то започва след успешно приемане. Изпратената покана може да се
-отмени в същата сесия; постоянен списък на изпратените покани още липсва.
+членство — то започва след успешно приемане. След потвърден от сървъра отговор
+екранът показва „Изпращането е потвърдено“. „Изпратени от Вас покани“ пази
+статуса след обновяване. Само за `sent` администраторът може да отмени или
+изпрати отново линк на същия имейл; повторението не създава втори акаунт и
+подновява срока с 24 часа. При непотвърдена доставка провери статуса и не
+повтаряй сляпо. „Наблюдател“ не вижда „Клиенти и договори“ и „Потребители и
+покани“ в реалния портал; дори при директен URL не получава админ форма.
 
 **Проверка на първа покана от администратор на клиентска организация:**
 отвори `/customers/users/` след вход в съществуващата организация; избери
@@ -91,8 +96,13 @@ configuration), and Integrator (device configuration). The current flow cannot
 delegate the organisation-administrator role. Only Sites available to the
 administrator are displayed, and the backend validates that scope both before
 creating the invitation and again at acceptance. Sending alone grants no
-membership; acceptance is required. A sent invitation can be revoked in the
-same session. A persistent sent-invitation list is not available yet.
+membership; acceptance is required. A confirmed send shows an explicit success
+message. The administrator's “Invitations sent by you” list persists across
+refresh, with status and expiry. Only a `sent` invitation may be revoked or
+resent to the same email; resend does not create another account and renews
+the link for 24 hours. If delivery is unconfirmed, inspect status rather than
+retrying blindly. In live mode a Viewer does not see Customers & contracts or
+Users & invitations, and a direct URL does not expose the admin form.
 
 **First member-invitation test for a customer organisation administrator:**
 open `/customers/users/` after signing in to the existing organisation;

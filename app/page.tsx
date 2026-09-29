@@ -165,6 +165,7 @@ export default function Home() {
   const [authCallback] = useState(hasGridexAuthCallback);
   const [authState,setAuthState] = useState<AuthState>(()=>runtimeConfig.mode !== "demo" ? "checking" : "anonymous");
   const [integrationError,setIntegrationError] = useState("");
+  const [sessionCheckError,setSessionCheckError] = useState(false);
   const [liveSites,setLiveSites] = useState<GridexSite[]>([]);
   const [sitesStatus,setSitesStatus] = useState<'loading'|'ready'|'error'>('loading');
   const [selectedSiteId,setSelectedSiteId] = useState(() => {
@@ -183,6 +184,7 @@ export default function Home() {
       setSessionUser(null);setAccountIdentity(null);setAccountMenuOpen(false);setAuthState('anonymous');
       setBackendState('unknown');setLiveSites([]);setLiveSnapshot(null);setSelectedSiteId('');
       setSitesStatus('loading');
+      setSessionCheckError(false);
       setIntegrationError(lang==='en'?'Your session ended. Please sign in again.':'Сесията е прекратена. Моля, влезте отново.');
     };
     const suspend=(broadcast:boolean)=>{
@@ -249,24 +251,12 @@ export default function Home() {
   useEffect(() => {
     if (runtimeConfig.mode === "demo") return;
     let active=true;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
     const epoch=sessionEpoch.current;
-    initialiseGridexAuth(runtimeConfig).then(async session=>{
-      if (!active||epoch!==sessionEpoch.current) return;
-      if (!session) {
-        setSessionUser(null);
-        setAccountIdentity(null);
-        setAuthState("anonymous");
-        // Login must not depend on a public unauthenticated health endpoint.
-        setBackendState("unknown");
-        setIntegrationError("");
-        return;
-      }
+    const verifyMembership=async(session:GridexAuthSession,attempt=0)=>{
       let membershipIdentity: GridexUser;
       try {
         membershipIdentity = await apiClient.me();
-        // A first administrator has completed the email/password action in
-        // Keycloak. Complete only that realm's exact pending invitation via
-        // the backend's verified, idempotent onboarding transition.
         if (runtimeConfig.realm !== 'gridex' && !membershipIdentity.memberships?.length && membershipIdentity.realm === runtimeConfig.realm) {
           const pending = (await apiClient.myOrganisationOnboarding()).invitations
             .filter(item => item.realm === membershipIdentity.realm);
@@ -279,22 +269,34 @@ export default function Home() {
               throw new Error('Organisation administrator membership unconfirmed');
           }
         }
-      } catch {
+      } catch(error) {
         if (!active||epoch!==sessionEpoch.current) return;
-        setSessionUser(null);
-        setAccountIdentity(null);
-        setBackendState("unknown");
-        setAuthState("error");
-        setIntegrationError(document.documentElement.lang==="en"?"Sign-in completed, but organisation access could not be verified. Refresh to retry; your invitation remains pending.":"Входът приключи, но достъпът до организацията не може да се потвърди. Обновете, за да опитате пак; поканата остава чакаща.");
+        if ((error instanceof GridexApiError && error.status===503) || error instanceof TypeError || (error instanceof DOMException&&error.name==='TimeoutError')) {
+          setAuthState('checking');setBackendState('unknown');setSessionCheckError(true);
+          retryTimer=setTimeout(()=>void verifyMembership(session,attempt+1),Math.min(2000*2**attempt,15000));
+          return;
+        }
+        setSessionUser(null);setAccountIdentity(null);setBackendState('unknown');setAuthState('error');
+        setIntegrationError(document.documentElement.lang==='en'?'Sign-in completed, but organisation access could not be verified. Please try again.':'Входът приключи, но достъпът до организацията не може да се потвърди. Опитайте отново.');
         return;
       }
       if (!active||epoch!==sessionEpoch.current) return;
       const user=sessionToUser({ ...session, roles: membershipIdentity.roles });
-      setSessionUser(user);
-      setAccountIdentity(membershipIdentity);
-      setAuthState("authenticated");
-      setBackendState("online");
-      setIntegrationError("");
+      setSessionUser(user);setAccountIdentity(membershipIdentity);setAuthState('authenticated');
+      setBackendState('online');setSessionCheckError(false);setIntegrationError('');
+    };
+    initialiseGridexAuth(runtimeConfig).then(async session=>{
+      if (!active||epoch!==sessionEpoch.current) return;
+      if (!session) {
+        setSessionUser(null);
+        setAccountIdentity(null);
+        setAuthState("anonymous");
+        // Login must not depend on a public unauthenticated health endpoint.
+        setBackendState("unknown");
+        setIntegrationError("");
+        return;
+      }
+      await verifyMembership(session);
     }).catch(()=>{
       if (!active||epoch!==sessionEpoch.current) return;
       setSessionUser(null);
@@ -303,7 +305,7 @@ export default function Home() {
       setAuthState("error");
       setIntegrationError(document.documentElement.lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
-    return()=>{active=false;};
+    return()=>{active=false;if(retryTimer)clearTimeout(retryTimer);};
   },[runtimeConfig,apiClient,authCallback]);
 
   useEffect(()=>{
@@ -313,6 +315,7 @@ export default function Home() {
       if(controller.signal.aborted)return;
       setLiveSites(sites);
       setSitesStatus('ready');
+      setIntegrationError(current=>current===(lang==='en'?'The site list could not be loaded.':'Списъкът с обекти не може да бъде зареден.')?'':current);
       if (!sites.length) {setSelectedSiteId('');setLiveSnapshot(null);return;}
       // A deep link to an inaccessible Site must never silently open another Site.
       const selected=selectedSiteId ? sites.find(item=>item.id===selectedSiteId) : sites[0];
@@ -382,19 +385,32 @@ export default function Home() {
       if(pending||!active)return;
       pending=true;
       try {
-        const identity=await apiClient.me(controller.signal);
-        const sites=await apiClient.sites(controller.signal);
+        const identity=await apiClient.me(controller.signal).catch(error=>{
+          if(error instanceof GridexApiError&&error.status===403)expireSession();
+          throw error;
+        });
+        const sites=await apiClient.sites(controller.signal).catch(error=>{
+          if(error instanceof GridexApiError&&error.status===403) {
+            setAccountIdentity(identity);setLiveSites([]);setLiveSnapshot(null);
+            setSelectedSiteId('');setSitesStatus('error');setSessionCheckError(false);
+            return null;
+          }
+          throw error;
+        });
         if(!active)return;
+        if(!sites)return;
         setSessionUser(current=>current?sessionToUser({subject:identity.subject,email:current.email,name:current.nameEn,preferredUsername:'',roles:identity.roles}):null);
         setAccountIdentity(identity);
         setLiveSites(current=>JSON.stringify(current)===JSON.stringify(sites)?current:sites);
+        setSitesStatus('ready');setSessionCheckError(false);
         if(selectedSiteId&&!sites.some(site=>site.id===selectedSiteId)) {
-          expireSession();
+          setSelectedSiteId('');setLiveSnapshot(null);
         }
       }catch(error){
         if(error instanceof GridexApiError&&error.code==='organisation_suspended')return;
-        if(error instanceof GridexSessionExpiredError||(error instanceof GridexApiError&&[401,403].includes(error.status)))expireSession();
-        else if(active)setIntegrationError(lang==='en'?'Session verification is temporarily unavailable. Retrying without signing you out.':'Проверката на сесията временно е недостъпна. Ще опитаме отново, без да те отписваме.');
+        if(error instanceof GridexApiError&&error.status===403)return;
+        if(error instanceof GridexSessionExpiredError||(error instanceof GridexApiError&&error.status===401))expireSession();
+        else if(active)setSessionCheckError(true);
       }finally{pending=false;}
     };
     const resume=()=>{if(document.visibilityState==='visible')void verifySession();};
@@ -467,6 +483,10 @@ export default function Home() {
 
   const pageDocumentation = documentationLink(view, lang);
   const documentationHome = documentationLink('help', lang).href;
+  const canManagePeople=accountIdentity?.permissions.includes('platform:manage')===true
+    || accountIdentity?.memberships?.some(item=>item.role==='administrator')===true;
+  const administrationDenied=dataMode==='live'&&authState==='authenticated'&&!canManagePeople
+    &&(view==='customers'||view==='members');
 
   return (
     <main className="app-shell" data-mode={dataMode}>
@@ -476,7 +496,8 @@ export default function Home() {
         </button>
         <nav ref={navigationRef} id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
           {navItems.map(([id, icon]) => {
-            if(id==='members'&&(dataMode!=='live'||authState!=='authenticated'||!accountIdentity?.memberships?.some(item=>item.role==='administrator')&&!accountIdentity?.permissions.includes('platform:manage')))return null;
+            if(id==='members'&&(dataMode!=='live'||!canManagePeople))return null;
+            if(id==='customers'&&dataMode==='live'&&!canManagePeople)return null;
             const hasDeviceWarning=dataMode==='live'&&authState==='authenticated'&&backendState==='online'&&deviceWarning?.siteId===selectedSiteId&&deviceWarning.warning;
             const badge=dataMode==='live'?(id==='devices'&&hasDeviceWarning?'!':''):id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
@@ -540,12 +561,13 @@ export default function Home() {
           <button className="demo-notice-close" aria-label={lang==="en"?"Hide demo notice":"Скрий демо съобщението"} onClick={dismissDemoNotice}>×</button>
         </section>}
 
+        {sessionCheckError&&dataMode==='live'&&<section className="integration-warning" role="status"><i>!</i><span>{lang==='en'?'Session verification is temporarily unavailable. Retrying without signing you out.':'Проверката на сесията временно е недостъпна. Ще опитаме отново, без да те отписваме.'}</span></section>}
         {integrationError&&dataMode==="live"&&!['profile','help','about','login'].includes(view)&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
           <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:administrationDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Administrator access required':'Нужни са администраторски права'}</h2><p>{lang==='en'?'The Users and invitations section is available only to organisation or platform administrators. Your permitted Sites and Devices remain available for viewing.':'Разделът за клиенти и покани е само за администратори на организация или на платформата. Разрешените Ви Обекти и Устройства остават достъпни за преглед.'}</p></section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
