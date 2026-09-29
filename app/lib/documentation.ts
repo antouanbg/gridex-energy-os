@@ -5,6 +5,7 @@ const readyGuides: Record<string, string> = {
   help: '/',
   login: '/organisations-and-access/',
   members: '/organisations-and-access/',
+  visualisations: '/organisations-and-access/#site-visualisations',
   market: '/market-prices/',
 };
 

@@ -2,6 +2,7 @@ import {useRef,useState} from 'react';
 import type {FormEvent} from 'react';
 import type { GridexApiClient,GridexSite } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
+import { sectionHref } from '../lib/routes';
 
 export function LiveSites({sites,status,onSelect,onCreated,organisations=[],api,lang,allowCreate=true}:{sites:GridexSite[];status:'loading'|'ready'|'error';onSelect:(site:GridexSite)=>void;onCreated:(site:GridexSite)=>void;organisations?:{organisationId:string;role:string;allSites:boolean}[];api:GridexApiClient;lang:UiLanguage;allowCreate?:boolean}) {
   const t=(bg:string,en:string)=>lang==='en'?en:bg;
@@ -32,6 +33,11 @@ export function LiveSites({sites,status,onSelect,onCreated,organisations=[],api,
     <h2>{site.name}</h2>
     <p>{t('Обект от твоя акаунт. Свързаността на устройствата се проверява отделно.','Site from your account. Device connectivity is verified separately.')}</p>
     <button type="button" className="primary-btn" onClick={()=>onSelect(site)}>{t('Устройства','Devices')} →</button>
+    <a className="secondary-btn" href={sectionHref('visualisations',site.id)} onClick={event=>{
+      if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+      event.preventDefault();window.history.pushState({},'',sectionHref('visualisations',site.id));
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }}>{t('Визуализации','Visualisations')} →</a>
   </article>)}</section>}
     {allowCreate&&!!adminOrganisations.length&&<section className="card config-card device-provisioning device-access">
       <h2>{t('Нов Обект','New Site')}</h2>

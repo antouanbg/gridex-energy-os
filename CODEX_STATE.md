@@ -1,5 +1,13 @@
 # Current task
 
+## 2026-09-29 — Site visualisations source checkpoint
+
+The portal has a Site-scoped `/sites/{id}/visualisations/` route using the
+read-only OpenRemote history API, with no shared customer Grafana source or
+demo fallback. Site/entitlement checks are backend-owned. Build and 57
+Playwright checks pass;
+publication and real browser acceptance are separate gates in HANDOFF.
+
 ## 2026-09-29 — service-request UI checkpoint
 
 Profile catalogue, requester history and separate platform/organisation
