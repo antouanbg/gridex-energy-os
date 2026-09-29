@@ -1,5 +1,14 @@
 # Current task
 
+## 2026-09-29 — BG-only collection administration
+
+Platform-only Market UI can explicitly enable/disable other ENTSO-E bidding
+zones (BG alone defaults on); the existing organisation administration grants
+a collected zone separately after day-ahead service permission. Members and
+price-value visibility are unchanged. No new menu or public Grafana link.
+Backend migration 018/API and browser role testing gate publication. See
+HANDOFF and paired BG/EN Docusaurus guide.
+
 ## 2026-09-29 — market entitlement UI
 
 Approved: service hidden from live member menu until both organisation and

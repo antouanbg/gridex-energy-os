@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { GridexApiError, type GridexApiClient, type PlatformOrganisation, type ServiceGrant } from '../lib/gridex-api';
+import { GridexApiError, type GridexApiClient, type PlatformOrganisation, type ServiceGrant, type OrganisationMarketZone } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 
 export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; lang: UiLanguage }) {
@@ -97,6 +97,40 @@ function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;l
     {services?.map(service=><label key={service.code} className="service-grant-row">
       <input type="checkbox" checked={service.enabled} disabled={busy} onChange={()=>void toggle(service)}/>
       <span>{service.code==='day_ahead'?(en?'Day-ahead market':'Пазар „ден напред“'):service.description}</span>
+    </label>)}
+    {services?.some(service=>service.code==='day_ahead'&&service.enabled)&&
+      <OrganisationMarketZones api={api} lang={lang} organisationId={organisationId}/>}
+  </div>;
+}
+
+function OrganisationMarketZones({api,lang,organisationId}:{api:GridexApiClient;lang:UiLanguage;organisationId:string}) {
+  const en=lang==='en';
+  const [zones,setZones]=useState<OrganisationMarketZone[]|null>(null);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  useEffect(()=>{
+    const abort=new AbortController();
+    api.organisationMarketZones(organisationId,abort.signal)
+      .then(result=>{if(!abort.signal.aborted)setZones(result.zones);})
+      .catch(()=>{if(!abort.signal.aborted)setError(en?'Country permissions unavailable.':'Правата по държави са недостъпни.');});
+    return()=>abort.abort();
+  },[api,organisationId,en]);
+  async function toggle(zone:OrganisationMarketZone) {
+    setBusy(true);setError('');
+    try {
+      await api.setOrganisationMarketZone(organisationId,zone.country,zone.zone,!zone.enabled);
+      setZones((await api.organisationMarketZones(organisationId)).zones);
+    } catch {setError(en?'Country permission not confirmed. Reload before retrying.':'Правото за държавата не е потвърдено. Обновете преди нов опит.');}
+    finally {setBusy(false);}
+  }
+  return <div className="service-grants">
+    <h4>{en?'Day-ahead countries for this organisation':'Държави „ден напред“ за организацията'}</h4>
+    <p>{en?'Grant a collected zone explicitly. This does not enable any user and does not yet expose price values.':
+      'Разрешете изрично зона, за която има събиране. Това не включва потребител и засега не разкрива ценови стойности.'}</p>
+    {error&&<p role="alert">{error}</p>}
+    {zones?.map(zone=><label key={zone.zone} className="service-grant-row">
+      <input type="checkbox" checked={zone.enabled} disabled={busy||(!zone.collected&&!zone.enabled)} onChange={()=>void toggle(zone)}/>
+      <span>{zone.country==='BG'?(en?'Bulgaria':'България'):zone.country} · {zone.zone}{!zone.collected?(en?' · collection off':' · събирането е изключено'):''}</span>
     </label>)}
   </div>;
 }
