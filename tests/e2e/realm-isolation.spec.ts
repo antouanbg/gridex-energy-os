@@ -31,4 +31,11 @@ test('a customer realm in browser storage cannot select the platform login in an
   await customerTab.getByRole('link', { name: /основния GrideX акаунт/ }).click();
   await expect(customerTab).toHaveURL(/\/login\/\?realm=gridex$/);
   expect(await customerTab.evaluate(() => sessionStorage.getItem('gridex.selected-realm'))).toBe('gridex');
+
+  // A second person using the same tab must not inherit the previous tenant.
+  await customerTab.goto('/login/');
+  expect(await customerTab.evaluate(() => sessionStorage.getItem('gridex.selected-realm'))).toBeNull();
+  await customerTab.getByLabel('Имейл',{exact:true}).fill('shared@example.invalid');
+  await customerTab.getByRole('button',{name:/Продължи към защитения вход/}).click();
+  await expect(customerTab.getByRole('button',{name:'gridex',exact:true})).toBeVisible();
 });

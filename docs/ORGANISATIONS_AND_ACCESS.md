@@ -27,7 +27,7 @@ GrideX за първата покана.
    Линкът от поканата може да отвори и директно правилната организация.
 3. След потвърждаване на имейла и задаване на парола първата администраторска
    покана се довършва автоматично при вход и сървърна проверка. Не е нужен
-   втори бутон „Приеми“. Поканите за колеги още се приемат от „Профил“.
+   втори бутон „Приеми“. Същото важи за поканен колега след проверен вход.
 4. След потвърдено активиране виждате само разрешените Ви Обекти и функции. Ако не виждате
    очакван Обект, поискайте администраторът да провери правата Ви.
 
@@ -37,7 +37,11 @@ GrideX за първата покана.
 „Клиенти и договори → Потребители и покани“. Системата изпраща нов 24-часов
 линк за **същия** акаунт и организация, без дублиране. След приемане или
 отмяна бутонът липсва. При неясен резултат от изпращането не повтаряйте
-автоматично — първо проверете състоянието. Ако забравите вече зададена
+автоматично — първо проверете състоянието. Поканеният може сам да поиска
+еднократно нов линк до **същия имейл** от страницата „Вход“, ако не е получил
+писмото. Приета покана не изтича със стария линк; списъкът показва последния
+записан вход. Обект се създава само в „Обекти“, не в „Устройства“. При
+споделен компютър използвайте „Влез с друг акаунт“. Ако забравите вече зададена
 парола, използвайте „Забравена парола“ в защитения вход на **правилната**
 организация; това е различно от повторно изпращане на покана.
 
@@ -86,7 +90,7 @@ a new organisation.
    the correct organisation's protected login. Enter your password only there.
 3. The first administrator invitation completes after verified email, password
    setup, sign-in and server checks, without a second Accept button. Member
-   invitations still require acceptance in Profile. Email alone grants no access.
+   invitations for colleagues complete the same way after verified sign-in. Email alone grants no access.
 4. After confirmed completion you will see only authorised Sites and features. Ask your administrator if
    a Site you expect is missing.
 
@@ -97,6 +101,10 @@ still **sent**, the platform administrator can use **Resend invitation** beside
 account or organisation. The button is absent after acceptance or revocation.
 If delivery is unconfirmed, the administrator must check its status rather
 than retry automatically. A revoked invitation needs administrator review.
+The recipient may request one resend to the **same address** from Sign in if
+the email was not received. Accepted access does not expire with the original
+link; the list shows the last recorded sign-in. Create Sites only under Sites,
+not Devices. On a shared computer, use “Sign in with another account”.
 
 ### Who can do what?
 

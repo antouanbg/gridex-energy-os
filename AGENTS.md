@@ -1,5 +1,24 @@
 # GrideX Energy OS — Working Rules
 
+## Account switching and member invitations — owner decision 2026-09-29
+
+On a shared computer, generic sign-in must route from the newly entered email,
+not a remembered realm or another person's UI state. A verified backend
+subject/realm mismatch clears private data. After the invited person verifies
+email, sets a password and signs in, the matching member invitation is
+accepted through the checked backend transition without a second UI button.
+Recipient-initiated resend is allowed once per pending invitation, to the
+same stored email only; after acceptance it is unavailable. Site creation is
+shown only under Sites, never under Devices. An accepted invitation is not
+time-limited by its former email link; show recorded last login instead.
+
+При споделен компютър входът започва от нововъведения имейл, не от запомнен
+realm. При несъответствие на проверената самоличност изчиствай личните данни.
+Потвърденият поканен член получава права след проверен вход без втори бутон.
+Еднократно повторно изпращане само до същия имейл важи само преди приемане.
+Обект се създава само от „Обекти“, не от „Устройства“; приета покана не
+изтича със стария имейл линк и показва записания последен вход.
+
 ## Owner approval for every new function / Одобрение за всяка нова функция
 
 Before adding a user-facing feature, menu action, workflow gate, permission,
@@ -36,8 +55,8 @@ Sites. The owner explicitly removed the second manual Accept button on
 2026-09-27. Do not infer completion from delivered mail, password update or
 login alone: verify the POST, OpenRemote grant, active membership and Site
 isolation. On failure keep the invitation pending and show a recoverable error.
-Test desktop, mobile and refresh. Do not extend automatic acceptance to other
-invitation types without the owner's explicit confirmation.
+Test desktop, mobile and refresh. The owner subsequently approved automatic
+acceptance for invited members on 2026-09-29; other types remain unchanged.
 
 След всяка промяна по покана, регистрация или вход тествай целия клиентски път
 с акаунт без членство: потвърден имейл → вход в клиентския realm →
@@ -46,8 +65,9 @@ invitation types without the owner's explicit confirmation.
 Собственикът изрично премахна втория ръчен бутон „Приеми“ на 2026-09-27.
 Получено писмо, нова парола или успешен вход НЕ доказват завършване: провери
 POST, OpenRemote правата, членството и изолацията. При отказ остави поканата
-чакаща и покажи поправима грешка. Тествай desktop, mobile и refresh. Не
-прилагай автоматично приемане за друг вид покани без изрично потвърждение.
+чакаща и покажи поправима грешка. Тествай desktop, mobile и refresh. На
+2026-09-29 собственикът одобри автоматично приемане и за поканен член;
+другите видове остават без промяна.
 
 ## Invitation and rights UX / Покани и права — 2026-09-26
 
@@ -63,8 +83,8 @@ UI must not infer global power from an email, an `admin` label or a browser
 claim. The member invitation flow cannot delegate administrator role. The
 first administrator verifies email, sets password and signs in; the portal
 completes the matching invitation through the checked backend transition,
-without a second button. Other invitation types remain unchanged until the
-owner explicitly confirms their workflow.
+without a second button. The later 2026-09-29 decision extends this to
+invited members; other invitation types remain unchanged.
 Never show a pending organisation as active. First real customer onboarding
 is still not end-to-end verified. The zero-Site member-invite frontend fix is
 local/unpublished. Update public BG/EN documentation with any flow change.
@@ -75,7 +95,8 @@ local/unpublished. Update public BG/EN documentation with any flow change.
 Администраторът на организация кани само в своя realm, с изрични роля и Обекти.
 Първият администратор потвърждава имейла, задава парола и влиза; порталът
 завършва съвпадащата покана през проверения backend без втори бутон.
-Другите покани не се променят без изрично потвърждение. Не показвай чакаща организация като
+Решението от 2026-09-29 включва и поканения член; другите видове покани
+остават без промяна. Не показвай чакаща организация като
 активна и не обявявай първия реален клиент за проверен преди теста.
 
 ## Working prompt language — Bulgarian / Език на работните prompt-и — български

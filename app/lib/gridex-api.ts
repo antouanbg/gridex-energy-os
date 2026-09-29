@@ -35,9 +35,9 @@ export type GridexUser = {
 };
 
 export type GridexInvitation = { id: string; organisationId: string; role: string; siteIds: string[]; expiresAt: string };
-export type SentGridexInvitation = { id: string; email: string; role: string; siteIds: string[]; state: string; expiresAt: string; createdAt: string };
+export type SentGridexInvitation = { id: string; email: string; role: string; siteIds: string[]; state: string; expiresAt: string; createdAt: string; acceptedAt?: string|null; lastLoginAt?: string|null };
 export type OrganisationOnboardingInvitation = { id: string; organisationId: string; realm: string; name: string; expiresAt: string };
-export type CreatedOrganisationInvitation = { id: string; realm: string; name: string; email: string; state: string; expiresAt: string; createdAt: string };
+export type CreatedOrganisationInvitation = { id: string; realm: string; name: string; email: string; state: string; expiresAt: string; createdAt: string; acceptedAt?: string|null; lastLoginAt?: string|null };
 
 export type PlatformOrganisation = { id: string; name: string; realm: string; status: 'active' | 'suspended'; revision: number;
   operationId?: string; target?: 'active' | 'suspended'; operationState?: 'pending' | 'applied'; mailState?: string };
@@ -275,6 +275,9 @@ export function getGridexRuntimeConfig(): GridexRuntimeConfig {
     // A customer's realm must never become a browser-wide default for another
     // tab or the platform owner's next login. Keep the hint in this tab only.
     localStorage.removeItem('gridex.selected-realm');
+    // A generic login is a new identity, never the last tenant in this tab.
+    if (window.location.pathname === '/login/' && !validRealm(requested))
+      sessionStorage.removeItem('gridex.selected-realm');
     if (selected) sessionStorage.setItem('gridex.selected-realm', selected);
     else {
       const remembered = sessionStorage.getItem('gridex.selected-realm');
@@ -301,6 +304,14 @@ export async function discoverGridexLoginRealms(config: GridexRuntimeConfig, ema
     typeof realm !== 'string' || !/^[a-z][a-z0-9-]{2,30}$/.test(realm)))
     throw new GridexApiError('Invalid login routing response', 503);
   return [...new Set(realms as string[])];
+}
+
+export async function requestInvitationResend(config: GridexRuntimeConfig, email: string): Promise<void> {
+  const response=await fetch(`${config.apiBaseUrl}/api/v1/auth/resend-invitation`, {
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email}),
+    cache:'no-store',signal:AbortSignal.timeout(Math.max(1000,config.backendTimeoutMs||5000)),
+  });
+  if(!response.ok)throw new GridexApiError('Invitation resend unavailable',response.status);
 }
 
 export class GridexApiClient {
