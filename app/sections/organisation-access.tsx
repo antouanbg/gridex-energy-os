@@ -95,8 +95,8 @@ function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;l
       'Никой потребител не получава достъп автоматично. Администраторът на организацията го разрешава отделно.'}</p>
     {error&&<p role="alert">{error}</p>}
     {services?.map(service=><label key={service.code} className="service-grant-row">
-      <input type="checkbox" checked={service.enabled} disabled={busy} onChange={()=>void toggle(service)}/>
-      <span>{service.code==='day_ahead'?(en?'Day-ahead market':'Пазар „ден напред“'):service.description}</span>
+      <input type="checkbox" checked={service.enabled} disabled={busy||!service.requestable} onChange={()=>void toggle(service)}/>
+      <span>{service.code==='day_ahead'?(en?'Day-ahead market':'Пазар „ден напред“'):service.description}{!service.requestable?(en?' · Coming soon':' · Предстои'):''}</span>
     </label>)}
     {services?.some(service=>service.code==='day_ahead'&&service.enabled)&&
       <OrganisationMarketZones api={api} lang={lang} organisationId={organisationId}/>}
@@ -125,8 +125,8 @@ function OrganisationMarketZones({api,lang,organisationId}:{api:GridexApiClient;
   }
   return <div className="service-grants">
     <h4>{en?'Day-ahead countries for this organisation':'Държави „ден напред“ за организацията'}</h4>
-    <p>{en?'Grant a collected zone explicitly. This does not enable any user and does not yet expose price values.':
-      'Разрешете изрично зона, за която има събиране. Това не включва потребител и засега не разкрива ценови стойности.'}</p>
+    <p>{en?'Grant a collected zone explicitly. This does not enable any user; BG charts also require individual grants for Prices and Visualisations.':
+      'Разрешете изрично събирана зона. Това не включва потребител; BG графиките изискват и лични права за Цени и Графики.'}</p>
     {error&&<p role="alert">{error}</p>}
     {zones?.map(zone=><label key={zone.zone} className="service-grant-row">
       <input type="checkbox" checked={zone.enabled} disabled={busy||(!zone.collected&&!zone.enabled)} onChange={()=>void toggle(zone)}/>

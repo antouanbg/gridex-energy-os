@@ -1,5 +1,13 @@
 # Current task
 
+## 2026-09-29 — service-request UI checkpoint
+
+Profile catalogue, requester history and separate platform/organisation
+queues are in source and build cleanly. The request does not grant access.
+Publish frontend only after backend migration 020/API; verify three roles
+with real sessions before calling it complete. Site charts remain pending
+tenant-safe source selection. See newest HANDOFF.
+
 ## 2026-09-29 — BG-only collection administration
 
 Platform-only Market UI can explicitly enable/disable other ENTSO-E bidding
