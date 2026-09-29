@@ -56,7 +56,9 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
       const result = await api.inviteOrganisation({ name, realm, email });
       if (result.state !== 'sent') throw new Error('Delivery not confirmed');
       setNotice(t.sent); setName(''); setRealm(''); setEmail('');
-      const updated = await api.organisationInvitations(); setItems(updated.invitations);
+      try {
+        const updated = await api.organisationInvitations(); setItems(updated.invitations);
+      } catch { /* A failed list refresh must not erase a confirmed send result. */ }
     } catch (error) {
       setNotice(error instanceof GridexApiError && error.status === 401 ? t.recent : t.failed);
       try { setItems((await api.organisationInvitations()).invitations); } catch { /* The previous state remains visible. */ }

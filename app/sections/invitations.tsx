@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { GridexApiError, type GridexApiClient, type GridexUser, type GridexSite, type GridexInvitation } from '../lib/gridex-api';
+import { GridexApiError, type GridexApiClient, type GridexUser, type GridexSite, type GridexInvitation, type SentGridexInvitation } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { OrganisationInvitationAdmin } from './organisation-invitations';
 import { documentationLink } from '../lib/documentation';
@@ -11,6 +11,7 @@ const copy = {
     invite: 'Invite by email', email: 'Work email', org: 'Organisation', role: 'Role', sites: 'Permitted sites', send: 'Send invitation', accept: 'Accept invitation',
     accepted: 'Invitation accepted. Reload to load your sites.', reload: 'Reload portal', sent: 'Email dispatch confirmed. Membership starts only after acceptance.',
     revoke: 'Revoke invitation', revoked: 'Invitation revoked.', pending: 'Your invitations', expiry: 'Expires', busy: 'Working…',
+    sentHistory: 'Invitations sent by you', noSent: 'No invitations sent yet.', resend: 'Resend invitation', resent: 'A new invitation link was sent to the same email.', resendUnconfirmed: 'Sending was not confirmed. Check the status before trying again.', state: 'Status',
     noadmin: 'Only an organisation administrator can invite members.', noSites: 'No sites yet. You may invite a member without site access; grant access explicitly when sites are created.',
     viewer: 'Viewer — read only', operator: 'Operator — operational actions', energy_manager: 'Energy manager — strategies and configuration', integrator: 'Integrator — device configuration' },
   bg: { title: 'Достъп до организации', manageTitle: 'Потребители и покани', loading: 'Зареждане на правата…', unavailable: 'Поканите по имейл още не са включени. Нужни са Mailgun и настройки за идентификация.',
@@ -18,10 +19,18 @@ const copy = {
     invite: 'Покана по имейл', email: 'Служебен имейл', org: 'Организация', role: 'Роля', sites: 'Разрешени обекти', send: 'Изпрати покана', accept: 'Приеми покана',
     accepted: 'Поканата е приета. Презаредете, за да заредите обектите.', reload: 'Презареди портала', sent: 'Изпращането е потвърдено. Членството започва само след приемане.',
     revoke: 'Отмени поканата', revoked: 'Поканата е отменена.', pending: 'Вашите покани', expiry: 'Валидна до', busy: 'Обработка…',
+    sentHistory: 'Изпратени от Вас покани', noSent: 'Още няма изпратени покани.', resend: 'Изпрати поканата наново', resent: 'Нов линк за покана е изпратен на същия имейл.', resendUnconfirmed: 'Изпращането не е потвърдено. Проверете статуса преди нов опит.', state: 'Статус',
     noadmin: 'Само администратор на организация може да кани членове.', noSites: 'Още няма обекти. Може да поканите човек без достъп до обекти; дайте му права изрично, когато създадете обект.',
     viewer: 'Наблюдател — само четене', operator: 'Оператор — оперативни действия', energy_manager: 'Енергиен мениджър — стратегии и конфигурация', integrator: 'Интегратор — настройки на устройства' },
 };
 const roles = ['viewer', 'operator', 'energy_manager', 'integrator'] as const;
+const invitationStates: Record<string, { bg: string; en: string }> = {
+  sent: { bg: 'Изпратена', en: 'Sent' },
+  accepted: { bg: 'Приета', en: 'Accepted' },
+  revoked: { bg: 'Отменена', en: 'Revoked' },
+  delivery_failed: { bg: 'Изпращането не е потвърдено', en: 'Delivery not confirmed' },
+  pending_delivery: { bg: 'Изпраща се', en: 'Sending' },
+};
 
 export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClient; lang: UiLanguage; mode?: 'accept' | 'manage' }) {
   const t = copy[lang];
@@ -36,7 +45,8 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<string>('viewer');
   const [selected, setSelected] = useState<string[]>([]);
-  const [sent, setSent] = useState<{ id: string; org: string } | null>(null);
+  const [outgoing, setOutgoing] = useState<SentGridexInvitation[]>([]);
+  const [outgoingError, setOutgoingError] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [managerError, setManagerError] = useState(false);
   useEffect(() => {
@@ -58,11 +68,19 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
     void load();
     return () => controller.abort();
   }, [api]);
-  async function action(work: () => Promise<void>) {
+  useEffect(() => {
+    if (mode !== 'manage' || !org || !me?.memberships?.some(m => m.organisationId === org && m.role === 'administrator')) return;
+    const controller = new AbortController();
+    void api.sentInvitations(org, controller.signal).then(result => {
+      if (!controller.signal.aborted) { setOutgoing(result.invitations); setOutgoingError(false); }
+    }).catch(() => { if (!controller.signal.aborted) setOutgoingError(true); });
+    return () => controller.abort();
+  }, [api, me, mode, org]);
+  async function action(work: () => Promise<void>, failure?: keyof typeof copy.en) {
     if (busy) return;
     setBusy(true); setNotice(null);
     try { await work(); } catch (error) {
-      setNotice(error instanceof GridexApiError && error.status === 503 ? 'unavailable' : 'failed');
+      setNotice(failure ?? (error instanceof GridexApiError && error.status === 503 ? 'unavailable' : 'failed'));
     } finally { setBusy(false); }
   }
   const admins = me?.memberships?.filter(m => m.role === 'administrator') ?? [];
@@ -93,7 +111,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
     <span className="profile-kicker">{mode==='manage'?(lang==='en'?'YOUR ORGANISATION':'ВАШАТА ОРГАНИЗАЦИЯ'):(lang==='en'?'PENDING ACCESS':'ЧАКАЩ ДОСТЪП')}</span>
     <h2>{mode==='manage'?t.invite:t.title}</h2>
     {loading && <p role="status">{t.loading}</p>}
-    {notice && <p role="status">{t[notice]}</p>}
+    {notice && <p role={notice==='failed'||notice==='unavailable'||notice==='resendUnconfirmed'?'alert':'status'} aria-live="polite">{t[notice]}</p>}
     {!loading && <>
       {mode==='accept'&&<><h3>{t.pending}</h3>
       {!invites.length && <p>{t.empty}</p>}
@@ -113,7 +131,10 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         void action(async () => {
           const result = await api.invite(org, { email, role, siteIds: selected });
           if (result.state !== 'sent') throw new Error('Dispatch not confirmed');
-          setSent({ id: result.id, org }); setNotice('sent'); setEmail(''); setSelected([]);
+          setOutgoing(current => [{ id: result.id, email, role, siteIds: selected, state: 'sent',
+            createdAt: new Date().toISOString(), expiresAt: new Date(Date.now()+86400000).toISOString() }, ...current]);
+          setOutgoingError(false);
+          setNotice('sent'); setEmail(''); setSelected([]);
         });
       }}>
         <p className="invitation-panel-intro">{lang==='en'?'Choose a role and grant access only to the Sites this person needs.':'Изберете роля и дайте достъп само до Обектите, които са нужни на този човек.'}</p>
@@ -130,11 +151,33 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
           <button className="primary-btn" type="submit" disabled={!org}>{busy ? t.busy : t.send}</button>
         </fieldset>
       </form>)}
-      {sent && <button className="secondary-btn" type="button" disabled={busy} onClick={() => void action(async () => {
-        const result = await api.revokeInvitation(sent.org, sent.id);
-        if (!result.revoked) throw new Error('Revocation not confirmed');
-        setSent(null); setNotice('revoked');
-      })}>{t.revoke}</button>}
+      {mode==='manage'&&admins.length>0&&<div className="invitation-history" aria-label={t.sentHistory}>
+        <h3>{t.sentHistory}</h3>
+        {outgoingError&&<p role="alert">{t.failed}</p>}
+        {!outgoingError&&!outgoing.length&&<p>{t.noSent}</p>}
+        {outgoing.map(item=><article className="invitation-record" key={item.id}>
+          <strong>{item.email}</strong> · {roles.includes(item.role as typeof roles[number])?t[item.role as typeof roles[number]]:item.role}
+          <p>{t.state}: {invitationStates[item.state]?.[lang] ?? item.state} · {t.expiry}: {new Date(item.expiresAt).toLocaleString(lang==='bg'?'bg-BG':'en-GB')}</p>
+          {item.state==='sent'&&<div className="invitation-record-actions">
+            <button className="secondary-btn" type="button" disabled={busy} onClick={() => void action(async () => {
+              const result=await api.revokeInvitation(org,item.id);
+              if(!result.revoked)throw new Error('Revocation not confirmed');
+              setOutgoing(current=>current.map(row=>row.id===item.id?{...row,state:'revoked'}:row));setNotice('revoked');
+            })}>{t.revoke}</button>
+            <button className="secondary-btn" type="button" disabled={busy} onClick={() => void action(async () => {
+              try {
+                const result=await api.resendInvitation(org,item.id);
+                if(result.state!=='sent')throw new Error('Resend not confirmed');
+                setOutgoing(current=>current.map(row=>row.id===item.id?{...row,state:result.state,expiresAt:result.expiresAt}:row));
+                setNotice('resent');
+              } catch(error) {
+                try {setOutgoing((await api.sentInvitations(org)).invitations);}catch{/* Keep the last known state. */}
+                throw error;
+              }
+            },'resendUnconfirmed')}>{t.resend}</button>
+          </div>}
+        </article>)}
+      </div>}
     </>}
   </section>}
   </div>;

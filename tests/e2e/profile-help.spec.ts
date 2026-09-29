@@ -53,7 +53,7 @@ test('profile explains and persists email preference; help is reachable on deskt
   const adminGuide=page.locator('#invite-members');
   await expect(adminGuide.getByRole('heading',{name:'Поканете колега във Вашата организация'})).toBeVisible();
   await expect(adminGuide).toContainText('не за създаване на нова организация');
-  await expect(adminGuide).toContainText('не повтаряйте сляпо заявката');
+  await expect(adminGuide).toContainText('при неясна доставка проверете статуса');
   await expect(adminGuide.getByRole('link',{name:/Подробно ръководство/})).toHaveAttribute('href','https://doc.gridex.tech/organisations-and-access/#invite-a-colleague');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
 });
@@ -72,6 +72,6 @@ test('organisation administrator help has matching English guidance',async({page
   const adminGuide=page.locator('#invite-members');
   await expect(adminGuide.getByRole('heading',{name:'Invite a colleague into your organisation'})).toBeVisible();
   await expect(adminGuide).toContainText('does not create a new organisation');
-  await expect(adminGuide).toContainText('do not assume the email was sent or retry blindly');
+  await expect(adminGuide).toContainText('inspect an uncertain status instead of retrying blindly');
   await expect(adminGuide.getByRole('link',{name:/Detailed guide/})).toHaveAttribute('href','https://doc.gridex.tech/en/organisations-and-access/#invite-a-colleague');
 });

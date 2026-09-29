@@ -35,6 +35,7 @@ export type GridexUser = {
 };
 
 export type GridexInvitation = { id: string; organisationId: string; role: string; siteIds: string[]; expiresAt: string };
+export type SentGridexInvitation = { id: string; email: string; role: string; siteIds: string[]; state: string; expiresAt: string; createdAt: string };
 export type OrganisationOnboardingInvitation = { id: string; organisationId: string; realm: string; name: string; expiresAt: string };
 export type CreatedOrganisationInvitation = { id: string; realm: string; name: string; email: string; state: string; expiresAt: string; createdAt: string };
 
@@ -350,6 +351,12 @@ export class GridexApiClient {
   }
   async invite(organisationId: string, body: { email: string; role: string; siteIds: string[] }): Promise<{ id: string; state: string }> {
     return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations`, body);
+  }
+  async sentInvitations(organisationId: string, signal?: AbortSignal): Promise<{ invitations: SentGridexInvitation[] }> {
+    return this.getJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations`, signal);
+  }
+  async resendInvitation(organisationId: string, id: string): Promise<{ id: string; state: string; expiresAt: string }> {
+    return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations/${encodeURIComponent(id)}/resend`, {});
   }
   async acceptInvitation(id: string): Promise<{ accepted: boolean }> {
     return this.postJson(`/api/v1/invitations/${encodeURIComponent(id)}/accept`, {});

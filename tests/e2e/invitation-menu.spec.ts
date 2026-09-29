@@ -2,9 +2,11 @@ import { test, expect, type BrowserContext } from '@playwright/test';
 
 const org='11111111-1111-4111-8111-111111111111';
 const site='22222222-2222-4222-8222-222222222222';
+const memberInvite='33333333-3333-4333-8333-333333333333';
 
 async function mockSession(context: BrowserContext, administrator: boolean, onInvite: (body: unknown) => void) {
   let nonce='';
+  let outgoing: {id:string;email:string;role:string;siteIds:string[];state:string;createdAt:string;expiresAt:string}[]=[];
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
   await context.route('**/gridex-config.js',route=>route.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
   await context.route('https://auth.example.invalid/**',route=>{
@@ -20,8 +22,14 @@ async function mockSession(context: BrowserContext, administrator: boolean, onIn
   await context.route('https://api.example.invalid/**',route=>{
     const path=new URL(route.request().url()).pathname;
     if(path===`/api/v1/organisations/${org}/invitations`&&route.request().method()==='POST'){
-      onInvite(route.request().postDataJSON());
-      return route.fulfill({status:201,json:{id:'invite',state:'sent'}});
+      const body=route.request().postDataJSON();onInvite(body);
+      outgoing=[{id:memberInvite,...body,state:'sent',createdAt:'2026-09-29T00:00:00Z',expiresAt:'2026-09-30T00:00:00Z'},...outgoing];
+      return route.fulfill({status:201,json:{id:memberInvite,state:'sent'}});
+    }
+    if(path===`/api/v1/organisations/${org}/invitations`&&route.request().method()==='GET')return route.fulfill({json:{invitations:outgoing}});
+    if(path===`/api/v1/organisations/${org}/invitations/${memberInvite}/resend`){
+      outgoing=outgoing.map(item=>({...item,expiresAt:'2026-10-01T00:00:00Z'}));
+      return route.fulfill({json:{id:memberInvite,state:'sent',expiresAt:'2026-10-01T00:00:00Z'}});
     }
     if(path==='/api/v1/me')return route.fulfill({json:{subject:'user',realm:'gridex',email:'owner@example.com',roles:[administrator?'administrator':'viewer'],permissions:['site:read'],memberships:[{organisationId:org,role:administrator?'administrator':'viewer',allSites:true}]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:site,organisationId:org,name:'Test Lab'}]}});
@@ -41,17 +49,25 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await page.getByLabel('Test Lab').check();
   await page.getByRole('button',{name:'Изпрати покана',exact:true}).click();
   await expect.poll(()=>invited).toEqual({email:'new@example.com',role:'operator',siteIds:[site]});
+  await expect(page.getByText('Изпращането е потвърдено.',{exact:false})).toBeVisible();
+  await expect(page.getByText('new@example.com')).toBeVisible();
   await page.reload();
   await expect(page).toHaveURL(/\/customers\/users\/$/);
   await expect(page.getByTestId('section-members').getByRole('heading',{name:'Потребители и покани'})).toBeVisible();
+  await expect(page.getByText('new@example.com')).toBeVisible();
+  await page.getByRole('button',{name:'Изпрати поканата наново'}).click();
+  await expect(page.getByText('Нов линк за покана е изпратен')).toBeVisible();
 });
 
 test('non-admin has no invitation submenu and cannot use its direct URL',async({page,context})=>{
   await mockSession(context,false,()=>{throw new Error('viewer sent invitation');});
   await page.goto('/customers/users/');
   await expect(page.locator('[data-view-id="members"]')).toHaveCount(0);
+  await expect(page.locator('[data-view-id="customers"]')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Изпрати покана'})).toHaveCount(0);
-  await expect(page.getByText('Само администратор на организация може да кани членове.')).toBeVisible();
+  await expect(page.getByText('Нужни са администраторски права')).toBeVisible();
+  await page.goto('/sites/');
+  await expect(page.locator('[data-view-id="sites"]')).toBeVisible();
 });
 
 test('platform administrator can prepare a separate-realm invitation from the approved submenu',async({page,context},testInfo)=>{

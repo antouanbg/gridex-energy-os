@@ -1,5 +1,14 @@
 # Current task
 
+## 2026-09-29 — invitation/session/viewer mobile correction
+
+Current work: persistent member-invitation status and sent-only resend,
+unambiguous send confirmation, automatic recovery from transient session
+verification failure, and viewer-only menu reduction. Keep API authorisation
+independent of menu visibility. BG/EN help and public Docusaurus guide must be
+published with the change; do not claim live until backend/frontend checks pass.
+See HANDOFF.
+
 ## 2026-09-29 — customer Sites/devices
 
 Source integration is prepared: organisation admin creates OpenRemote-backed Site and ROCK/ESP, authorised admin/integrator drafts up to two roles. Pages build, TypeScript and three Chromium tests passed. Not live: backend migration/API restart was blocked by automated risk review pending specific owner approval. Do not deploy frontend alone. See HANDOFF.
