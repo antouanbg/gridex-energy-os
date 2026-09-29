@@ -386,7 +386,7 @@ export default function Home() {
       pending=true;
       try {
         const identity=await apiClient.me(controller.signal).catch(error=>{
-          if(error instanceof GridexApiError&&error.status===403)expireSession();
+          if(error instanceof GridexApiError&&error.status===403&&error.code!=='organisation_suspended')expireSession();
           throw error;
         });
         const sites=await apiClient.sites(controller.signal).catch(error=>{
