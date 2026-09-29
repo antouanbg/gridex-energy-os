@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { GridexApiError, type GridexApiClient, type MarketHealth, type MarketCollectionZone } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 
-export function LiveMarket({ api, lang, platformAdmin }: { api: GridexApiClient; lang: UiLanguage; platformAdmin: boolean }) {
+export function LiveMarket({ api, lang, platformAdmin, grafanaEnabled }: { api: GridexApiClient; lang: UiLanguage; platformAdmin: boolean; grafanaEnabled: boolean }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
   const [health, setHealth] = useState<MarketHealth | null>(null);
   const [checkedAt,setCheckedAt] = useState<number | null>(null);
@@ -31,11 +31,18 @@ export function LiveMarket({ api, lang, platformAdmin }: { api: GridexApiClient;
     <section className="card live-market-hero">
       <div><p className="live-market-eyebrow">{t('ПАЗАР · ДЕН НАПРЕД','MARKET · DAY-AHEAD')}</p>
         <h2>{t('Пазарни данни','Market data')}</h2>
-        <p>{t('Часовите цени се съхраняват за бъдещ анализ в защитен архив. Достъпът до стойностите засега е само за супер администратора.',
-          'Hourly prices are retained in a protected archive for future analysis. Price values are currently restricted to the platform administrator.')}</p></div>
+        <p>{grafanaEnabled
+          ? t('Часовите цени за България са достъпни в защитените графики по-долу. Пълният архив остава само за супер администратора.',
+            'Bulgarian hourly prices are available in the protected charts below. The full archive remains restricted to the platform administrator.')
+          : t('Часовите цени се съхраняват за бъдещ анализ в защитен архив. Достъпът до стойностите засега е само за супер администратора.',
+            'Hourly prices are retained in a protected archive for future analysis. Price values are currently restricted to the platform administrator.')}</p></div>
       <span className="live-market-provider">ENTSO-E<br/><small>Transparency Platform</small></span>
     </section>
-    {!platformAdmin && <section className="card live-market-empty" role="status"><h3>{t('Услугата е разрешена','Service enabled')}</h3><p>{t('Ценовите стойности и състоянието на източника засега са видими само за супер администратора.','Prices and provider status are currently visible only to the platform administrator.')}</p></section>}
+    {!platformAdmin && <section className="card live-market-empty" role="status"><h3>{t('Услугата е разрешена','Service enabled')}</h3><p>{grafanaEnabled
+      ? t('За България можете да отворите графиките по-долу. Подробният архив и състоянието на източника остават достъпни само за супер администратора.',
+        'You can open the Bulgarian charts below. The detailed archive and provider status remain available only to the platform administrator.')
+      : t('Ценовите стойности и състоянието на източника засега са видими само за супер администратора.',
+        'Prices and provider status are currently visible only to the platform administrator.')}</p></section>}
     {platformAdmin && state === 'loading' && <section className="card live-market-empty" role="status">{t('Проверяваме връзката…','Checking the connection…')}</section>}
     {platformAdmin && state === 'restricted' && <section className="card live-market-empty" role="status"><h3>{t('Достъпът до ценовия архив е ограничен','Market archive access is restricted')}</h3><p>{t('Услугите се разрешават първо от супер администратора за организацията, след това от нейния администратор за отделните потребители. Ценовите стойности още не са публикувани за клиентски достъп.',
       'The platform administrator first enables a service for an organisation; its administrator then enables it for individual users. Price values are not yet published for customer access.')}</p></section>}
@@ -47,7 +54,30 @@ export function LiveMarket({ api, lang, platformAdmin }: { api: GridexApiClient;
       <button type="button" className="secondary-btn" onClick={() => { setState('loading'); setRefresh(value => value + 1); }}>{t('Провери отново','Check again')}</button>
     </section>}
     {platformAdmin && <MarketCollectionControls api={api} lang={lang}/>}
+    {grafanaEnabled && <BgDashboard api={api} lang={lang}/>}
   </div>;
+}
+
+function BgDashboard({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
+  const en=lang==='en';
+  const [url,setUrl]=useState('');
+  const [state,setState]=useState<'idle'|'loading'|'error'>('idle');
+  async function open() {
+    setState('loading');setUrl('');
+    try { const launch=await api.grafanaLaunch();setUrl(launch.url);setState('idle'); }
+    catch { setState('error'); }
+  }
+  return <section className="card live-market-empty" aria-label={en?'BG market dashboard':'BG пазарен дашборд'}>
+    <h3>{en?'Bulgaria · day-ahead charts':'България · графики ден напред'}</h3>
+    <p>{en?'Protected Grafana dashboard in the GrideX portal. Market prices are wholesale EUR/MWh, not a customer tariff.':
+      'Защитен Grafana дашборд в портала на GrideX. Борсовите цени са в EUR/MWh, не са клиентска тарифа.'}</p>
+    <button type="button" className="primary-btn" disabled={state==='loading'} onClick={()=>void open()}>
+      {state==='loading'?(en?'Opening…':'Отваряме…'):(en?'Open charts':'Отвори графиките')}
+    </button>
+    {state==='error'&&<p role="alert">{en?'Dashboard access could not be confirmed. No data were shown.':'Достъпът до дашборда не беше потвърден. Данни не са показани.'}</p>}
+    {url&&<iframe title={en?'Bulgaria day-ahead Grafana dashboard':'Grafana дашборд за цени ден напред в България'}
+      src={url} referrerPolicy="no-referrer" loading="lazy" style={{width:'100%',minHeight:650,border:0,marginTop:20,borderRadius:12}}/>}
+  </section>;
 }
 
 function MarketCollectionControls({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {

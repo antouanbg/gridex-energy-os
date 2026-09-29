@@ -1,5 +1,29 @@
 # GrideX Energy OS — Working Rules
 
+## Approved service catalog / Одобрен каталог — 2026-09-29
+
+All verified members, including viewers, may see a five-entry service
+catalogue in Profile → Services. Only day-ahead prices (one selected
+country/zone, BG at first) and visualisations are requestable, independently.
+Analysis, meteorology and forecasting show Coming soon and have no request
+action. A request is not an entitlement: platform administrator grants the
+active organisation and BG zone; its own administrator grants an approved
+member. Admins see their stages under the existing Users & invitations area.
+Keep prices and the BG price dashboard under Market; future Site telemetry
+charts belong under Sites → Site → Visualisations, without new top-level navigation. A BG price dashboard needs both services
+plus BG zone permission, not Grafana permission alone. Until the secured
+backend/portal implementation is verified, show no customer prices or
+embedded Grafana and retain the current platform-only boundary.
+
+Всички потвърдени членове, включително наблюдателят, виждат пет услуги в
+„Профил → Услуги“. Само „Цени ден напред“ (точно една държава/зона, първо
+BG) и „Графики“ са отделно заявяеми. Другите три са „Предстои“. Заявката
+не дава право: супер администраторът разрешава организация и зона, а нейният
+администратор — конкретен член. Цените и BG ценовият dashboard са в „Пазар“;
+бъдещите графики за Обекти — в „Обекти → Обект → Визуализации“; без ново главно меню. За BG ценов график
+са нужни и двете услуги плюс BG зона. До проверено внедряване клиентски
+цени или вграден Grafana не се показват.
+
 ## Market country controls — owner decision 2026-09-29
 
 Only BG is collected by default. The verified platform administrator alone
@@ -7,15 +31,16 @@ may explicitly enable another bidding zone in the existing Market screen and
 separately grant a collected zone to an approved organisation in the existing
 Users & invitations administration. No new main-menu item. Neither action
 enables a member or publishes price values. Keep demo separate. Never show
-historical foreign-zone rows as evidence of current collection. Grafana is
-private operator preparation, not a public portal route or a replacement for
-the approved GrideX shell; require a new owner decision before exposing it.
+historical foreign-zone rows as evidence of current collection. The later
+owner decision above approves a guarded BG dashboard under Market, not a
+standalone public Grafana login or unrelated tenant data sources.
 
 Само BG се събира по подразбиране. Провереният супер администратор изрично
 разрешава друга зона в „Пазар“ и отделно я дава на организация в съществуващото
 „Потребители и покани“. Без ново главно меню, автоматично лично право или
 клиентски ценови стойности. Старите чужди записи не означават текущо събиране.
-Grafana остава частна операторска подготовка, без публичен маршрут.
+По-късното решение по-горе разрешава защитен BG dashboard в „Пазар“, но не
+и самостоятелен публичен Grafana вход или други източници с клиентски данни.
 
 ## Service permissions and market status — owner decision 2026-09-29
 

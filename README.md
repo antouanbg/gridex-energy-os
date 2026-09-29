@@ -24,6 +24,8 @@ The interface uses representative demonstration data. It is not connected to a l
 
 The same build is prepared for a protected live mode. `public/gridex-config.js` normally uses `auto`: the portal switches to live data only when both the backend and a valid OIDC session are available; otherwise it stays in clearly labelled demo mode. Live data and commands go through the GrideX API, never directly from the browser to OpenRemote or a field device.
 
+The approved service catalogue has Day-ahead prices (one selected country/zone, BG initially), Visualisations, Analysis, Meteorology and Forecasting. Only the first two are independently requestable; the other three are future entries. A request grants nothing: the platform administrator enables an organisation and its price zone, then its administrator enables an approved member. The BG Grafana price dashboard is embedded under live Market behind a one-time portal launch and requires **both** Day-ahead and Visualisations rights plus BG scope for a customer. There is no standalone public Grafana login. The service-request UI is not implemented yet.
+
 The complete frontend state machine, OIDC requirements, endpoint/field catalogue and backend rollout plan are in [FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md](docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md). The machine-readable API is [frontend-backend-contract.yaml](docs/integration/frontend-backend-contract.yaml), and the site strategy/settings lifecycle is [STRATEGY_AND_SETTINGS_CONTRACT.md](docs/integration/STRATEGY_AND_SETTINGS_CONTRACT.md).
 
 ## Product scope
@@ -162,6 +164,15 @@ GrideX Energy OS е двуезична продуктова демонстрац
 - Free, Pro и Enterprise функционални планове.
 
 ### Архитектура
+
+Одобреният каталог съдържа „Цени ден напред“ (избор на една държава/зона,
+засега само BG), „Графики“, „Анализ“, „Метеорология“ и „Прогнозиране“.
+Само първите две са отделно заявяеми; другите са бъдещи. Заявката не дава
+достъп: супер администраторът разрешава организация и ценова зона, след което
+нейният администратор разрешава конкретен одобрен член. BG Grafana ценовият
+dashboard се вгражда в реалния „Пазар“ с еднократен вход от портала; за
+клиент са нужни **и двете** услуги и BG зона. Няма самостоятелен публичен
+Grafana вход. UI за заявки още не е внедрен.
 
 Производствената концепция разделя стратегията от безопасността:
 
