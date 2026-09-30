@@ -27,7 +27,8 @@ test('super-admin Market stays visible with PostgreSQL ISO delivery date and on 
     if (path.endsWith('/me/services')) return route.fulfill({ json: { services: [] } });
     if (path.endsWith('/sites')) return route.fulfill({ json: { sites: [] } });
     if (path.endsWith('/market/status')) return route.fulfill({ json: { provider: 'ENTSO-E', zones: [{
-      zone: 'BG', country: 'BG', status: 'published', lastSuccessAt: '2026-09-29T20:10:00.000Z',
+      zone: 'BG', country: 'BG', status: 'partial', lastAttemptAt: new Date().toISOString(),
+      lastSuccessAt: '2026-09-29T20:10:00.000Z',
       latestDeliveryDate: '2026-09-29T21:00:00.000Z', errorCode: null,
     }] } });
     if (path.endsWith('/platform/market/zones')) return route.fulfill({ json: { zones: [{ country: 'BG', zone: 'BG', enabled: true }] } });
@@ -36,8 +37,11 @@ test('super-admin Market stays visible with PostgreSQL ISO delivery date and on 
   await page.goto('/market/');
   await expect(page.getByRole('heading', { name: 'Пазарни данни' })).toBeVisible();
   await expect(page.getByText('30 септември 2026 г.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Проверките към ENTSO-E работят' })).toBeVisible();
+  await expect(page.getByText(/ENTSO-E връща само част от интервалите/)).toBeVisible();
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Пазарни данни' })).toBeVisible();
   await expect(page.getByText('30 септември 2026 г.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Проверките към ENTSO-E работят' })).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
