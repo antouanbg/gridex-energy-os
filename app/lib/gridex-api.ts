@@ -25,7 +25,7 @@ export type GridexRuntimeConfig = {
 
 export type ContactChallenge = { id: string; left: number; right: number; expiresInSeconds: number };
 export type ContactEnquiry = { name: string; email: string; topic: string; message: string;
-  challengeId: string; answer: number; website: string };
+  replyEmail?: string; challengeId: string; answer: number; website: string };
 
 export type GridexUser = {
   subject: string;

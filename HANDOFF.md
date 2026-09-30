@@ -1,6 +1,19 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 — editable enquiry reply email and approved Suntech gallery
+
+Owner reported the signed-in About form's reply email was not editable. The
+input is now editable while the API still sends the verified account email
+separately for identity; `replyEmail` is used for the Mailgun Reply-To. The
+About screen shows two photos of the exact SunStorage PRO STE-261L-125P model
+with source attribution. The owner approved phone swipe, no menu change.
+BG/EN Docusaurus contact guide is updated in the docs repository. TypeScript,
+Pages build and three mocked Chromium checks (390 px, desktop, signed-in
+submission) pass. Publication, live API health, BG/EN guide URLs and external
+browser acceptance must be verified separately; no real mail was sent by
+these tests.
+
 ## 2026-09-30 — изтекла сесия към демото
 
 Одобрено поведение: при потвърден 401, отнета идентичност или нов release
