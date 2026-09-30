@@ -6,7 +6,7 @@
 
 ## Project credits / Принос към проекта
 
-Created and led by **Dr. Eng. Antuan Hristov Angelov** — product concept, EMS
+Created and led by **Antouan** — product concept, EMS
 and system architecture, software development, frontend implementation, and
 product/UX/UI design. [Digital profile](https://linkmy.cards/en/antouan-anguelov/)
 · [LinkedIn](https://www.linkedin.com/in/antouan/) ·
@@ -126,7 +126,7 @@ code based on manufacturer specifications and validated laboratory traces.
 
 ## Author
 
-Concept and system architecture: **Antuan Angelov**
+Concept and system architecture: **Antouan**
 [Digital profile](https://linkmy.cards/en/antouan-anguelov/) · [LinkedIn](https://www.linkedin.com/in/antouan/)
 
 ---
@@ -232,5 +232,5 @@ npm run test:e2e
 
 ### Автор
 
-Концепция и системна архитектура: **Антуан Ангелов**
+Концепция и системна архитектура: **Antouan**
 [Дигитален профил](https://linkmy.cards/en/antouan-anguelov/) · [LinkedIn](https://www.linkedin.com/in/antouan/)
