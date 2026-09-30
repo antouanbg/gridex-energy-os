@@ -73,23 +73,59 @@ function BgDashboard({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
   const en=lang==='en';
   const [url,setUrl]=useState('');
   const [state,setState]=useState<'idle'|'loading'|'error'>('idle');
+  const [period,setPeriod]=useState<'delivery'|'recent'|'week'|'month'|'custom'>('delivery');
+  const [fromDay,setFromDay]=useState('');
+  const [toDay,setToDay]=useState('');
+  const [rangeError,setRangeError]=useState('');
+  const [shownPeriod,setShownPeriod]=useState('');
   async function open() {
+    if(period==='custom'&&(!fromDay||!toDay||fromDay>toDay||
+      Date.parse(`${toDay}T00:00:00Z`)-Date.parse(`${fromDay}T00:00:00Z`)>30*86400000)) {
+      setRangeError(en?'Choose up to 31 delivery days in order.':'Изберете до 31 дни на доставка в правилен ред.');
+      return;
+    }
+    setRangeError('');
     setState('loading');setUrl('');
-    try { const launch=await api.grafanaLaunch();setUrl(launch.url);setState('idle'); }
+    try {
+      const launch=await api.grafanaLaunch();
+      const target=new URL(launch.url);
+      target.searchParams.set('range',period);
+      if(period==='custom') {
+        target.searchParams.set('fromDay',fromDay);
+        target.searchParams.set('toDay',toDay);
+      }
+      setUrl(target.toString());setShownPeriod(period==='custom'?`${fromDay} – ${toDay}`:period);
+      setState('idle');
+    }
     catch { setState('error'); }
   }
+  const labels={delivery:en?'Today and tomorrow':'Днес и утре',recent:en?'Last 48 hours':'Последните 48 часа',
+    week:en?'Last 7 days':'Последните 7 дни',month:en?'Last 30 days':'Последните 30 дни',custom:en?'Choose dates':'Избор на дати'};
   return <section className="card live-market-empty" aria-label={en?'BG market dashboard':'BG пазарен дашборд'}>
     <h3>{en?'Bulgaria · day-ahead charts':'България · графики ден напред'}</h3>
     <p>{en?'Protected Grafana dashboard in the GrideX portal. Market prices are wholesale EUR/MWh, not a customer tariff.':
       'Защитен Grafana дашборд в портала на GrideX. Борсовите цени са в EUR/MWh, не са клиентска тарифа.'}</p>
-    <p>{en?'Day-ahead means prices for electricity delivered on the indicated date, determined in the preceding day’s auction. The chart’s date and hour are delivery time in Bulgaria (Europe/Sofia), not the time you opened this page. It shows the past 7 days and up to 2 days ahead only where prices have been published. “Last successful refresh” is when GrideX received data from ENTSO-E; it is not the delivery date.':
-      '„Ден напред“ означава цени за електроенергия, доставяна на посочената дата, определени на търга през предходния ден. Датата и часът на графиката са за доставката по българско време (Europe/Sofia), не за момента на отваряне. Показват се последните 7 дни и до 2 дни напред само ако има публикувани цени. „Последно успешно обновяване“ е кога GrideX е получил данните от ENTSO-E, не датата на доставка.'}</p>
+    <p>{en?'Day-ahead means prices for electricity delivered on the indicated date, determined in the preceding day’s auction. The chart uses Bulgaria time (Europe/Sofia). Select a period below; only published prices are shown. “Last successful refresh” is when GrideX received data from ENTSO-E, not the delivery date.':
+      '„Ден напред“ означава цени за електроенергия, доставяна на посочената дата, определени на търга през предходния ден. Графиката е по българско време (Europe/Sofia). Изберете период по-долу; показват се само публикувани цени. „Последно успешно обновяване“ е кога GrideX е получил данните от ENTSO-E, не датата на доставка.'}</p>
+    <div className="grafana-period-controls">
+      <label>{en?'Chart period':'Период на графиката'}
+        <select value={period} onChange={event=>{setPeriod(event.target.value as typeof period);setRangeError('');}}>
+          {Object.entries(labels).map(([value,label])=><option key={value} value={value}>{label}</option>)}
+        </select>
+      </label>
+      {period==='custom'&&<>
+        <label>{en?'From delivery date':'От дата на доставка'}<input type="date" value={fromDay} onChange={event=>setFromDay(event.target.value)}/></label>
+        <label>{en?'Through delivery date':'До дата на доставка'}<input type="date" value={toDay} onChange={event=>setToDay(event.target.value)}/></label>
+      </>}
+    </div>
+    {rangeError&&<p role="alert">{rangeError}</p>}
     <button type="button" className="primary-btn" disabled={state==='loading'} onClick={()=>void open()}>
-      {state==='loading'?(en?'Opening…':'Отваряме…'):(en?'Open charts':'Отвори графиките')}
+      {state==='loading'?(en?'Opening…':'Отваряме…'):(en?'Show selected period':'Покажи избрания период')}
     </button>
+    {url&&<p className="grafana-period-current">{en?'Showing':'Показан период'}: {shownPeriod in labels?labels[shownPeriod as keyof typeof labels]:shownPeriod}</p>}
     {state==='error'&&<p role="alert">{en?'Dashboard access could not be confirmed. No data were shown.':'Достъпът до дашборда не беше потвърден. Данни не са показани.'}</p>}
     {url&&<iframe title={en?'Bulgaria day-ahead Grafana dashboard':'Grafana дашборд за цени ден напред в България'}
-      src={url} referrerPolicy="no-referrer" loading="lazy" style={{width:'100%',minHeight:650,border:0,marginTop:20,borderRadius:12}}/>}
+      src={url} referrerPolicy="no-referrer" loading="lazy" className="grafana-market-frame"/>}
   </section>;
 }
 

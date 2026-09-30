@@ -25,6 +25,9 @@ test('super-admin Market stays visible with PostgreSQL ISO delivery date and on 
     if (path.endsWith('/me')) return route.fulfill({ json: { subject: 'platform-owner', realm: 'gridex',
       roles: ['administrator'], permissions: ['platform:manage'], memberships: [] } });
     if (path.endsWith('/me/services')) return route.fulfill({ json: { services: [] } });
+    if (path.endsWith('/me/grafana-launch')) return route.fulfill({ json: {
+      url: 'https://api.example.invalid/grafana/launch?ticket=fixture', expiresInSeconds: 60,
+    } });
     if (path.endsWith('/sites')) return route.fulfill({ json: { sites: [] } });
     if (path.endsWith('/market/status')) return route.fulfill({ json: { provider: 'ENTSO-E', zones: [{
       zone: 'BG', country: 'BG', status: 'partial', lastAttemptAt: new Date().toISOString(),
@@ -43,5 +46,17 @@ test('super-admin Market stays visible with PostgreSQL ISO delivery date and on 
   await expect(page.getByRole('heading', { name: 'Пазарни данни' })).toBeVisible();
   await expect(page.getByText('30 септември 2026 г.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Проверките към ENTSO-E работят' })).toBeVisible();
+  await page.setViewportSize({width:390,height:844});
+  await page.getByLabel('Период на графиката').selectOption('week');
+  await page.getByRole('button',{name:'Покажи избрания период'}).click();
+  await expect(page.getByTitle('Grafana дашборд за цени ден напред в България'))
+    .toHaveAttribute('src',/range=week/);
+  await page.getByLabel('Период на графиката').selectOption('custom');
+  await page.getByLabel('От дата на доставка').fill('2026-09-30');
+  await page.getByLabel('До дата на доставка').fill('2026-10-01');
+  await page.getByRole('button',{name:'Покажи избрания период'}).click();
+  await expect(page.getByTitle('Grafana дашборд за цени ден напред в България'))
+    .toHaveAttribute('src',/range=custom.*fromDay=2026-09-30.*toDay=2026-10-01/);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   expect(pageErrors).toEqual([]);
 });
