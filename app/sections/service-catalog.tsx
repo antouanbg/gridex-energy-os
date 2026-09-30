@@ -3,14 +3,8 @@ import { useEffect, useState } from 'react';
 import type { GridexApiClient, GridexUser, ServiceCatalogItem, ServiceRequest } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { documentationLink } from '../lib/documentation';
+import { serviceLabel } from '../lib/service-labels';
 
-const labels: Record<string,{bg:string;en:string}> = {
-  day_ahead:{bg:'Цени ден напред',en:'Day-ahead prices'},
-  visualisations:{bg:'Графики и визуализации',en:'Charts and visualisations'},
-  analysis:{bg:'Анализ',en:'Analysis'},
-  meteorology:{bg:'Метеорология',en:'Meteorology'},
-  forecasting:{bg:'Прогнозиране',en:'Forecasting'},
-};
 const stages: Record<string,{bg:string;en:string}> = {
   awaiting_platform:{bg:'Чака разрешение от администратора на платформата',en:'Awaiting platform administrator'},
   awaiting_organisation:{bg:'Чака разрешение от администратора на организацията',en:'Awaiting organisation administrator'},
@@ -71,7 +65,7 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
   }
   return <article className="card profile-panel service-catalog" aria-label={en?'Services':'Услуги'}>
     <div className="profile-panel-heading"><div><span className="profile-kicker">03 / {en?'SERVICES':'УСЛУГИ'}</span>
-      <h3>{en?'Available services':'Достъпни услуги'}</h3></div>
+      <h3>{en?'Service catalogue':'Каталог на услуги'}</h3></div>
       <a href={documentationLink('members',lang).href+'#additional-services'} target="_blank" rel="noopener noreferrer" aria-label={en?'Service access guide':'Помощ за услугите'}>?</a></div>
     <p className="profile-panel-intro">{en?'A request grants no access. The platform administrator enables your organisation; its administrator then enables you.':
       'Заявката не дава достъп. Супер администраторът разрешава организацията, а нейният администратор — Вас.'}</p>
@@ -88,7 +82,7 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
       const enabled=granted.some(item=>item.code===service.code&&item.organisationId===organisationId);
       const pending=item?.state==='open'&&item.stage!=='active';
       return <div className="service-grant-row" key={service.code}>
-        <span><strong>{labels[service.code]?.[lang]||service.description}</strong>
+        <span><strong>{serviceLabel(service.code,lang,service.description)}</strong>
           {service.code==='day_ahead'&&<small>{en?'Country: Bulgaria (BG) · one bidding zone':'Държава: България (BG) · една ценова зона'}</small>}
           <small>{enabled?en?'Enabled':'Разрешена':item?stages[item.stage]?.[lang]:service.requestable?en?'May be requested':'Може да се заяви':en?'Coming soon':'Предстои'}</small>
           {item&&<small>{en?'Requested':'Заявена'}: {new Date(item.createdAt).toLocaleString(en?'en-GB':'bg-BG')}</small>}

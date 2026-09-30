@@ -1,5 +1,21 @@
 # Current task
 
+## 2026-09-30 — service approval screens (publication in progress)
+
+The approved five-service catalogue remains in Profile → Services. In the
+existing Users & invitations administration the platform view now separates
+organisation-approved, requestable-but-not-approved and coming-soon entries;
+the organisation administrator sees the same statuses and may grant only
+approved services to verified members. No top-level menu or backend contract
+was added. BG/EN public help was updated in gridex-docs. Source tests passed;
+record published revision and real three-role, two-organisation acceptance in
+HANDOFF before calling the workflow live.
+
+Български: публикуваме вече одобрения каталог и двустепенните права в
+съществуващите „Профил → Услуги“ и „Потребители и покани“. След публикация
+провери реални сесии на супер администратор, организационен администратор и
+обикновен потребител в две организации; тестовите fixture-и не са приемане.
+
 ## 2026-09-30 — Market Grafana period (source gate)
 
 The embedded BG chart now has GrideX-styled preset/custom date controls in
