@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import ts from "typescript";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -216,4 +217,16 @@ test("explains delivery date separately from the ENTSO-E refresh time", async ()
   assert.match(market, /Датата и часът на графиката са за доставката/);
   assert.match(market, /Last successful refresh/);
   assert.match(market, /не датата на доставка/);
+});
+
+test("market delivery date handles PostgreSQL ISO DATE without blanking super-admin Market", async () => {
+  const source = await readFile(new URL("../app/lib/market-date.ts", import.meta.url), "utf8");
+  const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const loadedModule = { exports: {} };
+  new Function("module", "exports", compiled)(loadedModule, loadedModule.exports);
+  const { formatMarketDeliveryDate } = loadedModule.exports;
+  assert.equal(formatMarketDeliveryDate("2026-09-29T21:00:00.000Z", "bg"), "30 септември 2026 г.");
+  assert.equal(formatMarketDeliveryDate("2026-09-30", "bg"), "30 септември 2026 г.");
+  assert.equal(formatMarketDeliveryDate("2026-09-29T21:00:00.000Z", "en"), "30 September 2026");
+  assert.equal(formatMarketDeliveryDate("invalid", "bg"), null);
 });

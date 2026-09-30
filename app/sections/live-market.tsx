@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { GridexApiError, type GridexApiClient, type MarketHealth, type MarketCollectionZone } from '../lib/gridex-api';
+import { formatMarketDeliveryDate } from '../lib/market-date';
 import type { UiLanguage } from '../i18n/messages';
 
 export function LiveMarket({ api, lang, platformAdmin, grafanaEnabled }: { api: GridexApiClient; lang: UiLanguage; platformAdmin: boolean; grafanaEnabled: boolean }) {
@@ -24,9 +25,7 @@ export function LiveMarket({ api, lang, platformAdmin, grafanaEnabled }: { api: 
     ? new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'bg-BG', { dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Sofia' }).format(new Date(value))
     : t('Още няма успешно обновяване', 'No successful refresh yet');
   const bgZone = health?.zones.find(zone => zone.country === 'BG' && zone.zone === 'BG');
-  const deliveryDate = bgZone?.latestDeliveryDate
-    ? new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'bg-BG', { dateStyle:'long',timeZone:'Europe/Sofia' }).format(new Date(`${bgZone.latestDeliveryDate}T12:00:00Z`))
-    : null;
+  const deliveryDate = formatMarketDeliveryDate(bgZone?.latestDeliveryDate, lang);
   const latest = health?.zones.reduce<string | null>((date, zone) =>
     zone.lastSuccessAt && (!date || zone.lastSuccessAt > date) ? zone.lastSuccessAt : date, null) || null;
   const live = latest && checkedAt !== null && checkedAt - Date.parse(latest) < 2 * 60 * 60 * 1000;

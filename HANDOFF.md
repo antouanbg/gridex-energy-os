@@ -1,5 +1,16 @@
 # Frontend login handoff
 
+## 2026-09-30 — /market/ super-admin render regression
+
+След добавянето на BG delivery date PostgreSQL `DATE` пристигаше през JSON
+като ISO timestamp (например `2026-09-29T21:00:00.000Z` за 30 септември
+в София). Frontend добавяше второ `T12:00:00Z`, създаваше невалидна дата и
+`Intl.DateTimeFormat` прекъсваше целия екран. `formatMarketDeliveryDate`
+вече приема както DATE-only, така и ISO timestamp, показва датата по
+Europe/Sofia и връща празна стойност при невалиден отговор, без crash.
+Регресионният тест покрива реалния PostgreSQL формат, BG/EN и fallback.
+Няма промяна в права, ценови записи, API или Grafana.
+
 ## 2026-09-29 — яснота за датите на цените „ден напред“
 
 В „Пазар“ BG/EN текстът различава датата/часа на доставка по Europe/Sofia
