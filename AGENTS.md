@@ -1,5 +1,31 @@
 # GrideX Energy OS — Working Rules
 
+## Deployment failures and regression evidence / Грешки при внедряване и регресионни тестове
+
+For every deployment, provisioning or production failure, first record a
+sanitized incident in the repository's version-controlled `HANDOFF.md` (or
+an incident document linked from it): UTC time, affected environment and
+revision, symptom, evidence/root cause, data or customer impact, rollback,
+current status and exact next action. Do not include secrets or personal data.
+Fix the cause in source, add a regression test that fails for the original
+defect when feasible, run the relevant suite and test the actual deployment
+path. Commit the incident record, fix and test to Git/PR so another agent can
+find them. Distinguish source-fixed, published, deployed and user-verified;
+if the real test cannot be run, leave it explicitly open instead of declaring
+success. Never rely on an undocumented live-only patch.
+
+При всяка грешка при внедряване, провизиране или работа на живо първо запиши
+обезличен инцидент във версионирания `HANDOFF.md` (или свързан от него
+документ): UTC час, среда и ревизия, симптом, доказателства/причина, отражение
+върху данни и клиенти, връщане назад, текущ статус и точна следваща стъпка.
+Без тайни и лични данни. Поправи причината в кода, добави регресионен тест,
+който възпроизвежда първоначалния дефект, когато е възможно, изпълни
+относимите тестове и провери реалния път на внедряване. Публикувай записа,
+поправката и теста в Git/PR, за да са видими за следващия агент. Разграничавай
+поправен код, публикация, внедряване и проверка от потребителя; ако реалният
+тест не е възможен, остави го изрично отворен, без да обявяваш успех. Не
+разчитай на недокументирана поправка само в живата среда.
+
 ## Project display name / Име в проекта — owner decision 2026-09-30
 
 Use **Antouan** as the owner's display name in project credits, README and UI,

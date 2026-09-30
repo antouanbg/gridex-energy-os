@@ -1,5 +1,13 @@
 # Current task
 
+## 2026-09-30 — live enquiry acceptance
+
+Owner confirms the live form submits correctly. Mailgun `accepted` and
+`delivered` events were checked for both configured support recipients at
+17:21 Europe/Sofia. Recipient-server delivery is verified; inbox placement
+was not independently inspected. No new code/deploy. Remaining: distinct
+signed-in Reply-To acceptance, if the owner wants to test it.
+
 ## 2026-09-30 — contact form failure visibility
 
 PR #85 is merged; frontend CI and Pages deploy passed. Docs PR #31 is merged

@@ -1,6 +1,20 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 — contact form live acceptance
+
+The owner confirms that submitting the live enquiry form now works correctly.
+Mailgun recorded `accepted` and `delivered` events for the latest contact
+message at 17:21 Europe/Sofia, separately for `support@novacom.bg` (To) and
+`support@gridex.tech` (CC). This verifies provider-to-recipient-server delivery,
+not placement in either inbox. No code, runtime or menu change was made for
+this acceptance note. A distinct signed-in Reply-To test remains open.
+
+Собственикът потвърди, че изпращането през живия формуляр вече работи.
+Mailgun отчете приемане и доставка до пощенските сървъри на основния
+получател и CC в 17:21 ч. Това не доказва в коя папка е попаднало писмото.
+Отделната проверка на Reply-To за влязъл потребител остава отворена.
+
 ## 2026-09-30 — contact form reliability follow-up
 
 Release checkpoint: frontend PR #85 and BG/EN docs PR #31 are merged. Full
