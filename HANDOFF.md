@@ -1,6 +1,42 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 — account switch source correction
+
+Explicit login now binds the selected email and realm to the verified
+Keycloak/API identity. Generic Login and the OIDC callback do not silently
+restore the previous user; the previous Site selection is cleared. A stale
+identity or failed callback returns safely to Login before private content is
+rendered. Synthetic same-browser tests cover same-realm, cross-realm, stale
+identity and callback outage. No real-customer account was used in tests.
+The earlier root-cause note below is the incident opening, not the final
+source status. Merge/deploy/public verification and owner mobile acceptance
+remain distinct gates.
+
+## 2026-09-30 17:15 UTC — account switching can restore the previous identity
+
+Environment/revision: public mobile portal after frontend `47767de`.
+Owner screenshot shows a guarded live Overview with “identity service could
+not initialise” and unavailable account data while changing users; the owner
+also reports the old user sometimes remains shown after valid credentials for
+the next user. No proven cross-tenant data disclosure in the screenshot, but
+misidentification is a serious access risk. Do not use a real second account
+for automated tests. Source review found two gaps: the OIDC callback can run
+another silent SSO check from the remembered release, and a valid Keycloak
+token plus matching backend `/me` is not compared with the email/realm the
+person just selected for account switching. Root cause is provisional until
+the real external-browser flow is retested. No production rollback yet; the
+prior release remains deployed while the guarded source correction is tested.
+Next: bind the login attempt to the verified returned identity, never accept
+the old user as the new one, avoid a redundant SSO check on callback/generic
+Login, add same-browser two-user regression tests, then publish/verify the
+live flow. If any identity mismatch occurs, clear private state and present
+a safe retry rather than rendering the previous account.
+
+Български: При смяна на потребител старият профил не бива да остава активен.
+Потвърденият от API профил трябва да съвпада и с нововъведения имейл и realm.
+Снимката доказва грешка при входа, но не доказва изтичане на клиентски данни.
+
 ## 2026-09-30 — login correction release checkpoint
 
 PR #88 is merged as `2200d17`. The main-branch quality run 36748520895

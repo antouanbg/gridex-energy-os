@@ -1,5 +1,15 @@
 # Current task
 
+## 2026-09-30 — same-browser account switching (source gate)
+
+An explicit login records the selected email and realm; the callback accepts
+only a matching Keycloak/API identity. Generic Login and the callback cannot
+silently restore the previous user. Previous Site selection is cleared, and
+failed verification returns safely to Login. Synthetic regression tests cover
+same-realm, cross-realm, stale identity and callback outage. Deployment and
+real mobile acceptance remain separate gates; see HANDOFF. Do not report a
+production fix until those gates pass.
+
 ## 2026-09-30 — login correction published
 
 PR #88 is in main (`2200d17`); CI and Pages deploy succeeded. Public Login

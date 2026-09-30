@@ -30,8 +30,9 @@ test('verified invited member joins automatically without another accept button'
   await expect.poll(()=>accepts).toBe(1);
   await expect(page.getByRole('button',{name:'Приеми покана'})).toHaveCount(0);
   await page.goto('/login/?realm=novacom');
-  await expect(page).toHaveURL(/\/?(?:\?realm=novacom)?$/);
-  await expect(page.getByTestId('section-overview')).toBeVisible();
+  await expect(page).toHaveURL(/\/login\/\?realm=novacom/);
+  await expect(page.getByLabel('Имейл',{exact:true})).toBeVisible();
+  await expect(page.getByTestId('section-overview')).toHaveCount(0);
   await page.reload();
   await expect.poll(()=>accepts).toBe(1);
 });
