@@ -363,7 +363,11 @@ export class GridexApiClient {
       method: 'POST', headers, body: JSON.stringify(enquiry), cache: 'no-store',
       signal: AbortSignal.timeout(20000),
     });
-    if (!response.ok) throw new GridexApiError('Contact enquiry not accepted', response.status);
+    if (!response.ok) {
+      const problem=await response.json().catch(()=>null);
+      throw new GridexApiError('Contact enquiry not accepted', response.status,
+        typeof problem?.error==='string'?problem.error:undefined);
+    }
     const result = await response.json();
     if (result.status !== 'queued') throw new GridexApiError('Contact enquiry not queued', 503);
   }

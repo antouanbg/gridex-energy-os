@@ -1,6 +1,24 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 — contact form reliability follow-up
+
+Owner reports that after refresh the human check can stay on “Loading”, and
+the submit button sometimes appears inert. Source inspection found that the
+challenge failure still displayed the loading label, browser-native required
+validation blocked `onSubmit` without an in-page explanation, and `live&&!email`
+disabled submission even though the verified identity is resolved by the API.
+The form now displays a challenge error/retry beside the field, performs
+explicit BG/EN validation with an alert, leaves the entered text intact on
+network errors, and maps API errors without automatic resend. Local API and
+proxy challenge returned 200/CORS for `gridex.tech`; direct public API from
+this Mac timed out, which may be hairpin routing and does not prove external
+reachability. Four mocked Chromium scenarios, Pages build and lint pass.
+Pending: CI, merge, Pages deploy, external-network user acceptance and genuine
+support receipt. Google Forms is not introduced because the existing protected
+Mailgun workflow remains the approved implementation; if external API remains
+unreachable, diagnose ingress before changing providers.
+
 ## 2026-09-30 — editable enquiry reply email and approved Suntech gallery
 
 Live checkpoint: backend PR #76, frontend PR #82 and BG/EN docs PR #29 are
