@@ -1,5 +1,21 @@
 # GrideX Energy OS — Working Rules
 
+## Local website reachability / Достъп до сайта при локални тестове — 2026-09-30
+
+The local website has no direct route through the internal LAN. A VPN is
+required for local tests that depend on reaching the site. Before diagnosing
+an unreachable page as an application, login, proxy or deployment failure,
+verify that the VPN is connected and that the expected route is available.
+If the VPN is absent or the route is unavailable, record the test as blocked
+by network access; do not report the website as broken on that evidence alone.
+
+Локалният сайт няма директен път през вътрешната мрежа. За локални тестове,
+които изискват достъп до него, е необходим VPN. Преди да приемеш
+недостъпна страница за грешка в сайта, входа, proxy-то или внедряването,
+провери дали VPN е свързан и маршрутът е наличен. Без VPN или при липсващ
+маршрут отбележи теста като блокиран от мрежов достъп, а не като повреда на
+сайта само въз основа на този симптом.
+
 ## Deployment failures and regression evidence / Грешки при внедряване и регресионни тестове
 
 For every deployment, provisioning or production failure, first record a
