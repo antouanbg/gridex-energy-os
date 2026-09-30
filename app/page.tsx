@@ -221,7 +221,7 @@ export default function Home() {
     };
     const suspended=()=>suspend(true);
     const storage=(event:StorageEvent)=>{
-      if(event.key===logoutSignalKey&&event.newValue)ended();
+      if(event.key===logoutSignalKey&&event.newValue){ended();showDemoAfterExpiredSession();}
       if(event.key==='gridex.organisation-suspended'&&event.newValue)try{if(JSON.parse(event.newValue).realm===runtimeConfig.realm)suspend(false);}catch{/* Ignore malformed optional browser signals. */}
     };
     window.addEventListener('gridex:session-ended',ended);
