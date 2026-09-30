@@ -18,11 +18,10 @@ test('a stalled callback times out and a new sign-in can open the provider',asyn
   await page.locator('.quick-sign-in').click();
   await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
   await page.locator('.login-submit').click();
-  await expect(page.getByRole('heading',{name:'Данните от акаунта са недостъпни'})).toBeVisible();
-  await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
-  await expect(page.locator('.quick-sign-in')).toBeEnabled();
+  await expect(page).toHaveURL(/\/login\/\?error=identity-init/);
+  await expect(page.getByText('Новият вход не можа да се провери')).toBeVisible();
+  await expect(page.getByTestId('section-overview')).toHaveCount(0);
   await expect(page.locator('main')).not.toContainText('Свързване…');
-  await page.locator('.quick-sign-in').click();
   await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
   await page.locator('.login-submit').click();
   await expect(page.getByRole('heading',{name:'Retry sign-in'})).toBeVisible();

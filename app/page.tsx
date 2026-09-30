@@ -2,7 +2,7 @@
 
 import { lazy, Suspense, useEffect, useMemo, useState, useRef, type FormEvent } from "react";
 import { discoverGridexLoginRealms, requestInvitationResend, getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexRuntimeConfig, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
-import { getGridexAccessToken, gridexLoginForEmail, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
+import { getGridexAccessToken, gridexLoginForEmail, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, pendingGridexLogin, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
@@ -11,7 +11,7 @@ import { ServiceCatalog } from './sections/service-catalog';
 import { documentationLink } from './lib/documentation';
 import { readRoute, sectionHref } from './lib/routes';
 import { forgetSession, releaseId, previousRelease } from './lib/session-policy';
-import {clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
+import {clearGridexLoginIntent,clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
 const navItems = [
@@ -48,6 +48,7 @@ type DemoUser = {
 
 type BackendState = "demo" | "checking" | "unknown" | "online" | "offline";
 type AuthState = "checking" | "authenticated" | "anonymous" | "error";
+class LoginIdentityMismatchError extends Error {}
 
 function initials(name:string):string {
   return name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()).join("") || "GX";
@@ -275,6 +276,14 @@ export default function Home() {
       let membershipIdentity: GridexUser;
       try {
         membershipIdentity = await apiClient.me();
+        const expected=pendingGridexLogin();
+        const verifiedEmail=(membershipIdentity.email||session.email||'').trim().toLowerCase();
+        if(membershipIdentity.subject!==session.subject||
+          (membershipIdentity.realm&&membershipIdentity.realm!==runtimeConfig.realm)||
+          (membershipIdentity.email&&session.email&&membershipIdentity.email.toLowerCase()!==session.email.toLowerCase())||
+          (expected&&(expected.realm!==runtimeConfig.realm||verifiedEmail!==expected.email))) {
+          throw new LoginIdentityMismatchError();
+        }
         if (runtimeConfig.realm !== 'gridex' && !membershipIdentity.memberships?.length && membershipIdentity.realm === runtimeConfig.realm) {
           const pending = (await apiClient.myOrganisationOnboarding()).invitations
             .filter(item => item.realm === membershipIdentity.realm);
@@ -298,6 +307,13 @@ export default function Home() {
         }
       } catch(error) {
         if (!active||epoch!==sessionEpoch.current) return;
+        if(error instanceof LoginIdentityMismatchError) {
+          forgetSession();clearGridexSession();
+          try{sessionStorage.removeItem('gridex.selected-realm');sessionStorage.removeItem('gridex.selected-site');}catch{/* Optional storage. */}
+          setSessionUser(null);setAccountIdentity(null);setLiveSites([]);setLiveSnapshot(null);
+          window.location.replace('/login/?error=account-mismatch');
+          return;
+        }
         if ((error instanceof GridexApiError && error.status===503) || error instanceof TypeError || (error instanceof DOMException&&error.name==='TimeoutError')) {
           setAuthState('checking');setBackendState('unknown');setSessionCheckError(true);
           retryTimer=setTimeout(()=>void verifyMembership(session,attempt+1),Math.min(2000*2**attempt,15000));
@@ -315,6 +331,7 @@ export default function Home() {
       }
       const user=sessionToUser({ ...session, email:membershipIdentity.email||session.email, name:membershipIdentity.name||session.name, roles: membershipIdentity.roles });
       verifiedIdentity.current={subject:membershipIdentity.subject,realm:membershipIdentity.realm||runtimeConfig.realm,email:user.email,name:user.nameEn};
+      clearGridexLoginIntent();
       setSessionUser(user);setAccountIdentity(membershipIdentity);setAuthState('authenticated');
       setBackendState('online');setSessionCheckError(false);setIntegrationError('');
       if(authCallback&&window.location.pathname==='/login/') {
@@ -337,16 +354,25 @@ export default function Home() {
         }
         setSessionUser(null);
         setAccountIdentity(null);
-        setAuthState("anonymous");
+        const loginError=new URLSearchParams(window.location.search).get('error');
+        setAuthState(loginError?'error':'anonymous');
         // Login must not depend on a public unauthenticated health endpoint.
         setBackendState("unknown");
-        setIntegrationError("");
+        setIntegrationError(loginError==='account-mismatch'
+          ?(document.documentElement.lang==='en'?'The previous account was returned instead of the email you entered. That session was rejected. Try signing in again.':'Върна се предишният акаунт вместо въведения имейл. Отказахме тази сесия. Опитайте вход отново.')
+          :loginError==='identity-init'
+            ?(document.documentElement.lang==='en'?'The new sign-in could not be verified. No previous account was restored. Please try again.':'Новият вход не можа да се провери. Предишен акаунт не е възстановен. Опитайте отново.'):'');
         return;
       }
       await verifyMembership(session);
     }).catch(error=>{
       if (!active||epoch!==sessionEpoch.current) return;
       if(error instanceof GridexSessionExpiredError){showDemoAfterExpiredSession();return;}
+      if(authCallback&&pendingGridexLogin()) {
+        forgetSession();clearGridexSession();
+        window.location.replace('/login/?error=identity-init');
+        return;
+      }
       setSessionUser(null);
       setAccountIdentity(null);
       setBackendState("unknown");

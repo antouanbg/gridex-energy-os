@@ -15,11 +15,30 @@ let keycloak: Keycloak | undefined;
 let initialisation: Promise<boolean> | undefined;
 let locallyEnded=false;
 export const logoutSignalKey='gridex.logout-signal';
+const loginIntentKey='gridex.login-intent';
+export function pendingGridexLogin(): {realm:string;email:string}|null {
+  try {
+    const raw=sessionStorage.getItem(loginIntentKey);
+    if(!raw)return null;
+    const intent=JSON.parse(raw) as {realm?:unknown;email?:unknown;at?:unknown};
+    // Do not silently stop enforcing an unfinished account switch after a
+    // timeout or a prolonged API outage. A new explicit login replaces it.
+    if(typeof intent.realm==='string'&&typeof intent.email==='string'&&typeof intent.at==='number') {
+      return {realm:intent.realm,email:intent.email};
+    }
+  }catch{/* Missing browser storage cannot authorize an identity. */}
+  clearGridexLoginIntent();
+  return null;
+}
+export function clearGridexLoginIntent(): void {
+  try{sessionStorage.removeItem(loginIntentKey);}catch{/* Optional storage. */}
+}
 export function clearGridexSession(): void {
   locallyEnded=true;
   keycloak?.clearToken();
   keycloak=undefined;
   initialisation=undefined;
+  clearGridexLoginIntent();
 }
 const returnPathKey='gridex.auth-return-path';
 function saveReturnPath() {
@@ -90,7 +109,10 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
   // Do not even start the identity client's automatic SSO flow in this case.
   if(fresh)return null;
   const instance = client(config);
-  const restore=previousRelease()!==null || (!window.location.pathname.startsWith('/demo')&&!['/','/en/','/login/','/about/'].includes(window.location.pathname));
+  // A generic Login page is a new identity choice, and an OIDC callback must
+  // consume its own code before any remembered-session SSO check can run.
+  const restore=!hasGridexAuthCallback()&&window.location.pathname!=='/login/'&&
+    (previousRelease()!==null || (!window.location.pathname.startsWith('/demo')&&!['/','/en/','/about/'].includes(window.location.pathname)));
   if(!initialisation)saveReturnPath();
   initialisation ??= bounded(instance.init({
     flow: "standard",
@@ -109,7 +131,7 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
   const authenticated = await initialisation;
   if(locallyEnded||keycloak!==instance)throw new GridexSessionExpiredError();
   restoreReturnPath();
-  if (!authenticated || !instance.authenticated) return null;
+  if (!authenticated || !instance.authenticated) {clearGridexLoginIntent();return null;}
   rememberSession();
   return sessionFrom(instance);
 }
@@ -135,13 +157,19 @@ export async function gridexLoginForEmail(config: GridexRuntimeConfig, realm: st
   if (boundary < 0) throw new Error('Invalid identity issuer');
   const routed = { ...config, realm, oidcIssuer: `${config.oidcIssuer.slice(0, boundary + marker.length)}${realm}` };
   clearGridexSession();
+  try {
+    for(const key of ['gridex.selected-site','gridex.live-return-path',returnPathKey])sessionStorage.removeItem(key);
+  }catch{/* Browser storage is optional; private data still requires a verified token. */}
   locallyEnded = false;
   const instance = client(routed);
   await bounded(instance.init({ flow: 'standard', pkceMethod: 'S256', checkLoginIframe: false,
     redirectUri: authRedirect(routed) }), Math.max(1000, Math.min(config.backendTimeoutMs || 5000, 15000)));
   saveReturnPath();
-  await instance.login({ redirectUri: authRedirect(routed), scope: 'openid profile email',
-    loginHint: email, prompt: 'login', maxAge: 0 });
+  try {
+    sessionStorage.setItem(loginIntentKey,JSON.stringify({realm,email:email.trim().toLowerCase(),at:Date.now()}));
+    await instance.login({ redirectUri: authRedirect(routed), scope: 'openid profile email',
+      loginHint: email, prompt: 'login', maxAge: 0 });
+  }catch(error){clearGridexLoginIntent();throw error;}
 }
 
 export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
