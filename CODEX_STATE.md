@@ -1,5 +1,11 @@
 # Current task
 
+## 2026-09-30 — login correction published
+
+PR #88 is in main (`2200d17`); CI and Pages deploy succeeded. Public Login
+HTML and its new JS/CSS were checked. BG/EN docs PR #32 is deployed. Only
+real-account external-browser acceptance remains; see HANDOFF for steps.
+
 ## 2026-09-30 — sign-in navigation and landing
 
 Unfinished sign-in returns directly to the selected Demo route; mobile and

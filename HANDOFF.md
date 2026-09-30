@@ -1,6 +1,18 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 — login correction release checkpoint
+
+PR #88 is merged as `2200d17`. The main-branch quality run 36748520895
+and GitHub Pages deployment 36748520884 succeeded (65 Chromium tests).
+Public `/login/` serves the new main JS with “Входът е успешен” and the new
+CSS as `text/css`. The paired BG/EN guide is merged/deployed in `gridex-docs`
+PR #32. No real account credentials were used in automated checks. The owner
+still needs to accept the exact external-browser flow: Demo → Login → another
+Demo section without refresh, then genuine login → brief success → Overview.
+If that fails, capture the visible error without tokens, inspect the deployed
+bundle/network path and revert PR #88 if authentication is impacted.
+
 ## 2026-09-30 16:52 UTC — interrupted sign-in and post-login landing
 
 Environment/revision: public portal, source baseline `fbda553` (the live
