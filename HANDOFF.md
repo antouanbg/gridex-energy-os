@@ -2472,3 +2472,13 @@ and coming-soon services at both administration levels. Only the platform
 administrator grants an active organisation, while its administrator may
 grant approved services to verified members. Local code/tests passed; live
 deployment and cross-tenant acceptance remain open.
+
+Publication update: PR #95 merged into `main` at `1d6fe19`. Frontend quality
+CI passed 71 Chromium cases, and GitHub Pages run `36769923322` succeeded.
+The public `https://gridex.tech/` served the matching `main-BOjngRq5.js`
+bundle. BG/EN guide PR #37 merged in `antouanbg/gridex-docs`; local HTTPS
+proxy served both guide routes and CSS/JS with correct MIME after deployment.
+Real three-role/two-organisation browser acceptance, including revocation and
+cross-tenant denial, is still open. The docs public hostname timed out from
+this Mac without the required external route/VPN; check it from an external
+network rather than treating that timeout as a site defect.

@@ -1,6 +1,10 @@
 # Current task
 
-## 2026-09-30 — service approval screens (publication in progress)
+## 2026-09-30 — service approval screens (published; acceptance pending)
+
+Publication update: PR #95 merged as `1d6fe19`; Pages run `36769923322`
+passed and the public HTML served the matching new bundle. Mocked/local and
+CI suites pass. Real-account acceptance across two organisations remains open.
 
 The approved five-service catalogue remains in Profile → Services. In the
 existing Users & invitations administration the platform view now separates
