@@ -2,6 +2,10 @@
 
 ## 2026-09-30 — contact form failure visibility
 
+PR #85 is merged; frontend CI and Pages deploy passed. Docs PR #31 is merged
+and published BG/EN. Public About JS contains the new retry/validation text.
+External-network acceptance and real support receipt remain open.
+
 Source fix: show human-check failure and nearby retry; remove silent submit
 disable tied to a UI email projection; validate form fields in BG/EN before
 sending; retain typed values on API errors and avoid automatic resends. Four
