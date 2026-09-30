@@ -23,6 +23,10 @@ export type GridexRuntimeConfig = {
   authEnabled: boolean;
 };
 
+export type ContactChallenge = { id: string; left: number; right: number; expiresInSeconds: number };
+export type ContactEnquiry = { name: string; email: string; topic: string; message: string;
+  challengeId: string; answer: number; website: string };
+
 export type GridexUser = {
   subject: string;
   realm?: string;
@@ -339,6 +343,30 @@ export class GridexApiClient {
     private readonly config: GridexRuntimeConfig,
     private readonly getAccessToken: (force?: boolean) => Promise<string | undefined> = async () => undefined,
   ) {}
+
+  async contactChallenge(): Promise<ContactChallenge> {
+    const response = await fetch(`${this.config.apiBaseUrl}/api/v1/contact/challenge`, {
+      cache: 'no-store', signal: AbortSignal.timeout(Math.max(1000, this.config.backendTimeoutMs || 5000)),
+    });
+    if (!response.ok) throw new GridexApiError('Contact challenge unavailable', response.status);
+    return response.json();
+  }
+
+  async submitContactEnquiry(enquiry: ContactEnquiry, authenticated: boolean): Promise<void> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (authenticated) {
+      const token = await this.getAccessToken();
+      if (!token) throw new GridexApiError('Authentication required', 401);
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const response = await fetch(`${this.config.apiBaseUrl}/api/v1/contact/inquiries`, {
+      method: 'POST', headers, body: JSON.stringify(enquiry), cache: 'no-store',
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!response.ok) throw new GridexApiError('Contact enquiry not accepted', response.status);
+    const result = await response.json();
+    if (result.status !== 'queued') throw new GridexApiError('Contact enquiry not queued', 503);
+  }
 
   async health(signal?: AbortSignal): Promise<{ status: string; openRemote: string; writesEnabled?: boolean }> {
     if (this.config.mode === "demo") return { status: "demo", openRemote: "not-connected" };

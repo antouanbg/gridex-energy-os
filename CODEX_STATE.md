@@ -1,5 +1,19 @@
 # Current task
 
+## 2026-09-30 — enquiry form (source only)
+
+Owner approved a public demo contact form and a free-topic form for every
+verified signed-in member. Existing About/Request an offer now leads to the
+same form; the backend is the only sender and fixes the support recipient.
+Browser uses the one-use human question, with no new menu or mobile-only
+layout rule. TypeScript, Pages build, lint (two existing image warnings),
+29 unit/render tests, 59 existing browser tests and 2 new desktop/mobile form
+tests pass. Backend and documentation publication plus a real inbox test are
+required before calling the feature live. See HANDOFF.
+
+Демо посетител и потвърден влязъл потребител получават реална форма в „За нас“;
+публикуването и истинският имейл тест още предстоят.
+
 ## 2026-09-29 — Site visualisations source checkpoint
 
 The portal has a Site-scoped `/sites/{id}/visualisations/` route using the

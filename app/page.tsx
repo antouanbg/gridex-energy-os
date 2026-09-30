@@ -640,7 +640,7 @@ export default function Home() {
         {view === "reports" && <ReportsCenter notify={notify} lang={lang} batteryCost={batteryCost}/>}
         {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
-        {view === "about" && <About lang={lang} notify={notify}/>}
+        {view === "about" && <About lang={lang} notify={notify} api={apiClient} live={dataMode==='live'} email={sessionUser?.email}/>}
         {view === "help" && <ProfileHelp lang={lang} live={dataMode==='live'}/>}
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "members" && dataMode==='demo' && <section className="card config-card"><h2>{lang==='en'?'Users & invitations':'Потребители и покани'}</h2><p>{lang==='en'?'Sign in as an organisation administrator to manage real invitations. No demo emails are sent.':'Влезте като администратор на организация, за да управлявате реални покани. В демо режима не се изпращат имейли.'}</p></section>}
