@@ -1,5 +1,20 @@
 # GrideX Energy OS — Working Rules
 
+## BG day-ahead status semantics — 2026-09-30
+
+Do not infer ENTSO-E connectivity from `lastSuccessAt` alone: a complete
+next-day auction is published once daily, while the worker checks hourly.
+Use the current `lastAttemptAt` and error status for check health; show the
+last complete import and latest delivery date separately. `partial` means
+the provider returned some next-day intervals, not that today's complete
+prices have disappeared. Bulgarian day-ahead prices have 15-minute market
+time units since 2025-10-01; API polling is not the price resolution.
+
+Не бъркай 15-минутната цена с честотата на API заявките. Връзката се следи
+по последния опит и грешката, а не само по последния пълен дневен импорт.
+`partial` за утре не означава липса на днешните цени. Показвай отделно
+последната проверка, последния пълен импорт и датата на доставка.
+
 ## Approved service catalog / Одобрен каталог — 2026-09-29
 
 All verified members, including viewers, may see a five-entry service

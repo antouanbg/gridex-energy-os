@@ -26,9 +26,12 @@ export function LiveMarket({ api, lang, platformAdmin, grafanaEnabled }: { api: 
     : t('Още няма успешно обновяване', 'No successful refresh yet');
   const bgZone = health?.zones.find(zone => zone.country === 'BG' && zone.zone === 'BG');
   const deliveryDate = formatMarketDeliveryDate(bgZone?.latestDeliveryDate, lang);
-  const latest = health?.zones.reduce<string | null>((date, zone) =>
+  const latestSuccess = health?.zones.reduce<string | null>((date, zone) =>
     zone.lastSuccessAt && (!date || zone.lastSuccessAt > date) ? zone.lastSuccessAt : date, null) || null;
-  const live = latest && checkedAt !== null && checkedAt - Date.parse(latest) < 2 * 60 * 60 * 1000;
+  const latestAttempt = health?.zones.reduce<string | null>((date, zone) =>
+    zone.lastAttemptAt && (!date || zone.lastAttemptAt > date) ? zone.lastAttemptAt : date, null) || null;
+  const live = bgZone?.status !== 'error' && latestAttempt && checkedAt !== null
+    && checkedAt - Date.parse(latestAttempt) < 2 * 60 * 60 * 1000;
 
   return <div className="market-page live-market">
     <section className="card live-market-hero">
@@ -51,10 +54,14 @@ export function LiveMarket({ api, lang, platformAdmin, grafanaEnabled }: { api: 
       'The platform administrator first enables a service for an organisation; its administrator then enables it for individual users. Price values are not yet published for customer access.')}</p></section>}
     {platformAdmin && state === 'error' && <section className="card live-market-empty" role="status"><h3>{t('Състоянието не е достъпно','Status unavailable')}</h3><p>{t('Няма да показваме стари данни като текущи.','Old data will not be presented as current.')}</p></section>}
     {platformAdmin && state === 'ready' && <section className="card live-market-empty" role="status">
-      <h3>{live ? t('ENTSO-E API е активно','ENTSO-E API is live') : t('ENTSO-E API не е потвърдено като активно','ENTSO-E API is not confirmed live')}</h3>
-      <p>{t('Последно успешно обновяване (българско време)','Last successful refresh (Bulgaria time)')}: {stamp(latest)}</p>
+      <h3>{live ? t('Проверките към ENTSO-E работят','ENTSO-E checks are running') : t('Проверките към ENTSO-E не са потвърдени','ENTSO-E checks are not confirmed')}</h3>
+      <p>{t('Последна проверка (българско време)','Last check (Bulgaria time)')}: {stamp(latestAttempt)}</p>
+      <p>{t('Последен напълно получен ден (българско време)','Last complete day received (Bulgaria time)')}: {stamp(latestSuccess)}</p>
       <p>{t('Последна дата с налични BG цени','Latest date with available BG prices')}: {deliveryDate || t('Все още няма публикувани стойности','No published values yet')}</p>
-      <p>{t('Последните публикувани данни по зони','Latest published data by zone')}: {health?.zones.filter(zone => zone.status === 'published').length || 0} / {health?.zones.length || 0}</p>
+      {bgZone?.status === 'partial' && <p>{t('За следващия ден ENTSO-E връща само част от интервалите. Цените за последния пълен ден са налични; непълният ден не се използва като завършен.',
+        'ENTSO-E currently returns only some intervals for the next day. Prices for the last complete day remain available; an incomplete day is not treated as complete.')}</p>}
+      {bgZone?.status === 'not_published' && <p>{t('Следващият ден още не е публикуван. Проверяваме отново автоматично веднъж на час.',
+        'The next day has not been published yet. We check again automatically once per hour.')}</p>}
       <button type="button" className="secondary-btn" onClick={() => { setState('loading'); setRefresh(value => value + 1); }}>{t('Провери отново','Check again')}</button>
     </section>}
     {platformAdmin && <MarketCollectionControls api={api} lang={lang}/>}
