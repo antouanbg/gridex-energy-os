@@ -2,13 +2,17 @@
 
 ## 2026-09-30 — About reply address and product gallery
 
+Merged frontend PR #82; CI and GitHub Pages deploy run 36711505755 passed.
+Public images and the About bundle were checked over HTTPS. BG/EN docs PR #29
+is merged and deployed. Real signed-in mailbox reply acceptance is still open.
+
 The owner-approved two-photo STE-261L-125P gallery supports touch swipe and
 arrow controls in About, without menu changes. A signed-in user may edit the
 reply email; verified identity remains separate. Source tests: TypeScript,
 Pages build and three Chromium browser fixtures passed. BG/EN guide is paired
-in the docs repository. Next: merge/deploy backend, portal and docs, then
-verify public pages and real signed-in acceptance. Mock tests do not establish
-production delivery.
+and deployed from the docs repository. Public pages were verified. Next:
+real signed-in acceptance and alternate-address Reply-To delivery check.
+Mock tests do not establish production delivery.
 
 ## 2026-09-30 — expired session UX
 
