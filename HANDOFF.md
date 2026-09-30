@@ -3,6 +3,14 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## 2026-09-30 — editable enquiry reply email and approved Suntech gallery
 
+Live checkpoint: backend PR #76, frontend PR #82 and BG/EN docs PR #29 are
+merged. Frontend CI passed and Pages deploy run 36711505755 succeeded. The
+public About bundle contains `replyEmail` and both photo references; the
+two image URLs return image/webp 200 and `/demo/about/` returns 200. Mocked
+form checks passed on desktop, 390 px and signed-in identity. An external
+browser submission with a genuine account and support reply to the alternate
+address remain unverified; do not infer mailbox delivery from the code test.
+
 Owner reported the signed-in About form's reply email was not editable. The
 input is now editable while the API still sends the verified account email
 separately for identity; `replyEmail` is used for the Mailgun Reply-To. The
@@ -10,9 +18,9 @@ About screen shows two photos of the exact SunStorage PRO STE-261L-125P model
 with source attribution. The owner approved phone swipe, no menu change.
 BG/EN Docusaurus contact guide is updated in the docs repository. TypeScript,
 Pages build and three mocked Chromium checks (390 px, desktop, signed-in
-submission) pass. Publication, live API health, BG/EN guide URLs and external
-browser acceptance must be verified separately; no real mail was sent by
-these tests.
+submission) pass. Publication, live API health and BG/EN guide URLs were
+verified separately above. External browser acceptance remains open; no real
+mail was sent by these automated tests.
 
 ## 2026-09-30 — изтекла сесия към демото
 
