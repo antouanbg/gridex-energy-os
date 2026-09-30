@@ -1,5 +1,29 @@
 import { test, expect } from '@playwright/test';
 
+test('failed human check has a visible retry, and invalid form submission explains what is missing', async ({ page }) => {
+  let challenges = 0;
+  await page.route('**/gridex-config.js', route => route.fulfill({ contentType: 'application/javascript',
+    body: `window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};` }));
+  await page.route('https://api.example.invalid/**', route => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === '/api/v1/contact/challenge') {
+      challenges++;
+      return challenges === 1 ? route.fulfill({ status: 503, json: { error: 'contact_unavailable' } })
+        : route.fulfill({ json: { id: 'second', left: 4, right: 5, expiresInSeconds: 600 } });
+    }
+    return route.fulfill({ status: 503, json: { error: 'unavailable' } });
+  });
+  await page.goto('/demo/about/');
+  const form = page.locator('#contact-enquiry');
+  await expect(form).toContainText('Проверката не се зареди.');
+  await expect(form.getByRole('button', { name: 'Изпрати запитване' })).toBeEnabled();
+  await form.getByRole('button', { name: 'Изпрати запитване' }).click();
+  await expect(form.locator('..').getByRole('alert')).toContainText('Въведете име');
+  await form.getByRole('button', { name: 'Опитай проверката отново' }).click();
+  await expect(form).toContainText('Проверка: колко е 4 + 5?');
+  expect(challenges).toBe(2);
+});
+
 for (const width of [390, 1280]) test(`demo enquiry submits only after human check at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 900 });
   let sent = 0;

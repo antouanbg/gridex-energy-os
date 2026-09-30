@@ -1,5 +1,14 @@
 # Current task
 
+## 2026-09-30 — contact form failure visibility
+
+Source fix: show human-check failure and nearby retry; remove silent submit
+disable tied to a UI email projection; validate form fields in BG/EN before
+sending; retain typed values on API errors and avoid automatic resends. Four
+mocked Chromium cases, lint and Pages build pass. External network acceptance
+is still required: local API/proxy challenge works but this Mac times out to
+the public API address. See HANDOFF. Paired BG/EN guide updated in docs repo.
+
 ## 2026-09-30 — About reply address and product gallery
 
 Merged frontend PR #82; CI and GitHub Pages deploy run 36711505755 passed.

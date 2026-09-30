@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { UiLanguage } from "../i18n/messages";
-import type { ContactChallenge, GridexApiClient } from '../lib/gridex-api';
+import { GridexApiError, type ContactChallenge, type GridexApiClient } from '../lib/gridex-api';
+
+type FormIssue = 'name'|'email'|'topic'|'message'|'answer'|'challenge'|'auth'|'rate'|'delivery'|'network';
 
 export function About({lang,notify,api,live,email}:{lang:UiLanguage;notify:(v:string)=>void;api:GridexApiClient;live:boolean;email?:string}) {
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
@@ -20,20 +22,49 @@ export function About({lang,notify,api,live,email}:{lang:UiLanguage;notify:(v:st
   const [website,setWebsite]=useState('');
   const [busy,setBusy]=useState(false);
   const [result,setResult]=useState<'queued'|'error'|null>(null);
+  const [issue,setIssue]=useState<FormIssue|null>(null);
+  const issueCopy:Record<FormIssue,string>={
+    name:t('Въведете име с поне 2 знака.','Enter a name of at least 2 characters.'),
+    email:t('Въведете валиден имейл за отговор.','Enter a valid reply email address.'),
+    topic:t('Въведете тема с поне 3 знака.','Enter a topic of at least 3 characters.'),
+    message:t('Опишете запитването с поне 20 знака.','Describe your enquiry in at least 20 characters.'),
+    answer:t('Проверете отговора на задачата за човек.','Check the answer to the human-check question.'),
+    challenge:t('Проверката още не е готова. Ако не се появи, натиснете „Опитай отново“.','The human check is not ready. If it does not appear, choose Retry.'),
+    auth:t('Не можахме да потвърдим сесията. Влезте отново през портала.','We could not verify your session. Sign in again through the portal.'),
+    rate:t('Заявката е ограничена временно. Изчакайте няколко минути, без да изпращате повторно.','This request is temporarily rate-limited. Wait a few minutes without resubmitting.'),
+    delivery:t('Резултатът от изпращането е неясен. Проверете пощата за поддръжка, преди да опитате отново.','Delivery status is uncertain. Check with support before trying again.'),
+    network:t('Не успяхме да се свържем с API. Запазете текста и опитайте отново по-късно.','We could not reach the API. Keep your text and try again later.'),
+  };
   useEffect(()=>{let current=true;api.contactChallenge().then(value=>{if(current){setChallenge(value);setChallengeError(false);}}).catch(()=>{if(current)setChallengeError(true);});return()=>{current=false;};},[api]);
   const refreshChallenge=async()=>{
-    setChallenge(null);setAnswer('');
-    try{setChallenge(await api.contactChallenge());setChallengeError(false);}catch{setChallengeError(true);}
+    setChallenge(null);setAnswer('');setChallengeError(false);setIssue(null);
+    try{setChallenge(await api.contactChallenge());}catch{setChallengeError(true);}
   };
   const send=async(event:FormEvent<HTMLFormElement>)=>{
     event.preventDefault();
-    if(!challenge||busy)return;
-    setBusy(true);setResult(null);
+    if(busy)return;
+    setResult(null);setIssue(null);
+    let invalid:FormIssue|null=null;
+    if(name.trim().length<2)invalid='name';
+    else if(!/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(senderEmail.trim()))invalid='email';
+    else if(topic.trim().length<3)invalid='topic';
+    else if(message.trim().length<20)invalid='message';
+    else if(!challenge)invalid='challenge';
+    else if(!answer.trim()||Number(answer)!==challenge.left+challenge.right)invalid='answer';
+    if(invalid){setIssue(invalid);setResult('error');return;}
+    setBusy(true);
     try{
       await api.submitContactEnquiry({name,email:live?(email||''):senderEmail,replyEmail:senderEmail,topic,message,
-        challengeId:challenge.id,answer:Number(answer),website},live);
+        challengeId:challenge!.id,answer:Number(answer),website},live);
       setResult('queued');setMessage('');setTopic('');
-    }catch{setResult('error');}
+    }catch(error){
+      setIssue(error instanceof GridexApiError?
+        error.status===401||error.code==='email_unverified'?'auth':
+        error.status===429?'rate':
+        error.code==='contact_delivery_unknown'?'delivery':
+        error.code==='contact_challenge_invalid'?'challenge':'network':'network');
+      setResult('error');
+    }
     finally{setBusy(false);void refreshChallenge();}
   };
   const showForm=(subject:string)=>{setTopic(subject);document.getElementById('contact-enquiry')?.scrollIntoView({behavior:'smooth',block:'start'});};
@@ -73,17 +104,17 @@ export function About({lang,notify,api,live,email}:{lang:UiLanguage;notify:(v:st
       <p className="eyebrow">{t('ВРЪЗКА С ЕКИПА','CONTACT THE TEAM')}</p>
       <h2 id="contact-heading">{live?t('Изпрати запитване','Send an enquiry'):t('Запитване от демото','Enquiry from the demo')}</h2>
       <p>{t('Опишете темата и въпроса си. Ще изпратим съобщението до екипа за поддръжка след проверката срещу автоматични заявки.','Describe your topic and question. We will send the message to support after the anti-bot check.')}</p>
-      <form className="config-form" onSubmit={send}>
+      <form className="config-form" onSubmit={send} noValidate>
         <label><span>{t('Име','Name')}</span><input required minLength={2} maxLength={100} autoComplete="name" value={name} onChange={event=>setName(event.target.value)}/></label>
         <label><span>{t('Имейл за отговор','Reply email')}</span><input required type="email" maxLength={254} autoComplete="email" value={senderEmail} onChange={event=>setEditedReply({account:accountEmail,value:event.target.value})}/>{live&&<small>{t('Предварително е попълнен имейлът от профила. Можете да зададете друг адрес за отговор; профилната Ви самоличност остава записана отделно.','Your account email is filled in. You can enter a different reply address; your verified account identity is recorded separately.')}</small>}</label>
         <label><span>{t('Тема','Topic')}</span><input required minLength={3} maxLength={120} value={topic} onChange={event=>setTopic(event.target.value)}/></label>
-        <label><span>{challenge?t(`Проверка: колко е ${challenge.left} + ${challenge.right}?`,`Human check: what is ${challenge.left} + ${challenge.right}?`):t('Зареждане на проверката…','Loading human check…')}</span><input required type="number" inputMode="numeric" value={answer} onChange={event=>setAnswer(event.target.value)} disabled={!challenge}/></label>
+        <label><span>{challenge?t(`Проверка: колко е ${challenge.left} + ${challenge.right}?`,`Human check: what is ${challenge.left} + ${challenge.right}?`):challengeError?t('Проверката не се зареди.','The human check could not load.'):t('Зареждане на проверката…','Loading human check…')}</span><input required type="number" inputMode="numeric" value={answer} onChange={event=>setAnswer(event.target.value)} disabled={!challenge}/>{challengeError&&<button className="secondary-btn" type="button" onClick={()=>void refreshChallenge()}>{t('Опитай проверката отново','Retry human check')}</button>}</label>
         <label style={{gridColumn:'1/-1'}}><span>{t('Вашето запитване','Your enquiry')}</span><textarea required minLength={20} maxLength={5000} rows={5} value={message} onChange={event=>setMessage(event.target.value)} style={{width:'100%',border:'1px solid #d5e0d8',borderRadius:9,padding:12,font:'inherit',resize:'vertical'}}/></label>
         <label aria-hidden="true" style={{position:'absolute',left:'-10000px'}}><span>Website</span><input tabIndex={-1} autoComplete="off" value={website} onChange={event=>setWebsite(event.target.value)}/></label>
-        <div style={{gridColumn:'1/-1'}}><button className="primary-btn" type="submit" disabled={busy||!challenge||live&&!email}>{busy?t('Изпращане…','Sending…'):t('Изпрати запитване','Send enquiry')}</button>{challengeError&&<button className="secondary-btn" type="button" onClick={()=>void refreshChallenge()}>{t('Опитай проверката отново','Retry human check')}</button>}</div>
+        <div style={{gridColumn:'1/-1'}}><button className="primary-btn" type="submit" disabled={busy}>{busy?t('Изпращане…','Sending…'):t('Изпрати запитване','Send enquiry')}</button></div>
       </form>
       {result==='queued'&&<p role="status">{t('Запитването е прието за изпращане. Това не е потвърждение за доставка в пощата.','Your enquiry was accepted for sending. This is not confirmation of mailbox delivery.')}</p>}
-      {result==='error'&&<p role="alert">{t('Запитването не е потвърдено. Не натискайте повторно веднага; при нужда се свържете с поддръжката.','The enquiry was not confirmed. Do not retry immediately; contact support if needed.')}</p>}
+      {result==='error'&&<p role="alert">{issue?issueCopy[issue]:issueCopy.network}</p>}
     </section>
 
     <section className="card github-project-card">
