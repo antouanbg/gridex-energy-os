@@ -12,7 +12,11 @@ test('deep link and refresh restore SSO; expiry and restart show Demo until expl
       if(url.searchParams.get('prompt')!=='none')logins++;
       return r.fulfill({status:302,headers:{location:url.searchParams.get('redirect_uri')+'#'+(signedIn?'code=fixture':'error=login_required')+'&state='+url.searchParams.get('state')}});
     }
-    if(url.pathname.endsWith('/logout')) {signedIn=false;return r.fulfill({status:302,headers:{location:url.searchParams.get('post_logout_redirect_uri')!}});}
+    if(url.pathname.endsWith('/logout')) {
+      expect(url.searchParams.get('post_logout_redirect_uri')).toBe('http://127.0.0.1:4173/demo/');
+      signedIn=false;
+      return r.fulfill({status:302,headers:{location:url.searchParams.get('post_logout_redirect_uri')!}});
+    }
     const now=Math.floor(Date.now()/1000);
     const claims={sub:'owner',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce,email:'owner@example.invalid'};
     return r.fulfill({json:{access_token:jwt(claims),id_token:jwt(claims),refresh_token:jwt(claims),expires_in:600,token_type:'Bearer'}});
@@ -83,10 +87,13 @@ test('deep link and refresh restore SSO; expiry and restart show Demo until expl
   await expect(other.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
   await page.locator('.profile').click();
   await page.locator('.account-menu-logout').click();
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await expect(other).toHaveURL(/\/demo\/$/);
   await expect(page.locator('.quick-sign-in')).toBeVisible();
   await expect(other.locator('.quick-sign-in')).toBeVisible();
   await expect(other.getByRole('heading',{name:'ROCK',exact:true})).toHaveCount(0);
-  await expect(other.locator('.app-shell')).toHaveAttribute('data-mode','live');
+  await expect(other.locator('.app-shell')).toHaveAttribute('data-mode','demo');
   await other.close();
   await page.reload();
   await expect(page.locator('.quick-sign-in')).toBeVisible();

@@ -17,6 +17,11 @@ for(const scenario of ['same-realm','cross-realm','stale-identity','callback-fai
       issuedRealm=url.pathname.split('/realms/')[1]?.split('/')[0]||'gridex';
       return route.fulfill({status:302,headers:{location:`${url.searchParams.get('redirect_uri')}#code=fixture&state=${url.searchParams.get('state')}`}});
     }
+    if(url.pathname.endsWith('/logout')) {
+      expect(url.pathname).toContain('/realms/novacom/');
+      expect(url.searchParams.get('post_logout_redirect_uri')).toBe('http://127.0.0.1:4173/demo/');
+      return route.fulfill({status:302,headers:{location:url.searchParams.get('post_logout_redirect_uri')!}});
+    }
     if(secondLogin&&scenario==='callback-failure')return route.fulfill({status:503,json:{error:'identity_unavailable'}});
     const now=Math.floor(Date.now()/1000);
     const claims={sub:issuedEmail,iss:`https://auth.example.invalid/auth/realms/${issuedRealm}`,aud:'gridex-portal',iat:now,exp:now+600,nonce,name:issuedEmail,email:issuedEmail};
@@ -66,6 +71,13 @@ for(const scenario of ['same-realm','cross-realm','stale-identity','callback-fai
     await page.locator('[data-view-id="sites"]').click();
     await expect(page.getByText('Second private Site')).toBeVisible();
     await expect(page.getByText('First private Site')).toHaveCount(0);
+    if(scenario==='cross-realm') {
+      await page.locator('.profile').click();
+      await page.locator('.account-menu-logout').click();
+      await expect(page).toHaveURL(/\/demo\/$/);
+      await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+      await expect(page.getByText('Second private Site')).toHaveCount(0);
+    }
   }
   expect(silentChecks).toBe(0);
 });

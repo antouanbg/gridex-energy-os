@@ -175,7 +175,9 @@ export async function gridexLoginForEmail(config: GridexRuntimeConfig, realm: st
 export async function gridexLogout(config: GridexRuntimeConfig): Promise<void> {
   const instance = client(config);
   if (!initialisation) await initialiseGridexAuth(config);
-  const logoutUrl=instance.createLogoutUrl({redirectUri:new URL('/', window.location.origin).toString()});
+  // Return directly to the public demo after the identity session ends.
+  // The generic home route may still initialise a guarded live view first.
+  const logoutUrl=instance.createLogoutUrl({redirectUri:new URL('/demo/', window.location.origin).toString()});
   forgetSession();
   // Leaving one customer realm must not select it for the next person using
   // this tab. The next generic sign-in starts in the pilot platform realm.
