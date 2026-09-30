@@ -9,7 +9,9 @@ export function About({lang,notify,api,live,email}:{lang:UiLanguage;notify:(v:st
   const [challenge,setChallenge]=useState<ContactChallenge|null>(null);
   const [challengeError,setChallengeError]=useState(false);
   const [name,setName]=useState('');
-  const [senderEmail,setSenderEmail]=useState(email||'');
+  const [editedReply,setEditedReply]=useState<{account:string;value:string}|null>(null);
+  const accountEmail=live?(email||''):'';
+  const senderEmail=editedReply?.account===accountEmail?editedReply.value:accountEmail;
   const [slide,setSlide]=useState(0);
   const gallery=useRef<HTMLDivElement>(null);
   const [topic,setTopic]=useState('');
@@ -18,7 +20,6 @@ export function About({lang,notify,api,live,email}:{lang:UiLanguage;notify:(v:st
   const [website,setWebsite]=useState('');
   const [busy,setBusy]=useState(false);
   const [result,setResult]=useState<'queued'|'error'|null>(null);
-  useEffect(()=>{if(live)setSenderEmail(email||'');},[live,email]);
   useEffect(()=>{let current=true;api.contactChallenge().then(value=>{if(current){setChallenge(value);setChallengeError(false);}}).catch(()=>{if(current)setChallengeError(true);});return()=>{current=false;};},[api]);
   const refreshChallenge=async()=>{
     setChallenge(null);setAnswer('');
@@ -74,7 +75,7 @@ export function About({lang,notify,api,live,email}:{lang:UiLanguage;notify:(v:st
       <p>{t('Опишете темата и въпроса си. Ще изпратим съобщението до екипа за поддръжка след проверката срещу автоматични заявки.','Describe your topic and question. We will send the message to support after the anti-bot check.')}</p>
       <form className="config-form" onSubmit={send}>
         <label><span>{t('Име','Name')}</span><input required minLength={2} maxLength={100} autoComplete="name" value={name} onChange={event=>setName(event.target.value)}/></label>
-        <label><span>{t('Имейл за отговор','Reply email')}</span><input required type="email" maxLength={254} autoComplete="email" value={senderEmail} onChange={event=>setSenderEmail(event.target.value)}/>{live&&<small>{t('Предварително е попълнен имейлът от профила. Можете да зададете друг адрес за отговор; профилната Ви самоличност остава записана отделно.','Your account email is filled in. You can enter a different reply address; your verified account identity is recorded separately.')}</small>}</label>
+        <label><span>{t('Имейл за отговор','Reply email')}</span><input required type="email" maxLength={254} autoComplete="email" value={senderEmail} onChange={event=>setEditedReply({account:accountEmail,value:event.target.value})}/>{live&&<small>{t('Предварително е попълнен имейлът от профила. Можете да зададете друг адрес за отговор; профилната Ви самоличност остава записана отделно.','Your account email is filled in. You can enter a different reply address; your verified account identity is recorded separately.')}</small>}</label>
         <label><span>{t('Тема','Topic')}</span><input required minLength={3} maxLength={120} value={topic} onChange={event=>setTopic(event.target.value)}/></label>
         <label><span>{challenge?t(`Проверка: колко е ${challenge.left} + ${challenge.right}?`,`Human check: what is ${challenge.left} + ${challenge.right}?`):t('Зареждане на проверката…','Loading human check…')}</span><input required type="number" inputMode="numeric" value={answer} onChange={event=>setAnswer(event.target.value)} disabled={!challenge}/></label>
         <label style={{gridColumn:'1/-1'}}><span>{t('Вашето запитване','Your enquiry')}</span><textarea required minLength={20} maxLength={5000} rows={5} value={message} onChange={event=>setMessage(event.target.value)} style={{width:'100%',border:'1px solid #d5e0d8',borderRadius:9,padding:12,font:'inherit',resize:'vertical'}}/></label>
