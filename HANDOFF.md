@@ -1,4 +1,21 @@
 # Frontend login handoff
+Repository / GitHub: `antouanbg/gridex-energy-os`
+
+## 2026-09-30 — contact enquiry release gate
+
+The About form is source-ready on `feat/secure-contact-inquiries`. The existing
+offer button only pre-fills a topic; it never sends until form submission.
+Dependency: backend contact API and private support recipient must be deployed
+first; the BG/EN Docusaurus guide must be published. Acceptance: anonymous
+demo and a verified customer member each receive a provider-queued response
+and support confirms actual mailbox delivery; bad challenge, honeypot,
+throttling and foreign Origin cannot send. Exact next action: review the PR,
+deploy backend first, publish Pages, then perform the two real browser tests.
+Do not mark the About help guide ready until the public guide and live form
+are both verified.
+
+Изходният код е готов, но живото изпращане още не е потвърдено. Пази
+последователността backend → портал → документация → реална доставка.
 
 ## 2026-09-30 — /market/ super-admin render regression
 
