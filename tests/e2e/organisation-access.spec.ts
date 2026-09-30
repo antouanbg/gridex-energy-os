@@ -88,3 +88,70 @@ for (const unavailable of [false,true]) test(`approved organisation list disting
   if(unavailable)await expect(page.getByText('Няма одобрени клиентски организации.',{exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Спри организацията',exact:true})).toHaveCount(0);
 });
+
+test('platform service catalogue separates approved, available and future; removal needs confirmation',async({page})=>{
+  const state=initial();await session(page,true,state);
+  const organisationId='11111111-1111-4111-8111-111111111111';
+  const approved=new Set(['day_ahead']);let writes=0;
+  await page.route(new RegExp(`^https://api\\.example\\.invalid/api/v1/platform/organisations/${organisationId}/services(?:/[^/]+)?$`),route=>{
+    const code=new URL(route.request().url()).pathname.split('/').at(-1);
+    if(route.request().method()==='PUT'){
+      writes++;const enabled=Boolean((route.request().postDataJSON() as {enabled:boolean}).enabled);
+      if(enabled)approved.add(code!);else approved.delete(code!);
+      return route.fulfill({json:{code,enabled}});
+    }
+    return route.fulfill({json:{services:[
+      {code:'day_ahead',description:'Day-ahead',prerequisites:[],requestable:true,enabled:approved.has('day_ahead')},
+      {code:'visualisations',description:'Visualisations',prerequisites:[],requestable:true,enabled:approved.has('visualisations')},
+      {code:'analysis',description:'Analysis',prerequisites:[],requestable:false,enabled:false},
+    ]}});
+  });
+  await page.route(`https://api.example.invalid/api/v1/platform/organisations/${organisationId}/market-zones`,route=>route.fulfill({json:{zones:[{country:'BG',zone:'BG',collected:true,enabled:true}]}}));
+  await page.goto('/customers/users/');
+  await expect(page.getByRole('heading',{name:'Разрешени за организацията',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Налични, но неразрешени за организацията'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Предстои'}).first()).toBeVisible();
+  await page.locator('.service-grant-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Разреши за организацията'}).click();
+  await expect(page.locator('.service-grant-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Отнеми'})).toBeVisible();
+  expect(writes).toBe(1);
+  await page.locator('.service-grant-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Отнеми'}).click();
+  expect(writes).toBe(1);
+  await page.getByRole('button',{name:'Потвърди отнемането'}).click();
+  expect(writes).toBe(2);
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+});
+
+test('organisation admin sees unavailable services but may grant only approved services to members',async({page})=>{
+  await session(page,false,initial());
+  const organisationId='11111111-1111-4111-8111-111111111111';
+  let memberWrites=0;
+  await page.route('https://api.example.invalid/api/v1/me',route=>route.fulfill({json:{subject:'owner',realm:'gridex',roles:['administrator'],permissions:[],memberships:[{organisationId,role:'administrator'}]}}));
+  await page.route('https://api.example.invalid/api/v1/me/invitations',route=>route.fulfill({json:{invitations:[]}}));
+  await page.route('https://api.example.invalid/api/v1/me/service-catalog',route=>route.fulfill({json:{services:[
+    {code:'day_ahead',description:'Day-ahead',requestable:true},
+    {code:'visualisations',description:'Visualisations',requestable:true},
+    {code:'analysis',description:'Analysis',requestable:false},
+  ]}}));
+  await page.route(`https://api.example.invalid/api/v1/organisations/${organisationId}/services`,route=>route.fulfill({json:{services:[
+    {code:'visualisations',description:'Visualisations',prerequisites:[],requestable:true,enabled:true},
+  ]}}));
+  await page.route(new RegExp(`^https://api\\.example\\.invalid/api/v1/organisations/${organisationId}/services/visualisations/members(?:/[^/]+)?$`),route=>{
+    if(route.request().method()==='PUT'){memberWrites++;return route.fulfill({json:{enabled:true}});}
+    return route.fulfill({json:{members:[{subject:'viewer',email:'viewer@example.invalid',role:'viewer',enabled:false}]}});
+  });
+  await page.route(`https://api.example.invalid/api/v1/organisations/${organisationId}/service-requests`,route=>route.fulfill({json:{requests:[]}}));
+  await page.route(`https://api.example.invalid/api/v1/organisations/${organisationId}/invitations`,route=>route.fulfill({json:{invitations:[]}}));
+  await page.goto('/customers/users/');
+  await expect(page.getByRole('heading',{name:'Услуги и достъп на потребителите'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Налични, но неразрешени за Вашата организация'})).toBeVisible();
+  await expect(page.getByText('Чака разрешение от супер администратора; още не може да се включи потребител.')).toBeVisible();
+  const memberCheck=page.locator('.service-grant-row').filter({hasText:'viewer@example.invalid'}).getByRole('checkbox');
+  await memberCheck.click();
+  await expect(memberCheck).toBeChecked();
+  await expect(page.getByText('Достъпът на потребителя е разрешен.')).toBeVisible();
+  expect(memberWrites).toBe(1);
+  await expect(page.getByRole('button',{name:'Разреши за организацията'})).toHaveCount(0);
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+});

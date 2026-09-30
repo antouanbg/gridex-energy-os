@@ -3,10 +3,9 @@ import { useEffect, useState } from 'react';
 import type { GridexApiClient, ServiceRequest } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { documentationLink } from '../lib/documentation';
+import { serviceLabel } from '../lib/service-labels';
 
 const label:Record<string,{bg:string;en:string}>={
-  day_ahead:{bg:'Цени ден напред · България',en:'Day-ahead prices · Bulgaria'},
-  visualisations:{bg:'Графики и визуализации',en:'Charts and visualisations'},
   awaiting_platform:{bg:'Чака супер администратор',en:'Awaiting platform administrator'},
   awaiting_organisation:{bg:'Чака администратор на организация',en:'Awaiting organisation administrator'},
   active:{bg:'Разрешена',en:'Enabled'},
@@ -63,7 +62,7 @@ export function ServiceRequestsAdmin({api,lang,organisationId}: {api:GridexApiCl
     {requests.map(item=>{
       const actionable=item.stage===(organisationId?'awaiting_organisation':'awaiting_platform');
       return <article className="invitation-record" key={item.id}>
-        <strong>{label[item.serviceCode]?.[lang]||item.serviceCode}</strong>
+        <strong>{serviceLabel(item.serviceCode,lang)}{item.serviceCode==='day_ahead'?(en?' · Bulgaria':' · България'):''}</strong>
         <p>{item.organisationName} · {item.email} · {label[item.stage]?.[lang]||item.stage}</p>
         <small>{new Date(item.createdAt).toLocaleString(en?'en-GB':'bg-BG')}</small>
         {item.events.length>0&&<details><summary>{en?'Decision history':'История на решенията'}</summary>

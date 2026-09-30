@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { GridexApiError, type GridexApiClient, type PlatformOrganisation, type ServiceGrant, type OrganisationMarketZone } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
+import { serviceLabel } from '../lib/service-labels';
 
 export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; lang: UiLanguage }) {
   const en = lang === 'en';
@@ -74,6 +75,8 @@ function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;l
   const [services,setServices]=useState<ServiceGrant[]|null>(null);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
+  const [notice,setNotice]=useState('');
+  const [confirmCode,setConfirmCode]=useState('');
   useEffect(()=>{
     const abort=new AbortController();
     api.platformOrganisationServices(organisationId,abort.signal)
@@ -82,24 +85,47 @@ function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;l
     return()=>abort.abort();
   },[api,organisationId,en]);
   async function toggle(service:ServiceGrant){
-    setBusy(true);setError('');
+    setBusy(true);setError('');setNotice('');setConfirmCode('');
     try{
       await api.setPlatformOrganisationService(organisationId,service.code,!service.enabled);
       setServices((await api.platformOrganisationServices(organisationId)).services);
+      setNotice(service.enabled
+        ?en?'Organisation access removed. Previous member grants will not return automatically.':'Достъпът за организацията е отнет. Предишните права на потребителите няма да се върнат автоматично.'
+        :en?'Organisation service enabled. Its administrator must grant each member separately.':'Услугата е разрешена за организацията. Нейният администратор трябва отделно да разреши всеки потребител.');
     }catch{setError(en?'Change not confirmed. Reload before retrying.':'Промяната не е потвърдена. Обновете преди нов опит.');}
     finally{setBusy(false);}
   }
+  const approved=services?.filter(service=>service.enabled)||[];
+  const available=services?.filter(service=>!service.enabled&&service.requestable)||[];
+  const future=services?.filter(service=>!service.enabled&&!service.requestable)||[];
   return <div className="service-grants">
-    <h4>{en?'Services approved for this organisation':'Разрешени услуги за организацията'}</h4>
+    <h4>{en?'Services for this organisation':'Услуги за тази организация'}</h4>
     <p>{en?'No user receives access automatically. The organisation administrator grants it separately.':
       'Никой потребител не получава достъп автоматично. Администраторът на организацията го разрешава отделно.'}</p>
     {error&&<p role="alert">{error}</p>}
-    {services?.map(service=><label key={service.code} className="service-grant-row">
-      <input type="checkbox" checked={service.enabled} disabled={busy||!service.requestable} onChange={()=>void toggle(service)}/>
-      <span>{service.code==='day_ahead'?(en?'Day-ahead market':'Пазар „ден напред“'):service.description}{!service.requestable?(en?' · Coming soon':' · Предстои'):''}</span>
-    </label>)}
-    {services?.some(service=>service.code==='day_ahead'&&service.enabled)&&
+    {notice&&<p role="status">{notice}</p>}
+    {!services&&!error&&<p role="status">{en?'Loading services…':'Зареждане на услугите…'}</p>}
+    <h5>{en?'Approved for the organisation':'Разрешени за организацията'}</h5>
+    {services&&!approved.length&&<p>{en?'No services approved yet.':'Все още няма разрешени услуги.'}</p>}
+    {approved.map(service=><div key={service.code} className="service-grant-row">
+      <span><strong>{serviceLabel(service.code,lang,service.description)}</strong><small>{en?'Organisation approved · members require separate permission':'Одобрена за организацията · потребителите се разрешават отделно'}</small></span>
+      <button type="button" className="secondary-btn" disabled={busy} onClick={()=>setConfirmCode(service.code)}>{en?'Remove':'Отнеми'}</button>
+      {confirmCode===service.code&&<div role="group" aria-label={en?'Confirm service removal':'Потвърди отнемането на услугата'}>
+        <p>{en?'Remove this service for the whole organisation? All member grants are deleted and will not return automatically.':'Да се отнеме ли услугата за цялата организация? Всички лични права се изтриват и няма да се върнат автоматично.'}</p>
+        <button type="button" className="primary-btn" disabled={busy} onClick={()=>void toggle(service)}>{en?'Confirm removal':'Потвърди отнемането'}</button>
+        <button type="button" className="secondary-btn" disabled={busy} onClick={()=>setConfirmCode('')}>{en?'Cancel':'Откажи'}</button>
+      </div>}
+    </div>)}
+    {approved.some(service=>service.code==='day_ahead')&&
       <OrganisationMarketZones api={api} lang={lang} organisationId={organisationId}/>}
+    <h5>{en?'Available, not approved for this organisation':'Налични, но неразрешени за организацията'}</h5>
+    {services&&!available.length&&<p>{en?'No other requestable services.':'Няма други заявяеми услуги.'}</p>}
+    {available.map(service=><div key={service.code} className="service-grant-row">
+      <span><strong>{serviceLabel(service.code,lang,service.description)}</strong><small>{en?'Not approved for this organisation':'Не е разрешена за тази организация'}</small></span>
+      <button type="button" className="secondary-btn" disabled={busy} onClick={()=>void toggle(service)}>{en?'Enable for organisation':'Разреши за организацията'}</button>
+    </div>)}
+    <h5>{en?'Coming soon':'Предстои'}</h5>
+    {future.map(service=><div key={service.code} className="service-grant-row"><span><strong>{serviceLabel(service.code,lang,service.description)}</strong><small>{en?'Not yet requestable or available to grant':'Още не се заявява и не може да се разреши'}</small></span></div>)}
   </div>;
 }
 
