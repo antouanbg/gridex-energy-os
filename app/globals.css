@@ -1087,6 +1087,18 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .profile-help-topic p,.profile-help-roadmap p { margin:0; color:#657a6c; font-size:13px; line-height:1.7; }
 .profile-help-roadmap { padding:23px 25px; border-color:#c8e0d0; background:#f0f8f2; }
 .profile-help-roadmap strong { display:block; margin-bottom:7px; color:#1f6c43; font-size:14px; }
+.suntech-gallery{min-width:0;padding:25px 24px 20px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.suntech-gallery-track{display:flex;width:100%;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;border-radius:16px}
+.suntech-gallery-track::-webkit-scrollbar{display:none}
+.suntech-gallery-slide{position:relative;flex:0 0 100%;width:100%;height:326px;margin:0;overflow:hidden;scroll-snap-align:start;border:1px solid #f0d5d6;border-radius:16px;background:#fff}
+.suntech-gallery-slide img{display:block;width:100%;height:100%;object-fit:contain}
+.suntech-gallery-detail img{object-fit:cover;object-position:center 23%}
+.suntech-gallery-slide figcaption{position:absolute;bottom:10px;left:10px;padding:8px 12px;border-radius:9px;color:#5a1c20;background:rgba(255,255,255,.93);font-size:12px;font-weight:800}
+.suntech-gallery-controls{display:flex;align-items:center;justify-content:center;gap:14px;color:#8a4649;font-size:12px;font-weight:800}
+.suntech-gallery-controls button{width:42px;height:42px;border:1px solid #e9b9bc;border-radius:12px;background:#fff;color:#ad2027;font-size:28px;cursor:pointer}
+.suntech-gallery-controls button:focus-visible{outline:3px solid #ad2027;outline-offset:2px}
+.suntech-gallery-source{align-self:center;color:#9b3339;font-size:11px;text-align:center}
+@media(max-width:680px){.suntech-advert-body{grid-template-columns:minmax(0,1fr)}.suntech-advert-copy{padding:25px 22px 18px}.suntech-gallery{padding:12px 20px 20px}.suntech-gallery-slide{height:340px}}
 @media(max-width:1100px){.profile-dashboard{grid-template-columns:1fr}.profile-session-panel{grid-column:auto;grid-template-columns:1fr 1.2fr}.profile-session-panel>.profile-action{grid-column:1/-1}}
 @media(max-width:680px){.user-profile-page .user-hero{grid-template-columns:60px 1fr;gap:14px;padding:22px 18px}.user-profile-page .user-hero>.profile-action{grid-column:1/-1}.profile-panel{padding:19px}.profile-session-panel{display:block}.profile-session-state{margin:16px 0}.profile-help-intro{display:block;padding:24px 19px}.profile-help-intro .profile-action{margin-top:19px}.profile-help-grid{grid-template-columns:1fr}.profile-help-topic{padding:21px}.profile-facts>div{grid-template-columns:1fr;gap:4px}}
 

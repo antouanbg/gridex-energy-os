@@ -1,5 +1,15 @@
 # Current task
 
+## 2026-09-30 — About reply address and product gallery
+
+The owner-approved two-photo STE-261L-125P gallery supports touch swipe and
+arrow controls in About, without menu changes. A signed-in user may edit the
+reply email; verified identity remains separate. Source tests: TypeScript,
+Pages build and three Chromium browser fixtures passed. BG/EN guide is paired
+in the docs repository. Next: merge/deploy backend, portal and docs, then
+verify public pages and real signed-in acceptance. Mock tests do not establish
+production delivery.
+
 ## 2026-09-30 — expired session UX
 
 Owner-approved: confirmed session loss or release invalidation clears private
