@@ -214,7 +214,8 @@ test("explains delivery date separately from the ENTSO-E refresh time", async ()
   const market = await readFile(new URL("../app/sections/live-market.tsx", import.meta.url), "utf8");
   assert.match(market, /latestDeliveryDate/);
   assert.match(market, /Europe\/Sofia/);
-  assert.match(market, /Датата и часът на графиката са за доставката/);
+  assert.match(market, /Графиката е по българско време \(Europe\/Sofia\)/);
+  assert.match(market, /Изберете период по-долу/);
   assert.match(market, /Last successful refresh/);
   assert.match(market, /не датата на доставка/);
 });
