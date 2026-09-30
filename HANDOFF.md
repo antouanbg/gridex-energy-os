@@ -1,6 +1,18 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 — BG Grafana period control (source gate)
+
+Owner mobile screenshots show an over-wide time axis and two “No data” Stats
+inside the protected Market iframe. The portal now offers BG/EN delivery-period
+presets and a custom 31-day maximum, with an explicit Apply button and current
+range label; mobile controls stay within 390 px. Each application obtains a new
+one-time dashboard launch and forwards only the selected range/dates; no price
+API, customer scope or menu changes. The matching backend must be deployed
+first to validate/forward range; otherwise the control cannot work. Browser
+regression covers preset/custom selection at mobile width. Source-ready only;
+public deployment and owner acceptance remain open.
+
 ## 2026-09-30 — account switch source correction
 
 Explicit login now binds the selected email and realm to the verified

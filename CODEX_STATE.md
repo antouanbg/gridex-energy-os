@@ -1,5 +1,13 @@
 # Current task
 
+## 2026-09-30 — Market Grafana period (source gate)
+
+The embedded BG chart now has GrideX-styled preset/custom date controls in
+BG/EN, including mobile overflow regression. A matching backend range/proxy
+update must reach production before the portal is deployed. This does not
+expand price permissions or collection zones. See HANDOFF for deployment and
+owner acceptance gates.
+
 ## 2026-09-30 — same-browser account switching (source gate)
 
 An explicit login records the selected email and realm; the callback accepts
