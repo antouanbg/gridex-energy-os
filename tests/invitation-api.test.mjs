@@ -14,7 +14,7 @@ test('final 401 ends the session; restart on retry requests fresh login; writes 
     const client=new GridexApiClient({mode:'auto',apiBaseUrl:''},async()=>'fixture');
     globalThis.fetch=async()=>{requests++;return new Response('{}',{status:401});};
     await assert.rejects(client.me(),{status:401});
-    assert.equal(requests,2);assert.deepEqual(events,['gridex:session-ended']);
+    assert.equal(requests,2);assert.deepEqual(events,['gridex:session-expired']);
     requests=0;events.length=0;
     globalThis.fetch=async()=>{requests++;return new Response(JSON.stringify({error:requests===2?'reauthentication_required':'authentication_required'}),{status:401});};
     await assert.rejects(client.me(),{status:401});
@@ -22,7 +22,7 @@ test('final 401 ends the session; restart on retry requests fresh login; writes 
     requests=0;events.length=0;
     globalThis.fetch=async()=>{requests++;return new Response('{}',{status:401});};
     await assert.rejects(client.invite('org',{email:'test@example.invalid',role:'customer',siteIds:[]}),{status:401});
-    assert.equal(requests,1);assert.deepEqual(events,['gridex:session-ended']);
+    assert.equal(requests,1);assert.deepEqual(events,['gridex:session-expired']);
   }finally{globalThis.fetch=originalFetch;globalThis.window=originalWindow;}
 });
 test('device heartbeat reads are authenticated, site-scoped and never fall back to demo', async () => {

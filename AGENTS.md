@@ -1,5 +1,18 @@
 # GrideX Energy OS — Working Rules
 
+## Expired portal session — owner decision 2026-09-30
+
+After confirmed session expiry, revoked identity, or a release boundary, clear
+private portal state and navigate to `/demo/`. Never start an automatic
+Keycloak/OpenRemote login. The visitor signs in again only by choosing Login
+in Demo. A temporary API/identity outage is not confirmed expiry: retain the
+guarded live/checking state and retry, without showing sample data as user data.
+
+При потвърдено изтичане/отнемане на сесията или след нова версия изчиствай
+личното състояние и отваряй `/demo/`, без автоматичен Keycloak/OpenRemote
+вход. Нов вход започва само от бутона в демото. Временна недостъпност не е
+изтекла сесия и не разрешава замяна с демо стойности.
+
 ## BG day-ahead status semantics — 2026-09-30
 
 Do not infer ENTSO-E connectivity from `lastSuccessAt` alone: a complete

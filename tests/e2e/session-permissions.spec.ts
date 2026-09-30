@@ -34,8 +34,9 @@ for(const loss of ['site','identity'] as const)test(`session rechecks roles and 
   if(loss==='identity')await expect(page.locator('.quick-sign-in')).toBeVisible();
   else await expect(page.locator('.profile small')).toHaveText('Клиент');
   await expect(page.getByRole('heading',{name:'Private ROCK',exact:true})).toHaveCount(0);
-  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
-  await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode',loss==='identity'?'demo':'live');
+  if(loss==='identity')await expect(page).toHaveURL(/\/demo\/$/);
+  else await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
   await expect(page.locator('main')).not.toContainText('Private Lab');
 });
 

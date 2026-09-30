@@ -2,7 +2,7 @@
 
 import { lazy, Suspense, useEffect, useMemo, useState, useRef, type FormEvent } from "react";
 import { discoverGridexLoginRealms, requestInvitationResend, getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexRuntimeConfig, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
-import { getGridexAccessToken, gridexLogin, gridexLoginForEmail, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
+import { getGridexAccessToken, gridexLoginForEmail, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
 import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
@@ -10,7 +10,7 @@ import { ProfileHelp } from './sections/profile-help';
 import { ServiceCatalog } from './sections/service-catalog';
 import { documentationLink } from './lib/documentation';
 import { readRoute, sectionHref } from './lib/routes';
-import { releaseId, previousRelease } from './lib/session-policy';
+import { forgetSession, releaseId, previousRelease } from './lib/session-policy';
 import {clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
@@ -24,6 +24,16 @@ const parentSection:Record<string,string>={members:'customers',assets:'sites',ba
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
 const liveViews = new Set(["overview", "sites", "devices", "visualisations", "members", "market", "profile", "login", "about", "help"]);
+
+function showDemoAfterExpiredSession() {
+  forgetSession();
+  clearGridexSession();
+  try {
+    for (const key of ['gridex.selected-site', 'gridex.selected-realm', 'gridex.live-return-path', 'gridex.auth-return-path'])
+      sessionStorage.removeItem(key);
+  } catch { /* Browser storage is optional. */ }
+  window.location.replace('/demo/');
+}
 
 type DemoUser = {
   nameBg:string;
@@ -202,6 +212,7 @@ export default function Home() {
       setSessionCheckError(false);
       setIntegrationError(lang==='en'?'Your session ended. Please sign in again.':'Сесията е прекратена. Моля, влезте отново.');
     };
+    const expired=()=>{ended();showDemoAfterExpiredSession();};
     const suspend=(broadcast:boolean)=>{
       ended();setIntegrationError(lang==='en'?'Your organisation is temporarily suspended. Contact the super administrator.':'Организацията е временно спряна. Свържете се със супер администратора.');
       if(broadcast)try{localStorage.setItem('gridex.organisation-suspended',JSON.stringify({realm:runtimeConfig.realm,nonce:crypto.randomUUID()}));}catch{/* Other tabs recheck on resume. */}
@@ -212,9 +223,11 @@ export default function Home() {
       if(event.key==='gridex.organisation-suspended'&&event.newValue)try{if(JSON.parse(event.newValue).realm===runtimeConfig.realm)suspend(false);}catch{/* Ignore malformed optional browser signals. */}
     };
     window.addEventListener('gridex:session-ended',ended);
+    window.addEventListener('gridex:session-expired',expired);
+    window.addEventListener('gridex:reauth-required',expired);
     window.addEventListener('gridex:organisation-suspended',suspended);
     window.addEventListener('storage',storage);
-    return()=>{window.removeEventListener('gridex:organisation-suspended',suspended);window.removeEventListener('gridex:session-ended',ended);window.removeEventListener('storage',storage);};
+    return()=>{window.removeEventListener('gridex:organisation-suspended',suspended);window.removeEventListener('gridex:session-ended',ended);window.removeEventListener('gridex:session-expired',expired);window.removeEventListener('gridex:reauth-required',expired);window.removeEventListener('storage',storage);};
   },[dataMode,lang,runtimeConfig.realm]);
   useEffect(()=>{
     if(selectedSiteId&&liveSites.some(site=>site.id===selectedSiteId)) {
@@ -226,18 +239,6 @@ export default function Home() {
     window.addEventListener('popstate',restore);
     return()=>window.removeEventListener('popstate',restore);
   },[]);
-  useEffect(()=>{
-    let pending=false;
-    const reauthenticate=()=>{
-      if(pending)return;
-      pending=true;
-      setAuthState('checking');
-      setBackendState('unknown');
-      void gridexLogin(runtimeConfig,true).catch(()=>{pending=false;setAuthState('error');});
-    };
-    window.addEventListener('gridex:reauth-required',reauthenticate);
-    return()=>window.removeEventListener('gridex:reauth-required',reauthenticate);
-  },[runtimeConfig]);
   useEffect(()=>{
     if(authState!=='authenticated')return;
     const controller=new AbortController();
@@ -318,6 +319,12 @@ export default function Home() {
     initialiseGridexAuth(runtimeConfig).then(async session=>{
       if (!active||epoch!==sessionEpoch.current) return;
       if (!session) {
+        // A confirmed anonymous result after a remembered/deep-linked session
+        // returns to the public demo; an API outage is handled in catch below.
+        if(window.location.pathname!=='/login/' && (previousRelease()!==null || window.location.pathname!=='/about/')) {
+          showDemoAfterExpiredSession();
+          return;
+        }
         setSessionUser(null);
         setAccountIdentity(null);
         setAuthState("anonymous");
@@ -327,8 +334,9 @@ export default function Home() {
         return;
       }
       await verifyMembership(session);
-    }).catch(()=>{
+    }).catch(error=>{
       if (!active||epoch!==sessionEpoch.current) return;
+      if(error instanceof GridexSessionExpiredError){showDemoAfterExpiredSession();return;}
       setSessionUser(null);
       setAccountIdentity(null);
       setBackendState("unknown");
@@ -409,7 +417,7 @@ export default function Home() {
     const controller=new AbortController();
     const expireSession=()=>{
         if(!active)return;
-        window.dispatchEvent(new Event('gridex:session-ended'));
+        window.dispatchEvent(new Event('gridex:session-expired'));
       };
     const verifySession=async()=>{
       if(pending||!active)return;
