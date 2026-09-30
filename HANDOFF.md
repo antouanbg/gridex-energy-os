@@ -1,6 +1,15 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 — изтекла сесия към демото
+
+Одобрено поведение: при потвърден 401, отнета идентичност или нов release
+порталът чисти личните данни и отваря `/demo/`. Не стартира автоматичен
+Keycloak/OpenRemote вход. Следващият вход е само с бутона „Вход“ от демото.
+При временен отказ на API проверката остава в защитено live състояние с
+повторен опит; демо данни не заменят потребителските. Няма ново меню.
+Публикация и реална проверка с потребителска сесия се отчитат отделно.
+
 ## 2026-09-30 — contact enquiry release gate
 
 The About form is source-ready on `feat/secure-contact-inquiries`. The existing

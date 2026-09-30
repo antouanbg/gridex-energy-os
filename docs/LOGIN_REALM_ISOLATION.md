@@ -15,7 +15,10 @@ been verified. It is not a sign-out. “Verification unavailable” means the ch
 failed; retry when connectivity returns. Only after a confirmed anonymous result
 does the UI say “No active session”. A verified user sees only authorised Sites;
 an empty Site list does not imply that devices exist elsewhere. Demo data is
-never substituted for a live account.
+never substituted for a live account. After confirmed expiry or a release
+change, private state is cleared and `/demo/` opens. There is no automatic
+OpenRemote/Keycloak login; choose Login in Demo. A temporary connection
+failure does not trigger this transition.
 
 OpenRemote's public Manager is restricted to the platform realm. Customer
 action-email links remain available for verification and password setup, but
@@ -39,7 +42,10 @@ account holder.
 „Няма активна сесия“ се показва само след потвърден анонимен резултат.
 Потвърденият потребител вижда само разрешените му Обекти; празният списък не
 означава, че има устройства на друго място. Демо данни не заместват реалния
-акаунт.
+акаунт. При потвърдено изтичане на сесията или смяна на версията личното
+състояние се изчиства и се отваря `/demo/`. Няма автоматичен вход към
+OpenRemote/Keycloak; за нов вход натиснете „Вход“ в демото. Временна грешка
+на връзката не води до този преход.
 
 Публичният OpenRemote Manager е ограничен до платформения realm. Клиентските
 линкове от писмата остават достъпни за потвърждение и парола, но заглавието

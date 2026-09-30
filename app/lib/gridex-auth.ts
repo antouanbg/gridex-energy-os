@@ -85,8 +85,11 @@ function client(config: GridexRuntimeConfig): Keycloak {
 
 export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise<GridexAuthSession | null> {
   if (!config.authEnabled || config.mode === "demo") return null;
-  const instance = client(config);
   const fresh=requiresFreshLogin()&&!hasGridexAuthCallback();
+  // A release boundary is a confirmed end of the remembered portal session.
+  // Do not even start the identity client's automatic SSO flow in this case.
+  if(fresh)return null;
+  const instance = client(config);
   const restore=previousRelease()!==null || (!window.location.pathname.startsWith('/demo')&&!['/','/en/','/login/','/about/'].includes(window.location.pathname));
   if(!initialisation)saveReturnPath();
   initialisation ??= bounded(instance.init({
@@ -105,10 +108,6 @@ export async function initialiseGridexAuth(config: GridexRuntimeConfig): Promise
   });
   const authenticated = await initialisation;
   if(locallyEnded||keycloak!==instance)throw new GridexSessionExpiredError();
-  if(fresh) {
-    await instance.login({redirectUri:authRedirect(config),prompt:'login',maxAge:0,scope:'openid profile email'});
-    return null;
-  }
   restoreReturnPath();
   if (!authenticated || !instance.authenticated) return null;
   rememberSession();

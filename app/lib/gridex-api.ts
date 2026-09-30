@@ -849,11 +849,11 @@ export class GridexApiClient {
     try {
       token = await this.getAccessToken();
     } catch(error) {
-      if((error as {status?:number})?.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+      if((error as {status?:number})?.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-expired'));
       throw new GridexApiError("Authentication refresh unavailable", (error as {status?:number})?.status===401?401:503);
     }
     if (!token) {
-      if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+      if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-expired'));
       throw new GridexApiError("Authentication is required for live GridEx data", 401);
     }
     const headers = new Headers(init.headers);
@@ -879,18 +879,18 @@ export class GridexApiClient {
     if(response.status===401 && (!init.method || init.method==='GET') && !init.signal?.aborted) {
       try { token=await this.getAccessToken(true); }
       catch(error) {
-        if((error as {status?:number})?.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+        if((error as {status?:number})?.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-expired'));
         throw new GridexApiError('Authentication refresh unavailable',(error as {status?:number})?.status===401?401:503);
       }
       if(!token) {
-        if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+        if(typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-expired'));
         throw new GridexApiError('Authentication required',401);
       }
       headers.set('Authorization',`Bearer ${token}`);
       response=await fetch(`${this.config.apiBaseUrl}${path}`,{...init,headers});
       await checkRestart(response);
     }
-    if(response.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-ended'));
+    if(response.status===401&&typeof window!=='undefined')window.dispatchEvent(new Event('gridex:session-expired'));
     return response;
   }
 }

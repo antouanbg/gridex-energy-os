@@ -1,5 +1,14 @@
 # Current task
 
+## 2026-09-30 — expired session UX
+
+Owner-approved: confirmed session loss or release invalidation clears private
+portal state and navigates to `/demo/`; no automatic Keycloak/OpenRemote
+redirect. Login remains an explicit action in Demo. Transient API failure
+stays guarded live/checking, never substitutes demo values. See HANDOFF and
+the paired BG/EN public access guide. Browser fixtures and live acceptance
+are separate evidence.
+
 ## 2026-09-30 — enquiry form (source only)
 
 Owner approved a public demo contact form and a free-topic form for every

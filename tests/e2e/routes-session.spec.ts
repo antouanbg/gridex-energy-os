@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-test('deep link, refresh, SSO restore, history, release re-login and explicit logout',async({page,context})=>{
+test('deep link and refresh restore SSO; expiry and restart show Demo until explicit login',async({page,context})=>{
   let signedIn=true,nonce='',forceLogins=0,logins=0,serverRestart=false;
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
   await context.route('**/gridex-config.js',r=>r.fulfill({contentType:'application/javascript',body:`window.__GRIDEX_CONFIG__={mode:'auto',authEnabled:true,apiBaseUrl:'https://api.example.invalid',oidcIssuer:'https://auth.example.invalid/auth/realms/gridex',realm:'gridex',oidcClientId:'gridex-portal'};`}));
@@ -14,11 +14,12 @@ test('deep link, refresh, SSO restore, history, release re-login and explicit lo
     }
     if(url.pathname.endsWith('/logout')) {signedIn=false;return r.fulfill({status:302,headers:{location:url.searchParams.get('post_logout_redirect_uri')!}});}
     const now=Math.floor(Date.now()/1000);
-    const claims={sub:'owner',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce};
+    const claims={sub:'owner',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce,email:'owner@example.invalid'};
     return r.fulfill({json:{access_token:jwt(claims),id_token:jwt(claims),refresh_token:jwt(claims),expires_in:600,token_type:'Bearer'}});
   });
   await context.route('https://api.example.invalid/**',r=>{
     const path=new URL(r.request().url()).pathname;
+    if(path.endsWith('/auth/login-realm'))return r.fulfill({json:{realms:['gridex']}});
     if(serverRestart&&forceLogins<2)return r.fulfill({status:401,json:{error:'reauthentication_required'}});
     if(path.endsWith('/me'))return r.fulfill({json:{subject:'owner',roles:['administrator'],permissions:[],memberships:[]}});
     if(path.endsWith('/me/services'))return r.fulfill({json:{services:[{code:'day_ahead'}]}});
@@ -52,12 +53,27 @@ test('deep link, refresh, SSO restore, history, release re-login and explicit lo
   await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
   await page.evaluate(()=>localStorage.setItem('gridex.session-release','old-release'));
   await page.reload();
-  await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await expect(page.locator('main')).not.toContainText('Private ROCK');
+  expect(forceLogins).toBe(0);
+  await page.locator('.demo-sign-in').click();
+  await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
+  await page.locator('.login-submit').click();
+  await expect(page.locator('.profile small')).toHaveText('Администратор');
   expect(forceLogins).toBe(1);
   serverRestart=true;
-  await page.reload();
-  await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
+  await page.goto('/sites/lab/devices/');
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator('main')).not.toContainText('Private ROCK');
+  expect(forceLogins).toBe(1);
+  await page.locator('.demo-sign-in').click();
+  await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
+  await page.locator('.login-submit').click();
+  await expect(page.locator('.profile small')).toHaveText('Администратор');
   expect(forceLogins).toBe(2);
+  await page.goto('/sites/lab/devices/');
+  await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();
   await expect(page).toHaveURL(/\/sites\/lab\/devices\/$/);
   const other=await context.newPage();
   await other.goto('/sites/lab/devices/');
