@@ -7,6 +7,7 @@ const readyGuides: Record<string, string> = {
   members: '/organisations-and-access/',
   visualisations: '/organisations-and-access/#site-visualisations',
   market: '/market-prices/',
+  about: '/contact-inquiries/',
 };
 
 export function documentationLink(view: string, lang: UiLanguage): { href: string; ready: boolean } {
