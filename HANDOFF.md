@@ -3,6 +3,15 @@ Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## 2026-09-30 — contact form reliability follow-up
 
+Release checkpoint: frontend PR #85 and BG/EN docs PR #31 are merged. Full
+frontend quality run 36719131291 and Pages deploy run 36719560024 succeeded.
+The public About chunk serves the new failure/retry and field-validation copy;
+the BG/EN Docusaurus guide is live through the approved local deploy script.
+Backend was not changed/restarted. Still pending: a real external-network
+browser test and inbox receipt for a fresh, non-duplicate enquiry. Do not
+claim the public API is reliably reachable from every network based on local
+proxy tests; this Mac times out on the public API hostname (likely hairpin).
+
 Owner reports that after refresh the human check can stay on “Loading”, and
 the submit button sometimes appears inert. Source inspection found that the
 challenge failure still displayed the loading label, browser-native required
