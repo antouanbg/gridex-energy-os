@@ -60,6 +60,9 @@ test('deep link and refresh restore SSO; expiry and restart show Demo until expl
   await page.locator('.demo-sign-in').click();
   await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
   await page.locator('.login-submit').click();
+  await expect(page.getByRole('heading',{name:'Входът е успешен'})).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByTestId('section-overview')).toBeVisible();
   await expect(page.locator('.profile small')).toHaveText('Администратор');
   expect(forceLogins).toBe(1);
   serverRestart=true;

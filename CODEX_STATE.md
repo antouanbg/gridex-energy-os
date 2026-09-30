@@ -1,5 +1,15 @@
 # Current task
 
+## 2026-09-30 — sign-in navigation and landing
+
+Unfinished sign-in returns directly to the selected Demo route; mobile and
+desktop email entry is at the top of Login. A verified callback briefly shows
+successful sign-in, then opens Overview with a clean home URL. Regression
+tests cover these flows and the invited-member case. Paired BG/EN public
+documentation is updated in the docs repository. Source checks are separate
+from merge, Pages deployment and external-browser owner acceptance; see
+HANDOFF for the incident and exact next gate.
+
 ## 2026-09-30 — live enquiry acceptance
 
 Owner confirms the live form submits correctly. Mailgun `accepted` and

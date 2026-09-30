@@ -1,6 +1,34 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-09-30 16:52 UTC — interrupted sign-in and post-login landing
+
+Environment/revision: public portal, source baseline `fbda553` (the live
+release must be checked after publication). The owner reports that opening
+Login and then another demo section leaves a live-mode “account data
+unavailable” screen until manual refresh; the mobile email field is below
+lengthy copy; a successful sign-in can remain on Login. No evidence of
+customer data disclosure or mutation; the impact is misleading navigation
+and extra steps. Root cause in source: `/login/` mounts the live runtime while
+client-side navigation only changed URL/view, and the OIDC return path could
+remain `/login/`. This change sends an unfinished anonymous login to the
+selected `/demo/` route, places the email form first, and, after verified
+membership, shows a one-second success state then replaces the URL with the
+Overview home. It does not change authentication, realm selection, API data
+or menu structure. No rollback was performed; revert this frontend release
+if live authentication regresses. Regression tests cover desktop/mobile demo
+return, email placement, successful callback and invited-user landing. Source
+checks: 65/65 Chromium tests, unit/render suite, TypeScript, Pages build and
+lint (four existing image warnings). Publication/deployment and an external
+browser check are separate acceptance gates. Next: merge, deploy, verify the
+three flows on gridex.tech without using real account credentials in logs.
+
+Български: При незавършен вход изборът от менюто трябва веднага да отвори
+съответния демо раздел, без ръчно презареждане. Полето за имейл е в началото
+на екрана. След проверен успешен вход се показва кратко потвърждение и се
+отваря началният „Преглед“. Не обявявай живия сайт за проверен преди
+външния браузърен тест.
+
 ## 2026-09-30 — contact form live acceptance
 
 The owner confirms that submitting the live enquiry form now works correctly.

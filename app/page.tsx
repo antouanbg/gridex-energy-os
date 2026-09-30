@@ -179,6 +179,7 @@ export default function Home() {
   );
   const [authCallback] = useState(hasGridexAuthCallback);
   const [authState,setAuthState] = useState<AuthState>(()=>runtimeConfig.mode !== "demo" ? "checking" : "anonymous");
+  const [loginSuccess,setLoginSuccess] = useState(false);
   const [integrationError,setIntegrationError] = useState("");
   const [sessionCheckError,setSessionCheckError] = useState(false);
   const [liveSites,setLiveSites] = useState<GridexSite[]>([]);
@@ -268,6 +269,7 @@ export default function Home() {
     if (runtimeConfig.mode === "demo") return;
     let active=true;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let successTimer: ReturnType<typeof setTimeout> | undefined;
     const epoch=sessionEpoch.current;
     const verifyMembership=async(session:GridexAuthSession,attempt=0)=>{
       let membershipIdentity: GridexUser;
@@ -315,6 +317,14 @@ export default function Home() {
       verifiedIdentity.current={subject:membershipIdentity.subject,realm:membershipIdentity.realm||runtimeConfig.realm,email:user.email,name:user.nameEn};
       setSessionUser(user);setAccountIdentity(membershipIdentity);setAuthState('authenticated');
       setBackendState('online');setSessionCheckError(false);setIntegrationError('');
+      if(authCallback&&window.location.pathname==='/login/') {
+        setLoginSuccess(true);
+        successTimer=setTimeout(()=>{
+          if(!active||epoch!==sessionEpoch.current)return;
+          window.history.replaceState({},'',sectionHref('overview'));
+          setView('overview');setLoginSuccess(false);
+        },1000);
+      }
     };
     initialiseGridexAuth(runtimeConfig).then(async session=>{
       if (!active||epoch!==sessionEpoch.current) return;
@@ -343,7 +353,7 @@ export default function Home() {
       setAuthState("error");
       setIntegrationError(document.documentElement.lang==="en"?"The identity service could not initialise.":"Услугата за реален вход не може да бъде инициализирана.");
     });
-    return()=>{active=false;if(retryTimer)clearTimeout(retryTimer);};
+    return()=>{active=false;if(retryTimer)clearTimeout(retryTimer);if(successTimer)clearTimeout(successTimer);};
   },[runtimeConfig,apiClient,authCallback]);
 
   useEffect(()=>{
@@ -484,8 +494,16 @@ export default function Home() {
     setDemoNoticeVisible(false);
   };
 
+  // The login route starts in live mode, but an anonymous visitor who has not
+  // completed sign-in must return to the public demo, not an unauthenticated
+  // live section in this still-mounted React tree.
+  const browseAsDemoFromLogin=dataMode==='live'&&view==='login'&&!sessionUser&&authState!=='authenticated'&&!authCallback;
   const navigate = (id: string, siteId = selectedSiteId) => {
     const target=id === 'gateway' ? 'devices' : id;
+    if(browseAsDemoFromLogin&&target!=='login') {
+      window.location.assign(sectionHref(target,'',true));
+      return;
+    }
     window.history.pushState({},'',sectionHref(target,siteId,dataMode==='demo'));
     setView(target);
     setMobileNavOpen(false);
@@ -560,7 +578,7 @@ export default function Home() {
             const badge=dataMode==='live'?(id==='devices'&&hasDeviceWarning?'!':''):id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo')} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={id==='devices'&&hasDeviceWarning?(lang==='en'?'Devices — heartbeat warning':'Устройства — предупреждение: липсва heartbeat'):tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${parentSection[view]===id?'active-parent':''} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''} ${parentSection[id]&&parentSection[navItems[navItems.findIndex(item=>item[0]===id)+1]?.[0]]!==parentSection[id]?'nav-child-last':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
+            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo'||browseAsDemoFromLogin)} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={id==='devices'&&hasDeviceWarning?(lang==='en'?'Devices — heartbeat warning':'Устройства — предупреждение: липсва heartbeat'):tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${parentSection[view]===id?'active-parent':''} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''} ${parentSection[id]&&parentSection[navItems[navItems.findIndex(item=>item[0]===id)+1]?.[0]]!==parentSection[id]?'nav-child-last':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
               <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </a>;
           })}
@@ -601,7 +619,7 @@ export default function Home() {
           <div>
             <div role="navigation" aria-label={lang==='en'?'Breadcrumb':'Път до страницата'}>
               <h1 className="page-breadcrumb" data-testid="page-title">
-                {parentSection[view]&&<><a href={sectionHref(parentSection[view],selectedSiteId,dataMode==='demo')} onClick={event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(parentSection[view]);}}}>{tKey(`nav.${parentSection[view]}` as MessageKey)}</a><span className="breadcrumb-separator" aria-hidden="true">→</span></>}
+                {parentSection[view]&&<><a href={sectionHref(parentSection[view],selectedSiteId,dataMode==='demo'||browseAsDemoFromLogin)} onClick={event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(parentSection[view]);}}}>{tKey(`nav.${parentSection[view]}` as MessageKey)}</a><span className="breadcrumb-separator" aria-hidden="true">→</span></>}
                 <span aria-current="page">{view==='not-found'?(lang==='en'?'Page not found':'Страницата не е намерена'):view==='help'?(lang==='en'?'Documentation':'Документация'):tKey(`nav.${view}` as MessageKey)}</span>
               </h1>
             </div>
@@ -653,7 +671,7 @@ export default function Home() {
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "members" && dataMode==='demo' && <section className="card config-card"><h2>{lang==='en'?'Users & invitations':'Потребители и покани'}</h2><p>{lang==='en'?'Sign in as an organisation administrator to manage real invitations. No demo emails are sent.':'Влезте като администратор на организация, за да управлявате реални покани. В демо режима не се изпращат имейли.'}</p></section>}
         {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations api={apiClient} lang={lang} mode="manage"/>}
-        {view === "login" && <LoginPage lang={lang} user={sessionUser} config={runtimeConfig} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"&&new URLSearchParams(window.location.search).has('realm')}/>}
+        {view === "login" && (loginSuccess?<section className="login-success-screen" role="status"><span aria-hidden="true">✓</span><h2>{lang==='en'?'Sign-in successful':'Входът е успешен'}</h2><p>{lang==='en'?'Opening your overview…':'Отваряме началния екран…'}</p></section>:<LoginPage lang={lang} user={sessionUser} config={runtimeConfig} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"&&new URLSearchParams(window.location.search).has('realm')}/>)}
             </>}
           </div>
         </Suspense>
@@ -740,13 +758,6 @@ function LoginPage({lang,user,config,onSignIn,onSignOut,navigate,backendState,au
       <div className={`login-demo-chip ${backendAvailable?"ready":"offline"}`}>{t("СИГУРЕН ВХОД","SECURE SIGN-IN")}</div>
       <p>{t("ДОБРЕ ДОШЛИ","WELCOME BACK")}</p>
       <h2>{t("Вход в портала","Sign in to the portal")}</h2>
-      <p>{t("Реалният достъп е само с покана. Въведете имейла от поканата. След потвърждение на адреса и задаване на парола първият администратор влиза без втори бутон за приемане.","Live access is invitation-only. Enter the invited email. After verification and password setup, the first administrator signs in without a second acceptance button.")}</p>
-      <a className="profile-inline-help" href={documentationLink('login',lang).href} target="_blank" rel="noopener noreferrer">{t('Как се получава достъп?','How do I get access?')} <span aria-hidden="true">↗</span></a>
-      <span className="login-intro">{t("Ще намерим правилната организация по имейла. Паролата се въвежда само в защитения OpenRemote / Keycloak вход.","We will find the right organisation from your email. Enter your password only on the secure OpenRemote / Keycloak sign-in page.")}</span>
-      {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
-      <div className={`login-connection-state ${backendAvailable?"online":"offline"}`}><i/>
-        <span><strong>{authState==="checking"?t("Проверка на сесията","Checking session"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):backendState==="offline"?t("API достъпът не е потвърден","API access could not be verified"):t("Влезте за проверка на достъпа","Sign in to verify access")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
-      </div>
       {error&&<div className="login-error" role="alert">{error}</div>}
       <form className="login-email-form" onSubmit={resolveEmail}>
         <label htmlFor="gridex-login-email">{t('Имейл','Email')}</label>
@@ -759,6 +770,13 @@ function LoginPage({lang,user,config,onSignIn,onSignOut,navigate,backendState,au
           {realmChoices.map(realm=><button type="button" key={realm} disabled={routingBusy} onClick={()=>void onSignIn(email.trim(),realm)}>{realm}</button>)}
         </div>}
       </form>
+      <p>{t("Реалният достъп е само с покана. Въведете имейла от поканата. След потвърждение на адреса и задаване на парола първият администратор влиза без втори бутон за приемане.","Live access is invitation-only. Enter the invited email. After verification and password setup, the first administrator signs in without a second acceptance button.")}</p>
+      <a className="profile-inline-help" href={documentationLink('login',lang).href} target="_blank" rel="noopener noreferrer">{t('Как се получава достъп?','How do I get access?')} <span aria-hidden="true">↗</span></a>
+      <span className="login-intro">{t("Ще намерим правилната организация по имейла. Паролата се въвежда само в защитения OpenRemote / Keycloak вход.","We will find the right organisation from your email. Enter your password only on the secure OpenRemote / Keycloak sign-in page.")}</span>
+      {user&&<div className="active-session-note"><i>●</i><span><strong>{t("Има активна сесия", "An active session is available")}</strong><small>{user.email}</small></span><button type="button" onClick={()=>navigate("profile")}>{t("Профил","Profile")}</button></div>}
+      <div className={`login-connection-state ${backendAvailable?"online":"offline"}`}><i/>
+        <span><strong>{authState==="checking"?t("Проверка на сесията","Checking session"):backendAvailable?t("Backend връзката е готова","Backend connection is ready"):backendState==="offline"?t("API достъпът не е потвърден","API access could not be verified"):t("Влезте за проверка на достъпа","Sign in to verify access")}</strong><small>{backendAvailable?t("Удостоверяване: OIDC Authorization Code + PKCE S256","Authentication: OIDC Authorization Code + PKCE S256"):t("Ще проверим отново при следващо отваряне или обновяване на страницата.","The connection will be checked again when the page is reopened or refreshed.")}</small></span>
+      </div>
       {!user&&<div className="login-resend"><button type="button" className="login-secondary" disabled={resendBusy||!email.trim()} onClick={async()=>{
         setResendBusy(true);setResendNotice('');
         try{await requestInvitationResend(config,email.trim());setResendNotice(t('Ако има неприета покана за този имейл и не е използван еднократният опит, ще изпратим нов линк на същия адрес.','If a pending invitation exists and its one-time resend has not been used, a new link will be sent to the same address.'));}
