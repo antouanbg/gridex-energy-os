@@ -1,5 +1,34 @@
 # GrideX Energy OS — Working Rules
 
+## Specify, draw, approve, then implement / Специфицирай, начертай, одобри, после внедрявай — 2026-10-01
+
+Before implementing any new feature, workflow, business rule, permission or
+substantial UI change, present one complete proposal to the owner **before
+coding**. Draw the role-by-role flow, including initiator, recipient, decision,
+state transitions, notifications, failure/retry and revocation; show the exact
+existing menu/page location and a reviewable desktop/mobile screen or wireframe
+with labels, actions and statuses. State what already exists, what changes, what
+does not change, and every unresolved choice. Do not fill gaps with an assistant
+assumption or implement only a convenient subset. Wait for the owner's explicit
+approval of both logic and screen. Record the approved scope and decision in
+HANDOFF/CODEX_STATE; implement, test and publish BG/EN help against that scope.
+If an important behavior or screen changes during implementation, present the
+revised flow/screen for approval before proceeding. A purely internal bug fix
+that preserves an already approved contract does not invent a new feature.
+
+Преди внедряване на всяка нова функция, процес, бизнес правило, право или
+значима промяна на интерфейса представи на собственика **пълно предложение
+преди писане на код**. Начертай потока по роли: инициатор, получател, решение,
+състояния, уведомления, отказ/повторен опит и отнемане; покажи точното място
+в съществуващото меню/страница и прегледен desktop/mobile екран или макет с
+текстове, действия и статуси. Посочи кое вече съществува, кое се променя,
+кое остава и всички неуточнени избори. Не запълвай празнотите сам и не
+внедрявай само удобна част. Изчакай изрично одобрение **и на логиката, и на
+екрана**. Запиши одобрения обхват в HANDOFF/CODEX_STATE; изпълни, тествай и
+публикувай BG/EN помощ точно по него. При съществена промяна по време на
+работата покажи новия поток/екран за повторно одобрение. Вътрешна поправка,
+която пази вече одобрен договор, не е нова функция.
+
 ## Local website reachability / Достъп до сайта при локални тестове — 2026-09-30
 
 The local website has no direct route through the internal LAN. A VPN is
