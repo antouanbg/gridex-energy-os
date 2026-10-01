@@ -41,6 +41,20 @@ publish an unapproved mock as an operational guide.
 съответната помощ и сложи връзка от екрана. Не представяй неодобрен макет
 като работещо ръководство.
 
+Implementation gate: first commit the complete proposed logic, role-specific
+desktop/mobile screens and form description to version-controlled documentation,
+clearly marked DRAFT and not as live help. Send those documents for the owner's
+review. Only after the owner explicitly confirms the documented logic and
+screens are correct may implementation begin. An earlier approval of one
+screen does not approve later revisions or the full workflow.
+
+Първа стъпка на внедряването: качи в Git документацията пълната предложена
+логика, отделните екрани по роли за desktop/mobile и описанието на формите,
+ясно означени като ЧЕРНОВА, не като работеща помощ. Дай ги на собственика за
+преглед. Кодът започва чак след неговото изрично потвърждение, че описанието
+и екраните са правилни. Старо одобрение на един екран не одобрява следваща
+редакция или целия процес.
+
 ## Local website reachability / Достъп до сайта при локални тестове — 2026-09-30
 
 The local website has no direct route through the internal LAN. A VPN is
