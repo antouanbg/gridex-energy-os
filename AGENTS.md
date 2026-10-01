@@ -29,6 +29,18 @@ that preserves an already approved contract does not invent a new feature.
 работата покажи новия поток/екран за повторно одобрение. Вътрешна поправка,
 която пази вече одобрен договор, не е нова функция.
 
+Every owner-approved form or screen must become versioned documentation: keep the
+approved mockup or screenshot, its exact menu/URL, fields, validation, roles,
+actions, statuses, error/empty states and BG/EN usage guide in Git. Publish the
+matching help page when the feature is live; link it from that screen. Do not
+publish an unapproved mock as an operational guide.
+
+Пази всяка одобрена форма/екран във версионирана Git документация: одобрения
+макет или снимка, точно меню/URL, полета, валидация, роли, действия, статуси,
+грешки/празни състояния и BG/EN указания. При реално внедряване публикувай
+съответната помощ и сложи връзка от екрана. Не представяй неодобрен макет
+като работещо ръководство.
+
 ## Local website reachability / Достъп до сайта при локални тестове — 2026-09-30
 
 The local website has no direct route through the internal LAN. A VPN is
