@@ -2518,5 +2518,8 @@ sections. Its explanation distinguishes GrideX role/Site checks from the
 approved target of read-only human OpenRemote Manager. The existing Manager
 entry also explains that changes belong in GrideX. No menu location or new
 customer action was added. Pages build, TypeScript and 29 frontend tests pass.
-Do not deploy the read-only wording before the backend migration is verified:
-the current `novacom` human admin still has legacy OpenRemote write roles.
+Subsequently, the Novacom human roles were migrated and verified read-only.
+Frontend PR #98 merged as `4fcafd2`, Pages deployment succeeded, and the
+public member route serves the new JS containing both help anchors. Real
+signed-in desktop/mobile member-edit acceptance remains open; a public 200
+is not proof of role-specific behavior.
