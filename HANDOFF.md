@@ -1,6 +1,20 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-10-02 — approved organisation-member access screen
+
+Owner approved the reviewed desktop/mobile mockup and role/Site/service
+logic for the existing `/customers/users/` page. Implement all-member roster,
+explicit Site scope and guarded non-admin role changes without altering menu
+structure. Pending invitations stay separate; services remain separate grants.
+The paired BG/EN proposal is in `gridex-docs/proposals/service-approval-v2.md`.
+Source, API integration, tests, public help and real-account acceptance remain
+open. Do not represent the mock as deployed.
+
+Български: одобрени са общият списък на членовете, конкретните им Обекти,
+членските роли и отделните услуги. Без ново меню или делегиране на
+администратор през членска покана. Публикацията и реалният тест предстоят.
+
 ## 2026-09-30 18:38 UTC — празен екран след „Изход“
 
 Собственикът съобщава, че потребител достига до празен екран след изход от

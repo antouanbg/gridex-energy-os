@@ -1,5 +1,60 @@
 # GrideX Energy OS — Working Rules
 
+## Specify, draw, approve, then implement / Специфицирай, начертай, одобри, после внедрявай — 2026-10-01
+
+Before implementing any new feature, workflow, business rule, permission or
+substantial UI change, present one complete proposal to the owner **before
+coding**. Draw the role-by-role flow, including initiator, recipient, decision,
+state transitions, notifications, failure/retry and revocation; show the exact
+existing menu/page location and a reviewable desktop/mobile screen or wireframe
+with labels, actions and statuses. State what already exists, what changes, what
+does not change, and every unresolved choice. Do not fill gaps with an assistant
+assumption or implement only a convenient subset. Wait for the owner's explicit
+approval of both logic and screen. Record the approved scope and decision in
+HANDOFF/CODEX_STATE; implement, test and publish BG/EN help against that scope.
+If an important behavior or screen changes during implementation, present the
+revised flow/screen for approval before proceeding. A purely internal bug fix
+that preserves an already approved contract does not invent a new feature.
+
+Преди внедряване на всяка нова функция, процес, бизнес правило, право или
+значима промяна на интерфейса представи на собственика **пълно предложение
+преди писане на код**. Начертай потока по роли: инициатор, получател, решение,
+състояния, уведомления, отказ/повторен опит и отнемане; покажи точното място
+в съществуващото меню/страница и прегледен desktop/mobile екран или макет с
+текстове, действия и статуси. Посочи кое вече съществува, кое се променя,
+кое остава и всички неуточнени избори. Не запълвай празнотите сам и не
+внедрявай само удобна част. Изчакай изрично одобрение **и на логиката, и на
+екрана**. Запиши одобрения обхват в HANDOFF/CODEX_STATE; изпълни, тествай и
+публикувай BG/EN помощ точно по него. При съществена промяна по време на
+работата покажи новия поток/екран за повторно одобрение. Вътрешна поправка,
+която пази вече одобрен договор, не е нова функция.
+
+Every owner-approved form or screen must become versioned documentation: keep the
+approved mockup or screenshot, its exact menu/URL, fields, validation, roles,
+actions, statuses, error/empty states and BG/EN usage guide in Git. Publish the
+matching help page when the feature is live; link it from that screen. Do not
+publish an unapproved mock as an operational guide.
+
+Пази всяка одобрена форма/екран във версионирана Git документация: одобрения
+макет или снимка, точно меню/URL, полета, валидация, роли, действия, статуси,
+грешки/празни състояния и BG/EN указания. При реално внедряване публикувай
+съответната помощ и сложи връзка от екрана. Не представяй неодобрен макет
+като работещо ръководство.
+
+Implementation gate: first commit the complete proposed logic, role-specific
+desktop/mobile screens and form description to version-controlled documentation,
+clearly marked DRAFT and not as live help. Send those documents for the owner's
+review. Only after the owner explicitly confirms the documented logic and
+screens are correct may implementation begin. An earlier approval of one
+screen does not approve later revisions or the full workflow.
+
+Първа стъпка на внедряването: качи в Git документацията пълната предложена
+логика, отделните екрани по роли за desktop/mobile и описанието на формите,
+ясно означени като ЧЕРНОВА, не като работеща помощ. Дай ги на собственика за
+преглед. Кодът започва чак след неговото изрично потвърждение, че описанието
+и екраните са правилни. Старо одобрение на един екран не одобрява следваща
+редакция или целия процес.
+
 ## Local website reachability / Достъп до сайта при локални тестове — 2026-09-30
 
 The local website has no direct route through the internal LAN. A VPN is

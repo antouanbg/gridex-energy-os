@@ -4,7 +4,8 @@ const org='11111111-1111-4111-8111-111111111111';
 const site='22222222-2222-4222-8222-222222222222';
 const memberInvite='33333333-3333-4333-8333-333333333333';
 
-async function mockSession(context: BrowserContext, administrator: boolean, onInvite: (body: unknown) => void) {
+async function mockSession(context: BrowserContext, administrator: boolean, onInvite: (body: unknown) => void,
+  onMemberUpdate?: (body: unknown) => void) {
   let nonce='';
   let outgoing: {id:string;email:string;role:string;siteIds:string[];state:string;createdAt:string;expiresAt:string}[]=[];
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
@@ -27,6 +28,15 @@ async function mockSession(context: BrowserContext, administrator: boolean, onIn
       return route.fulfill({status:201,json:{id:memberInvite,state:'sent'}});
     }
     if(path===`/api/v1/organisations/${org}/invitations`&&route.request().method()==='GET')return route.fulfill({json:{invitations:outgoing}});
+    if(path===`/api/v1/organisations/${org}/members`&&route.request().method()==='GET')return route.fulfill({json:{
+      members:[{subject:'member-1',email:'member@example.com',firstName:'Иван',lastName:'Иванов',role:'viewer',
+        allSites:false,siteIds:[],verifiedSiteIds:[],services:[],lastLoginAt:null}],
+      sites:[{id:site,name:'Test Lab'}],nextOffset:null}});
+    if(path===`/api/v1/organisations/${org}/members/member-1`&&route.request().method()==='PUT'){
+      const body=route.request().postDataJSON();onMemberUpdate?.(body);
+      return route.fulfill({json:{subject:'member-1',...body}});
+    }
+    if(path===`/api/v1/organisations/${org}/services`&&route.request().method()==='GET')return route.fulfill({json:{services:[]}});
     if(path===`/api/v1/organisations/${org}/invitations/${memberInvite}/resend`){
       outgoing=outgoing.map(item=>({...item,expiresAt:'2026-10-01T00:00:00Z'}));
       return route.fulfill({json:{id:memberInvite,state:'sent',expiresAt:'2026-10-01T00:00:00Z'}});
@@ -44,11 +54,13 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await page.goto('/customers/users/');
   await expect(page.getByTestId('section-members').getByRole('heading',{name:'Потребители и покани'})).toBeVisible();
   await expect(page.locator('[data-view-id="members"]')).toHaveAttribute('aria-current','page');
+  await page.getByLabel('Собствено име').fill('Мария');
+  await page.getByLabel('Фамилно име').fill('Петрова');
   await page.getByLabel('Служебен имейл').fill('new@example.com');
-  await page.getByLabel('Роля').selectOption('operator');
-  await page.getByLabel('Test Lab').check();
+  await page.locator('.invitation-panel form select').last().selectOption('operator');
+  await page.locator('.invitation-panel form').getByLabel('Test Lab').check();
   await page.getByRole('button',{name:'Изпрати покана',exact:true}).click();
-  await expect.poll(()=>invited).toEqual({email:'new@example.com',role:'operator',siteIds:[site]});
+  await expect.poll(()=>invited).toEqual({firstName:'Мария',lastName:'Петрова',email:'new@example.com',role:'operator',siteIds:[site]});
   await expect(page.getByText('Изпращането е потвърдено.',{exact:false})).toBeVisible();
   await expect(page.getByText('new@example.com')).toBeVisible();
   await page.reload();
@@ -57,6 +69,18 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await expect(page.getByText('new@example.com')).toBeVisible();
   await page.getByRole('button',{name:'Изпрати поканата наново'}).click();
   await expect(page.getByText('Нов линк за покана е изпратен')).toBeVisible();
+});
+
+test('organisation administrator sees approved members and saves a role with an explicit Site',async({page,context})=>{
+  let updated:unknown=null;
+  await mockSession(context,true,()=>{},body=>{updated=body;});
+  await page.goto('/customers/users/');
+  await expect(page.getByRole('heading',{name:'Потребители на организацията'})).toBeVisible();
+  await page.getByRole('button',{name:/Иван Иванов/}).click();
+  await page.getByLabel('Роля в организацията').selectOption('operator');
+  await page.locator('.organisation-member-detail').getByRole('group',{name:'Разрешени Обекти'}).getByLabel('Test Lab').check();
+  await page.getByRole('button',{name:'Запази роля и Обекти'}).click();
+  await expect.poll(()=>updated).toEqual({role:'operator',siteIds:[site]});
 });
 
 test('non-admin has no invitation submenu and cannot use its direct URL',async({page,context})=>{

@@ -1026,6 +1026,24 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .invitation-record strong { color:#173f2e; }
 .invitation-record p { color:#607568; font-size:12px; }
 .invitation-record-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.organisation-members-layout { display:grid; grid-template-columns:minmax(230px, 1fr) minmax(0, 1.35fr); gap:20px; margin-top:20px; }
+.organisation-members-list { min-width:0; display:flex; flex-direction:column; gap:9px; }
+.organisation-member-row { width:100%; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px; border:1px solid #dbe8df; border-radius:12px; background:#fff; color:#173f2e; text-align:left; cursor:pointer; }
+.organisation-member-row[aria-pressed="true"] { border-color:#42a779; background:#eff9f2; box-shadow:inset 3px 0 #24b56a; }
+.organisation-member-row span { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.organisation-member-row small { color:#61766a; font-size:12px; overflow-wrap:anywhere; }
+.organisation-member-row b { font-size:12px; }
+.organisation-member-detail { min-width:0; padding:20px; border:1px solid #dbe8df; border-radius:14px; background:#f9fcfa; }
+.organisation-member-detail h3 { margin:0; color:#173f2e; }
+.organisation-member-detail p { color:#607568; font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
+.organisation-member-detail>label { display:grid; gap:7px; color:#385947; font-size:13px; font-weight:700; }
+.organisation-member-detail select { min-height:44px; width:100%; border:1px solid #cbded1; border-radius:9px; padding:0 10px; background:#fff; }
+.organisation-member-detail fieldset { min-width:0; margin:16px 0; padding:14px; border:1px solid #dbe8df; border-radius:10px; }
+.organisation-member-detail legend { padding:0 6px; color:#385947; font-size:13px; font-weight:700; }
+.organisation-member-detail fieldset label { display:flex; align-items:center; gap:8px; margin:8px 0; color:#385947; font-size:13px; }
+.organisation-member-warning { padding:10px; border-radius:8px; background:#fff1e8; color:#9a492f !important; }
+.organisation-member-rights { margin:10px 0; }
+@media(max-width:760px){.organisation-members-layout{grid-template-columns:1fr}.organisation-member-detail{padding:16px}.organisation-member-row{align-items:flex-start}}
 @media(max-width:680px){.invitation-hero{display:block;padding:24px 19px}.invitation-hero .profile-action{width:100%;margin-top:19px}.invitation-panel{padding:20px 17px}.invitation-form>fieldset{grid-template-columns:1fr}.invitation-form label:first-child{grid-column:auto}.invitation-form button,.invitation-panel .config-form>button{width:100%;justify-self:stretch}.invitation-steps{display:grid;grid-template-columns:1fr}.invitation-panel-mark{width:37px;height:37px;flex-basis:37px}}
 .user-profile-page .user-hero { margin:0; }
 .user-profile-page .user-hero>div:nth-child(2)>span { overflow-wrap:anywhere; }

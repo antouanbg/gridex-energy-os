@@ -21,7 +21,7 @@ test('final 401 ends the session; restart on retry requests fresh login; writes 
     assert.equal(requests,2);assert.deepEqual(events,['gridex:reauth-required']);
     requests=0;events.length=0;
     globalThis.fetch=async()=>{requests++;return new Response('{}',{status:401});};
-    await assert.rejects(client.invite('org',{email:'test@example.invalid',role:'customer',siteIds:[]}),{status:401});
+    await assert.rejects(client.invite('org',{firstName:'Test',lastName:'Member',email:'test@example.invalid',role:'viewer',siteIds:[]}),{status:401});
     assert.equal(requests,1);assert.deepEqual(events,['gridex:session-expired']);
   }finally{globalThis.fetch=originalFetch;globalThis.window=originalWindow;}
 });

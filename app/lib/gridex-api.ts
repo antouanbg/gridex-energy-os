@@ -39,7 +39,10 @@ export type GridexUser = {
 };
 
 export type GridexInvitation = { id: string; organisationId: string; role: string; siteIds: string[]; expiresAt: string };
-export type SentGridexInvitation = { id: string; email: string; role: string; siteIds: string[]; state: string; expiresAt: string; createdAt: string; acceptedAt?: string|null; lastLoginAt?: string|null };
+export type SentGridexInvitation = { id: string; email: string; firstName?: string|null; lastName?: string|null; role: string; siteIds: string[]; state: string; expiresAt: string; createdAt: string; acceptedAt?: string|null; lastLoginAt?: string|null };
+export type OrganisationMember = { subject: string; email: string|null; firstName: string|null; lastName: string|null;
+  role: string; allSites: boolean; siteIds: string[]; verifiedSiteIds: string[]; services: string[]; lastLoginAt: string|null };
+export type OrganisationMembersPage = { members: OrganisationMember[]; sites: {id:string;name:string}[]; nextOffset: number|null };
 export type OrganisationOnboardingInvitation = { id: string; organisationId: string; realm: string; name: string; expiresAt: string };
 export type CreatedOrganisationInvitation = { id: string; realm: string; name: string; email: string; state: string; expiresAt: string; createdAt: string; acceptedAt?: string|null; lastLoginAt?: string|null };
 
@@ -421,11 +424,19 @@ export class GridexApiClient {
   async invitations(signal?: AbortSignal): Promise<{ invitations: GridexInvitation[] }> {
     return this.getJson('/api/v1/me/invitations', signal);
   }
-  async invite(organisationId: string, body: { email: string; role: string; siteIds: string[] }): Promise<{ id: string; state: string }> {
+  async invite(organisationId: string, body: { firstName:string; lastName:string; email: string; role: string; siteIds: string[] }): Promise<{ id: string; state: string }> {
     return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations`, body);
   }
   async sentInvitations(organisationId: string, signal?: AbortSignal): Promise<{ invitations: SentGridexInvitation[] }> {
     return this.getJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations`, signal);
+  }
+  organisationMembers(id:string,offset=0,platform=false,signal?:AbortSignal):Promise<OrganisationMembersPage> {
+    const prefix=platform?'/api/v1/platform/organisations':'/api/v1/organisations';
+    return this.getJson(`${prefix}/${encodeURIComponent(id)}/members?offset=${offset}&limit=25`,signal);
+  }
+  updateOrganisationMember(id:string,subject:string,role:string,siteIds:string[]):Promise<{subject:string;role:string;siteIds:string[]}> {
+    return this.putBody(`/api/v1/organisations/${encodeURIComponent(id)}/members/${encodeURIComponent(subject)}`,
+      {role,siteIds});
   }
   async resendInvitation(organisationId: string, id: string): Promise<{ id: string; state: string; expiresAt: string }> {
     return this.postJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations/${encodeURIComponent(id)}/resend`, {});
