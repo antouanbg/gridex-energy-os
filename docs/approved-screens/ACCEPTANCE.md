@@ -8,12 +8,14 @@ approval references, not screenshots of a live customer's account.
 | Contract | Component | Evidence |
 | --- | --- | --- |
 | Existing URL/menu, actual role only | Invitations | invitation-menu, organisation-access role tests |
+| Canonical continuous page, services first, no tabs, shared card/colour tokens | Invitations, OrganisationAccessAdmin | ordered visible sections and exact CSS token checks; CANONICAL_LAYOUT.md |
 | Roster left, selected person right; mobile stacked | OrganisationMembers | desktop/mobile geometry assertions and inspected screenshots |
 | Name/email, role, Sites, services, last login | OrganisationMembers | roster/edit tests; live read-only API probe verifies real members/OR links |
 | Independent roster/service failure handling | OrganisationMembers | service failure browser regression |
 | Five rows and visible disabled actions with no grants | adminServiceRows, both organisation editors | zero-grant browser regression; live catalogue probe |
 | Review then save role/Sites | OrganisationMembers | member edit browser regression |
 | Separate invitations, sent/resend, accepted history | Invitations | invitation-menu tests; no change to recipient acceptance contract |
+| First administrator's first/last names required | OrganisationInvitationAdmin, onboarding API | invitation payload and Keycloak write/read-back regression tests |
 | Organisation request/cancel only by administrator | OrganisationServiceMembers | request/cancel browser test; backend permission guards |
 | Member grant only after organisation grant | OrganisationMembers | organisation-access approved/unapproved test and backend tests |
 | No member layout change or administrator controls | Profile/ServiceCatalog | viewer denial and existing service catalogue tests |

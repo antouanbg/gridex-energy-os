@@ -37,6 +37,7 @@ async function mockSession(context: BrowserContext, administrator: boolean, onIn
       return route.fulfill({json:{subject:'member-1',...body}});
     }
     if(path===`/api/v1/organisations/${org}/services`&&route.request().method()==='GET')return route.fulfill({json:{services:[]}});
+    if(path===`/api/v1/organisations/${org}/service-requests`&&route.request().method()==='GET')return route.fulfill({json:{requests:[]}});
     if(path===`/api/v1/organisations/${org}/invitations/${memberInvite}/resend`){
       outgoing=outgoing.map(item=>({...item,expiresAt:'2026-10-01T00:00:00Z'}));
       return route.fulfill({json:{id:memberInvite,state:'sent',expiresAt:'2026-10-01T00:00:00Z'}});
@@ -52,8 +53,8 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   let invited:unknown=null;
   await mockSession(context,true,body=>{invited=body;});
   await page.goto('/customers/users/');
-  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Достъп на потребителите'})).toBeVisible();
-  await page.getByRole('tab',{name:/Изпратени покани/}).click();
+  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Услуги за организацията'})).toBeVisible();
+
   await expect(page.locator('[data-view-id="members"]')).toHaveAttribute('aria-current','page');
   await page.getByLabel('Собствено име').fill('Мария');
   await page.getByLabel('Фамилно име').fill('Петрова');
@@ -66,8 +67,8 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await expect(page.getByText('new@example.com')).toBeVisible();
   await page.reload();
   await expect(page).toHaveURL(/\/customers\/users\/$/);
-  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Достъп на потребителите'})).toBeVisible();
-  await page.getByRole('tab',{name:/Изпратени покани/}).click();
+  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Услуги за организацията'})).toBeVisible();
+
   await expect(page.getByText('new@example.com')).toBeVisible();
   await page.getByRole('button',{name:'Изпрати поканата наново'}).click();
   await expect(page.getByText('Нов линк за покана е изпратен')).toBeVisible();
@@ -118,7 +119,7 @@ test('organisation administrator requests a service without granting it and canc
   });
   await context.route(`https://api.example.invalid/api/v1/organisations/${org}/service-requests/${id}/cancel`,route=>{pending=false;cancellations++;return route.fulfill({json:{id,stage:'cancelled'}});});
   await page.goto('/customers/users/');
-  await page.getByRole('tab',{name:'Услуги',exact:true}).click();
+
   const catalogue=page.locator('.organisation-service-workspace');
   await expect(catalogue.locator('[data-service-code]')).toHaveCount(5);
   const price=catalogue.locator('[data-service-code="day_ahead"]');
@@ -175,7 +176,7 @@ test('platform administrator can prepare a separate-realm invitation from the ap
     return route.fulfill({status:503,json:{error:'unavailable'}});
   });
   await page.goto('/customers/users/');
-  await expect(page.getByRole('heading',{name:'Нова организация'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Нова покана за организация'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Изпрати поканата наново'})).toBeVisible();
   await page.getByRole('button',{name:'Изпрати поканата наново'}).click();
   await expect.poll(()=>resent).toBe(true);
@@ -187,8 +188,10 @@ test('platform administrator can prepare a separate-realm invitation from the ap
   await page.getByLabel('Име на организацията').fill('Fixture Company');
   await page.getByLabel('Кратък код (realm)').fill('fixture-co');
   await page.getByLabel('Имейл на първия администратор').fill('admin@example.com');
+  await page.getByLabel('Собствено име').fill('Мария');
+  await page.getByLabel('Фамилно име').fill('Петрова');
   await page.getByRole('button',{name:'Изпрати покана',exact:true}).click();
-  await expect.poll(()=>submitted).toEqual({name:'Fixture Company',realm:'fixture-co',email:'admin@example.com'});
+  await expect.poll(()=>submitted).toEqual({name:'Fixture Company',realm:'fixture-co',email:'admin@example.com',firstName:'Мария',lastName:'Петрова'});
   await expect(page.getByText('Организацията и правата ще се активират след потвърждаване на имейла, задаване на парола, вход и проверка от сървъра.',{exact:false})).toBeVisible();
 });
 
@@ -196,6 +199,17 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await mockSession(context,true,()=>{});
   await page.goto('/customers/users/');
   await expect(page.locator('.invitation-hero')).toBeVisible();
+  await expect(page.locator('.invitation-page [role=tab]')).toHaveCount(0);
+  const sections=['.organisation-service-workspace','#new-member-invitation','.member-invitation-history','#approved-organisation-members'];
+  const positions=[];
+  for(const selector of sections){await expect(page.locator(selector)).toBeVisible();positions.push((await page.locator(selector).boundingBox())!.y);}
+  expect(positions).toEqual([...positions].sort((a,b)=>a-b));
+  await expect(page.locator('.organisation-service-workspace [data-service-code]')).toHaveCount(5);
+  expect(await page.locator('.organisation-service-workspace .admin-panel').first().evaluate(el=>{
+    const s=getComputedStyle(el);return {background:s.backgroundColor,radius:s.borderRadius,padding:s.padding};
+  })).toEqual({background:'rgb(255, 255, 255)',radius:'15px',padding:'17px'});
+  await expect(page.locator('.organisation-service-workspace [data-service-code="day_ahead"]').getByRole('button',{name:'Заяви',exact:true})).toBeEnabled();
+  expect(await page.locator('.organisation-service-workspace .primary-btn').first().evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(11, 66, 48)');
   await expect(page.locator('.page-help-link')).toHaveAttribute('href','https://doc.gridex.tech/organisations-and-access/');
   await expect(page.getByRole('region',{name:'Потребители на организацията'})).toBeVisible();
   const listBox=await page.locator('.organisation-members-list').boundingBox();
@@ -214,6 +228,6 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await expect(page.locator('.organisation-member-detail [data-service-code]')).toHaveCount(5);
   await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-mobile.png'),fullPage:true});
-  await page.getByRole('tab',{name:/Изпратени покани/}).click();
+
   await expect(page.getByRole('button',{name:'Изпрати покана',exact:true})).toBeVisible();
 });

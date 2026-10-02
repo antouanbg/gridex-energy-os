@@ -91,7 +91,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
     finally{setBusy(false);}
   }
   return <section className="organisation-members" aria-label={en?'Organisation members':'Потребители на организацията'}>
-    <div className="admin-section-heading"><div><h2>{en?'Approved members and access':'Одобрени потребители и достъп'}</h2>
+    <div className="admin-section-heading"><div><h2>{en?'Approved members and services':'Одобрени потребители и услуги'}</h2>
       <p>{platform?en?'Read-only overview for the selected organisation.':'Преглед на избраната организация без редакция.':en?'Select a person to manage their role, Sites and separate services.':'Изберете човек, за да управлявате ролята, Обектите и отделните му услуги.'}</p></div>
       <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#approved-members`} target="_blank" rel="noopener noreferrer">{en?'Help':'Помощ'} ↗</a></div>
     {error&&<div className="admin-feedback error" role="alert">{error} <button type="button" className="secondary-btn" onClick={()=>setRefreshKey(key=>key+1)}>{en?'Retry':'Опитай отново'}</button></div>}

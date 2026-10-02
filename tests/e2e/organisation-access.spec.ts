@@ -89,7 +89,7 @@ for (const unavailable of [false,true]) test(`approved organisation list disting
   await expect(page.getByRole('button',{name:'Спри организацията',exact:true})).toHaveCount(0);
 });
 
-test('platform service catalogue separates approved, available and future; removal needs confirmation',async({page})=>{
+test('platform service catalogue separates approved, available and future; removal needs confirmation',async({page},info)=>{
   const state=initial();await session(page,true,state);
   const organisationId='11111111-1111-4111-8111-111111111111';
   const approved=new Set(['day_ahead']);let writes=0;
@@ -108,18 +108,22 @@ test('platform service catalogue separates approved, available and future; remov
   });
   await page.route(`https://api.example.invalid/api/v1/platform/organisations/${organisationId}/market-zones`,route=>route.fulfill({json:{zones:[{country:'BG',zone:'BG',collected:true,enabled:true}]}}));
   await page.goto('/customers/users/');
-  await expect(page.getByRole('heading',{name:'Разрешени за организацията',exact:true})).toBeVisible();
-  await expect(page.getByRole('heading',{name:'Налични, но неразрешени за организацията'})).toBeVisible();
-  await expect(page.getByRole('heading',{name:'Предстои'}).first()).toBeVisible();
-  await page.locator('.service-grant-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Разреши за организацията'}).click();
-  await expect(page.locator('.service-grant-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Отнеми'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Услуги за организацията',exact:true})).toBeVisible();
+  await expect(page.locator('.platform-service-workspace [data-service-code]')).toHaveCount(5);
+  await expect(page.locator('.platform-service-workspace [data-service-code="analysis"]')).toContainText('Предстои');
+  await expect(page.locator('[role="tab"]')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Нова покана за организация',exact:true})).toBeVisible();
+  await page.screenshot({path:info.outputPath('platform-services-desktop.png'),fullPage:true});
+  await page.locator('.platform-service-workspace .admin-service-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Разреши и уведоми'}).click();
+  await expect(page.locator('.platform-service-workspace .admin-service-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Отнеми'})).toBeVisible();
   expect(writes).toBe(1);
-  await page.locator('.service-grant-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Отнеми'}).click();
+  await page.locator('.platform-service-workspace .admin-service-row').filter({hasText:'Графики и визуализации'}).getByRole('button',{name:'Отнеми'}).click();
   expect(writes).toBe(1);
   await page.getByRole('button',{name:'Потвърди отнемането'}).click();
   expect(writes).toBe(2);
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('platform-services-mobile.png'),fullPage:true});
 });
 
 test('organisation admin sees unavailable services but may grant only approved services to members',async({page})=>{
@@ -144,7 +148,7 @@ test('organisation admin sees unavailable services but may grant only approved s
   await page.route(`https://api.example.invalid/api/v1/organisations/${organisationId}/invitations`,route=>route.fulfill({json:{invitations:[]}}));
   await page.route(new RegExp(`^https://api\\.example\\.invalid/api/v1/organisations/${organisationId}/members(?:\\?.*)?$`),route=>route.fulfill({json:{members:[{subject:'viewer',email:'viewer@example.invalid',firstName:'Иван',lastName:'Иванов',role:'viewer',allSites:false,siteIds:[],verifiedSiteIds:[],services:[],lastLoginAt:null}],sites:[],nextOffset:null,total:1}}));
   await page.goto('/customers/users/');
-  await expect(page.getByRole('heading',{name:'Одобрени потребители и достъп'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Одобрени потребители и услуги'})).toBeVisible();
   const detail=page.locator('.organisation-member-detail');
   await expect(detail.locator('[data-service-code="day_ahead"]')).toContainText('Не е одобрена за организацията');
   await expect(detail.locator('[data-service-code="day_ahead"]').getByRole('button',{name:'Разреши и уведоми'})).toBeDisabled();
@@ -152,7 +156,7 @@ test('organisation admin sees unavailable services but may grant only approved s
   await expect(detail.locator('[data-service-code="visualisations"]').getByRole('button',{name:'Отнеми достъпа'})).toBeVisible();
   await expect(page.getByText('Услугата е разрешена.',{exact:false})).toBeVisible();
   expect(memberWrites).toBe(1);
-  await expect(page.getByRole('button',{name:'Разреши за организацията'})).toHaveCount(0);
+  await expect(detail.locator('[data-service-code="day_ahead"]').getByRole('button',{name:'Разреши и уведоми'})).toBeDisabled();
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
 });

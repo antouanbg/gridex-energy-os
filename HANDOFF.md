@@ -1,6 +1,47 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-10-02 — canonical continuous layout correction
+
+Owner resolved the conflicting templates: use the recommended continuous page,
+with one shared GrideX design for all roles. The three-role mockup is canonical
+for page order; the member-access mockup applies only inside the approved-member
+editor, not as a replacement tabbed page. Organisation admin order: catalogue,
+new invitation, invitation history, approved members/editor, pending requests.
+Platform order: approved organisation selector, five service rows, new organisation
+invitation, invitation history, approved organisation ledger. Member workflow stays
+unchanged. No navigation item, permission, grant or second Accept step is added.
+
+Incident: 2026-10-02. The previous release used three assistant-added tabs and a
+decorative hero, so services were hidden behind a tab and the approved template
+was not followed. Cause: combining older editor design with the newer page
+without resolving their conflict; tests checked the resulting implementation
+instead of its reference. Correction removes tabs, restores reference styling,
+adds order/visibility/style regression checks, and makes first administrator
+first/last names required and verified in Keycloak for new invitations only.
+Existing identities, devices and grants are untouched. AGENTS now requires an
+explicit question before resolving conflicting approved sources.
+
+Source checks: 75 browser tests, 29 frontend unit tests, TypeScript and lint
+passed (four existing image warnings); backend 139 passed, one skipped.
+Publication/deployment are pending this commit; owner real-account acceptance
+remains open. Next: publish paired frontend/backend/BG+EN help, verify the live
+read-only membership/catalogue probe, then owner tests request/approval/delivery.
+
+Български: собственикът избра общ непрекъснат екран и един GrideX дизайн за
+всички роли. Макетът с трите роли определя реда; старият редактор определя
+само вътрешната секция за одобрените потребители. Премахнати са измислените
+три таба и декоративният header. Услугите са първи и петте реда са видими,
+после следват поканата, историята и хората/правата. Супер администраторът
+първо избира одобрена организация. Потребителската логика не се променя.
+Новите първи администратори изискват две имена, проверени в Keycloak;
+съществуващи акаунти, устройства и права не се променят. Инцидентът е
+липса на проверка спрямо водещия макет. Има нови проверки за ред, видимост
+и стил, както и правило за въпрос при противоречие. Тестовете: 75 browser,
+29 frontend unit, TypeScript/lint и 139 backend (един пропуснат).
+Публикуването/внедряването предстоят; реалното приемане от собственика е
+отделна отворена проверка.
+
 ## 2026-10-02 — publication and verification checkpoint
 
 Merged PR [#100](https://github.com/antouanbg/gridex-energy-os/pull/100) into main at `78b22655fb6dc0bcf61187d1e9d2766d10628539`.
