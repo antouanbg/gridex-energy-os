@@ -1,5 +1,19 @@
 # Current task
 
+## 2026-10-02 — member-access frontend held after live OpenRemote denial
+
+PR #96 is merged; local build/typecheck/lint, 29 unit tests, 72 browser tests
+and GitHub CI passed. The new frontend **has not been deployed**. Backend
+migration 021 was applied, but the candidate API encountered OpenRemote 403
+on user–Asset link verification; the previous healthy API was restored.
+Do not deploy the new UI until the backend's scoped provisioning and
+`GRIDEX_MEMBER_ACCESS_ENABLED` are verified in both realms. The existing
+`/customers/users/` page remains live without the new member editor.
+
+Български: кодът и тестовете на екрана са готови, но той не е публикуван
+на живия сайт. Backend е върнат след отказ 403 от OpenRemote; първо се
+довършват служебните права и реалният тест.
+
 ## 2026-10-02 — owner-approved member access screen (implementation in progress)
 
 The owner approved the reviewed Users & invitations mockup: an organisation

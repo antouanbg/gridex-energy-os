@@ -1,6 +1,20 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-10-02 — PR #96 merged, live frontend withheld
+
+The approved member roster/editor is in `main`. Local typecheck, lint,
+build, 29 unit tests, 72 browser tests and CI passed. The live OpenRemote
+check for the paired backend returned 403 on user–Asset link reads, so the
+previous API image was restored. **Do not publish the new frontend yet.**
+It would show an unavailable member roster until per-realm service rights,
+backend link verification and the explicit enablement gate are proven.
+The live page remains the older invitation/service experience. See backend
+`docs/INCIDENT_MEMBER_ACCESS_021.md`; no menu structure was changed.
+
+Български: новият екран е в GitHub, но не е live. След отказа от OpenRemote
+не публикувай frontend-а преди защитена проверка и включване на backend-а.
+
 ## 2026-10-02 — approved organisation-member access screen
 
 Owner approved the reviewed desktop/mobile mockup and role/Site/service
