@@ -1043,6 +1043,8 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .organisation-member-detail fieldset label { display:flex; align-items:center; gap:8px; margin:8px 0; color:#385947; font-size:13px; }
 .organisation-member-warning { padding:10px; border-radius:8px; background:#fff1e8; color:#9a492f !important; }
 .organisation-member-rights { margin:10px 0; }
+.organisation-member-rights-note { max-width:74ch; margin:13px 0 0; padding:12px 14px; border:1px solid #d6e8dc; border-radius:11px; background:#f1f8f2; color:#365b44; font-size:12px; line-height:1.55; }
+.organisation-member-rights-note a { color:#197e4e; font-weight:800; text-decoration:underline; text-underline-offset:2px; }
 @media(max-width:760px){.organisation-members-layout{grid-template-columns:1fr}.organisation-member-detail{padding:16px}.organisation-member-row{align-items:flex-start}}
 @media(max-width:680px){.invitation-hero{display:block;padding:24px 19px}.invitation-hero .profile-action{width:100%;margin-top:19px}.invitation-panel{padding:20px 17px}.invitation-form>fieldset{grid-template-columns:1fr}.invitation-form label:first-child{grid-column:auto}.invitation-form button,.invitation-panel .config-form>button{width:100%;justify-self:stretch}.invitation-steps{display:grid;grid-template-columns:1fr}.invitation-panel-mark{width:37px;height:37px;flex-basis:37px}}
 .user-profile-page .user-hero { margin:0; }

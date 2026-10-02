@@ -2510,3 +2510,13 @@ Real three-role/two-organisation browser acceptance, including revocation and
 cross-tenant denial, is still open. The docs public hostname timed out from
 this Mac without the required external route/VPN; check it from an external
 network rather than treating that timeout as a site defect.
+## 2026-10-02 — member access explanation and documentation links
+
+The existing approved member screen now links directly to the BG/EN
+`organisations-and-access/#approved-members` and `#rights-matrix` help
+sections. Its explanation distinguishes GrideX role/Site checks from the
+approved target of read-only human OpenRemote Manager. The existing Manager
+entry also explains that changes belong in GrideX. No menu location or new
+customer action was added. Pages build, TypeScript and 29 frontend tests pass.
+Do not deploy the read-only wording before the backend migration is verified:
+the current `novacom` human admin still has legacy OpenRemote write roles.
