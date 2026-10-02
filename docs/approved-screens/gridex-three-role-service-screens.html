@@ -1,0 +1,155 @@
+<div id="gridex-three-role-screens">
+  <style>
+    #gridex-three-role-screens { --gx-page:light-dark(#f4f7f3,#101b18); --gx-card:light-dark(#fff,#182923); --gx-ink:light-dark(#18382c,#e7f3ec); --gx-muted:light-dark(#63776d,#a6bdb1); --gx-line:light-dark(#dce8df,#355044); --gx-green:light-dark(#0b4230,#124c39); --gx-green-ink:#f4faef; --gx-soft:light-dark(#eaf4ed,#203c2e); --gx-warn:light-dark(#fcf4e4,#41341d); --gx-warn-ink:light-dark(#765312,#edd698); color:var(--gx-ink); font-family:Arial,Helvetica,sans-serif; }
+    #gridex-three-role-screens * { box-sizing:border-box; }
+    #gridex-three-role-screens .gx-role-caption { margin:25px 2px 10px; font-size:14px; font-weight:700; color:var(--gx-ink); }
+    #gridex-three-role-screens .gx-role-caption:first-child { margin-top:0; }
+    #gridex-three-role-screens .gx-window { overflow:hidden; border:1px solid var(--gx-line); border-radius:20px; background:var(--gx-page); }
+    #gridex-three-role-screens .gx-top { display:flex; align-items:center; justify-content:space-between; min-height:56px; padding:0 22px; background:var(--gx-green); color:var(--gx-green-ink); }
+    #gridex-three-role-screens .gx-brand { font-size:20px; font-weight:800; letter-spacing:.02em; }
+    #gridex-three-role-screens .gx-top small { font-size:12px; opacity:.9; }
+    #gridex-three-role-screens .gx-layout { display:grid; grid-template-columns:188px minmax(0,1fr); }
+    #gridex-three-role-screens .gx-side { padding:22px 11px; border-right:1px solid var(--gx-line); background:var(--gx-card); }
+    #gridex-three-role-screens .gx-side-title { margin:2px 11px 12px; color:var(--gx-muted); font-size:11px; letter-spacing:.1em; }
+    #gridex-three-role-screens .gx-nav { display:block; padding:10px 11px; border-radius:10px; font-size:13px; color:var(--gx-muted); }
+    #gridex-three-role-screens .gx-nav.active { background:var(--gx-soft); color:var(--gx-ink); font-weight:700; }
+    #gridex-three-role-screens .gx-main { min-width:0; padding:23px; }
+    #gridex-three-role-screens .gx-path { margin-bottom:9px; color:var(--gx-muted); font-size:12px; }
+    #gridex-three-role-screens h2 { margin:0 0 5px; font-size:24px; font-weight:700; }
+    #gridex-three-role-screens h3 { margin:0 0 7px; font-size:16px; }
+    #gridex-three-role-screens h4 { margin:0 0 3px; font-size:14px; }
+    #gridex-three-role-screens .gx-sub { margin:0; color:var(--gx-muted); font-size:13px; line-height:1.45; }
+    #gridex-three-role-screens .gx-card { margin-top:16px; padding:17px; border:1px solid var(--gx-line); border-radius:15px; background:var(--gx-card); }
+    #gridex-three-role-screens .gx-card-head { display:flex; align-items:start; justify-content:space-between; gap:12px; }
+    #gridex-three-role-screens .gx-row { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; border-top:1px solid var(--gx-line); }
+    #gridex-three-role-screens .gx-row:first-of-type { margin-top:13px; }
+    #gridex-three-role-screens .gx-row:last-child { padding-bottom:0; }
+    #gridex-three-role-screens .gx-row p { margin:3px 0 0; color:var(--gx-muted); font-size:12px; line-height:1.4; }
+    #gridex-three-role-screens .gx-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:8px; }
+    #gridex-three-role-screens .gx-button { min-height:40px; padding:9px 13px; border:1px solid var(--gx-line); border-radius:10px; background:var(--gx-card); color:var(--gx-ink); font:inherit; font-size:12px; font-weight:700; }
+    #gridex-three-role-screens .gx-button.primary { background:var(--gx-green); border-color:var(--gx-green); color:var(--gx-green-ink); }
+    #gridex-three-role-screens .gx-pill { display:inline-block; padding:7px 9px; border-radius:999px; background:var(--gx-soft); color:var(--gx-ink); font-size:11px; white-space:nowrap; }
+    #gridex-three-role-screens .gx-pill.wait { background:var(--gx-warn); color:var(--gx-warn-ink); }
+    #gridex-three-role-screens .gx-choice { display:flex; align-items:end; gap:12px; flex-wrap:wrap; margin-top:13px; }
+    #gridex-three-role-screens label { display:block; font-size:12px; font-weight:700; }
+    #gridex-three-role-screens select { display:block; min-height:40px; min-width:245px; margin-top:6px; padding:8px; border:1px solid var(--gx-line); border-radius:10px; background:var(--gx-card); color:var(--gx-ink); font:inherit; font-size:13px; }
+    #gridex-three-role-screens .gx-feedback { min-height:21px; margin:10px 0 0; color:var(--gx-muted); font-size:12px; }
+    #gridex-three-role-screens .gx-ledger-tools { display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin-top:14px; }
+    #gridex-three-role-screens .gx-ledger-tools label { flex:1 1 170px; }
+    #gridex-three-role-screens .gx-ledger-tools input, #gridex-three-role-screens .gx-ledger-tools select { display:block; width:100%; min-width:0; min-height:40px; margin-top:6px; padding:8px; border:1px solid var(--gx-line); border-radius:10px; background:var(--gx-card); color:var(--gx-ink); font:inherit; font-size:13px; }
+    #gridex-three-role-screens .gx-ledger-body { margin-top:11px; }
+    #gridex-three-role-screens .gx-ledger-body .gx-row:first-child { border-top:1px solid var(--gx-line); }
+    #gridex-three-role-screens .gx-pagebar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; color:var(--gx-muted); font-size:12px; }
+    #gridex-three-role-screens .gx-pagebar-actions { display:flex; gap:7px; }
+    #gridex-three-role-screens .gx-pagebar .gx-button { min-height:38px; }
+    #gridex-three-role-screens .gx-empty { margin:14px 0 0; color:var(--gx-muted); font-size:13px; }
+    #gridex-three-role-screens .gx-mobile-nav { display:none; }
+    @media(max-width:650px) { #gridex-three-role-screens .gx-layout{display:block} #gridex-three-role-screens .gx-side{display:none} #gridex-three-role-screens .gx-main{padding:17px} #gridex-three-role-screens .gx-row{display:block} #gridex-three-role-screens .gx-actions{justify-content:flex-start;margin-top:11px} #gridex-three-role-screens .gx-choice{display:block} #gridex-three-role-screens select{width:100%;min-width:0} #gridex-three-role-screens .gx-mobile-nav{display:flex;justify-content:space-around;gap:8px;padding:12px;border-top:1px solid var(--gx-line);background:var(--gx-green);color:var(--gx-green-ink);font-size:12px} #gridex-three-role-screens .gx-top{padding:0 17px} }
+  </style>
+  <p class="gx-role-caption">1 · Супер администратор — вижда само своя административен екран</p>
+  <section class="gx-window" aria-label="Макет за супер администратор">
+    <div class="gx-top"><span class="gx-brand">GrideX</span><small>КОНЦЕПЦИЯ · БЕЗ РЕАЛНИ ДЕЙСТВИЯ</small></div>
+    <div class="gx-layout"><aside class="gx-side"><p class="gx-side-title">АДМИНИСТРАЦИЯ</p><span class="gx-nav">Преглед</span><span class="gx-nav active">Потребители и покани</span><span class="gx-nav">Обекти</span></aside><main class="gx-main">
+      <div class="gx-path">Клиенти и договори / Потребители и покани / Услуги</div><h2>Услуги за организации</h2><p class="gx-sub">Текущ тестов обект: избираш одобрена организация и решаваш услугите ѝ поотделно.</p>
+      <div class="gx-card"><h3>Одобрена организация</h3><div class="gx-choice"><label>Организация<select aria-label="Организация"><option>„Примерна организация Груп“ ЕООД · активна</option></select></label><span class="gx-pill">Активна</span></div></div>
+      <div class="gx-card"><div class="gx-card-head"><h3>Услуги за организацията</h3><span class="gx-pill">2 заявяеми</span></div><div class="gx-row"><div><h4>Цени ден напред · България / BG</h4><p>Няма организационно разрешение или заявка</p></div><div class="gx-actions"><span class="gx-pill">Не е разрешена</span><button class="gx-button primary" type="button" data-demo="Разрешението за организацията и BG зоната влиза в сила веднага; администраторът се уведомява.">Разреши и уведоми</button></div></div><div class="gx-row"><div><h4>Графики и визуализации</h4><p>Няма организационно разрешение или заявка</p></div><div class="gx-actions"><span class="gx-pill">Не е разрешена</span><button class="gx-button" type="button" data-demo="Администраторското разрешение влиза в сила веднага и се изпраща уведомление.">Разреши и уведоми</button></div></div><div class="gx-row"><div><h4>Анализ · Метеорология · Прогнозиране</h4><p>Показани в каталога; не са заявяеми</p></div><span class="gx-pill">Предстои</span></div></div>
+      <div class="gx-card"><h3>Нова покана за организация</h3><p class="gx-sub">Име, фамилия и имейл на първия администратор са задължителни при нова покана.</p></div>
+      <div class="gx-card gx-ledger" data-ledger="platform-sent"><h3>Покани за организации</h3><p class="gx-sub">Показва и приетите покани. Ако имената още липсват в профила, имейлът остава видим.</p><div class="gx-ledger-tools"><label>Намери организация или имейл<input type="search" placeholder="Организация или имейл" data-ledger-query></label><label>Статус<select data-ledger-status><option value="all">Всички</option><option value="accepted">Приета</option><option value="sent">Изпратена</option><option value="rejected">Отказана</option></select></label></div><div class="gx-ledger-body" data-ledger-body><p class="gx-empty">Зареждане на записите…</p></div><div class="gx-pagebar"><span data-ledger-range>—</span><div class="gx-pagebar-actions"><button class="gx-button" type="button" data-ledger-prev>Назад</button><button class="gx-button" type="button" data-ledger-next>Напред</button></div></div></div>
+      <div class="gx-card gx-ledger" data-ledger="platform-approved"><h3>Одобрени организации и услуги</h3><p class="gx-sub">Всяка организация и всяко разрешение са отделен запис.</p><div class="gx-ledger-tools"><label>Намери организация<input type="search" placeholder="Име на организация" data-ledger-query></label></div><div class="gx-ledger-body" data-ledger-body><p class="gx-empty">Зареждане на примерни редове…</p></div><div class="gx-pagebar"><span data-ledger-range>—</span><div class="gx-pagebar-actions"><button class="gx-button" type="button" data-ledger-prev>Назад</button><button class="gx-button" type="button" data-ledger-next>Напред</button></div></div></div>
+      <p class="gx-feedback" aria-live="polite">Макет — бутоните не променят права.</p>
+    </main></div><div class="gx-mobile-nav"><span>Преглед</span><span>Клиенти</span><strong>Меню</strong></div>
+  </section>
+  <p class="gx-role-caption">2 · Администратор на организация — вижда само своята организация</p>
+  <section class="gx-window" aria-label="Макет за администратор на организация">
+    <div class="gx-top"><span class="gx-brand">GrideX</span><small>КОНЦЕПЦИЯ · БЕЗ РЕАЛНИ ДЕЙСТВИЯ</small></div>
+    <div class="gx-layout"><aside class="gx-side"><p class="gx-side-title">МОЯТА ОРГАНИЗАЦИЯ</p><span class="gx-nav">Преглед</span><span class="gx-nav active">Потребители и покани</span><span class="gx-nav">Обекти</span></aside><main class="gx-main">
+      <div class="gx-path">Клиенти и договори / Потребители и покани / Услуги</div><h2>Услуги за организацията</h2><p class="gx-sub">Само администраторът изпраща и отменя заявка към супер администратора.</p>
+      <div class="gx-card"><div class="gx-card-head"><h3>Налични услуги</h3><span class="gx-pill">Примерна организация</span></div><div class="gx-row"><div><h4>Цени ден напред · България / BG</h4><p data-org-status>Не е разрешена за организацията</p></div><div class="gx-actions"><span class="gx-pill" data-org-pill>Налична</span><button class="gx-button primary" type="button" data-org-action>Заяви</button></div></div><div class="gx-row"><div><h4>Графики и визуализации</h4><p>Не е разрешена за организацията</p></div><div class="gx-actions"><span class="gx-pill">Налична</span><button class="gx-button" type="button" data-demo="Заявката за графики се изпраща от администратора до супер администратора.">Заяви</button></div></div><div class="gx-row"><div><h4>Анализ · Метеорология · Прогнозиране</h4><p>Видими, но все още не се заявяват</p></div><span class="gx-pill">Предстои</span></div></div>
+      <div class="gx-card"><h3>Нова покана за потребител</h3><p class="gx-sub">Собствено име, фамилия, имейл, роля и достъп до Обекти; имената и имейлът са задължителни.</p></div>
+      <div class="gx-card gx-ledger" data-ledger="organisation-sent"><h3>Покани за потребители</h3><p class="gx-sub">Само хора от Примерна организация; приетата покана остава видима.</p><div class="gx-ledger-tools"><label>Намери потребител или имейл<input type="search" placeholder="Име или имейл" data-ledger-query></label><label>Статус<select data-ledger-status><option value="all">Всички</option><option value="accepted">Приета</option><option value="sent">Изпратена</option><option value="rejected">Отказана</option></select></label></div><div class="gx-ledger-body" data-ledger-body><p class="gx-empty">Зареждане на записите…</p></div><div class="gx-pagebar"><span data-ledger-range>—</span><div class="gx-pagebar-actions"><button class="gx-button" type="button" data-ledger-prev>Назад</button><button class="gx-button" type="button" data-ledger-next>Напред</button></div></div></div>
+      <div class="gx-card gx-ledger" data-ledger="organisation-approved"><h3>Одобрени потребители и услуги</h3><p class="gx-sub">Реалните разрешения за всеки потребител поотделно.</p><div class="gx-ledger-tools"><label>Намери потребител<input type="search" placeholder="Име на потребител" data-ledger-query></label></div><div class="gx-ledger-body" data-ledger-body><p class="gx-empty">Зареждане на примерни редове…</p></div><div class="gx-pagebar"><span data-ledger-range>—</span><div class="gx-pagebar-actions"><button class="gx-button" type="button" data-ledger-prev>Назад</button><button class="gx-button" type="button" data-ledger-next>Напред</button></div></div></div>
+      <p class="gx-feedback" aria-live="polite" data-org-feedback>Макет — „Заяви“ показва как ще изглежда чакаща заявка.</p>
+    </main></div><div class="gx-mobile-nav"><span>Преглед</span><span>Потребители</span><strong>Меню</strong></div>
+  </section>
+  <p class="gx-role-caption">3 · Потребител — само личен каталог, без администраторски действия</p>
+  <section class="gx-window" aria-label="Макет за потребител">
+    <div class="gx-top"><span class="gx-brand">GrideX</span><small>КОНЦЕПЦИЯ · БЕЗ РЕАЛНИ ДЕЙСТВИЯ</small></div>
+    <div class="gx-layout"><aside class="gx-side"><p class="gx-side-title">МОЯТ ПРОФИЛ</p><span class="gx-nav">Преглед</span><span class="gx-nav">Обекти</span><span class="gx-nav active">Услуги</span></aside><main class="gx-main">
+      <div class="gx-path">Профил / Услуги</div><h2>Моите услуги</h2><p class="gx-sub">Виждаш каталога и състоянието на собствените си заявки. Нямаш достъп до чужди потребители или организации.</p>
+      <div class="gx-card"><h3>Каталог</h3><div class="gx-row"><div><h4>Цени ден напред · България / BG</h4><p>Няма лично разрешение; заявката отива до администратора на организацията</p></div><button class="gx-button primary" type="button" data-demo="Заявката стига само до администратора на вашата организация.">Заяви</button></div><div class="gx-row"><div><h4>Графики и визуализации</h4><p>Вече е подадена заявка</p></div><span class="gx-pill wait">Чака решение</span></div><div class="gx-row"><div><h4>Анализ · Метеорология · Прогнозиране</h4><p>Показват се, но още нямат заявяване</p></div><span class="gx-pill">Предстои</span></div></div><p class="gx-feedback" aria-live="polite">Макет — бутоните не изпращат заявки.</p>
+    </main></div><div class="gx-mobile-nav"><span>Преглед</span><span>Обекти</span><strong>Меню</strong></div>
+  </section>
+  <script>
+    (() => {
+      const root = document.getElementById('gridex-three-role-screens');
+      const action = root.querySelector('[data-org-action]');
+      const status = root.querySelector('[data-org-status]');
+      const pill = root.querySelector('[data-org-pill]');
+      const feedback = root.querySelector('[data-org-feedback]');
+      let requested = false;
+      action.addEventListener('click', () => {
+        requested = !requested;
+        status.textContent = requested ? 'Заявката е изпратена към супер администратора' : 'Не е разрешена за организацията';
+        pill.textContent = requested ? 'Чака решение' : 'Налична';
+        pill.classList.toggle('wait', requested);
+        action.textContent = requested ? 'Отмени заявката' : 'Заяви';
+        action.classList.toggle('primary', !requested);
+        feedback.textContent = requested ? 'Макет — заявката чака; администраторът може да я отмени.' : 'Макет — заявката е отменена; права не са били дадени.';
+      });
+      const ledgers = {
+        'platform-sent': [{ name:'„Примерна организация Груп“ ЕООД', email:'org-admin@example.org', detail:'Администратор · имената не са попълнени', state:'accepted', date:'28.09.2026' }],
+        'platform-approved': [],
+        'organisation-sent': [{ name:'Потребител на Примерна организация', email:'member@example.org', detail:'Наблюдател · имената не са попълнени', state:'accepted', date:'29.09.2026' }],
+        'organisation-approved': []
+      };
+      const stateLabels = { sent:'Изпратена', waiting:'Чака решение', rejected:'Отказана', approved:'Одобрена', accepted:'Приета' };
+      root.querySelectorAll('[data-ledger]').forEach(ledger => {
+        const records = ledgers[ledger.dataset.ledger];
+        const body = ledger.querySelector('[data-ledger-body]');
+        const range = ledger.querySelector('[data-ledger-range]');
+        const query = ledger.querySelector('[data-ledger-query]');
+        const statusFilter = ledger.querySelector('[data-ledger-status]');
+        const prev = ledger.querySelector('[data-ledger-prev]');
+        const next = ledger.querySelector('[data-ledger-next]');
+        let page = 0;
+        const size = 3;
+        function render() {
+          const term = query.value.trim().toLocaleLowerCase('bg');
+          const selected = statusFilter ? statusFilter.value : 'all';
+          const filtered = records.filter(record => (record.name + ' ' + record.email).toLocaleLowerCase('bg').includes(term) && (selected === 'all' || record.state === selected));
+          const pages = Math.max(1, Math.ceil(filtered.length / size));
+          page = Math.min(page, pages - 1);
+          body.replaceChildren();
+          for (const record of filtered.slice(page * size, page * size + size)) {
+            const row = document.createElement('div'); row.className = 'gx-row';
+            const main = document.createElement('div');
+            const title = document.createElement('h4'); title.textContent = record.name + ' · ' + record.email;
+            const detail = document.createElement('p'); detail.textContent = record.detail + ' · приета на ' + record.date;
+            main.append(title, detail);
+            const pill = document.createElement('span');
+            pill.className = 'gx-pill' + (record.state === 'waiting' || record.state === 'sent' ? ' wait' : '');
+            pill.textContent = stateLabels[record.state];
+            row.append(main, pill); body.append(row);
+          }
+          if (!filtered.length) {
+            const empty = document.createElement('p'); empty.className = 'gx-empty';
+            empty.textContent = 'Няма записи за този филтър или още няма разрешени услуги.'; body.append(empty);
+          }
+          range.textContent = filtered.length ? 'Показани ' + (page * size + 1) + '–' + Math.min((page + 1) * size, filtered.length) + ' от ' + filtered.length : '0 записа';
+          prev.disabled = page === 0;
+          next.disabled = page >= pages - 1;
+        }
+        query.addEventListener('input', () => { page = 0; render(); });
+        if (statusFilter) statusFilter.addEventListener('change', () => { page = 0; render(); });
+        prev.addEventListener('click', () => { page -= 1; render(); });
+        next.addEventListener('click', () => { page += 1; render(); });
+        render();
+      });
+      root.addEventListener('click', event => {
+        const button = event.target.closest('[data-demo]');
+        if (button && root.contains(button)) button.closest('.gx-main').querySelector('.gx-feedback').textContent = button.dataset.demo + ' Това е само макет.';
+      });
+    })();
+  </script>
+</div>
+

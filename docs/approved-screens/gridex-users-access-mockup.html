@@ -1,0 +1,124 @@
+<div id="gridex-users-mock" class="gx-mock">
+  <style>
+    #gridex-users-mock{color-scheme:light dark;--gx-bg:light-dark(#f3f6f2,#101d19);--gx-panel:light-dark(#fff,#193028);--gx-ink:light-dark(#19342a,#eef7f0);--gx-soft:light-dark(#5c7166,#b5c8bb);--gx-line:light-dark(#d9e5dc,#355246);--gx-green:light-dark(#174d38,#7bd09c);--gx-green-ink:light-dark(#fff,#102319);--gx-pale:light-dark(#e9f4eb,#234434);--gx-amber:light-dark(#fbf0d5,#4a3d1e);--gx-amber-ink:light-dark(#825a13,#f8dc93);font:400 14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--gx-ink);background:var(--gx-bg);padding:18px;border-radius:22px;box-sizing:border-box}
+    #gridex-users-mock *{box-sizing:border-box}
+    #gridex-users-mock [hidden]{display:none!important}
+    #gridex-users-mock .gx-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+    #gridex-users-mock .gx-brand{font-weight:500;letter-spacing:.04em;color:var(--gx-green)}
+    #gridex-users-mock .gx-path{color:var(--gx-soft);margin:2px 0 0}
+    #gridex-users-mock h2{font-size:23px;font-weight:500;margin:12px 0 2px}
+    #gridex-users-mock h3{font-size:17px;font-weight:500;margin:0 0 12px}
+    #gridex-users-mock p{margin:4px 0 0}
+    #gridex-users-mock .gx-note{font-size:12px;color:var(--gx-soft)}
+    #gridex-users-mock .gx-button{border:1px solid var(--gx-green);background:var(--gx-green);color:var(--gx-green-ink);padding:10px 14px;border-radius:10px;font:inherit;font-weight:500;min-height:42px}
+    #gridex-users-mock .gx-button.secondary{background:var(--gx-panel);color:var(--gx-green)}
+    #gridex-users-mock .gx-tabs{display:flex;gap:6px;border-bottom:1px solid var(--gx-line);margin:14px 0}
+    #gridex-users-mock .gx-tab{border:0;background:transparent;color:var(--gx-soft);padding:10px 12px;font:inherit;min-height:42px}
+    #gridex-users-mock .gx-tab[aria-selected="true"]{color:var(--gx-green);border-bottom:3px solid var(--gx-green);font-weight:500}
+    #gridex-users-mock .gx-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:14px}
+    #gridex-users-mock .gx-panel{background:var(--gx-panel);border:1px solid var(--gx-line);border-radius:16px;padding:18px;min-width:0}
+    #gridex-users-mock .gx-list{display:grid;gap:8px}
+    #gridex-users-mock .gx-person{display:flex;align-items:center;justify-content:space-between;text-align:left;gap:8px;width:100%;border:1px solid var(--gx-line);background:var(--gx-panel);color:var(--gx-ink);border-radius:12px;padding:12px;font:inherit;min-height:64px}
+    #gridex-users-mock .gx-person[aria-pressed="true"]{background:var(--gx-pale);border-color:var(--gx-green)}
+    #gridex-users-mock .gx-person strong,#gridex-users-mock .gx-person small{display:block}
+    #gridex-users-mock .gx-person strong{font-weight:500}
+    #gridex-users-mock .gx-person small{font-size:12px;color:var(--gx-soft);overflow-wrap:anywhere}
+    #gridex-users-mock .gx-badge{display:inline-block;padding:4px 8px;border-radius:99px;background:var(--gx-pale);color:var(--gx-green);font-size:12px;white-space:nowrap}
+    #gridex-users-mock .gx-badge.wait{background:var(--gx-amber);color:var(--gx-amber-ink)}
+    #gridex-users-mock .gx-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid var(--gx-line);padding-bottom:13px;margin-bottom:13px}
+    #gridex-users-mock .gx-meta label,#gridex-users-mock .gx-field-label{display:block;color:var(--gx-soft);font-size:12px;margin-bottom:5px}
+    #gridex-users-mock .gx-meta strong{font-weight:500}
+    #gridex-users-mock .gx-select{width:100%;border:1px solid var(--gx-line);background:var(--gx-panel);color:var(--gx-ink);border-radius:9px;padding:9px;font:inherit;min-height:42px}
+    #gridex-users-mock .gx-section{padding:12px 0;border-bottom:1px solid var(--gx-line)}
+    #gridex-users-mock .gx-section:last-of-type{border:0}
+    #gridex-users-mock .gx-section-title{display:flex;justify-content:space-between;gap:8px;font-weight:500}
+    #gridex-users-mock .gx-section-title small{font-weight:400;color:var(--gx-soft)}
+    #gridex-users-mock .gx-checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    #gridex-users-mock .gx-check{display:flex;align-items:center;gap:6px;border:1px solid var(--gx-line);padding:7px 9px;border-radius:9px;min-height:42px}
+    #gridex-users-mock .gx-check input{accent-color:var(--gx-green);width:16px;height:16px}
+    #gridex-users-mock .gx-rights{background:var(--gx-pale);border-radius:10px;padding:11px;margin-top:12px}
+    #gridex-users-mock .gx-rights strong{font-weight:500}
+    #gridex-users-mock .gx-actions{display:flex;justify-content:flex-end;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    #gridex-users-mock .gx-invite{display:none}
+    #gridex-users-mock .gx-invite[aria-hidden="false"]{display:block}
+    #gridex-users-mock .gx-invite-row{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--gx-line);flex-wrap:wrap}
+    #gridex-users-mock .gx-invite-row strong,#gridex-users-mock .gx-invite-row small{display:block}
+    #gridex-users-mock .gx-invite-row small{color:var(--gx-soft)}
+    #gridex-users-mock .gx-invite-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+    #gridex-users-mock .gx-input{width:100%;border:1px solid var(--gx-line);background:var(--gx-panel);color:var(--gx-ink);border-radius:9px;padding:9px;font:inherit;min-height:42px}
+    #gridex-users-mock .gx-invite-fields label{display:block;color:var(--gx-soft);font-size:12px}
+    #gridex-users-mock .gx-invite-fields input,#gridex-users-mock .gx-invite-fields select{margin-top:5px}
+    @media(max-width:700px){#gridex-users-mock{padding:12px}#gridex-users-mock .gx-layout,#gridex-users-mock .gx-invite-fields{grid-template-columns:1fr}#gridex-users-mock .gx-panel{padding:14px}#gridex-users-mock .gx-head .gx-button{width:100%}}
+  </style>
+  <header class="gx-head">
+    <div><div class="gx-brand">GrideX</div><div class="gx-path">Клиенти и договори / Потребители и покани</div><h2>Достъп на потребителите</h2><p class="gx-note">Примерен екран · данните и действията са само за преглед на дизайна</p></div>
+    <button class="gx-button" type="button" id="gx-new-invite">+ Покани потребител</button>
+  </header>
+  <nav class="gx-tabs" aria-label="Изглед">
+    <button class="gx-tab" type="button" data-tab="members" aria-selected="true">Потребители · 3</button>
+    <button class="gx-tab" type="button" data-tab="invites" aria-selected="false">Изпратени покани · 1</button>
+  </nav>
+  <div id="gx-members" class="gx-layout">
+    <section class="gx-panel" aria-label="Списък с потребители">
+      <h3>Потребители на организацията</h3>
+      <div class="gx-list">
+        <button class="gx-person" type="button" data-person="0" aria-pressed="true"><span><strong>Мария Петрова</strong><small>maria@example.org · Администратор</small></span><span class="gx-badge">Активен</span></button>
+        <button class="gx-person" type="button" data-person="1" aria-pressed="false"><span><strong>Георги Димитров</strong><small>georgi@example.org · Интегратор</small></span><span class="gx-badge">Активен</span></button>
+        <button class="gx-person" type="button" data-person="2" aria-pressed="false"><span><strong>Елена Иванова</strong><small>elena@example.org · Наблюдател</small></span><span class="gx-badge">Активен</span></button>
+      </div>
+    </section>
+    <section class="gx-panel" aria-label="Права на избрания потребител">
+      <h3 id="gx-detail-name">Мария Петрова</h3>
+      <div class="gx-meta"><div><label>Имейл</label><strong id="gx-detail-email">maria@example.org</strong></div><div><label>Последен вход</label><strong id="gx-detail-login">Днес, 09:24</strong></div></div>
+      <label class="gx-field-label" for="gx-role">Роля в организацията</label>
+      <select id="gx-role" class="gx-select" aria-label="Роля в организацията"><option value="administrator">Администратор</option><option value="viewer">Наблюдател</option><option value="operator">Оператор</option><option value="energy_manager">Енергиен мениджър</option><option value="integrator">Интегратор</option></select>
+      <div class="gx-section"><div class="gx-section-title">Разрешени Обекти <small>Избрани от администратора</small></div><div class="gx-checks"><label class="gx-check"><input type="checkbox" data-site="east"> Соларен парк Изток</label><label class="gx-check"><input type="checkbox" data-site="west"> Склад Запад</label></div></div>
+      <div class="gx-section"><div class="gx-section-title">Допълнителни услуги <small>Отделно от ролята</small></div><div class="gx-checks"><label class="gx-check"><input type="checkbox" data-service="prices"> Цени ден напред · BG</label><label class="gx-check"><input type="checkbox" data-service="charts"> Графики</label></div></div>
+      <div class="gx-rights" aria-live="polite"><strong>Ефективни права</strong><p id="gx-rights-text"></p></div>
+      <div class="gx-actions"><span class="gx-note">Обектите не се създават от потребителя</span><button class="gx-button secondary" type="button" id="gx-save">Преглед на промените</button></div>
+    </section>
+  </div>
+  <section class="gx-panel gx-invite" id="gx-invites" aria-hidden="true">
+    <h3>Нова покана</h3>
+    <div class="gx-invite-fields"><label>Име<input class="gx-input" type="text" placeholder="Име"></label><label>Фамилия<input class="gx-input" type="text" placeholder="Фамилия"></label><label>Служебен имейл<input class="gx-input" type="email" placeholder="name@example.org"></label><label>Роля<select class="gx-select"><option>Наблюдател</option><option>Оператор</option><option>Енергиен мениджър</option><option>Интегратор</option></select></label></div>
+    <div class="gx-section"><div class="gx-section-title">Достъп до Обекти <small>Не е избрано нищо по подразбиране</small></div><div class="gx-checks"><label class="gx-check"><input type="checkbox"> Соларен парк Изток</label><label class="gx-check"><input type="checkbox"> Склад Запад</label></div></div>
+    <div class="gx-actions"><span class="gx-note" id="gx-invite-note"></span><button class="gx-button secondary" type="button" id="gx-review-invite">Преглед на поканата</button></div>
+    <h3 style="margin-top:20px">Изпратени покани</h3>
+    <div class="gx-invite-row"><span><strong>Николай Стоянов · nikolay@example.org</strong><small>Оператор · Соларен парк Изток · без допълнителни услуги</small></span><span class="gx-badge wait">Изпратена · очаква регистрация</span></div>
+    <p class="gx-note">След регистрацията потребителят се появява в „Потребители“ с действителните си права. Тук остават само чакащите покани.</p>
+  </section>
+  <script>
+    (()=>{
+      const root=document.getElementById('gridex-users-mock');
+      const people=[
+        {name:'Мария Петрова',email:'maria@example.org',login:'Днес, 09:24',role:'administrator',sites:['east','west'],services:['prices','charts']},
+        {name:'Георги Димитров',email:'georgi@example.org',login:'Вчера, 17:12',role:'integrator',sites:['east'],services:['charts']},
+        {name:'Елена Иванова',email:'elena@example.org',login:'30 септември, 11:06',role:'viewer',sites:['east'],services:[]}
+      ];
+      const descriptions={administrator:'Управление на организацията, Обектите, потребителите и конфигурацията.',viewer:'Само преглед на разрешените Обекти, устройства и стратегии.',operator:'Преглед, оперативни команди, чернови и симулации на стратегии.',energy_manager:'Оперативни права, конфигурация и активиране на стратегии.',integrator:'Управление на активи и хардуер в разрешените Обекти; без създаване на Обект.'};
+      let selected=0;
+      const render=()=>{
+        const person=people[selected];
+        root.querySelector('#gx-detail-name').textContent=person.name;
+        root.querySelector('#gx-detail-email').textContent=person.email;
+        root.querySelector('#gx-detail-login').textContent=person.login;
+        root.querySelector('#gx-role').value=person.role;
+        root.querySelectorAll('[data-site]').forEach(input=>{input.checked=person.sites.includes(input.dataset.site)});
+        root.querySelectorAll('[data-service]').forEach(input=>{input.checked=person.services.includes(input.dataset.service)});
+        root.querySelectorAll('[data-person]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.person)===selected)));
+        root.querySelector('#gx-rights-text').textContent=descriptions[person.role]+' '+(person.sites.length?`Достъп до ${person.sites.length} Обект${person.sites.length>1?'а':''}.`:'Без достъп до Обекти.');
+      };
+      root.querySelectorAll('[data-person]').forEach(button=>button.addEventListener('click',()=>{selected=Number(button.dataset.person);render()}));
+      root.querySelector('#gx-role').addEventListener('change',event=>{people[selected].role=event.target.value;render()});
+      root.querySelectorAll('[data-site]').forEach(input=>input.addEventListener('change',()=>{people[selected].sites=[...root.querySelectorAll('[data-site]:checked')].map(item=>item.dataset.site);render()}));
+      root.querySelectorAll('[data-service]').forEach(input=>input.addEventListener('change',()=>{people[selected].services=[...root.querySelectorAll('[data-service]:checked')].map(item=>item.dataset.service);render()}));
+      const switchTab=tab=>{root.querySelector('#gx-members').hidden=tab!=='members';const invites=root.querySelector('#gx-invites');invites.setAttribute('aria-hidden',String(tab!=='invites'));root.querySelectorAll('[data-tab]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.tab===tab)))};
+      root.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>switchTab(button.dataset.tab)));
+      root.querySelector('#gx-new-invite').addEventListener('click',()=>switchTab('invites'));
+      root.querySelector('#gx-review-invite').addEventListener('click',()=>root.querySelector('#gx-invite-note').textContent='Примерен преглед — не се изпраща имейл.');
+      root.querySelector('#gx-save').addEventListener('click',()=>root.querySelector('#gx-rights-text').textContent='Примерна проверка: '+descriptions[people[selected].role]+' Реалният запис ще се добави само след одобрение на този екран.');
+      render();
+    })();
+  </script>
+</div>
+

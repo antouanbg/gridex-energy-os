@@ -1,5 +1,30 @@
 # Организации и достъп / Organisations and access
 
+## Approved catalogue visibility / Одобрена видимост на каталога — 2026-10-02
+
+Implementation status: source checks passed; publication and real-account
+acceptance of the revised administration screen are pending. On the existing
+Users & invitations page, keep all five approved service rows and controls
+visible even with no organisation grants. Day-ahead prices and Visualisations
+show Not approved until verified prerequisites exist; Analysis, Meteorology
+and Forecasting show Coming soon. Only the organisation administrator may
+request organisation approval. The member grant button stays visible but
+disabled without organisation approval. A service-check failure shows Unknown /
+Unavailable, not an inferred approval or denial, and must not hide members.
+Ordinary members retain the existing Profile → Services catalogue and cannot
+request on behalf of the organisation.
+
+Статус: проверките на кода минаха; публикацията и приемането с реален акаунт
+на обновения административен екран предстоят. В съществуващото „Потребители
+и покани“ петте одобрени реда и контроли остават видими дори без разрешени
+услуги. „Цени ден напред“ и „Графики“ показват „Не е одобрена“, докато няма
+проверени предпоставки; „Анализ“, „Метеорология“ и „Прогнозиране“ са „Предстои“.
+Само организационният администратор заявява разрешение за организацията.
+Бутонът за лично разрешение остава видим, но неактивен без организационно
+одобрение. При грешка на проверката статусът е неизвестен/недостъпен, не
+измислено разрешение или отказ; списъкът с хора остава видим. Обикновеният
+потребител запазва каталога „Профил → Услуги“ и не заявява от името на организацията.
+
 Статус 2026-09-28: публичната документация е в Docusaurus на
 `doc.gridex.tech`. Първият клиент потвърди получаване на покана и вход;
 автоматичното завършване и пълната изолация още се проверяват в реалната среда.
