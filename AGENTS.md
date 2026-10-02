@@ -1,5 +1,17 @@
 # GrideX Energy OS — Working Rules
 
+## Account changes require logout / Друг акаунт само след изход — 2026-10-02
+
+Owner removed Switch account/user from the portal. Do not restore an
+in-session account-switch menu action. Use Sign out → Demo → Sign in with
+the new user's email/password. Preserve existing identity mismatch guards,
+logout propagation, tenant isolation and all unrelated menu/design decisions.
+
+Собственикът премахна „Смяна на профил/потребител“. Не връщай такава опция
+в активната сесия. Друг акаунт: „Изход“ → демо → „Вход“ с новия имейл/парола.
+Пази проверката за чужда самоличност, изхода в другите табове и изолацията;
+без други промени на менюто/дизайна.
+
 ## Ask before resolving contradictions / Питай преди разрешаване на противоречия — 2026-10-02
 
 If an approved template, another approved screen, workflow, permission, API

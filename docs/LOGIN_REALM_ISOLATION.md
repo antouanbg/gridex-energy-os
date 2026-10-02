@@ -2,6 +2,11 @@
 
 ## English
 
+Owner decision 2026-10-02: the account menu no longer offers Switch account.
+To use another identity, choose Sign out, wait for Demo, then Sign in with
+the new user's email/password. This uses the existing logout/login flows;
+it does not change roles, inventory, realm isolation or token validation.
+
 The generic `/login/` entry starts with the GrideX platform realm. A customer
 invitation uses its own explicit `?realm=` link. The selected realm is kept only
 in that browser tab for refresh and route navigation; it is not a browser-wide
@@ -27,6 +32,11 @@ does not claim a customer browser sign-in has been accepted until tested by the
 account holder.
 
 ## Български
+
+Решение на собственика 2026-10-02: потребителското меню няма „Смяна на
+профил/потребител“. За друг акаунт натиснете „Изход“, изчакайте демото и
+изберете „Вход“ с неговите имейл/парола. Използват се текущите процеси;
+права, инвентар, изолация и проверка на токените не се променят.
 
 Общият адрес `/login/` започва в платформения realm на GrideX. Поканата за
 клиент използва свой изричен линк с `?realm=`. Избраният realm се пази само в

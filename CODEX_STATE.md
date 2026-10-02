@@ -1,5 +1,31 @@
 # Current task
 
+## 2026-10-02 — remove in-session account switching
+
+Owner explicitly removed Switch account/user. The account menu now retains
+Profile, Documentation and Sign out only. Another person must Sign out →
+Demo → Sign in with their own email/password. No identity, permission,
+backend, logout or OIDC policy is changed; existing mismatch guards remain.
+BG/EN inline help and Docusaurus guide updated; AGENTS prohibits restoring
+the switch action. Regression covers both languages, desktop/mobile,
+logout clearing private data, new same/cross-realm login and stale/callback
+failures. All 11 targeted browser tests passed; Pages build, TypeScript
+and lint passed (four existing image warnings). The initial mobile test
+attempt omitted opening Menu; corrected the test, not the production layout.
+Source ready; merge/publication tracked by this release PR. Docs deployment
+uses deploy-local.sh; owner/real-Keycloak logout/login acceptance remains
+separate from browser fixtures. No backend restart needed.
+
+Български: по изрично искане е премахната „Смяна на профил/потребител“.
+Остават Профил, Документация и Изход. Друг акаунт се ползва само с
+„Изход“ → демо → „Вход“ с новите имейл/парола. Няма промени на права,
+backend, организации, OIDC или текущата защита за несъвпадаща самоличност.
+Помощта е обновена на BG/EN; AGENTS забранява връщането на опцията.
+11 целеви browser теста минаха, с Pages build, TypeScript и lint.
+Първият mobile тест не отваряше Меню — поправен е тестът, не дизайнът.
+Кодът е готов; публикацията се проследява в PR. Реалният Keycloak тест
+от собственика остава отделен от симулираните сценарии. Без рестарт на API.
+
 ## 2026-10-02 — continuous layout publication checkpoint
 
 Published and merged: frontend PR #102 (main 07a792147820d3e26db775493bc89bffdde4e0f4),
