@@ -1,6 +1,48 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-10-02 — continuous layout publication checkpoint
+
+Published and merged: frontend PR #102 (main 07a792147820d3e26db775493bc89bffdde4e0f4),
+backend PR #94 (df78df72991125d9bdcb5c1e15576f22e22e5da1), docs PR #45
+(6aa1f92ec24ad76b82a7a9f49b2dce3924f52487). Frontend Pages run 37029349030
+succeeded. API-only rollout is healthy; backup service-admin-t11cFC is in the
+existing private-backups directory. Read-only live probe verifies pilot 1,
+customer 2 members; each catalogue has five services and zero grants; tenant
+and viewer guards and OpenRemote links/profile recipients verified. No mail
+sent and no grant changed by the probe.
+
+BG+EN Docusaurus deployed through scripts/deploy-local.sh; both locale builds,
+typecheck and proxy asset checks passed. 75 browser/29 frontend unit tests,
+139 backend tests (one skipped) and final 10 role/layout regressions passed.
+Four existing image lint warnings and 17 existing moderate docs dependency
+audit findings remain outside this layout correction.
+
+Auth gate: local master discovery/console/login passed; the public proxy on
+loopback 14443 returns customer discovery 200 and admin/master/health/metrics
+404. Normal-DNS public auth timed out (HTTP 000) from this Mac; no configured
+VPN connection was shown. This is a network-blocked external check, not proof
+of an auth outage or external security acceptance. Owner real-account screen
+acceptance, request/approval and notification delivery remain open.
+Next: signed-in organisation administrator checks services first, invitations
+and both approved members, then tests an explicit service request and decision.
+The member's existing workflow and all unrelated navigation remain unchanged.
+
+Български: frontend #102, backend #94 и docs #45 са слети в main.
+Pages публикацията е успешна; внедряването само на API е здраво с частно
+резервно копие. Живата проба само с четене потвърждава един пилотен и двама
+клиентски членове, пет услуги без права, OpenRemote връзки и изолация.
+Не изпраща писма и не променя права. BG/EN помощта е внедрена с успешни
+build/typecheck/asset проверки. Минаха 75 browser, 29 frontend unit, 139
+backend (един пропуснат) и последните 10 регресионни проверки по роли.
+Локалните auth проверки са успешни; публичният proxy връща 200 за клиентски
+issuer и 404 за master/admin/health/metrics. Публичният auth през нормален
+DNS от Mac е блокиран от маршрут (timeout/000), без видима VPN връзка.
+Това не доказва срив или външно приемане на защитата. Остават реалното
+приемане на екрана с акаунт, заявка/одобрение и полученото уведомление.
+Следва тест от администратора: услуги най-горе, покани и двамата одобрени
+членове, след това изрична заявка и решение. Няма друга промяна на менюто.
+
 ## 2026-10-02 — canonical continuous layout correction
 
 Owner resolved the conflicting templates: use the recommended continuous page,
