@@ -1,6 +1,8 @@
 import {test,expect} from '@playwright/test';
 
 for(const scenario of ['same-realm','cross-realm','stale-identity','callback-failure'] as const)test(`same-browser account switch ${scenario}`,async({page,context})=>{
+  const en=scenario==='same-realm';
+  if(en)await page.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
   const staleSecondIdentity=scenario==='stale-identity';
   let nonce='',issuedEmail='first@example.invalid',issuedRealm='gridex',silentChecks=0,secondLogin=false;
   const jwt=(claims:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(claims)).toString('base64url'),'test'].join('.');
@@ -18,7 +20,7 @@ for(const scenario of ['same-realm','cross-realm','stale-identity','callback-fai
       return route.fulfill({status:302,headers:{location:`${url.searchParams.get('redirect_uri')}#code=fixture&state=${url.searchParams.get('state')}`}});
     }
     if(url.pathname.endsWith('/logout')) {
-      expect(url.pathname).toContain('/realms/novacom/');
+      expect(url.pathname).toContain(`/realms/${issuedRealm}/`);
       expect(url.searchParams.get('post_logout_redirect_uri')).toBe('http://127.0.0.1:4173/demo/');
       return route.fulfill({status:302,headers:{location:url.searchParams.get('post_logout_redirect_uri')!}});
     }
@@ -41,18 +43,28 @@ for(const scenario of ['same-realm','cross-realm','stale-identity','callback-fai
 
   await page.goto('/demo/');
   await page.locator('.demo-sign-in').click();
-  await page.getByLabel('Имейл',{exact:true}).fill('first@example.invalid');
+  await page.getByLabel(en?'Email':'Имейл',{exact:true}).fill('first@example.invalid');
   await page.locator('.login-submit').click();
   await expect(page.getByTestId('section-overview')).toBeVisible();
   await expect(page.locator('.profile strong')).toHaveText('first@example.invalid');
 
-  // Opening generic Login for another person must not silently restore the
-  // first person's server session just because this browser has a release hint.
-  await page.goto('/login/');
-  await expect(page.getByLabel('Имейл',{exact:true})).toBeVisible();
+  // Account changes are only offered through explicit logout and new sign-in.
+  if(scenario==='cross-realm'){
+    await page.setViewportSize({width:390,height:844});
+    await page.locator('.mobile-menu-toggle').click();
+  }
+  await page.locator('.profile').click();
+  await expect(page.getByRole('menuitem',{name:/Смяна на профил|Смяна на потребител|Switch account/})).toHaveCount(0);
+  await expect(page.getByRole('menuitem',{name:/Изход|Sign out/})).toBeVisible();
+  await page.locator('.account-menu-logout').click();
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
+  await expect(page.getByText('First private Site')).toHaveCount(0);
+  await page.locator('.demo-sign-in').click();
+  await expect(page.getByLabel(en?'Email':'Имейл',{exact:true})).toBeVisible();
   await expect(page.locator('.profile strong')).not.toHaveText('first@example.invalid');
   expect(silentChecks).toBe(0);
-  await page.getByLabel('Имейл',{exact:true}).fill('second@example.invalid');
+  await page.getByLabel(en?'Email':'Имейл',{exact:true}).fill('second@example.invalid');
   await page.locator('.login-submit').click();
 
   if(scenario==='callback-failure'){
@@ -72,6 +84,7 @@ for(const scenario of ['same-realm','cross-realm','stale-identity','callback-fai
     await expect(page.getByText('Second private Site')).toBeVisible();
     await expect(page.getByText('First private Site')).toHaveCount(0);
     if(scenario==='cross-realm') {
+      await page.locator('.mobile-menu-toggle').click();
       await page.locator('.profile').click();
       await page.locator('.account-menu-logout').click();
       await expect(page).toHaveURL(/\/demo\/$/);
