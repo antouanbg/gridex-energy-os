@@ -99,9 +99,9 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
       <section className="card config-card invitation-panel" aria-label={lang==='en'?'OpenRemote administration':'Администрация в OpenRemote'}>
         <span className="profile-kicker">OPENREMOTE</span>
         <h2>{lang==='en'?'Organisation administration':'Администрация на организацията'}</h2>
-        <p>{lang==='en'?'Open Manager for the organisation in your current signed-in session. The one-time link expires in one minute.':'Отворете Manager само за организацията от текущата Ви сесия. Еднократният линк изтича след една минута.'}</p>
+        <p>{lang==='en'?'Open Manager for the organisation in your current signed-in session. The one-time link expires in one minute. Manager is read-only for people; changes are made through GrideX.':'Отворете Manager само за организацията от текущата Ви сесия. Еднократният линк изтича след една минута. За хората Manager е само за четене; промените се правят през GrideX.'}</p>
         {managerError&&<p role="alert">{lang==='en'?'Manager access could not be verified. Refresh your session and try again.':'Достъпът до Manager не можа да се потвърди. Обновете сесията и опитайте пак.'}</p>}
-        <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#openremote-manager`} target="_blank" rel="noopener noreferrer">{lang==='en'?'How Manager access works':'Как работи входът в Manager'} ↗</a>
+        <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#openremote-manager`} target="_blank" rel="noopener noreferrer">{lang==='en'?'Manager access and read-only rights':'Достъп и права само за четене в Manager'} ↗</a>
         <button type="button" className="primary-btn" disabled={busy} onClick={()=>void action(async()=>{
           setManagerError(false);
           try {

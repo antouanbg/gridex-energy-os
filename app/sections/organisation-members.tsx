@@ -90,8 +90,13 @@ export function OrganisationMembers({api,lang,organisationId,platform=false}: {
     <p className="invitation-panel-intro">{platform
       ?en?'Read-only overview for the selected organisation.':'Преглед на избраната организация без редакция.'
       :en?'Select a member to review the effective role, assigned Sites and separate services.':'Изберете човек, за да видите ролята, Обектите и отделните му услуги.'}</p>
-    <a className="profile-inline-help" href={documentationLink('members',lang).href} target="_blank" rel="noopener noreferrer">
+    <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#approved-members`} target="_blank" rel="noopener noreferrer">
       {en?'Roles and Site access':'Роли и достъп до Обекти'} ↗</a>
+    <p className="organisation-member-rights-note">{en
+      ? 'GrideX checks each action against the current role and assigned Sites. Direct OpenRemote Manager access is read-only for every person.'
+      : 'GrideX проверява всяко действие спрямо текущата роля и разрешените Обекти. Прекият достъп до OpenRemote Manager е само за четене за всеки човек.'}
+      {' '}<a href={`${documentationLink('members',lang).href}#rights-matrix`} target="_blank" rel="noopener noreferrer">
+        {en?'Compare permissions':'Сравни правата'} ↗</a></p>
     {loading&&<p role="status">{en?'Verifying members…':'Проверяваме потребителите…'}</p>}
     {error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
     {!loading&&page&&<div className="organisation-members-layout">
