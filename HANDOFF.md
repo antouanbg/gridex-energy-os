@@ -1,6 +1,26 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-10-02 — publication and verification checkpoint
+
+Merged PR [#100](https://github.com/antouanbg/gridex-energy-os/pull/100) into main at `78b22655fb6dc0bcf61187d1e9d2766d10628539`.
+Frontend Pages and quality runs 37000251322 and 37000251346 succeeded. The public member route served /assets/main-D81MxDup.js. 75 browser and 29 unit tests passed; TypeScript, Pages build and lint passed (four existing image warnings).
+Paired releases: frontend #100, backend #92, documentation #43.
+Status: source tested, published and deployed; owner acceptance remains open.
+Next acceptance: signed-in organisation administrator reviews the roster and
+all five service rows, requests an unapproved active service, then verifies
+the platform decision, individual member grant and actual notification delivery.
+Do not fabricate grants or treat test fixtures/mail configuration as delivered mail.
+
+Български: PR #100 е слят в main (78b22655fb6dc0bcf61187d1e9d2766d10628539).
+Pages и quality проверките 37000251322 и 37000251346 са успешни; публичният адрес обслужва /assets/main-D81MxDup.js. Минаха 75 браузърни и 29 unit теста, TypeScript, build и lint (четири стари предупреждения за изображения).
+Кодът е проверен, публикуван и внедрен; приемането от собственика остава отворено.
+Следва реален тест: администраторът вижда списъка и петте услуги, заявява
+неодобрена активна услуга; проверяват се решението на супер администратора,
+личното разрешение и действително полученият мейл. Без примерни права и без
+приравняване на тестови данни/мейл настройки с реална доставка.
+
+
 ## 2026-10-02 — clarification: no grant does not hide catalogue controls
 
 Final source checkpoint: 75 browser tests and 29 unit tests passed, including
