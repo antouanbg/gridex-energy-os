@@ -6,8 +6,8 @@ import { serviceLabel } from '../lib/service-labels';
 import { adminServiceRows, organisationServiceReady } from '../lib/admin-service-catalog';
 import { documentationLink } from '../lib/documentation';
 
-export function OrganisationServiceMembers({api,lang,organisationId,subject,onMembers}: {
-  api:GridexApiClient;lang:UiLanguage;organisationId:string;subject:string;onMembers?:()=>void
+export function OrganisationServiceMembers({api,lang,organisationId,subject,onMembers,catalogueOnly=false}: {
+  api:GridexApiClient;lang:UiLanguage;organisationId:string;subject:string;onMembers?:()=>void;catalogueOnly?:boolean
 }) {
   const en=lang==='en';
   const [services,setServices]=useState<ServiceGrant[]|null>(null);
@@ -31,11 +31,12 @@ export function OrganisationServiceMembers({api,lang,organisationId,subject,onMe
     return()=>abort.abort();
   },[api,organisationId,en,refreshKey]);
   useEffect(()=>{
+    if(catalogueOnly)return;
     const abort=new AbortController();queueMicrotask(()=>{if(!abort.signal.aborted)setMembersError(false);});
     void api.organisationMembers(organisationId,offset,false,abort.signal,search).then(result=>{if(!abort.signal.aborted)setPage(result);})
       .catch(()=>{if(!abort.signal.aborted)setMembersError(true);});
     return()=>abort.abort();
-  },[api,organisationId,offset,search,refreshKey]);
+  },[api,organisationId,offset,search,refreshKey,catalogueOnly]);
   async function request(service:ServiceGrant,pending?:ServiceRequest){
     if(busy||services===null||requests===null)return;
     setBusy(service.code);setError('');setNotice('');
@@ -49,9 +50,9 @@ export function OrganisationServiceMembers({api,lang,organisationId,subject,onMe
     finally{setBusy('');}
   }
   return <section className="organisation-service-workspace" aria-label={en?'Organisation services':'Услуги за организацията'}>
-    <div className="admin-section-heading"><div><h2>{en?'Services for the organisation':'Услуги за организацията'}</h2>
+    {!catalogueOnly&&<div className="admin-section-heading"><div><h2>{en?'Services for the organisation':'Услуги за организацията'}</h2>
       <p>{en?'Only an organisation administrator requests services from the platform administrator. Each member needs a separate grant.':'Само администраторът на организацията заявява услуги към супер администратора. Всеки потребител получава отделно разрешение.'}</p></div>
-      <a className="profile-inline-help" href={documentationLink('members',lang).href+'#additional-services'} target="_blank" rel="noopener noreferrer">{en?'Help':'Помощ'} ↗</a></div>
+      <a className="profile-inline-help" href={documentationLink('members',lang).href+'#additional-services'} target="_blank" rel="noopener noreferrer">{en?'Help':'Помощ'} ↗</a></div>}
     {error&&<div className="admin-feedback error" role="alert">{error} <button type="button" className="secondary-btn" onClick={()=>setRefreshKey(key=>key+1)}>{en?'Refresh status':'Опресни статуса'}</button></div>}
     {notice&&<p className="admin-feedback" role="status">{notice}</p>}
     <section className="admin-panel"><div className="admin-section-heading"><h3>{en?'Available services':'Налични услуги'}</h3><button className="secondary-btn" type="button" disabled={Boolean(busy)} onClick={()=>setRefreshKey(key=>key+1)}>{en?'Refresh':'Опресни'}</button></div>
@@ -68,7 +69,7 @@ export function OrganisationServiceMembers({api,lang,organisationId,subject,onMe
         </div>;
       })}
     </section>
-    <section className="admin-panel"><div className="admin-section-heading"><div><h3>{en?'Approved members and services':'Одобрени потребители и услуги'}</h3><p>{en?'All approved members remain listed even when no services have been granted.':'Всички одобрени хора са в списъка, включително когато още нямат разрешени услуги.'}</p></div>
+    {!catalogueOnly&&<section className="admin-panel"><div className="admin-section-heading"><div><h3>{en?'Approved members and services':'Одобрени потребители и услуги'}</h3><p>{en?'All approved members remain listed even when no services have been granted.':'Всички одобрени хора са в списъка, включително когато още нямат разрешени услуги.'}</p></div>
       {onMembers&&<button type="button" className="secondary-btn" onClick={onMembers}>{en?'Manage access':'Управлявай достъпа'}</button>}</div>
       <label className="admin-search">{en?'Find a person or email':'Намери човек или имейл'}<input type="search" value={query} maxLength={120} onChange={event=>setQuery(event.target.value)}/></label>
       {membersError&&<p role="alert">{en?'Members could not be checked.':'Потребителите не можаха да се проверят.'}</p>}
@@ -76,6 +77,6 @@ export function OrganisationServiceMembers({api,lang,organisationId,subject,onMe
       {page&&!page.members.length&&<p>{en?'No members match this search.':'Няма потребители за този избор.'}</p>}
       {page?.members.map(member=><article className="admin-service-row" key={member.subject}><div><strong>{member.firstName&&member.lastName?`${member.firstName} ${member.lastName}`:member.email}</strong><small>{member.email}</small><small>{member.services.length?member.services.map(code=>serviceLabel(code,lang)).join(' · '):(en?'No services enabled for this person.':'Няма разрешени услуги за този човек.')}</small></div><span className="admin-status">{en?'Approved':'Одобрен'}</span></article>)}
       {page&&<div className="admin-pagination"><span>{page.members.length?`${offset+1}–${offset+page.members.length}${page.total?` / ${page.total}`:''}`:'0'}</span><div><button type="button" className="secondary-btn" disabled={offset===0} onClick={()=>setOffset(value=>Math.max(0,value-25))}>{en?'Previous':'Назад'}</button><button type="button" className="secondary-btn" disabled={page.nextOffset===null} onClick={()=>setOffset(page.nextOffset||0)}>{en?'Next':'Напред'}</button></div></div>}
-    </section>
+    </section>}
   </section>;
 }

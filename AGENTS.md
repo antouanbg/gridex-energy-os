@@ -1,5 +1,29 @@
 # GrideX Energy OS — Working Rules
 
+## Ask before resolving contradictions / Питай преди разрешаване на противоречия — 2026-10-02
+
+If an approved template, another approved screen, workflow, permission, API
+contract or live state conflicts with the requested implementation, identify
+the exact conflicting sources and ask the owner a concrete question before
+editing the affected behavior. Recommend an option but do not select it on
+the owner's behalf. A pending answer is not approval. Work may continue only
+on independent, non-conflicting parts. Do not hide a missing prerequisite,
+replace an approved layout, or invent a control/transition to make tests pass.
+Record the question, answer and canonical template revision in HANDOFF; tests
+must check that approved reference, not a newly invented implementation.
+Explicit scope already approved needs no repeated permission.
+
+При противоречие между одобрен шаблон, друг одобрен екран, логика, права,
+API договор или реално състояние посочи точните източници и задай конкретен
+въпрос ПРЕДИ редакция на засегнатото поведение. Предложи вариант, но не
+решавай вместо собственика. Чакащ отговор не е одобрение. Продължи само
+независимите непротиворечиви части. Не скривай липсваща предпоставка,
+не заменяй одобрен дизайн и не измисляй контрола/преход за успешен тест.
+Запиши въпроса, отговора и водещата версия на шаблона в HANDOFF; тестовете
+проверяват нея, а не самостоятелно измислената реализация. Не искай повторно
+разрешение за вече изрично одобрения обхват.
+
+
 ## Specify, draw, approve, then implement / Специфицирай, начертай, одобри, после внедрявай — 2026-10-01
 
 Before implementing any new feature, workflow, business rule, permission or

@@ -529,7 +529,7 @@ export class GridexApiClient {
   async organisationInvitations(signal?: AbortSignal): Promise<{ enabled: boolean; invitations: CreatedOrganisationInvitation[] }> {
     return this.getJson('/api/v1/platform/organisation-invitations', signal);
   }
-  async inviteOrganisation(body: { name: string; realm: string; email: string }): Promise<{ id: string; realm: string; state: string }> {
+  async inviteOrganisation(body: { name: string; realm: string; email: string; firstName:string; lastName:string }): Promise<{ id: string; realm: string; state: string }> {
     return this.postJson('/api/v1/platform/organisation-invitations', body);
   }
   async revokeOrganisationInvitation(id: string): Promise<{ revoked: boolean }> {

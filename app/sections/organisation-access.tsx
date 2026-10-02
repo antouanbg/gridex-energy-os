@@ -1,16 +1,20 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { GridexApiError, type GridexApiClient, type PlatformOrganisation, type ServiceGrant, type OrganisationMarketZone } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { serviceLabel } from '../lib/service-labels';
+import { adminServiceRows } from '../lib/admin-service-catalog';
 
-export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; lang: UiLanguage }) {
+export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexApiClient; lang: UiLanguage; children?:ReactNode }) {
   const en = lang === 'en';
   const [items, setItems] = useState<PlatformOrganisation[]>([]);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [notice, setNotice] = useState('');
   const [confirm, setConfirm] = useState<PlatformOrganisation | null>(null);
+  const [selectedId,setSelectedId]=useState('');
+  const [query,setQuery]=useState('');
+  const [page,setPage]=useState(0);
   const labels: Record<string, string> = en ? {
     active: 'Active', suspended: 'Suspended', pending: 'Pending', applied: 'Verified', sending: 'Delivery unknown — do not resend',
     unknown: 'Delivery unknown — do not resend', queued: 'Queued; delivery unconfirmed', delivered: 'Delivered', failed: 'Delivery failed', not_required: 'No email required',
@@ -41,16 +45,29 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
         : en ? 'The change was not confirmed. Reload and reconcile the existing operation; do not create another request.' : 'Промяната не е потвърдена. Обновете и довършете съществуващата операция; не създавайте нова заявка.');
     } finally { try { await reload(); } catch { /* Keep the failure visible. */ } setBusy(false); }
   }
-  return <div className="invitation-history" data-no-translate>
-    <h3>{en ? 'Approved organisations' : 'Одобрени организации'}</h3>
+  const active=items.filter(item=>item.status==='active');
+  const selected=active.find(item=>item.id===selectedId)||active[0];
+  const filtered=items.filter(item=>`${item.name} ${item.realm}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+  const pages=Math.max(1,Math.ceil(filtered.length/10));
+  const currentPage=Math.min(page,pages-1);
+  return <div className="platform-service-workspace" data-no-translate>
+    <section className="admin-panel"><h3>{en?'Approved organisation':'Одобрена организация'}</h3>
+      <div className="admin-organisation-choice"><label className="admin-search">{en?'Organisation':'Организация'}<select value={selected?.id||''} onChange={event=>setSelectedId(event.target.value)}><option value="" disabled>{en?'Choose an active organisation':'Изберете активна организация'}</option>{active.map(item=><option value={item.id} key={item.id}>{item.name} · {labels.active}</option>)}</select></label>{selected&&<span className="admin-status">{labels.active}</span>}</div>
+      {!loaded&&!notice&&<p role="status">{en?'Loading organisations…':'Зареждане на организациите…'}</p>}
+      {loaded&&!active.length&&<p>{en?'No approved customer organisations.':'Няма одобрени клиентски организации.'}</p>}
+      {notice&&<p role="status">{notice}</p>}
+    </section>
+    {selected&&<PlatformServiceGrants key={selected.id} api={api} lang={lang} organisationId={selected.id}/>}
+    {children}
+    <section className="admin-panel invitation-history">
+    <h3>{en ? 'Approved organisations and services' : 'Одобрени организации и услуги'}</h3>
     <p>{en ? 'Suspension blocks access and ends sessions. Accounts and inventory are preserved. Restoration requires a fresh sign-in.' : 'Спирането блокира достъпа и прекратява сесиите. Акаунтите и инвентарът се запазват. След възстановяване е нужен нов вход.'}</p>
-    {notice && <p role="status">{notice}</p>}
+    <label className="admin-search">{en?'Find an organisation':'Намери организация'}<input type="search" value={query} maxLength={120} onChange={event=>{setQuery(event.target.value);setPage(0);}}/></label>
     <button className="secondary-btn" type="button" disabled={busy} onClick={() => { void reload().catch(() => setNotice(en ? 'Reload failed.' : 'Обновяването не успя.')); }}>{en ? 'Reload status' : 'Обнови състоянието'}</button>
-    {!loaded && !notice && <p>{en ? 'Loading organisations…' : 'Зареждане на организациите…'}</p>}
-    {loaded && !items.length && <p>{en ? 'No approved customer organisations.' : 'Няма одобрени клиентски организации.'}</p>}
-    {items.map(item => <article className="invitation-record" key={item.id}>
+    {loaded&&!filtered.length&&<p>{en?'No organisations match this filter.':'Няма организации за този филтър.'}</p>}
+    {filtered.slice(currentPage*10,currentPage*10+10).map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong><p>{labels[item.status]}{item.operationState ? ` · ${labels[item.operationState]}` : ''}</p>
-      {item.status === 'active' && <PlatformServiceGrants api={api} lang={lang} organisationId={item.id}/>}
+      {item.status === 'active' && <button type="button" className="secondary-btn" onClick={()=>{setSelectedId(item.id);document.querySelector('.platform-service-workspace')?.scrollIntoView({behavior:'smooth',block:'start'});}}>{en?'View service permissions':'Виж правата за услуги'}</button>}
       {item.mailState && <p>{en ? 'Suspension email' : 'Имейл за спиране'}: {labels[item.mailState]}</p>}
       {item.operationState === 'pending'
         ? <button type="button" className="secondary-btn" disabled={busy} onClick={() => void change(item, true)}>{en ? 'Complete existing operation' : 'Довърши съществуващата операция'}</button>
@@ -67,6 +84,8 @@ export function OrganisationAccessAdmin({ api, lang }: { api: GridexApiClient; l
         <button type="button" className="secondary-btn" onClick={() => setConfirm(null)}>{en ? 'Cancel' : 'Откажи'}</button>
       </div>}
     </article>)}
+    <div className="admin-pagination"><span>{filtered.length} {en?'records':'записа'} · {currentPage+1} / {pages}</span><div><button type="button" className="secondary-btn" disabled={currentPage===0} onClick={()=>setPage(value=>Math.max(0,value-1))}>{en?'Previous':'Назад'}</button><button type="button" className="secondary-btn" disabled={currentPage>=pages-1} onClick={()=>setPage(value=>value+1)}>{en?'Next':'Напред'}</button></div></div>
+    </section>
   </div>;
 }
 
@@ -95,38 +114,23 @@ function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;l
     }catch{setError(en?'Change not confirmed. Reload before retrying.':'Промяната не е потвърдена. Обновете преди нов опит.');}
     finally{setBusy(false);}
   }
-  const approved=services?.filter(service=>service.enabled)||[];
-  const available=services?.filter(service=>!service.enabled&&service.requestable)||[];
-  const future=services?.filter(service=>!service.enabled&&!service.requestable)||[];
-  return <div className="service-grants">
-    <h4>{en?'Services for this organisation':'Услуги за тази организация'}</h4>
-    <p>{en?'No user receives access automatically. The organisation administrator grants it separately.':
-      'Никой потребител не получава достъп автоматично. Администраторът на организацията го разрешава отделно.'}</p>
+  return <section className="admin-panel service-grants" aria-label={en?'Organisation service permissions':'Права за услуги на организацията'}>
+    <div className="admin-section-heading"><h3>{en?'Services for the organisation':'Услуги за организацията'}</h3><span className="admin-status">{en?'2 requestable':'2 заявяеми'}</span></div>
     {error&&<p role="alert">{error}</p>}
     {notice&&<p role="status">{notice}</p>}
-    {!services&&!error&&<p role="status">{en?'Loading services…':'Зареждане на услугите…'}</p>}
-    <h5>{en?'Approved for the organisation':'Разрешени за организацията'}</h5>
-    {services&&!approved.length&&<p>{en?'No services approved yet.':'Все още няма разрешени услуги.'}</p>}
-    {approved.map(service=><div key={service.code} className="service-grant-row">
-      <span><strong>{serviceLabel(service.code,lang,service.description)}</strong><small>{en?'Organisation approved · members require separate permission':'Одобрена за организацията · потребителите се разрешават отделно'}</small></span>
-      <button type="button" className="secondary-btn" disabled={busy} onClick={()=>setConfirmCode(service.code)}>{en?'Remove':'Отнеми'}</button>
+    {adminServiceRows(services).map(service=><div key={service.code} className="admin-service-row" data-service-code={service.code}>
+      <div><strong>{serviceLabel(service.code,lang)}{service.code==='day_ahead'?(en?' · Bulgaria / BG':' · България / BG'):''}</strong>
+        <small>{!service.requestable?(en?'Shown in the catalogue; not yet requestable':'Показана в каталога; още не е заявяема'):!services?(error?(en?'Permissions unavailable':'Правата не са проверени'):(en?'Checking permissions…':'Проверяваме правата…')):service.enabled?(en?'Approved; members require separate permission':'Разрешена; потребителите се разрешават отделно'):(en?'Not approved for the organisation':'Не е разрешена за организацията')}</small></div>
+      <div className="admin-service-actions"><span className="admin-status">{!service.requestable?(en?'Coming soon':'Предстои'):!services?(error?(en?'Unavailable':'Недостъпна'):(en?'Checking':'Проверяваме')):service.enabled?(en?'Approved':'Разрешена'):(en?'Not approved':'Не е разрешена')}</span>
+        {service.requestable&&<button type="button" className={!service.enabled&&service.code==='day_ahead'?'primary-btn':'secondary-btn'} disabled={busy||!services} onClick={()=>service.enabled?setConfirmCode(service.code):void toggle(service)}>{service.enabled?(en?'Remove':'Отнеми'):(en?'Grant and notify':'Разреши и уведоми')}</button>}</div>
       {confirmCode===service.code&&<div role="group" aria-label={en?'Confirm service removal':'Потвърди отнемането на услугата'}>
-        <p>{en?'Remove this service for the whole organisation? All member grants are deleted and will not return automatically.':'Да се отнеме ли услугата за цялата организация? Всички лични права се изтриват и няма да се върнат автоматично.'}</p>
+        <p>{en?'Remove this service for the organisation and all its members? Previous member permissions will not return automatically.':'Да се отнеме ли услугата за организацията и всички нейни потребители? Старите лични разрешения няма да се върнат автоматично.'}</p>
         <button type="button" className="primary-btn" disabled={busy} onClick={()=>void toggle(service)}>{en?'Confirm removal':'Потвърди отнемането'}</button>
-        <button type="button" className="secondary-btn" disabled={busy} onClick={()=>setConfirmCode('')}>{en?'Cancel':'Откажи'}</button>
+        <button type="button" className="secondary-btn" onClick={()=>setConfirmCode('')}>{en?'Cancel':'Откажи'}</button>
       </div>}
     </div>)}
-    {approved.some(service=>service.code==='day_ahead')&&
-      <OrganisationMarketZones api={api} lang={lang} organisationId={organisationId}/>}
-    <h5>{en?'Available, not approved for this organisation':'Налични, но неразрешени за организацията'}</h5>
-    {services&&!available.length&&<p>{en?'No other requestable services.':'Няма други заявяеми услуги.'}</p>}
-    {available.map(service=><div key={service.code} className="service-grant-row">
-      <span><strong>{serviceLabel(service.code,lang,service.description)}</strong><small>{en?'Not approved for this organisation':'Не е разрешена за тази организация'}</small></span>
-      <button type="button" className="secondary-btn" disabled={busy} onClick={()=>void toggle(service)}>{en?'Enable for organisation':'Разреши за организацията'}</button>
-    </div>)}
-    <h5>{en?'Coming soon':'Предстои'}</h5>
-    {future.map(service=><div key={service.code} className="service-grant-row"><span><strong>{serviceLabel(service.code,lang,service.description)}</strong><small>{en?'Not yet requestable or available to grant':'Още не се заявява и не може да се разреши'}</small></span></div>)}
-  </div>;
+    {services?.some(service=>service.code==='day_ahead'&&service.enabled)&&<OrganisationMarketZones api={api} lang={lang} organisationId={organisationId}/>}
+  </section>;
 }
 
 function OrganisationMarketZones({api,lang,organisationId}:{api:GridexApiClient;lang:UiLanguage;organisationId:string}) {

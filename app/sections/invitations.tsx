@@ -53,7 +53,6 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
   const [outgoing, setOutgoing] = useState<SentGridexInvitation[]>([]);
   const [outgoingError, setOutgoingError] = useState(false);
   const [managerError, setManagerError] = useState(false);
-  const [tab,setTab]=useState<'members'|'invitations'|'services'>('members');
   const [sitesError,setSitesError]=useState(false);
   const [refreshKey,setRefreshKey]=useState(0);
   const [invitationQuery,setInvitationQuery]=useState('');
@@ -108,27 +107,19 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
   return <div className="invitation-page" data-no-translate>
     {mode==='manage'&&<header className="invitation-hero card">
       <div><span className="profile-kicker">GRIDEX · {lang==='en'?'ACCESS CONTROL':'УПРАВЛЕНИЕ НА ДОСТЪПА'}</span>
-        <h2>{organisationAdmin?(lang==='en'?'Member access':'Достъп на потребителите'):t.manageTitle}</h2>
+        <h2>{organisationAdmin?(lang==='en'?'Services for the organisation':'Услуги за организацията'):(lang==='en'?'Services for organisations':'Услуги за организации')}</h2>
         <p>{platform?(lang==='en'?'Manage approved organisations and their separate service permissions.':'Управлявайте одобрените организации и отделните им услуги.'):(lang==='en'?'Manage the people, roles, Sites and services in your organisation.':'Управлявайте хората, ролите, Обектите и услугите във Вашата организация.')}</p>
         <span className="admin-role-caption">{platform?(lang==='en'?'Platform administrator':'Супер администратор'):(lang==='en'?'Organisation administrator':'Администратор на организация')} · {me?.email}</span></div>
-      <div className="admin-header-actions">{organisationAdmin&&<button type="button" className="primary-btn" onClick={()=>setTab('invitations')}>{lang==='en'?'+ Invite member':'+ Покани потребител'}</button>}
+      <div className="admin-header-actions">{organisationAdmin&&<a className="secondary-btn" href="#new-member-invitation">{lang==='en'?'+ Invite member':'+ Покани потребител'}</a>}
         <a className="profile-action" href={documentationLink('members',lang).href} target="_blank" rel="noopener noreferrer">{lang==='en'?'Help':'Помощ'} <span aria-hidden="true">↗</span></a></div>
     </header>}
-    {organisationAdmin&&<div className="admin-workspace-tabs" role="tablist" aria-label={lang==='en'?'Administration views':'Административни изгледи'}>
-      {(['members','invitations','services'] as const).map(item=><button type="button" role="tab" id={`admin-tab-${item}`} aria-selected={tab===item} aria-controls={`admin-panel-${item}`} key={item} onClick={()=>setTab(item)}>{item==='members'?(lang==='en'?'Members':'Потребители'):item==='invitations'?(lang==='en'?'Invitations':'Изпратени покани'):(lang==='en'?'Services':'Услуги')}</button>)}
-    </div>}
     {mode==='manage'&&me?.permissions.includes('platform:manage')&&<OrganisationInvitationAdmin api={api} lang={lang}/>}
-    {mode==='manage'&&me?.permissions.includes('platform:manage')&&<PlatformOrganisationMembers api={api} lang={lang}/>}
-    {organisationAdmin&&<div role="tabpanel" id="admin-panel-members" aria-labelledby="admin-tab-members" hidden={tab!=='members'}>
-      {admins.map(admin=><OrganisationMembers key={`members-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId} onOrganisationServices={()=>setTab('services')}/>)}</div>}
-    {mode==='manage'&&me?.permissions.includes('platform:manage')&&<ServiceRequestsAdmin api={api} lang={lang}/>}
-    {organisationAdmin&&<div role="tabpanel" id="admin-panel-services" aria-labelledby="admin-tab-services" hidden={tab!=='services'} className="admin-services-panel">
-      {admins.map(admin=><OrganisationServiceMembers key={admin.organisationId} api={api} lang={lang} organisationId={admin.organisationId} subject={me!.subject} onMembers={()=>setTab('members')}/>)}
-      {admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}</div>}
+    {organisationAdmin&&<div id="organisation-services" className="admin-services-panel">
+      {admins.map(admin=><OrganisationServiceMembers key={admin.organisationId} api={api} lang={lang} organisationId={admin.organisationId} subject={me!.subject} catalogueOnly onMembers={()=>document.getElementById('approved-organisation-members')?.scrollIntoView({behavior:'smooth',block:'start'})}/>)}</div>}
     {(mode==='accept'||organisationAdmin||!platform)&&<section className="card config-card invitation-panel" aria-label={mode==='manage'?t.manageTitle:t.title}
-      id={organisationAdmin?'admin-panel-invitations':undefined} role={organisationAdmin?'tabpanel':undefined} aria-labelledby={organisationAdmin?'admin-tab-invitations':undefined} hidden={organisationAdmin&&tab!=='invitations'}>
+      id={organisationAdmin?'new-member-invitation':undefined}>
     <span className="profile-kicker">{mode==='manage'?(lang==='en'?'YOUR ORGANISATION':'ВАШАТА ОРГАНИЗАЦИЯ'):(lang==='en'?'PENDING ACCESS':'ЧАКАЩ ДОСТЪП')}</span>
-    <h2>{mode==='manage'?t.invite:t.title}</h2>
+    <h2>{mode==='manage'?(lang==='en'?'New member invitation':'Нова покана за потребител'):t.title}</h2>
     {loading && <p role="status">{t.loading}</p>}
     {notice && <p role={notice==='failed'||notice==='unavailable'||notice==='resendUnconfirmed'?'alert':'status'} aria-live="polite">{t[notice]}</p>}
     {!loading && <>
@@ -169,8 +160,10 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
           <button className="primary-btn" type="submit" disabled={!org}>{busy ? t.busy : t.send}</button>
         </fieldset>
       </form>)}
-      {mode==='manage'&&admins.length>0&&<div className="invitation-history" aria-label={t.sentHistory}>
-        <h3>{t.sentHistory}</h3>
+    </>}
+  </section>}
+{!loading&&organisationAdmin&&<section className="admin-panel member-invitation-history" aria-label={t.sentHistory}>
+        <h3>{lang==='en'?'Member invitations':'Покани за потребители'}</h3>
         <div className="admin-ledger-tools"><label className="admin-search">{lang==='en'?'Find a person or email':'Намери човек или имейл'}<input type="search" value={invitationQuery} onChange={event=>{setInvitationQuery(event.target.value);setInvitationPage(0);}}/></label>
           <label className="admin-search">{t.state}<select value={invitationStatus} onChange={event=>{setInvitationStatus(event.target.value);setInvitationPage(0);}}><option value="all">{lang==='en'?'All':'Всички'}</option>{['sent','accepted','revoked'].map(state=><option key={state} value={state}>{invitationStates[state]?.[lang]||state}</option>)}</select></label></div>
         {outgoingError&&<p role="alert">{t.failed}</p>}
@@ -199,9 +192,11 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
           </div>}
         </article>)}
         <div className="admin-pagination"><span>{currentInvitationPage+1} / {invitationPages}</span><div><button type="button" className="secondary-btn" disabled={currentInvitationPage===0} onClick={()=>setInvitationPage(value=>Math.max(0,value-1))}>{lang==='en'?'Previous':'Назад'}</button><button type="button" className="secondary-btn" disabled={currentInvitationPage>=invitationPages-1} onClick={()=>setInvitationPage(value=>value+1)}>{lang==='en'?'Next':'Напред'}</button></div></div>
-      </div>}
-    </>}
-  </section>}
+      </section>}
+    {organisationAdmin&&<div id="approved-organisation-members">
+      {admins.map(admin=><OrganisationMembers key={`members-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId} onOrganisationServices={()=>document.getElementById('organisation-services')?.scrollIntoView({behavior:'smooth',block:'start'})}/>)}</div>}
+    {platform&&mode==='manage'&&<PlatformOrganisationMembers api={api} lang={lang}/>}
+    {mode==='manage'&&(platform||organisationAdmin)&&<div className="admin-service-decisions">{platform?<ServiceRequestsAdmin api={api} lang={lang}/>:admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}</div>}
     {mode==='manage'&&(platform||organisationAdmin)&&<section className="card invitation-panel admin-manager-footer" aria-label={lang==='en'?'OpenRemote administration':'Администрация в OpenRemote'}>
       <div><span className="profile-kicker">OPENREMOTE · {lang==='en'?'READ ONLY':'САМО ЧЕТЕНЕ'}</span><h2>{lang==='en'?'OpenRemote Manager':'OpenRemote Manager'}</h2>
         <p>{lang==='en'?'View the Assets of your current organisation. Manage access through GrideX.':'Преглед на Assets в текущата организация. Управлението на достъпа е през GrideX.'}</p>
