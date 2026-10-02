@@ -1,5 +1,21 @@
 # Current task
 
+## 2026-10-02 — owner-approved member access screen (implementation in progress)
+
+The owner approved the reviewed Users & invitations mockup: an organisation
+administrator sees all approved members, their verified identity/fallback
+email, one role, explicit Sites, separate service grants and last login;
+pending invitations are separate. The existing menu/URL stays unchanged.
+Only non-admin member roles can be invited or edited; Site creation and
+commissioning remain administrator-only. BG/EN proposal is in the docs repo
+`proposals/service-approval-v2.md`. Backend/frontend tests, publication and
+real-account acceptance are still open; never call the mock live.
+
+Български: одобрен е екранът за всички членове с роля, конкретни Обекти и
+отделни услуги в съществуващото „Потребители и покани“. Изпратените покани
+са отделно. Ролята администратор не се раздава през членския процес.
+Внедряването и реалният тест още предстоят.
+
 ## 2026-09-30 — service approval screens (published; acceptance pending)
 
 Publication update: PR #95 merged as `1d6fe19`; Pages run `36769923322`
