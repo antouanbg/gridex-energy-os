@@ -1,6 +1,73 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-10-02 — clarification: no grant does not hide catalogue controls
+
+Final source checkpoint: 75 browser tests and 29 unit tests passed, including
+organisation request/cancel without a grant and actual approved-service member
+action. Typecheck, Pages build and lint pass (only existing About image warnings).
+Desktop/mobile screenshots were inspected. Sanitised approved HTML references
+and test mapping are preserved in docs/approved-screens. Backend migration
+022/API deployed healthy; real read-only checks verify the two customer
+members, all five services without grants, OR links and wrong-realm/viewer
+denial. Public publication and real owner browser acceptance remain separate.
+
+Български: 75 browser и 29 unit теста минаха, включително заявка/отмяна и
+лично разрешение само след организационно право. Проверени са desktop/mobile
+снимки; одобрените макети са обезличени и запазени в Git с тестово съответствие.
+Backend е внедрен и реалните четения/откази минаха. Публикацията и реалното
+потребителско приемане са отделни етапи.
+
+Owner explicitly requires all approved service rows/buttons to remain visible
+without organisation grants. Source now maintains five rows; first two show
+Not approved with disabled member-grant controls and an organisation-request
+entry for the organisation administrator. Future services show Coming soon.
+Independent member loading survives a failed service read. AGENTS includes
+this invariant. Typecheck, Pages build and modified-component lint passed;
+all seven invitation-menu browser tests passed, including zero grants, service
+failure, role/Site save, invitation controls, viewer denial and desktop/mobile
+layout. Desktop screenshot inspected; metadata labels and disabled-button
+contrast corrected afterwards. Tests use synthetic identities, NOT live login.
+Backend migration/workflow, versioned baseline comparison, BG/EN Docusaurus
+publication and live acceptance still pending. No rights granted as workaround.
+
+Български: липсата на разрешение вече не скрива петте услуги и одобрените
+контроли в кода. Двете активни услуги са „Не е одобрена“, с видимо неактивно
+лично разрешение и преход към организационна заявка само за администратора.
+Трите бъдещи са „Предстои“. Седемте браузърни теста минаха с тестови акаунти;
+това не доказва реален вход. Проверена е desktop снимка, след която са
+коригирани метаданните и стилът на неактивните бутони. Backend, публикуване
+на BG/EN помощ и реалното приемане остават отворени. Не са дадени фиктивни права.
+
+## 2026-10-02 10:21 UTC — organisation administrator screen differs from approval
+
+Environment: published `gridex.tech/customers/users/`, source `2f0be6b`.
+The owner reports that the organisation administrator cannot see the approved
+member/service management screen. Read-only database verification found two
+members in the pilot customer organisation but no organisation service grant
+and no service request. The frontend renders separate member and service
+cards instead of the approved unified lists and actions. The member component
+uses `Promise.all` for member and service reads, so a failed service read can
+hide a successful member roster. Current browser tests use mocked members and
+an empty service grant, save screenshots without comparing them to the
+approved baseline, and do not prove real-organisation behavior. The precise
+live API failure, if any, is not yet confirmed. No evidence of lost member
+records or an unintended service grant. Do not grant a member service before
+the platform administrator grants it to the organisation. No rollback has been
+performed. Status: diagnosis confirmed; visual and loading fix, realistic
+regression tests, publication and owner acceptance are open. Next: implement
+the exact approved organisation-administrator screen, keep independent data
+visible through unrelated API errors, verify both roles and service-prerequisite
+states in browser tests, then run a real-account acceptance check before
+marking complete. Follow the new approved-screen release gate in AGENTS.md.
+
+Български: публикуваният екран за администратор на организация не съвпада с
+одобрения. В пилотната организация има двама членове, но няма разрешена услуга
+или заявка. Списъкът на хората може да се скрие при грешка в отделната заявка
+за услуги. Тестовете са с примерни данни и не сравняват изгледа с одобрения
+макет. Точният отговор на live API за сесията на клиента остава непроверен;
+няма данни за изгубени членове. Поправката и реалното приемане предстоят.
+
 ## 2026-10-02 — PR #96 merged, live frontend withheld
 
 The approved member roster/editor is in `main`. Local typecheck, lint,

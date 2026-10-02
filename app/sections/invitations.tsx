@@ -35,9 +35,9 @@ const invitationStates: Record<string, { bg: string; en: string }> = {
   pending_delivery: { bg: 'Изпраща се', en: 'Sending' },
 };
 
-export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClient; lang: UiLanguage; mode?: 'accept' | 'manage' }) {
+export function Invitations({ api, lang, mode = 'accept', identity }: { api: GridexApiClient; lang: UiLanguage; mode?: 'accept' | 'manage'; identity?:GridexUser|null }) {
   const t = copy[lang];
-  const [me, setMe] = useState<GridexUser | null>(null);
+  const [me, setMe] = useState<GridexUser | null>(identity||null);
   const [sites, setSites] = useState<GridexSite[]>([]);
   const [invites, setInvites] = useState<GridexInvitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,25 +53,35 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
   const [outgoing, setOutgoing] = useState<SentGridexInvitation[]>([]);
   const [outgoingError, setOutgoingError] = useState(false);
   const [managerError, setManagerError] = useState(false);
+  const [tab,setTab]=useState<'members'|'invitations'|'services'>('members');
+  const [sitesError,setSitesError]=useState(false);
+  const [refreshKey,setRefreshKey]=useState(0);
+  const [invitationQuery,setInvitationQuery]=useState('');
+  const [invitationStatus,setInvitationStatus]=useState('all');
+  const [invitationPage,setInvitationPage]=useState(0);
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
       try {
-        const user = await api.me(controller.signal);
+        const user = identity || await api.me(controller.signal);
         if (controller.signal.aborted) return;
         setMe(user);
         const admin = user.memberships?.find(m => m.role === 'administrator');
         setOrg(admin?.organisationId ?? '');
-        if (user.permissions.includes('site:read')) setSites(await api.sites(controller.signal));
-        const response = await api.invitations(controller.signal);
-        if (!controller.signal.aborted) { setInvites(response.invitations); setAvailable(true); }
+        const results=await Promise.allSettled([user.permissions.includes('site:read')?api.sites(controller.signal):Promise.resolve([]),api.invitations(controller.signal)]);
+        if(controller.signal.aborted)return;
+        if(results[0].status==='fulfilled'){setSites(results[0].value);setSitesError(false);}else setSitesError(true);
+        if(results[1].status==='fulfilled'){setInvites(results[1].value.invitations);setAvailable(true);}else {setAvailable(false);setNotice('failed');}
       } catch (error) {
         if (!controller.signal.aborted) setNotice(error instanceof GridexApiError && error.status === 503 ? 'unavailable' : 'failed');
       } finally { if (!controller.signal.aborted) setLoading(false); }
     }
     void load();
     return () => controller.abort();
-  }, [api]);
+  // The portal's verified identity determines the role. A separate invitation
+  // or Site failure must never erase that identity or hide the member roster.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api,identity?.subject,identity?.realm,refreshKey]);
   useEffect(() => {
     if (mode !== 'manage' || !org || !me?.memberships?.some(m => m.organisationId === org && m.role === 'administrator')) return;
     const controller = new AbortController();
@@ -88,40 +98,41 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
     } finally { setBusy(false); }
   }
   const admins = me?.memberships?.filter(m => m.role === 'administrator') ?? [];
+  const platform=me?.permissions.includes('platform:manage')===true;
+  const organisationAdmin=mode==='manage'&&!platform&&admins.length>0;
   const visibleSites = sites.filter(s => s.organisationId === org);
+  const filteredInvitations=outgoing.filter(item=>(invitationStatus==='all'||item.state===invitationStatus)
+    &&`${item.firstName||''} ${item.lastName||''} ${item.email}`.toLocaleLowerCase().includes(invitationQuery.toLocaleLowerCase()));
+  const invitationPages=Math.max(1,Math.ceil(filteredInvitations.length/10));
+  const currentInvitationPage=Math.min(invitationPage,invitationPages-1);
   return <div className="invitation-page" data-no-translate>
     {mode==='manage'&&<header className="invitation-hero card">
       <div><span className="profile-kicker">GRIDEX · {lang==='en'?'ACCESS CONTROL':'УПРАВЛЕНИЕ НА ДОСТЪПА'}</span>
-        <h2>{t.manageTitle}</h2><p>{lang==='en'?'Invite the first administrator of a new organisation or manage access within yours. Rights are activated after verified sign-in.':'Поканете първия администратор на нова организация или управлявайте достъпа във Вашата. Правата се активират след потвърден вход.'}</p></div>
-      <a className="profile-action" href={documentationLink('members',lang).href} target="_blank" rel="noopener noreferrer">{lang==='en'?'How invitations work':'Как работят поканите'} <span aria-hidden="true">↗</span></a>
+        <h2>{organisationAdmin?(lang==='en'?'Member access':'Достъп на потребителите'):t.manageTitle}</h2>
+        <p>{platform?(lang==='en'?'Manage approved organisations and their separate service permissions.':'Управлявайте одобрените организации и отделните им услуги.'):(lang==='en'?'Manage the people, roles, Sites and services in your organisation.':'Управлявайте хората, ролите, Обектите и услугите във Вашата организация.')}</p>
+        <span className="admin-role-caption">{platform?(lang==='en'?'Platform administrator':'Супер администратор'):(lang==='en'?'Organisation administrator':'Администратор на организация')} · {me?.email}</span></div>
+      <div className="admin-header-actions">{organisationAdmin&&<button type="button" className="primary-btn" onClick={()=>setTab('invitations')}>{lang==='en'?'+ Invite member':'+ Покани потребител'}</button>}
+        <a className="profile-action" href={documentationLink('members',lang).href} target="_blank" rel="noopener noreferrer">{lang==='en'?'Help':'Помощ'} <span aria-hidden="true">↗</span></a></div>
     </header>}
-    {mode==='manage'&&(me?.permissions.includes('platform:manage')||me?.memberships?.some(m=>m.role==='administrator'))&&
-      <section className="card config-card invitation-panel" aria-label={lang==='en'?'OpenRemote administration':'Администрация в OpenRemote'}>
-        <span className="profile-kicker">OPENREMOTE</span>
-        <h2>{lang==='en'?'Organisation administration':'Администрация на организацията'}</h2>
-        <p>{lang==='en'?'Open Manager for the organisation in your current signed-in session. The one-time link expires in one minute. Manager is read-only for people; changes are made through GrideX.':'Отворете Manager само за организацията от текущата Ви сесия. Еднократният линк изтича след една минута. За хората Manager е само за четене; промените се правят през GrideX.'}</p>
-        {managerError&&<p role="alert">{lang==='en'?'Manager access could not be verified. Refresh your session and try again.':'Достъпът до Manager не можа да се потвърди. Обновете сесията и опитайте пак.'}</p>}
-        <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#openremote-manager`} target="_blank" rel="noopener noreferrer">{lang==='en'?'Manager access and read-only rights':'Достъп и права само за четене в Manager'} ↗</a>
-        <button type="button" className="primary-btn" disabled={busy} onClick={()=>void action(async()=>{
-          setManagerError(false);
-          try {
-            const launch=await api.managerLaunch();
-            window.location.assign(launch.url);
-          } catch(error) {setManagerError(true);throw error;}
-        })}>{busy?t.busy:(lang==='en'?'Open OpenRemote Manager':'Отвори OpenRemote Manager')}</button>
-      </section>}
+    {organisationAdmin&&<div className="admin-workspace-tabs" role="tablist" aria-label={lang==='en'?'Administration views':'Административни изгледи'}>
+      {(['members','invitations','services'] as const).map(item=><button type="button" role="tab" id={`admin-tab-${item}`} aria-selected={tab===item} aria-controls={`admin-panel-${item}`} key={item} onClick={()=>setTab(item)}>{item==='members'?(lang==='en'?'Members':'Потребители'):item==='invitations'?(lang==='en'?'Invitations':'Изпратени покани'):(lang==='en'?'Services':'Услуги')}</button>)}
+    </div>}
     {mode==='manage'&&me?.permissions.includes('platform:manage')&&<OrganisationInvitationAdmin api={api} lang={lang}/>}
     {mode==='manage'&&me?.permissions.includes('platform:manage')&&<PlatformOrganisationMembers api={api} lang={lang}/>}
-    {mode==='manage'&&admins.map(admin=><OrganisationMembers key={`members-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}
+    {organisationAdmin&&<div role="tabpanel" id="admin-panel-members" aria-labelledby="admin-tab-members" hidden={tab!=='members'}>
+      {admins.map(admin=><OrganisationMembers key={`members-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId} onOrganisationServices={()=>setTab('services')}/>)}</div>}
     {mode==='manage'&&me?.permissions.includes('platform:manage')&&<ServiceRequestsAdmin api={api} lang={lang}/>}
-    {mode==='manage'&&admins.map(admin=><OrganisationServiceMembers key={admin.organisationId} api={api} lang={lang} organisationId={admin.organisationId}/>)}
-    {mode==='manage'&&admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}
-    {(mode==='accept'||admins.length>0||!me?.permissions.includes('platform:manage'))&&<section className="card config-card invitation-panel" aria-label={mode==='manage'?t.manageTitle:t.title}>
+    {organisationAdmin&&<div role="tabpanel" id="admin-panel-services" aria-labelledby="admin-tab-services" hidden={tab!=='services'} className="admin-services-panel">
+      {admins.map(admin=><OrganisationServiceMembers key={admin.organisationId} api={api} lang={lang} organisationId={admin.organisationId} subject={me!.subject} onMembers={()=>setTab('members')}/>)}
+      {admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}</div>}
+    {(mode==='accept'||organisationAdmin||!platform)&&<section className="card config-card invitation-panel" aria-label={mode==='manage'?t.manageTitle:t.title}
+      id={organisationAdmin?'admin-panel-invitations':undefined} role={organisationAdmin?'tabpanel':undefined} aria-labelledby={organisationAdmin?'admin-tab-invitations':undefined} hidden={organisationAdmin&&tab!=='invitations'}>
     <span className="profile-kicker">{mode==='manage'?(lang==='en'?'YOUR ORGANISATION':'ВАШАТА ОРГАНИЗАЦИЯ'):(lang==='en'?'PENDING ACCESS':'ЧАКАЩ ДОСТЪП')}</span>
     <h2>{mode==='manage'?t.invite:t.title}</h2>
     {loading && <p role="status">{t.loading}</p>}
     {notice && <p role={notice==='failed'||notice==='unavailable'||notice==='resendUnconfirmed'?'alert':'status'} aria-live="polite">{t[notice]}</p>}
     {!loading && <>
+      {sitesError&&mode==='manage'&&<p className="admin-feedback error" role="alert">{lang==='en'?'Sites could not be loaded. Retry before choosing access.':'Обектите не можаха да се заредят. Опитайте отново преди избор на достъп.'} <button type="button" className="secondary-btn" onClick={()=>setRefreshKey(key=>key+1)}>{lang==='en'?'Retry':'Опитай отново'}</button></p>}
       {mode==='accept'&&<><h3>{t.pending}</h3>
       {!invites.length && <p>{t.empty}</p>}
       {invites.map(invite => <article key={invite.id}>
@@ -143,7 +154,7 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
         });
       }}>
         <p className="invitation-panel-intro">{lang==='en'?'Choose a role and grant access only to the Sites this person needs.':'Изберете роля и дайте достъп само до Обектите, които са нужни на този човек.'}</p>
-        <fieldset disabled={busy || !available} className="config-form">
+        <fieldset disabled={busy || !available || sitesError} className="config-form">
           <label>{t.org}<select value={org} onChange={event => { setOrg(event.target.value); setSelected([]); }}>
             {admins.map(m => <option key={m.organisationId} value={m.organisationId}>{me?.realm || m.organisationId}</option>)}
           </select></label>
@@ -160,9 +171,12 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
       </form>)}
       {mode==='manage'&&admins.length>0&&<div className="invitation-history" aria-label={t.sentHistory}>
         <h3>{t.sentHistory}</h3>
+        <div className="admin-ledger-tools"><label className="admin-search">{lang==='en'?'Find a person or email':'Намери човек или имейл'}<input type="search" value={invitationQuery} onChange={event=>{setInvitationQuery(event.target.value);setInvitationPage(0);}}/></label>
+          <label className="admin-search">{t.state}<select value={invitationStatus} onChange={event=>{setInvitationStatus(event.target.value);setInvitationPage(0);}}><option value="all">{lang==='en'?'All':'Всички'}</option>{['sent','accepted','revoked'].map(state=><option key={state} value={state}>{invitationStates[state]?.[lang]||state}</option>)}</select></label></div>
         {outgoingError&&<p role="alert">{t.failed}</p>}
         {!outgoingError&&!outgoing.length&&<p>{t.noSent}</p>}
-        {outgoing.map(item=><article className="invitation-record" key={item.id}>
+        {!outgoingError&&outgoing.length>0&&!filteredInvitations.length&&<p>{lang==='en'?'No invitations match this filter.':'Няма покани за този филтър.'}</p>}
+        {filteredInvitations.slice(currentInvitationPage*10,currentInvitationPage*10+10).map(item=><article className="invitation-record" key={item.id}>
           <strong>{item.firstName&&item.lastName?`${item.firstName} ${item.lastName} · `:''}{item.email}</strong> · {roles.includes(item.role as typeof roles[number])?t[item.role as typeof roles[number]]:item.role}
           <p>{t.state}: {invitationStates[item.state]?.[lang] ?? item.state} · {item.state==='accepted'?`${t.lastLogin}: ${item.lastLoginAt?new Date(item.lastLoginAt).toLocaleString(lang==='bg'?'bg-BG':'en-GB'):lang==='bg'?'Очаква се запис':'Not recorded yet'}`:`${t.expiry}: ${new Date(item.expiresAt).toLocaleString(lang==='bg'?'bg-BG':'en-GB')}`}</p>
           {item.state==='sent'&&<div className="invitation-record-actions">
@@ -184,8 +198,16 @@ export function Invitations({ api, lang, mode = 'accept' }: { api: GridexApiClie
             },'resendUnconfirmed')}>{t.resend}</button>
           </div>}
         </article>)}
+        <div className="admin-pagination"><span>{currentInvitationPage+1} / {invitationPages}</span><div><button type="button" className="secondary-btn" disabled={currentInvitationPage===0} onClick={()=>setInvitationPage(value=>Math.max(0,value-1))}>{lang==='en'?'Previous':'Назад'}</button><button type="button" className="secondary-btn" disabled={currentInvitationPage>=invitationPages-1} onClick={()=>setInvitationPage(value=>value+1)}>{lang==='en'?'Next':'Напред'}</button></div></div>
       </div>}
     </>}
   </section>}
+    {mode==='manage'&&(platform||organisationAdmin)&&<section className="card invitation-panel admin-manager-footer" aria-label={lang==='en'?'OpenRemote administration':'Администрация в OpenRemote'}>
+      <div><span className="profile-kicker">OPENREMOTE · {lang==='en'?'READ ONLY':'САМО ЧЕТЕНЕ'}</span><h2>{lang==='en'?'OpenRemote Manager':'OpenRemote Manager'}</h2>
+        <p>{lang==='en'?'View the Assets of your current organisation. Manage access through GrideX.':'Преглед на Assets в текущата организация. Управлението на достъпа е през GrideX.'}</p>
+        <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#openremote-manager`} target="_blank" rel="noopener noreferrer">{lang==='en'?'Manager access and read-only rights':'Достъп и права само за четене в Manager'} ↗</a>
+        {managerError&&<p role="alert">{lang==='en'?'Manager access could not be verified. Retry after checking your session.':'Достъпът до Manager не можа да се потвърди. Проверете сесията и опитайте пак.'}</p>}</div>
+      <button type="button" className="secondary-btn" disabled={busy} onClick={()=>void action(async()=>{setManagerError(false);try{const launch=await api.managerLaunch();window.location.assign(launch.url);}catch(error){setManagerError(true);throw error;}})}>{busy?t.busy:(lang==='en'?'Open OpenRemote Manager':'Отвори OpenRemote Manager')}</button>
+    </section>}
   </div>;
 }

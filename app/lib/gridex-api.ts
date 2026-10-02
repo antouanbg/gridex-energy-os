@@ -42,7 +42,7 @@ export type GridexInvitation = { id: string; organisationId: string; role: strin
 export type SentGridexInvitation = { id: string; email: string; firstName?: string|null; lastName?: string|null; role: string; siteIds: string[]; state: string; expiresAt: string; createdAt: string; acceptedAt?: string|null; lastLoginAt?: string|null };
 export type OrganisationMember = { subject: string; email: string|null; firstName: string|null; lastName: string|null;
   role: string; allSites: boolean; siteIds: string[]; verifiedSiteIds: string[]; services: string[]; lastLoginAt: string|null };
-export type OrganisationMembersPage = { members: OrganisationMember[]; sites: {id:string;name:string}[]; nextOffset: number|null };
+export type OrganisationMembersPage = { members: OrganisationMember[]; sites: {id:string;name:string}[]; nextOffset: number|null; total?:number };
 export type OrganisationOnboardingInvitation = { id: string; organisationId: string; realm: string; name: string; expiresAt: string };
 export type CreatedOrganisationInvitation = { id: string; realm: string; name: string; email: string; state: string; expiresAt: string; createdAt: string; acceptedAt?: string|null; lastLoginAt?: string|null };
 
@@ -62,12 +62,12 @@ export type MarketZone = { country: string; zone: string; eic: string; timezone:
 export type MarketCollectionZone = MarketZone & { enabled: boolean; changedAt?: string };
 export type OrganisationMarketZone = MarketZone & { collected: boolean; enabled: boolean };
 export type MarketServices = { services: { id: string; label: string; provider: string }[]; zones: MarketZone[] };
-export type ServiceGrant = { code: string; description: string; prerequisites: string[]; requestable: boolean; enabled: boolean };
+export type ServiceGrant = { code: string; description: string; prerequisites: string[]; requestable: boolean; enabled: boolean; grantedAt?:string|null; zones?:{country:string;zone:string}[] };
 export type ServiceMember = { subject: string; role: string; email: string | null; enabled: boolean };
 export type ServiceCatalogItem = { code: string; description: string; requestable: boolean };
 export type ServiceRequest = { id: string; organisationId: string; organisationName: string;
   subject: string; email: string; serviceCode: string; country: string | null; zone: string | null;
-  state: 'open' | 'rejected'; stage: 'awaiting_platform' | 'awaiting_organisation' | 'active' | 'rejected';
+  requestScope?:'member'|'organisation'; state: 'open' | 'approved' | 'rejected' | 'cancelled'; stage: 'awaiting_platform' | 'awaiting_organisation' | 'active' | 'rejected' | 'cancelled' | 'organisation_enabled' | 'revoked';
   createdAt: string; events: { action: string; at: string; note: string | null }[] };
 export type SiteVisualisationHistory = { siteId: string; from: number; to: number;
   items: { assetId: string; metric: string; unit: string; points: { x: number; y: number }[] }[] };
@@ -430,9 +430,9 @@ export class GridexApiClient {
   async sentInvitations(organisationId: string, signal?: AbortSignal): Promise<{ invitations: SentGridexInvitation[] }> {
     return this.getJson(`/api/v1/organisations/${encodeURIComponent(organisationId)}/invitations`, signal);
   }
-  organisationMembers(id:string,offset=0,platform=false,signal?:AbortSignal):Promise<OrganisationMembersPage> {
+  organisationMembers(id:string,offset=0,platform=false,signal?:AbortSignal,search=''):Promise<OrganisationMembersPage> {
     const prefix=platform?'/api/v1/platform/organisations':'/api/v1/organisations';
-    return this.getJson(`${prefix}/${encodeURIComponent(id)}/members?offset=${offset}&limit=25`,signal);
+    return this.getJson(`${prefix}/${encodeURIComponent(id)}/members?offset=${offset}&limit=25&search=${encodeURIComponent(search)}`,signal);
   }
   updateOrganisationMember(id:string,subject:string,role:string,siteIds:string[]):Promise<{subject:string;role:string;siteIds:string[]}> {
     return this.putBody(`/api/v1/organisations/${encodeURIComponent(id)}/members/${encodeURIComponent(subject)}`,
@@ -485,6 +485,13 @@ export class GridexApiClient {
   }
   organisationServiceRequests(id:string,signal?:AbortSignal):Promise<{requests:ServiceRequest[]}> {
     return this.getJson(`/api/v1/organisations/${encodeURIComponent(id)}/service-requests`,signal);
+  }
+  requestOrganisationService(id:string,serviceCode:string):Promise<{id:string;created:boolean}> {
+    return this.postJson(`/api/v1/organisations/${encodeURIComponent(id)}/service-requests`,
+      {serviceCode,...(serviceCode==='day_ahead'?{country:'BG',zone:'BG'}:{})});
+  }
+  cancelOrganisationServiceRequest(id:string,requestId:string):Promise<{id:string;stage:string}> {
+    return this.postJson(`/api/v1/organisations/${encodeURIComponent(id)}/service-requests/${encodeURIComponent(requestId)}/cancel`,{});
   }
   approvePlatformServiceRequest(id:string):Promise<{id:string;stage:string}> {
     return this.postJson(`/api/v1/platform/service-requests/${encodeURIComponent(id)}/approve`,{});

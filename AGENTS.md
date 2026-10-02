@@ -55,6 +55,43 @@ screen does not approve later revisions or the full workflow.
 и екраните са правилни. Старо одобрение на един екран не одобрява следваща
 редакция или целия процес.
 
+## Approved-screen release gate / Проверка на одобрения екран преди публикация — 2026-10-02
+
+Treat the exact owner-approved, versioned mockup and workflow as an acceptance
+contract, not just a design reference. Before coding, make a traceability
+checklist for every role and every approved field, list, action, status,
+placement, empty/error state and desktop/mobile behavior. Map each item to the
+implemented component and a test; mark missing items as incomplete. Do not
+replace an approved unified screen with disconnected cards or another layout
+without a revised owner approval. Browser tests must assert the actual content
+and actions for realistic role-specific data and error states, and visually
+compare desktop/mobile screenshots with the approved baseline; merely saving
+screenshots or getting HTTP 200 is insufficient. Before publication verify the
+real deployment with the relevant organisation and role, including backend
+permissions and prerequisite grants. If real-account verification is blocked,
+record the precise blocker and report "source-ready" or "published but not
+accepted", never "complete". Keep the change unpublished when the approved
+screen is materially incomplete or the dependency failure hides unrelated
+data. Record source-fixed, published, deployed and owner-verified separately
+in HANDOFF. No simulated grant may substitute for a real prerequisite.
+
+Точният одобрен и версиониран макет и процес са договор за приемане, не само
+ориентир за дизайн. Преди код направи контролен списък за всяка роля и всяко
+одобрено поле, списък, действие, статус, място, празно/грешно състояние и
+поведение на desktop/mobile. Свържи всяка точка с компонент и тест; липсваща
+точка означава незавършено внедряване. Не заменяй одобрен общ екран с отделни
+карти или друг лейаут без ново одобрение. Браузърните тестове проверяват
+реалното съдържание и действия с реалистични данни по роли и при грешки и
+сравняват визуално desktop/mobile с одобрения образец; записана снимка или
+HTTP 200 не стигат. Преди публикация провери реалното внедряване със
+съответната организация и роля, включително backend права и предварителни
+разрешения. Ако реалният тест е блокиран, запиши точната причина и съобщи
+„готов код“ или „публикувано, но неприето“, никога „завършено“. Не публикувай
+съществено непълен одобрен екран или екран, в който грешка на зависима услуга
+скрива несвързани данни. В HANDOFF води отделно: поправен код, публикация,
+внедряване и потвърждение от собственика. Примерно право в тест не замества
+реално предварително разрешение.
+
 ## Local website reachability / Достъп до сайта при локални тестове — 2026-09-30
 
 The local website has no direct route through the internal LAN. A VPN is
@@ -139,6 +176,22 @@ time units since 2025-10-01; API polling is not the price resolution.
 последната проверка, последния пълен импорт и датата на доставка.
 
 ## Approved service catalog / Одобрен каталог — 2026-09-29
+
+Owner clarification 2026-10-02: missing organisation grants must NOT hide
+catalogue rows or their approved controls. Keep all five service entries visible
+with explicit Not approved / Coming soon / Checking / Unavailable statuses.
+Only verified prerequisites enable grant/use actions. Organisation administrators
+can request the two currently requestable services; a disabled grant button is
+not an entitlement. A service API failure must not hide the independent member
+list. Cover zero-grant and service-failure states with regression tests.
+
+Уточнение от собственика 2026-10-02: липсващите организационни разрешения
+НЕ скриват редовете и одобрените контроли в каталога. Петте услуги остават
+видими с точен статус „Не е одобрена“, „Предстои“, „Проверяваме“ или
+„Недостъпна“. Само проверени предпоставки разрешават даване/ползване на
+право. Администраторът заявява двете активни услуги; неактивният бутон за
+разрешение не дава достъп. Грешка на service API не скрива независимия
+списък с хора. Покрий липсващи разрешения и service грешка с тестове.
 
 All verified members, including viewers, may see a five-entry service
 catalogue in Profile → Services. Only day-ahead prices (one selected

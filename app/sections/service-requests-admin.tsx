@@ -10,6 +10,9 @@ const label:Record<string,{bg:string;en:string}>={
   awaiting_organisation:{bg:'Чака администратор на организация',en:'Awaiting organisation administrator'},
   active:{bg:'Разрешена',en:'Enabled'},
   rejected:{bg:'Отказана',en:'Declined'},
+  cancelled:{bg:'Отменена',en:'Cancelled'},
+  organisation_enabled:{bg:'Одобрена за организацията',en:'Organisation enabled'},
+  revoked:{bg:'Достъпът е отнет',en:'Access revoked'},
   requested:{bg:'Подадена заявка',en:'Request submitted'},
   platform_approved:{bg:'Организацията е одобрена',en:'Organisation approved'},
   organisation_approved:{bg:'Потребителят е одобрен',en:'Member approved'},
@@ -52,6 +55,7 @@ export function ServiceRequestsAdmin({api,lang,organisationId}: {api:GridexApiCl
   return <section className="card config-card invitation-panel" aria-label={en?'Service requests':'Заявки за услуги'}>
     <span className="profile-kicker">GRIDEX · {en?'SERVICE REQUESTS':'ЗАЯВКИ ЗА УСЛУГИ'}</span>
     <h2>{en?'Service requests':'Заявки за услуги'}</h2>
+    <button className="secondary-btn" type="button" disabled={Boolean(busy)} onClick={()=>void reload().then(()=>setError('')).catch(()=>setError(en?'Service requests could not be loaded.':'Заявките за услуги не могат да се заредят.'))}>{en?'Refresh requests':'Опресни заявките'}</button>
     <p>{organisationId
       ?en?'Only requests from your organisation appear here. Approving a member never enables a service for the whole organisation.':'Тук са само заявките на Вашата организация. Одобрението на член не включва услуга за цялата организация.'
       :en?'Your decision enables an organisation (and BG for day-ahead). Its administrator must approve each member separately.':'Вашето решение разрешава организацията (и BG за цените). Нейният администратор одобрява всеки член отделно.'}</p>
@@ -60,7 +64,7 @@ export function ServiceRequestsAdmin({api,lang,organisationId}: {api:GridexApiCl
     {!loaded&&!error&&<p role="status">{en?'Loading…':'Зареждане…'}</p>}
     {loaded&&!requests.length&&<p>{en?'No service requests yet.':'Още няма заявки за услуги.'}</p>}
     {requests.map(item=>{
-      const actionable=item.stage===(organisationId?'awaiting_organisation':'awaiting_platform');
+      const actionable=item.state==='open'&&item.requestScope===(organisationId?'member':'organisation')&&item.stage===(organisationId?'awaiting_organisation':'awaiting_platform');
       return <article className="invitation-record" key={item.id}>
         <strong>{serviceLabel(item.serviceCode,lang)}{item.serviceCode==='day_ahead'?(en?' · Bulgaria':' · България'):''}</strong>
         <p>{item.organisationName} · {item.email} · {label[item.stage]?.[lang]||item.stage}</p>

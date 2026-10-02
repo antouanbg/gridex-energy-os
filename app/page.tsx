@@ -696,7 +696,7 @@ export default function Home() {
         {view === "help" && <ProfileHelp lang={lang} live={dataMode==='live'}/>}
         {view === "profile" && <UserProfile lang={lang} user={sessionUser} api={apiClient} live={dataMode==='live'} navigate={navigate} signOut={signOut}/>}
         {view === "members" && dataMode==='demo' && <section className="card config-card"><h2>{lang==='en'?'Users & invitations':'Потребители и покани'}</h2><p>{lang==='en'?'Sign in as an organisation administrator to manage real invitations. No demo emails are sent.':'Влезте като администратор на организация, за да управлявате реални покани. В демо режима не се изпращат имейли.'}</p></section>}
-        {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations api={apiClient} lang={lang} mode="manage"/>}
+        {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations key={`${accountIdentity?.realm}:${accountIdentity?.subject}`} api={apiClient} lang={lang} mode="manage" identity={accountIdentity}/>}
         {view === "login" && (loginSuccess?<section className="login-success-screen" role="status"><span aria-hidden="true">✓</span><h2>{lang==='en'?'Sign-in successful':'Входът е успешен'}</h2><p>{lang==='en'?'Opening your overview…':'Отваряме началния екран…'}</p></section>:<LoginPage lang={lang} user={sessionUser} config={runtimeConfig} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"&&new URLSearchParams(window.location.search).has('realm')}/>)}
             </>}
           </div>

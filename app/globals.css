@@ -1043,6 +1043,36 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .organisation-member-detail fieldset label { display:flex; align-items:center; gap:8px; margin:8px 0; color:#385947; font-size:13px; }
 .organisation-member-warning { padding:10px; border-radius:8px; background:#fff1e8; color:#9a492f !important; }
 .organisation-member-rights { margin:10px 0; }
+.admin-services-panel[hidden], .invitation-panel[hidden], .invitation-page [role="tabpanel"][hidden] { display:none !important; }
+.admin-panel { min-width:0; padding:22px; border:1px solid #dbe8df; border-radius:18px; background:#fff; }
+.admin-section-heading, .admin-header-actions, .admin-pagination, .admin-ledger-tools { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.admin-section-heading h2, .admin-section-heading h3 { margin:0; color:#173f2e; }
+.admin-section-heading p, .admin-role-caption { color:#61766a; line-height:1.5; }
+.admin-workspace-tabs { display:flex; gap:8px; flex-wrap:wrap; margin:18px 0; }
+.admin-workspace-tabs button { padding:12px 18px; border:1px solid #dbe8df; border-radius:12px; background:#fff; color:#173f2e; cursor:pointer; }
+.admin-workspace-tabs button[aria-selected="true"] { background:#173f2e; color:#fff; border-color:#173f2e; }
+.admin-service-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid #e5eee8; }
+.admin-service-row:last-child { border-bottom:0; }
+.admin-service-row>div:first-child { min-width:0; }
+.admin-service-row strong, .admin-service-row small { display:block; overflow-wrap:anywhere; }
+.admin-service-row small { margin-top:5px; color:#61766a; line-height:1.5; }
+.admin-service-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.admin-status { display:inline-block; padding:6px 10px; border-radius:999px; background:#eff7f1; color:#315941; font-size:12px; font-weight:700; white-space:nowrap; }
+.admin-status.waiting { background:#fff5dc; color:#8a641d; }
+.admin-feedback, .admin-effective-rights, .admin-change-review { padding:16px; margin:16px 0; border:1px solid #cfe4d5; border-radius:12px; background:#eff8f1; color:#173f2e; line-height:1.6; }
+.admin-feedback.error { border-color:#e8c6bf; background:#fff3f0; color:#903b2d; }
+.admin-search { display:grid; gap:7px; margin:16px 0; font-size:13px; color:#385947; }
+.admin-search input, .admin-ledger-tools select { min-height:44px; padding:10px 12px; border:1px solid #cbded1; border-radius:10px; background:#fff; color:#173f2e; }
+.admin-member-meta { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:18px 0; }
+.admin-member-meta small, .admin-member-meta span { display:block; color:#61766a; font-size:12px; margin-bottom:5px; }
+.admin-member-meta strong { display:block; overflow-wrap:anywhere; font-size:14px; }
+.admin-service-actions button:disabled { background:#eef2ef; color:#7a887f; border:1px solid #dce4de; cursor:not-allowed; box-shadow:none; }
+.admin-site-options { display:flex; flex-wrap:wrap; gap:8px; }
+.admin-site-options label { padding:8px 12px; border:1px solid #dbe8df; border-radius:10px; background:#f7fbf8; }
+.admin-member-actions, .admin-pagination>div { display:flex; gap:8px; flex-wrap:wrap; }
+.admin-pagination { margin-top:18px; color:#61766a; font-size:13px; }
+.organisation-service-workspace { display:grid; gap:20px; }
+@media(max-width:760px){.admin-panel{padding:16px}.admin-member-meta{grid-template-columns:1fr}.admin-service-row{align-items:flex-start;flex-direction:column}.admin-service-actions{justify-content:flex-start;width:100%}.admin-workspace-tabs button{flex:1}.admin-service-actions button{min-height:44px}}
 .organisation-member-rights-note { max-width:74ch; margin:13px 0 0; padding:12px 14px; border:1px solid #d6e8dc; border-radius:11px; background:#f1f8f2; color:#365b44; font-size:12px; line-height:1.55; }
 .organisation-member-rights-note a { color:#197e4e; font-weight:800; text-decoration:underline; text-underline-offset:2px; }
 @media(max-width:760px){.organisation-members-layout{grid-template-columns:1fr}.organisation-member-detail{padding:16px}.organisation-member-row{align-items:flex-start}}

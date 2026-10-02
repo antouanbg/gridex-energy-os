@@ -1,5 +1,16 @@
 # User documentation coverage / Покритие на потребителската документация
 
+2026-10-02: the BG/EN organisations guide is updated for the approved
+member editor, separate tabs, visible catalogue without grants, organisation
+request/cancellation, immediate individual grants and queued-versus-delivered
+notifications. Publish with the corrected `/customers/users/` screen. Actual
+owner browser acceptance remains open; see docs/approved-screens/ACCEPTANCE.md.
+
+Български: BG/EN помощта е обновена за одобрения редактор, отделните изгледи,
+видими услуги без права, организационна заявка/отмяна, незабавно лично право
+и разликата между записано уведомление и доставено писмо. Публикува се с
+поправения екран; реалното потребителско приемане остава отворено.
+
 Status: planned, except the in-portal Profile and invitation/access guide at
 `/help/` and the public BG/EN organisations guide at `doc.gridex.tech`.
 The public guide now includes member-invitation steps for administrators of

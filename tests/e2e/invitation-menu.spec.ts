@@ -52,7 +52,8 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   let invited:unknown=null;
   await mockSession(context,true,body=>{invited=body;});
   await page.goto('/customers/users/');
-  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Потребители и покани'})).toBeVisible();
+  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Достъп на потребителите'})).toBeVisible();
+  await page.getByRole('tab',{name:/Изпратени покани/}).click();
   await expect(page.locator('[data-view-id="members"]')).toHaveAttribute('aria-current','page');
   await page.getByLabel('Собствено име').fill('Мария');
   await page.getByLabel('Фамилно име').fill('Петрова');
@@ -65,7 +66,8 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await expect(page.getByText('new@example.com')).toBeVisible();
   await page.reload();
   await expect(page).toHaveURL(/\/customers\/users\/$/);
-  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Потребители и покани'})).toBeVisible();
+  await expect(page.getByTestId('section-members').getByRole('heading',{name:'Достъп на потребителите'})).toBeVisible();
+  await page.getByRole('tab',{name:/Изпратени покани/}).click();
   await expect(page.getByText('new@example.com')).toBeVisible();
   await page.getByRole('button',{name:'Изпрати поканата наново'}).click();
   await expect(page.getByText('Нов линк за покана е изпратен')).toBeVisible();
@@ -79,8 +81,54 @@ test('organisation administrator sees approved members and saves a role with an 
   await page.getByRole('button',{name:/Иван Иванов/}).click();
   await page.getByLabel('Роля в организацията').selectOption('operator');
   await page.locator('.organisation-member-detail').getByRole('group',{name:'Разрешени Обекти'}).getByLabel('Test Lab').check();
+  await page.getByRole('button',{name:'Преглед на промените',exact:true}).click();
   await page.getByRole('button',{name:'Запази роля и Обекти'}).click();
   await expect.poll(()=>updated).toEqual({role:'operator',siteIds:[site]});
+});
+
+test('zero organisation grants keep every service and disabled grant controls visible',async({page,context})=>{
+  await mockSession(context,true,()=>{});
+  await page.goto('/customers/users/');
+  const detail=page.locator('.organisation-member-detail');
+  await expect(detail.locator('[data-service-code]')).toHaveCount(5);
+  await expect(detail.locator('[data-service-code="day_ahead"]')).toContainText('Не е одобрена за организацията');
+  await expect(detail.locator('[data-service-code="visualisations"]')).toContainText('Не е одобрена за организацията');
+  await expect(detail.getByRole('button',{name:'Разреши и уведоми'})).toHaveCount(2);
+  for(const button of await detail.getByRole('button',{name:'Разреши и уведоми'}).all())await expect(button).toBeDisabled();
+  await expect(detail.getByRole('button',{name:'Заяви за организацията'})).toHaveCount(2);
+  await expect(page.getByRole('button',{name:/Иван Иванов/})).toBeVisible();
+});
+
+test('a service failure does not hide approved members or the catalogue',async({page,context})=>{
+  await mockSession(context,true,()=>{});
+  await context.route(`https://api.example.invalid/api/v1/organisations/${org}/services`,route=>route.fulfill({status:503,json:{error:'unavailable'}}));
+  await page.goto('/customers/users/');
+  await expect(page.getByRole('button',{name:/Иван Иванов/})).toBeVisible();
+  await expect(page.locator('.organisation-member-detail [data-service-code]')).toHaveCount(5);
+  await expect(page.getByText('Правата за услуги не можаха да се проверят.',{exact:false})).toBeVisible();
+});
+
+test('organisation administrator requests a service without granting it and cancels their pending request',async({page,context})=>{
+  await mockSession(context,true,()=>{});
+  let pending=false,submissions=0,cancellations=0;
+  const id='44444444-4444-4444-8444-444444444444';
+  await context.route(`https://api.example.invalid/api/v1/organisations/${org}/service-requests`,route=>{
+    if(route.request().method()==='POST'){pending=true;submissions++;expect(route.request().postDataJSON()).toEqual({serviceCode:'day_ahead',country:'BG',zone:'BG'});return route.fulfill({status:201,json:{id,created:true}});}
+    return route.fulfill({json:{requests:pending?[{id,organisationId:org,organisationName:'Example',subject:'user',email:'owner@example.com',serviceCode:'day_ahead',requestScope:'organisation',state:'open',stage:'awaiting_platform',events:[],createdAt:'2026-10-02T00:00:00Z'}]:[]}});
+  });
+  await context.route(`https://api.example.invalid/api/v1/organisations/${org}/service-requests/${id}/cancel`,route=>{pending=false;cancellations++;return route.fulfill({json:{id,stage:'cancelled'}});});
+  await page.goto('/customers/users/');
+  await page.getByRole('tab',{name:'Услуги',exact:true}).click();
+  const catalogue=page.locator('.organisation-service-workspace');
+  await expect(catalogue.locator('[data-service-code]')).toHaveCount(5);
+  const price=catalogue.locator('[data-service-code="day_ahead"]');
+  await price.getByRole('button',{name:'Заяви',exact:true}).click();
+  await expect(price.getByRole('button',{name:'Отмени заявката'})).toBeVisible();
+  expect(submissions).toBe(1);
+  await price.getByRole('button',{name:'Отмени заявката'}).click();
+  await expect(price.getByRole('button',{name:'Заяви',exact:true})).toBeVisible();
+  expect(cancellations).toBe(1);
+  await expect(price).toContainText('Не е одобрена за организацията');
 });
 
 test('non-admin has no invitation submenu and cannot use its direct URL',async({page,context})=>{
@@ -149,7 +197,10 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await page.goto('/customers/users/');
   await expect(page.locator('.invitation-hero')).toBeVisible();
   await expect(page.locator('.page-help-link')).toHaveAttribute('href','https://doc.gridex.tech/organisations-and-access/');
-  await expect(page.getByRole('region',{name:'Потребители и покани'})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Потребители на организацията'})).toBeVisible();
+  const listBox=await page.locator('.organisation-members-list').boundingBox();
+  const detailBox=await page.locator('.organisation-member-detail').boundingBox();
+  expect(detailBox!.x).toBeGreaterThan(listBox!.x+listBox!.width);
   await expect(page.getByRole('region',{name:'Администрация в OpenRemote'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-desktop.png'),fullPage:true});
@@ -157,7 +208,12 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await expect(page.locator('.invitation-hero')).toBeVisible();
   await expect(page.locator('.page-help-link')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
-  await expect(page.getByRole('button',{name:'Изпрати покана'})).toBeVisible();
+  const mobileList=await page.locator('.organisation-members-list').boundingBox();
+  const mobileDetail=await page.locator('.organisation-member-detail').boundingBox();
+  expect(mobileDetail!.y).toBeGreaterThan(mobileList!.y+mobileList!.height);
+  await expect(page.locator('.organisation-member-detail [data-service-code]')).toHaveCount(5);
   await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-mobile.png'),fullPage:true});
+  await page.getByRole('tab',{name:/Изпратени покани/}).click();
+  await expect(page.getByRole('button',{name:'Изпрати покана',exact:true})).toBeVisible();
 });

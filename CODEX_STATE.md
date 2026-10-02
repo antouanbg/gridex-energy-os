@@ -1,5 +1,33 @@
 # Current task
 
+## 2026-10-02 — approved catalogue visibility correction (source only)
+
+Latest checkpoint: the paired backend migration 022/API is deployed healthy.
+Real read-only verification confirmed 2 customer members, 5 services with
+zero grants, OpenRemote links and wrong-realm/viewer denial. Final frontend
+checks: 75 browser tests, 29 unit tests, typecheck/Pages build/lint pass.
+Approved visual references and acceptance mapping are in docs/approved-screens.
+Publishing this correction next; live browser owner acceptance remains open.
+
+Български: backend вече е внедрен и проверен с реални четения/откази;
+75 браузърни и 29 unit теста минаха. Одобрените макети и съответствието
+са в Git. Следва публикация; реалното browser приемане още е отворено.
+
+Owner clarified that missing organisation grants never remove approved service
+rows/buttons. All five entries now remain in the member-access editor and
+organisation catalogue; only verified grants enable member actions. Member
+loading is independent of service loading. Targeted browser regression tests
+passed for zero grants, service failure and role/Site editing. TypeScript and
+Pages build passed; modified-component lint passed. Wider layout verification,
+backend workflow tests/migration, BG/EN Docusaurus publication and live
+real-account acceptance remain open. Do not describe this source as deployed.
+
+Български: петте услуги и одобрените бутони остават видими без права;
+разрешението не е автоматично. Проверени са липсващи права, service грешка и
+редакция на роля/Обекти с браузърни тестове. Пълното сравнение с макета,
+backend процесът, публикуваната Docusaurus помощ и реалното внедряване
+предстоят. Това е поправен код, не приключена публикация.
+
 ## 2026-10-02 — member-access frontend held after live OpenRemote denial
 
 PR #96 is merged; local build/typecheck/lint, 29 unit tests, 72 browser tests
