@@ -480,6 +480,12 @@ export class GridexApiClient {
   myServiceRequests(signal?: AbortSignal): Promise<{requests:ServiceRequest[]}> {
     return this.getJson('/api/v1/me/service-requests', signal);
   }
+  cancelMyServiceRequest(id:string):Promise<{id:string;stage:string}> {
+    return this.postJson(`/api/v1/me/service-requests/${encodeURIComponent(id)}/cancel`,{});
+  }
+  stopMyService(organisationId:string,code:string):Promise<{code:string;enabled:boolean;changed:boolean}> {
+    return this.postJson(`/api/v1/me/services/${encodeURIComponent(code)}/stop`,{organisationId});
+  }
   requestService(organisationId:string,serviceCode:string,country?:'BG',zone?:'BG'): Promise<{id:string;created:boolean}> {
     return this.postJson('/api/v1/me/service-requests', {organisationId,serviceCode,country,zone});
   }

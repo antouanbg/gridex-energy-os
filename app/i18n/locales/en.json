@@ -1,4 +1,12 @@
 {
+  "services.cancel": "Cancel request",
+  "services.stop": "Stop service",
+  "services.confirmStop": "Confirm stop",
+  "services.keep": "Keep service",
+  "services.stopConfirm": "Only your personal access will stop. Re-enabling requires new administrator approval.",
+  "services.cancelled": "Request cancelled.",
+  "services.stopped": "Personal service stopped. Re-enabling requires new approval.",
+  "services.changeUnconfirmed": "The change was not confirmed. Refresh the state before retrying.",
   "nav.overview": "Overview",
   "nav.sites": "Sites",
   "nav.assets": "Energy assets",

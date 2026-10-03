@@ -1,5 +1,27 @@
 # Canonical layout / Водещ лейаут — 2026-10-02
 
+## Superseding approval — 2026-10-03 / По-ново одобрение
+
+The approved reference is now gridex-docs static/approved/users-three-roles.html
+and the BG/EN approved-users-screens guide. Settings → Users is continuous;
+five roster columns are Name/email, Role, Sites, Services, Actions. Details
+expand below, mobile uses cards. Platform order adds organisation requests
+and read-only member inspection before invitation/history/organisation ledger.
+Organisation order remains services, invitation, history, roster/editor, requests.
+Viewer cannot see Users; direct URL is denied; personal services live in Services.
+Older Profile → Services labels and side-by-side editor below are historical.
+Cancel/Stop persists only the caller's request/grant. Re-enable requires new
+organisation-admin approval. Do not infer runtime support from the mockup.
+
+БГ: новият одобрен шаблон е в gridex-docs static/approved/users-three-roles.html
+и BG/EN ръководството approved-users-screens. Една страница Настройки →
+Потребители, пет колони и разгъваеми подробности; мобилни карти. Супер админ:
+организация, услуги, заявки, преглед на хора, покана, история, организационен
+регистър. Организационен админ: услуги, покана, история, хора/редактор, заявки.
+Наблюдателят няма Потребители, а личните услуги са в Услуги. Старите имена и
+страничен редактор по-долу са история. Отмени/Спри остава с реален запис;
+само лично разрешение/заявка, с ново админско одобрение за повторно включване.
+
 Owner approved the recommended continuous screen and the same visual design for
 every role. Reference: gridex-three-role-service-screens.html; the older member
 editor reference governs only the roster/editor within the page.

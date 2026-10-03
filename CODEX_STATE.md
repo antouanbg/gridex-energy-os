@@ -1,5 +1,16 @@
 # Current task
 
+## 2026-10-03 — confirmed personal cancel/stop
+
+Owner confirmed: cancel only own pending request; stop only own active grant.
+Organisation, other members and Site assignments unchanged. Re-enable requires
+new organisation-admin approval. Source implemented; API 148 pass/1 skip,
+four targeted BG/EN browser/locale tests pass, frontend typecheck/build pass.
+No new live permission changes. New API/portal controls are not deployed yet.
+Approved three-role reference is in gridex-docs /approved-users-screens/ and EN.
+БГ: обхватът е окончателно одобрен, само личен. Има код и тестове;
+не се твърди живо внедряване на новите бутони и API.
+
 ## 2026-10-03 — owner-approved dynamic matrix and localization
 
 The owner approved database-backed navigation metadata, reusing existing

@@ -1,5 +1,40 @@
 # GrideX Energy OS — Working Rules
 
+## Approved Users reference — 2026-10-03 / Одобрен визуален шаблон
+
+### Confirmed personal cancellation / Потвърдена лична отмяна
+
+Owner answered “Да, точно този обхват”: pending requests can be cancelled
+only by their owner; stopping an active service removes only that person's
+member_services grant. Organisation/other members/Site rights remain unchanged.
+Re-enabling requires a new organisation-admin approval; no self-enable route.
+Buttons: Cancel request versus Stop service, with confirmation before active
+access removal. This is the final confirmed scope.
+БГ: чакащата заявка се отменя само от собственика; „Спри услугата“ отнема
+само неговото лично разрешение. Организация, други хора и Обекти остават
+непроменени. Повторно включване изисква ново админско одобрение. Това
+е окончателно потвърденият обхват.
+
+The owner approved the three Settings → Users mockups in this conversation.
+Canonical reference: gridex-docs static/approved/users-three-roles.html and
+docs/approved-users-screens.md, with desktop/mobile images for all three roles.
+Preserve the continuous page, five-column member roster, expandable editor,
+shared GrideX appearance and role-specific authority. Viewer has no Users menu;
+direct navigation is denied. Public reference uses example identities only.
+Approval of a visual does not prove backend support. Map every action to an
+API and test it before deployment. Owner requires the Cancel/Stop control to
+remain and persist its effect within the personal-only scope above.
+Do not silently remove the button or broaden permission.
+
+Собственикът одобри трите макета Настройки → Потребители. Водещи са
+gridex-docs static/approved/users-three-roles.html и docs/approved-users-screens.md.
+Пази общия екран, петте колони, разгъването, GrideX дизайна и отделните роли.
+Наблюдател няма административно меню; директен адрес е отказ. Примерните
+самоличности не са реални данни. Преди внедряване свържи всяко действие с API
+и тест. Собственикът изиска бутонът Отмени/Спри да остане с запис в базата;
+обхватът е само личен, с ново админско одобрение за повторно включване.
+Не махай бутона и не разширявай права мълчаливо.
+
 ## Approved dynamic navigation, access feedback and i18n — 2026-10-03
 
 This owner-approved contract supersedes older navigation names and the matrix
