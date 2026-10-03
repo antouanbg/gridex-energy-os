@@ -1221,6 +1221,13 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .register-scroll th {color:#48685c;font-size:13px;font-weight:700;}
 .register-scroll td small {display:block;margin-top:5px;color:#61766d;overflow-wrap:anywhere;}
 .member-register tr[aria-selected="true"] {background:#edf5ef;}
+.admin-identity {display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px;overflow-wrap:anywhere;}
+.admin-identity small {color:var(--admin-muted);}
+.admin-invite-form summary {cursor:pointer;font-weight:600;color:var(--admin-green);padding:12px 0;}
+.invitation-page .organisation-members-list.admin-panel {border:0;padding:0;background:transparent;}
+.invitation-page .organisation-member-detail.admin-panel {background:#f3f7f4;}
+.invitation-page .member-register {table-layout:fixed;}
+.invitation-page .member-register td {overflow-wrap:anywhere;}
 .organisation-member-detail summary {cursor:pointer;font-weight:700;color:#174d3b;padding:8px 0;}
 @media(max-width:760px){
   .member-register thead {display:none;}

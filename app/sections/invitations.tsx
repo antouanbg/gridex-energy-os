@@ -5,8 +5,9 @@ import type { UiLanguage } from '../i18n/messages';
 import { OrganisationInvitationAdmin } from './organisation-invitations';
 import { OrganisationServiceMembers } from './organisation-service-members';
 import { ServiceRequestsAdmin } from './service-requests-admin';
-import { OrganisationMembers, PlatformOrganisationMembers } from './organisation-members';
+import { OrganisationMembers } from './organisation-members';
 import { documentationLink } from '../lib/documentation';
+import { translate } from '../i18n/catalog';
 
 const copy = {
   en: { title: 'Organisation access', manageTitle: 'Users & invitations', loading: 'Loading access…', unavailable: 'Email invitations are not enabled yet. Mailgun and identity setup must be completed.',
@@ -109,7 +110,7 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
       <div><span className="profile-kicker">GRIDEX · {lang==='en'?'ACCESS CONTROL':'УПРАВЛЕНИЕ НА ДОСТЪПА'}</span>
         <h2>{organisationAdmin?(lang==='en'?'Services for the organisation':'Услуги за организацията'):(lang==='en'?'Services for organisations':'Услуги за организации')}</h2>
         <p>{platform?(lang==='en'?'Manage approved organisations and their separate service permissions.':'Управлявайте одобрените организации и отделните им услуги.'):(lang==='en'?'Manage the people, roles, Sites and services in your organisation.':'Управлявайте хората, ролите, Обектите и услугите във Вашата организация.')}</p>
-        <span className="admin-role-caption">{platform?(lang==='en'?'Platform administrator':'Супер администратор'):(lang==='en'?'Organisation administrator':'Администратор на организация')} · {me?.email}</span></div>
+        <div className="admin-identity"><span className="admin-status">{platform?(lang==='en'?'Platform administrator':'Супер администратор'):(lang==='en'?'Organisation administrator':'Администратор на организация')}</span><span>{me?.email}</span><small>{me?.name||translate(lang,'users.namesMissing')}</small></div></div>
       <div className="admin-header-actions">{organisationAdmin&&<a className="secondary-btn" href="#new-member-invitation">{lang==='en'?'+ Invite member':'+ Покани потребител'}</a>}
         <a className="profile-action" href={documentationLink('members',lang).href} target="_blank" rel="noopener noreferrer">{lang==='en'?'Help':'Помощ'} <span aria-hidden="true">↗</span></a></div>
     </header>}
@@ -132,7 +133,7 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
         <p>{lang==='en'?'The portal completes a valid invitation after verified sign-in; no second acceptance is required. If access remains pending, contact your administrator.':'Порталът завършва валидната покана след потвърден вход; не е нужно второ приемане. Ако достъпът остава чакащ, свържете се с администратора.'}</p>
       </article>)}
       </>}
-      {mode==='manage'&&(!admins.length ? !me?.permissions.includes('platform:manage') && <p>{t.noadmin}</p> : <form onSubmit={event => {
+      {mode==='manage'&&(!admins.length ? !me?.permissions.includes('platform:manage') && <p>{t.noadmin}</p> : <details className="admin-invite-form"><summary>{translate(lang,'users.inviteMember')}</summary><form onSubmit={event => {
         event.preventDefault();
         if (!available || !org) return;
         void action(async () => {
@@ -159,7 +160,7 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
           </fieldset>
           <button className="primary-btn" type="submit" disabled={!org}>{busy ? t.busy : t.send}</button>
         </fieldset>
-      </form>)}
+      </form></details>)}
     </>}
   </section>}
 {!loading&&organisationAdmin&&<section className="admin-panel member-invitation-history" aria-label={t.sentHistory}>
@@ -195,8 +196,7 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
       </section>}
     {organisationAdmin&&<div id="approved-organisation-members">
       {admins.map(admin=><OrganisationMembers key={`members-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId} onOrganisationServices={()=>document.getElementById('organisation-services')?.scrollIntoView({behavior:'smooth',block:'start'})}/>)}</div>}
-    {platform&&mode==='manage'&&<PlatformOrganisationMembers api={api} lang={lang}/>}
-    {mode==='manage'&&(platform||organisationAdmin)&&<div className="admin-service-decisions">{platform?<ServiceRequestsAdmin api={api} lang={lang}/>:admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}</div>}
+    {organisationAdmin&&<div className="admin-service-decisions">{admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}</div>}
     {mode==='manage'&&(platform||organisationAdmin)&&<section className="card invitation-panel admin-manager-footer" aria-label={lang==='en'?'OpenRemote administration':'Администрация в OpenRemote'}>
       <div><span className="profile-kicker">OPENREMOTE · {lang==='en'?'READ ONLY':'САМО ЧЕТЕНЕ'}</span><h2>{lang==='en'?'OpenRemote Manager':'OpenRemote Manager'}</h2>
         <p>{lang==='en'?'View the Assets of your current organisation. Manage access through GrideX.':'Преглед на Assets в текущата организация. Управлението на достъпа е през GrideX.'}</p>

@@ -5,6 +5,7 @@ import type { UiLanguage } from '../i18n/messages';
 import { serviceLabel } from '../lib/service-labels';
 import { adminServiceRows, organisationServiceReady } from '../lib/admin-service-catalog';
 import { documentationLink } from '../lib/documentation';
+import { translate } from '../i18n/catalog';
 
 const editableRoles = ['viewer','operator','energy_manager','integrator'] as const;
 const roleNames:Record<string,{bg:string;en:string}> = {
@@ -92,7 +93,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
     finally{setBusy(false);}
   }
   return <section className="organisation-members" aria-label={en?'Organisation members':'Потребители на организацията'}>
-    <div className="admin-section-heading"><div><h2>{en?'Approved members and services':'Одобрени потребители и услуги'}</h2>
+    <div className="admin-section-heading"><div><h2>{platform?translate(lang,'users.selectedOrganisationMembers'):(en?'Approved members and services':'Одобрени потребители и услуги')}</h2>
       <p>{platform?en?'Read-only overview for the selected organisation.':'Преглед на избраната организация без редакция.':en?'Select a person to manage their role, Sites and separate services.':'Изберете човек, за да управлявате ролята, Обектите и отделните му услуги.'}</p></div>
       <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#approved-members`} target="_blank" rel="noopener noreferrer">{en?'Help':'Помощ'} ↗</a></div>
     {error&&<div className="admin-feedback error" role="alert">{error} <button type="button" className="secondary-btn" onClick={()=>setRefreshKey(key=>key+1)}>{en?'Retry':'Опитай отново'}</button></div>}
@@ -105,7 +106,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
         {!loading&&page&&!members.length&&<p>{en?'No members match this search.':'Няма потребители за този избор.'}</p>}
         <div className="register-scroll"><table className="member-register"><thead><tr>{[en?'Name / email':'Име / имейл',en?'Role':'Роля',en?'Sites':'Обекти',en?'Services':'Услуги',en?'Actions':'Действия'].map(label=><th key={label}>{label}</th>)}</tr></thead><tbody>
           {members.map(member=><tr key={member.subject} aria-selected={selected===member.subject}>
-            <td data-label={en?'Name / email':'Име / имейл'}><strong>{memberName(member,en)}</strong><small>{member.email||member.subject}</small></td>
+            <td data-label={en?'Name / email':'Име / имейл'}><strong>{member.firstName&&member.lastName?memberName(member,en):translate(lang,'users.namesMissing')}</strong><small>{member.email||member.subject}</small></td>
             <td data-label={en?'Role':'Роля'}>{roleNames[member.role]?.[lang]||member.role}</td>
             <td data-label={en?'Sites':'Обекти'}>{member.allSites?(en?'All organisation Sites':'Всички Обекти на организацията'):member.siteIds.map(siteName).join(', ')||(en?'None assigned':'Няма разрешени')}</td>
             <td data-label={en?'Services':'Услуги'}>{member.services.map(code=>serviceLabel(code,lang)).join(', ')||(en?'None granted':'Няма разрешени')}</td>

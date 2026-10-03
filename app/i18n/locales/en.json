@@ -1,4 +1,8 @@
 {
+  "users.namesMissing": "First and last name: not provided",
+  "users.inviteMember": "Enter a person, role and permitted Sites",
+  "users.inviteFirstAdmin": "Invite the first administrator",
+  "users.selectedOrganisationMembers": "Members in the selected organisation",
   "services.cancel": "Cancel request",
   "services.stop": "Stop service",
   "services.confirmStop": "Confirm stop",

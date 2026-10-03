@@ -1,4 +1,8 @@
 {
+  "users.namesMissing": "Две имена: не са попълнени",
+  "users.inviteMember": "Въведи човек, роля и разрешени Обекти",
+  "users.inviteFirstAdmin": "Покани първия администратор",
+  "users.selectedOrganisationMembers": "Потребители в избраната организация",
   "services.cancel": "Отмени заявката",
   "services.stop": "Спри услугата",
   "services.confirmStop": "Потвърди спирането",

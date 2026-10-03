@@ -58,6 +58,7 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await expect(page.getByTestId('section-members').getByRole('heading',{name:'Услуги за организацията'})).toBeVisible();
 
   await expect(page.locator('[data-view-id="members"]')).toHaveAttribute('aria-current','page');
+  await page.getByText('Въведи човек, роля и разрешени Обекти',{exact:true}).click();
   await page.getByLabel('Собствено име').fill('Мария');
   await page.getByLabel('Фамилно име').fill('Петрова');
   await page.getByLabel('Служебен имейл').fill('new@example.com');
@@ -189,6 +190,7 @@ test('platform administrator can prepare a separate-realm invitation from the ap
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.screenshot({path:testInfo.outputPath('platform-invitation-mobile.png'),fullPage:true});
+  await page.getByText('Покани първия администратор',{exact:true}).click();
   await page.getByLabel('Име на организацията').fill('Fixture Company');
   await page.getByLabel('Кратък код (realm)').fill('fixture-co');
   await page.getByLabel('Имейл на първия администратор').fill('admin@example.com');
@@ -233,5 +235,6 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-mobile.png'),fullPage:true});
 
+  await page.getByText('Въведи човек, роля и разрешени Обекти',{exact:true}).click();
   await expect(page.getByRole('button',{name:'Изпрати покана',exact:true})).toBeVisible();
 });
