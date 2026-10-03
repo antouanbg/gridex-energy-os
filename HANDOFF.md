@@ -1,6 +1,127 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
+## 2026-10-03 — three Users screens approved / три одобрени екрана
+
+Owner approved Settings → Users three-role mockup and requested documentation.
+Canonical public reference: gridex-docs /approved-users-screens/ (BG) and
+/en/approved-users-screens/ (EN); static/approved/users-three-roles.html retains
+the layout with sanitized example identities. Six screenshots cover three
+roles at 1024/390px. Backend action mapping: docs/APPROVED_USERS_LAYOUT_API.md
+in backend repository. Latest suite: 148 pass, 1 skipped; no new live grants/mail.
+Owner confirmed personal-only cancel/stop and new admin approval to re-enable.
+Source includes two protected endpoints, five backend regression tests and BG/EN
+controls with confirmation. Typecheck, frontend build and four targeted browser
+tests passed. New portal layout and endpoints remain undeployed.
+БГ: трите екрана са одобрени; публичните копия са с примерни самоличности.
+Пазят се desktop/mobile и съответствието с API. Макетът не доказва живо
+внедряване. Отмени/Спри записва само личния ефект; ново включване изисква
+админско одобрение. Има код и тестове, без промяна на реални права.
+
+## 2026-10-03 implementation checkpoint / проверка на реализацията
+
+Navigation migration 023 seeds 27 approved entries; authenticated
+GET /api/v1/me/navigation returns identity-bound presentation states, no-store.
+Existing resource authorization remains mandatory. Frontend consumes catalogue
+order/visibility; known route/component mapping remains in source. Asset presence
+still comes from authorised inventory requests, not new local inventory records.
+Keyed BG/EN navigation resources and the five-column member register are implemented.
+Database migration dry-run succeeded with ROLLBACK (27 rows); not yet applied.
+Backend suite: 144 tests, 143 pass, 1 skip, zero failures. All four navigation
+unit/HTTP tests pass. Frontend TypeScript/build pass, eight invitation/member
+tests pass; demo checks pass at 360/390/430, new route tests at 390/1440 pass.
+Full browser regression rerun: 79 passed, zero failures.
+Docusaurus BG/EN typecheck/build pass. Live migration/API/frontend acceptance
+still pending. Older inline translations and remaining view integration are
+NOT claimed fully migrated. Do not call this a completed production rollout.
+
+БГ: има работещ локален каталог/API и петколонна таблица; тестовете по-горе
+са проверени. Пробата на миграцията е върната назад. Всички 79 браузърни теста
+минават; живото внедряване и приемането остават отделни стъпки. Не разширявай права
+и не представяй неприключените екрани/преводи като готови.
+
+Follow-up regression evidence: initial full browser run 57/79, next 74/79.
+Failures exposed a real navigation-shell regression when catalogue verification
+failed and stale test expectations for renamed routes/collapsed member details.
+Fixed safe shell links and anonymous-only demo navigation; last nine targeted
+tests pass, including all five remaining failures. Full rerun passed all 79 tests.
+БГ: отстранено е скриване на основните връзки при непроверим каталог и показване
+на демо навигация след неуспешна проверка на вход. Пълният набор е успешен.
+
+Publication: frontend PR #105, backend PR #96, documentation PR #48.
+Live deployment is blocked pending explicit owner approval for migration 023
+and gridex-api restart. The execution reviewer rejected the combined merge/live
+operation before execution; no live migration or restart occurred. Keep frontend
+deployment behind the backend schema/API rollout. Browser fixtures are not proof
+of production role acceptance; some screenshots intentionally show unavailable
+dependencies. Full legacy i18n conversion remains outstanding.
+БГ: чака се изрично одобрение за миграция 023 и рестарт само на gridex-api.
+Не представяй Git публикацията и локалните тестове като живо внедряване.
+
+## 2026-10-03 — approved dynamic navigation / динамична навигация
+
+Owner approved PostgreSQL navigation metadata with existing service grants;
+OpenRemote remains inventory/identity/Site authority. AGENTS contains the
+binding hierarchy, user feedback for denied versus unverifiable access,
+BG/EN locale resources and future-language extension rule. No blanket email
+notification on denial, new rights or fallback demo data is authorised.
+Status: LOCAL / implementation ongoing, not migrated or deployed.
+Frontend navigation labels now use keyed BG/EN resources; legacy inline
+translations still need migration. Full effective-navigation API, database
+seed/migration, access feedback wiring and end-to-end role/tenant tests remain.
+Test incident: localhost preview initially blocked by sandbox (EPERM), not a
+website outage. JSON imports in Node tests required type:json attributes;
+source corrected. Re-run localization suite and TypeScript before publication.
+
+БГ: одобрено е динамично меню от PostgreSQL с текущите разрешения за услуги;
+OpenRemote остава единствен източник за инвентар и Обекти. Липсващо право,
+чакаща заявка и непроверим достъп се съобщават различно. AGENTS е актуализиран.
+Само локална подготовка: няма приложена миграция/жив release. Менютата вече
+ползват BG/EN ключове; останалите inline преводи, API и цялостните тестове
+предстоят. Не представяй подготовката като завършено внедряване.
+
+## 2026-10-02 — service/device matrix draft from owner-selected manual
+
+Prepared [foundational matrix proposal](docs/FOUNDATIONAL_ACCESS_MATRIX_PROPOSAL.md)
+in EN/BG: existing menu/role boundaries, potential services and device classes from
+`Suggestions/User_manual_smartelectrosystem.pdf`, prerequisites and three-role
+presentation. New candidates are NOT approved or supported hardware. Preserve
+the five-service live catalogue until expansion is approved. Local document only;
+no code, grants, provisioning or deployment changed. Next: owner reviews matrix
+and candidate grouping before the approved layout implementation resumes.
+
+BG: Подготвена е свързаната EN/BG чернова с менюта/роли, потенциални услуги и
+устройства от посочения PDF, предпоставки и представяне по трите роли. Кандидат
+не означава одобрена услуга или поддържан хардуер. Живият каталог от пет услуги
+не се разширява без одобрение. Само локална документация, без код/права/провизиране
+или внедряване. Следва преглед от собственика преди възобновяване на реализацията.
+
+## 2026-10-02 — foundational matrix before member-table implementation
+
+Owner's latest instruction: stop layout implementation and first specify/approve
+the foundational access matrix. Approved visual reference remains: one design
+across three roles; five columns Name/email, Role, Sites, Services, Actions;
+permission/menu details expanded on demand and responsive mobile presentation.
+No frontend implementation, backend grant, schema or navigation change was made
+in this task before the interruption. The earlier assistant matrix is a proposal,
+NOT the approved contract; commissioning is an action, not a new menu section.
+Next: inventory actual existing menu/route/action guards; map role, organisation,
+OpenRemote Site links, service/zone prerequisites and personal grants; mark every
+unresolved choice for owner approval. Only afterwards implement the screens.
+Status: decision recorded locally; implementation intentionally not started;
+no publication, deployment or live acceptance is claimed.
+
+Български: последното указание спира реализацията на таблицата до уточняване и
+одобрение на ОСНОВОПОЛАГАЩАТА матрица. Одобреният визуален образец остава:
+един дизайн за трите роли; Име/имейл, Роля, Обекти, Услуги, Действия; подробностите
+за права/менюта се разгъват при нужда; мобилно оформление. Преди прекъсването
+няма редакция на приложението, backend права, схема или менюта. Предложената
+по-рано матрица НЕ е одобрена; комисионирането е действие, не нов раздел.
+Следва опис на текущите менюта/адреси/действия и проверки, обвързан с роли,
+организация, OpenRemote Обекти, услуги/зони и лични разрешения. Неяснотите се
+дават за одобрение преди реализацията. Записът е локален; няма публикация,
+внедряване или твърдение за реално приемане.
+
 ## 2026-10-02 — remove in-session account switching
 
 Owner explicitly removed Switch account/user. The account menu now retains

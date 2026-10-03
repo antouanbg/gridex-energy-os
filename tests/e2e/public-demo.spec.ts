@@ -10,9 +10,9 @@ for(const width of [390,1280])test(`public demo isolated routes at ${width}px`,a
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
   await expect(page.getByTestId('section-overview')).toContainText('248.6');
   if(width<681)await page.locator('.mobile-menu-toggle').click();
-  await expect(page.locator('[data-view-id="devices"]')).toHaveAttribute('href','/demo/devices/');
+  await expect(page.locator('[data-view-id="devices"]')).toHaveAttribute('href','/demo/infrastructure/');
   await page.locator('[data-view-id="devices"]').click();
-  await expect(page).toHaveURL(/\/demo\/devices\/$/);
+  await expect(page).toHaveURL(/\/demo\/infrastructure\/$/);
   await page.reload();
   await expect(page.getByTestId('section-devices')).toBeVisible();
   await expect(page.locator('.demo-mode-notice')).toBeVisible();

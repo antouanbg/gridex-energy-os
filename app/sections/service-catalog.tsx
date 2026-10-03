@@ -4,6 +4,8 @@ import type { GridexApiClient, GridexUser, ServiceCatalogItem, ServiceRequest } 
 import type { UiLanguage } from '../i18n/messages';
 import { documentationLink } from '../lib/documentation';
 import { serviceLabel } from '../lib/service-labels';
+import {sectionHref} from '../lib/routes';
+import {translate} from '../i18n/catalog';
 
 const stages: Record<string,{bg:string;en:string}> = {
   awaiting_platform:{bg:'Чака разрешение от администратора на платформата',en:'Awaiting platform administrator'},
@@ -20,6 +22,7 @@ const eventLabels: Record<string,{bg:string;en:string}> = {
 
 export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage}) {
   const en=lang==='en';
+  const [stopConfirm,setStopConfirm]=useState('');
   const [user,setUser]=useState<GridexUser|null>(null);
   const [services,setServices]=useState<ServiceCatalogItem[]>([]);
   const [requests,setRequests]=useState<ServiceRequest[]>([]);
@@ -63,6 +66,18 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
     }catch{setError(en?'The request was not confirmed. Reload before retrying.':'Заявката не е потвърдена. Обновете преди нов опит.');}
     finally{setBusy('');}
   }
+  async function remove(code:string,requestId?:string){
+    if(!organisationId||busy)return;
+    setBusy(code);setError('');setNotice('');
+    try {
+      if(requestId)await api.cancelMyServiceRequest(requestId);
+      else await api.stopMyService(organisationId,code);
+      setStopConfirm('');
+      await refresh();
+      setNotice(translate(lang,requestId?'services.cancelled':'services.stopped'));
+    }catch{setError(translate(lang,'services.changeUnconfirmed'));}
+    finally{setBusy('');}
+  }
   return <article className="card profile-panel service-catalog" aria-label={en?'Services':'Услуги'}>
     <div className="profile-panel-heading"><div><span className="profile-kicker">03 / {en?'SERVICES':'УСЛУГИ'}</span>
       <h3>{en?'Service catalogue':'Каталог на услуги'}</h3></div>
@@ -72,25 +87,34 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
     {loading&&<p role="status">{en?'Loading services…':'Зареждане на услугите…'}</p>}
     {error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
     {user&&user.memberships&&user.memberships.length>1&&<label>{en?'Organisation':'Организация'}
-      <select value={organisationId} onChange={event=>setOrganisationId(event.target.value)}>
+      <select value={organisationId} onChange={event=>{setOrganisationId(event.target.value);setStopConfirm('');}}>
         {user.memberships.map(m=><option key={m.organisationId} value={m.organisationId}>{m.organisationId}</option>)}
       </select></label>}
     {!loading&&!organisationId&&<p>{en?'An active organisation is required.':'Нужна е активна организация.'}</p>}
     {services.map(service=>{
       const item=requests.find(row=>row.organisationId===organisationId&&row.serviceCode===service.code&&row.state==='open')
         ||requests.find(row=>row.organisationId===organisationId&&row.serviceCode===service.code);
-      const enabled=granted.some(item=>item.code===service.code&&item.organisationId===organisationId);
+      const platform=user?.permissions.includes('platform:manage')===true;
+      const enabled=platform||granted.some(item=>item.code===service.code&&item.organisationId===organisationId);
       const pending=item?.state==='open'&&item.stage!=='active';
       return <div className="service-grant-row" key={service.code}>
         <span><strong>{serviceLabel(service.code,lang,service.description)}</strong>
           {service.code==='day_ahead'&&<small>{en?'Country: Bulgaria (BG) · one bidding zone':'Държава: България (BG) · една ценова зона'}</small>}
-          <small>{enabled?en?'Enabled':'Разрешена':item?stages[item.stage]?.[lang]:service.requestable?en?'May be requested':'Може да се заяви':en?'Coming soon':'Предстои'}</small>
+          <small>{!service.requestable?en?'Coming soon':'Предстои':enabled?en?'Enabled':'Разрешена':item?.stage==='cancelled'?translate(lang,'services.cancelled'):item?.stage==='revoked'?translate(lang,'services.stopped'):item?stages[item.stage]?.[lang]:en?'May be requested':'Може да се заяви'}</small>
           {item&&<small>{en?'Requested':'Заявена'}: {new Date(item.createdAt).toLocaleString(en?'en-GB':'bg-BG')}</small>}
           {item?.events.length&&<details><summary>{en?'Request history':'История на заявката'}</summary>
             <ul>{item.events.map((event,index)=><li key={`${event.at}-${index}`}>
-              {eventLabels[event.action]?.[lang]||event.action} · {new Date(event.at).toLocaleString(en?'en-GB':'bg-BG')}{event.note?` · ${event.note}`:''}
+              {event.action==='cancelled'?translate(lang,'services.cancelled'):eventLabels[event.action]?.[lang]||event.action} · {new Date(event.at).toLocaleString(en?'en-GB':'bg-BG')}{event.note?` · ${event.note}`:''}
             </li>)}</ul></details>}
         </span>
+        {enabled&&service.requestable&&<a className="secondary-btn" href={sectionHref(service.code==='day_ahead'?'market':'visualisations')}>{en?'Open':'Отвори'} →</a>}
+        {!platform&&enabled&&service.requestable&&<div>
+          {stopConfirm===service.code?<><p>{translate(lang,'services.stopConfirm')}</p>
+            <button type="button" className="secondary-btn" disabled={Boolean(busy)} onClick={()=>void remove(service.code)}>{translate(lang,'services.confirmStop')}</button>
+            <button type="button" className="secondary-btn" disabled={Boolean(busy)} onClick={()=>setStopConfirm('')}>{translate(lang,'services.keep')}</button></>
+            :<button type="button" className="secondary-btn" disabled={Boolean(busy)} onClick={()=>setStopConfirm(service.code)}>{translate(lang,'services.stop')}</button>}
+        </div>}
+        {!platform&&!enabled&&pending&&item&&<button type="button" className="secondary-btn" disabled={Boolean(busy)} onClick={()=>void remove(service.code,item.id)}>{translate(lang,'services.cancel')}</button>}
         {service.requestable&&!enabled&&!pending&&organisationId&&<button type="button" className="secondary-btn" disabled={Boolean(busy)}
           onClick={()=>void request(service.code)}>{busy===service.code?en?'Sending…':'Изпращане…':en?'Request':'Заяви'}</button>}
       </div>;

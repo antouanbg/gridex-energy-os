@@ -21,7 +21,7 @@ test('Site visualisations retain their URL and show only measured history on des
   });
   await page.goto('/sites/');
   await page.getByRole('link',{name:'Визуализации →'}).click();
-  await expect(page).toHaveURL(/\/sites\/lab\/visualisations\/$/);
+  await expect(page).toHaveURL(/\/sites\/lab\/services\/visualisations\/$/);
   await expect(page.getByText('43,25 °C',{exact:true})).toBeVisible();
   await expect(page.getByRole('img',{name:'Измерена история за последните 24 часа'})).toBeVisible();
   await expect(page.locator('main')).not.toContainText('Представителни демо данни');

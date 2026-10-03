@@ -5,6 +5,7 @@ import type { UiLanguage } from '../i18n/messages';
 import { serviceLabel } from '../lib/service-labels';
 import { adminServiceRows, organisationServiceReady } from '../lib/admin-service-catalog';
 import { documentationLink } from '../lib/documentation';
+import { translate } from '../i18n/catalog';
 
 const editableRoles = ['viewer','operator','energy_manager','integrator'] as const;
 const roleNames:Record<string,{bg:string;en:string}> = {
@@ -13,7 +14,7 @@ const roleNames:Record<string,{bg:string;en:string}> = {
   energy_manager:{bg:'Енергиен мениджър',en:'Energy manager'}, integrator:{bg:'Интегратор',en:'Integrator'},
 };
 const roleRights:Record<string,{bg:string;en:string}> = {
-  administrator:{bg:'Управлява организацията, потребителите, Обектите и commissioning.',en:'Manages the organisation, members, Sites and commissioning.'},
+  administrator:{bg:'Управлява организацията, потребителите, Обектите и внедряването.',en:'Manages the organisation, members, Sites and commissioning.'},
   viewer:{bg:'Чете данните от разрешените Обекти; не управлява устройства.',en:'Reads assigned Sites; cannot control devices.'},
   operator:{bg:'Чете данни, подава оперативни команди, подготвя и симулира стратегии.',en:'Reads data, sends operational commands, drafts and simulates strategies.'},
   energy_manager:{bg:'Оперативни права, конфигурация и активиране на стратегии.',en:'Operational rights, configuration and strategy activation.'},
@@ -34,6 +35,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
   const [serviceError,setServiceError]=useState(false);
   const [refreshKey,setRefreshKey]=useState(0);
   const [selected,setSelected]=useState<string|null>(null);
+  const [detailsOpen,setDetailsOpen]=useState(false);
   const [role,setRole]=useState('viewer');
   const [siteIds,setSiteIds]=useState<string[]>([]);
   const [busy,setBusy]=useState(false);
@@ -91,7 +93,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
     finally{setBusy(false);}
   }
   return <section className="organisation-members" aria-label={en?'Organisation members':'Потребители на организацията'}>
-    <div className="admin-section-heading"><div><h2>{en?'Approved members and services':'Одобрени потребители и услуги'}</h2>
+    <div className="admin-section-heading"><div><h2>{platform?translate(lang,'users.selectedOrganisationMembers'):(en?'Approved members and services':'Одобрени потребители и услуги')}</h2>
       <p>{platform?en?'Read-only overview for the selected organisation.':'Преглед на избраната организация без редакция.':en?'Select a person to manage their role, Sites and separate services.':'Изберете човек, за да управлявате ролята, Обектите и отделните му услуги.'}</p></div>
       <a className="profile-inline-help" href={`${documentationLink('members',lang).href}#approved-members`} target="_blank" rel="noopener noreferrer">{en?'Help':'Помощ'} ↗</a></div>
     {error&&<div className="admin-feedback error" role="alert">{error} <button type="button" className="secondary-btn" onClick={()=>setRefreshKey(key=>key+1)}>{en?'Retry':'Опитай отново'}</button></div>}
@@ -102,18 +104,22 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
         <label className="admin-search">{en?'Find a person or email':'Намери човек или имейл'}<input type="search" value={query} maxLength={120} onChange={event=>setQuery(event.target.value)} placeholder={en?'Name or email':'Име или имейл'}/></label>
         {loading&&<p role="status">{en?'Loading members…':'Зареждаме потребителите…'}</p>}
         {!loading&&page&&!members.length&&<p>{en?'No members match this search.':'Няма потребители за този избор.'}</p>}
-        {members.map(member=><button key={member.subject} type="button" className="organisation-member-row" disabled={busy||loading}
-          aria-pressed={selected===member.subject} onClick={()=>{setSelected(member.subject);setRole(member.role);setSiteIds(member.siteIds);setReviewing(false);setNotice('');}}>
-          <span><strong>{memberName(member,en)}</strong><small>{member.email||member.subject} · {roleNames[member.role]?.[lang]||member.role}</small>
-            <small>{member.siteIds.length} {en?'Sites':'Обекта'} · {member.services.length} {en?'services':'услуги'}</small>
-            {(!member.firstName||!member.lastName)&&<small>{en?'Complete the names in Profile':'Допълнете имената в Профил'}</small>}</span>
-          <span className="admin-status">{en?'Approved':'Одобрен'}</span>
-        </button>)}
+        <div className="register-scroll"><table className="member-register"><thead><tr>{[en?'Name / email':'Име / имейл',en?'Role':'Роля',en?'Sites':'Обекти',en?'Services':'Услуги',en?'Actions':'Действия'].map(label=><th key={label}>{label}</th>)}</tr></thead><tbody>
+          {members.map(member=><tr key={member.subject} aria-selected={selected===member.subject}>
+            <td data-label={en?'Name / email':'Име / имейл'}><strong>{member.firstName&&member.lastName?memberName(member,en):translate(lang,'users.namesMissing')}</strong><small>{member.email||member.subject}</small></td>
+            <td data-label={en?'Role':'Роля'}>{roleNames[member.role]?.[lang]||member.role}</td>
+            <td data-label={en?'Sites':'Обекти'}>{member.allSites?(en?'All organisation Sites':'Всички Обекти на организацията'):member.siteIds.map(siteName).join(', ')||(en?'None assigned':'Няма разрешени')}</td>
+            <td data-label={en?'Services':'Услуги'}>{member.services.map(code=>serviceLabel(code,lang)).join(', ')||(en?'None granted':'Няма разрешени')}</td>
+            <td data-label={en?'Actions':'Действия'}><button type="button" className="secondary-btn" disabled={busy||loading} aria-label={(en?'Access details: ':'Права и услуги: ')+memberName(member,en)} aria-pressed={selected===member.subject}
+              onClick={()=>{setSelected(member.subject);setDetailsOpen(true);setRole(member.role);setSiteIds(member.siteIds);setReviewing(false);setNotice('');}}>{en?'Access details':'Права и услуги'}</button></td>
+          </tr>)}
+        </tbody></table></div>
         {page&&<div className="admin-pagination"><span>{members.length?`${offset+1}–${offset+members.length}${page.total?` / ${page.total}`:''}`:'0'}</span>
           <div><button type="button" className="secondary-btn" disabled={loading||busy||offset===0} onClick={()=>setOffset(value=>Math.max(0,value-25))}>{en?'Previous':'Назад'}</button>
             <button type="button" className="secondary-btn" disabled={loading||busy||page.nextOffset===null} onClick={()=>setOffset(page.nextOffset||0)}>{en?'Next':'Напред'}</button></div></div>}
       </section>
-      <section className="organisation-member-detail admin-panel" aria-label={en?'Selected member permissions':'Права на избрания потребител'}>
+      <details open={detailsOpen} onToggle={event=>setDetailsOpen(event.currentTarget.open)} className="organisation-member-detail admin-panel" aria-label={en?'Selected member permissions':'Права на избрания потребител'}>
+        <summary>{en?'Selected member — permissions and services':'Избран потребител — права и услуги'}{current?` · ${memberName(current,en)}`:''}</summary>
         {!current&&<p>{en?'Select an approved member to view access.':'Изберете одобрен потребител, за да видите достъпа му.'}</p>}
         {current&&<><h3>{memberName(current,en)}</h3>
           <div className="admin-member-meta"><div><span>{en?'Email':'Имейл'}</span><strong>{current.email||current.subject}</strong></div>
@@ -147,7 +153,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
               </div>;
             })}
           </div></>}
-      </section>
+      </details>
     </div>
   </section>;
 }

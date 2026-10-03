@@ -5,7 +5,7 @@ for(const width of [360,390,430])test.describe(`swipe navigation ${width}`,()=>{
   test('three visible sections, touch scroll and every destination remain reachable',async({page},testInfo)=>{
     await page.goto('/demo/');
     const nav=page.locator('#main-navigation');
-    await expect(nav.locator('[data-view-id]')).toHaveCount(18);
+    await expect(nav.locator('[data-view-id]')).toHaveCount(26);
     const dimensions=await nav.evaluate(el=>({width:el.clientWidth,item:el.querySelector('a')!.getBoundingClientRect().width}));
     expect(Math.abs(dimensions.width-(dimensions.item*3+6))).toBeLessThan(2);
     const box=(await nav.boundingBox())!;

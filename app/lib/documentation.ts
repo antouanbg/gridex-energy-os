@@ -8,6 +8,17 @@ const readyGuides: Record<string, string> = {
   visualisations: '/organisations-and-access/#site-visualisations',
   market: '/market-prices/',
   about: '/contact-inquiries/',
+  services: '/navigation-and-permissions/#services',
+  settings: '/navigation-and-permissions/',
+  devices: '/navigation-and-permissions/#inventory',
+  assets: '/navigation-and-permissions/#inventory',
+  battery: '/navigation-and-permissions/#inventory',
+  inverter: '/navigation-and-permissions/#inventory',
+  evse: '/navigation-and-permissions/#inventory',
+  loads: '/navigation-and-permissions/#inventory',
+  sites: '/navigation-and-permissions/#inventory',
+  'market-settings': '/navigation-and-permissions/#administration',
+  settlement: '/navigation-and-permissions/#administration',
 };
 
 export function documentationLink(view: string, lang: UiLanguage): { href: string; ready: boolean } {

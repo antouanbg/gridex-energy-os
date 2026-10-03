@@ -468,6 +468,9 @@ export class GridexApiClient {
   myServices(signal?: AbortSignal): Promise<{services:{code:string;organisationId:string}[]}> {
     return this.getJson('/api/v1/me/services', signal);
   }
+  navigation(signal?:AbortSignal):Promise<{realm:string;subject:string;items:{id:string;parentId:string|null;path:string;labelKey:string;sortOrder:number;state:string;visible:boolean}[]}> {
+    return this.getJson('/api/v1/me/navigation',signal);
+  }
   siteVisualisationHistory(siteId:string,signal?:AbortSignal):Promise<SiteVisualisationHistory> {
     return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/visualisations/history`,signal);
   }
@@ -476,6 +479,12 @@ export class GridexApiClient {
   }
   myServiceRequests(signal?: AbortSignal): Promise<{requests:ServiceRequest[]}> {
     return this.getJson('/api/v1/me/service-requests', signal);
+  }
+  cancelMyServiceRequest(id:string):Promise<{id:string;stage:string}> {
+    return this.postJson(`/api/v1/me/service-requests/${encodeURIComponent(id)}/cancel`,{});
+  }
+  stopMyService(organisationId:string,code:string):Promise<{code:string;enabled:boolean;changed:boolean}> {
+    return this.postJson(`/api/v1/me/services/${encodeURIComponent(code)}/stop`,{organisationId});
   }
   requestService(organisationId:string,serviceCode:string,country?:'BG',zone?:'BG'): Promise<{id:string;created:boolean}> {
     return this.postJson('/api/v1/me/service-requests', {organisationId,serviceCode,country,zone});

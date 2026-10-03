@@ -13,9 +13,9 @@ for(const width of [390,1280])test(`unfinished login returns to demo without ref
   expect(box).not.toBeNull();
   expect(box!.y).toBeLessThan(550);
   if(width<681)await page.locator('.mobile-menu-toggle').click();
-  await expect(page.locator('[data-view-id="battery"]')).toHaveAttribute('href','/demo/battery/');
+  await expect(page.locator('[data-view-id="battery"]')).toHaveAttribute('href','/demo/assets/battery/');
   await page.locator('[data-view-id="battery"]').click();
-  await expect(page).toHaveURL(/\/demo\/battery\/$/);
+  await expect(page).toHaveURL(/\/demo\/assets\/battery\/$/);
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','demo');
   await expect(page.getByTestId('section-battery')).toBeVisible();
   await expect(page.getByRole('heading',{name:'Данните от акаунта са недостъпни'})).toHaveCount(0);

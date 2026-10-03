@@ -1,4 +1,5 @@
 import { test, expect, type BrowserContext } from '@playwright/test';
+import {navItems} from '../../app/lib/navigation';
 
 const org='11111111-1111-4111-8111-111111111111';
 const site='22222222-2222-4222-8222-222222222222';
@@ -43,6 +44,7 @@ async function mockSession(context: BrowserContext, administrator: boolean, onIn
       return route.fulfill({json:{id:memberInvite,state:'sent',expiresAt:'2026-10-01T00:00:00Z'}});
     }
     if(path==='/api/v1/me')return route.fulfill({json:{subject:'user',realm:'gridex',email:'owner@example.com',roles:[administrator?'administrator':'viewer'],permissions:['site:read'],memberships:[{organisationId:org,role:administrator?'administrator':'viewer',allSites:true}]}});
+    if(path==='/api/v1/me/navigation')return route.fulfill({json:{subject:'user',realm:'gridex',items:navItems.map(([id],sortOrder)=>({id,sortOrder,visible:administrator||!['members','plans','market-settings','settlement','balance'].includes(id),state:'available'}))}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:site,organisationId:org,name:'Test Lab'}]}});
     if(path==='/api/v1/me/invitations')return route.fulfill({json:{invitations:[]}});
     return route.fulfill({status:503,json:{error:'unavailable'}});
@@ -56,6 +58,7 @@ test('organisation administrator has a deep-linked invitation submenu and explic
   await expect(page.getByTestId('section-members').getByRole('heading',{name:'Услуги за организацията'})).toBeVisible();
 
   await expect(page.locator('[data-view-id="members"]')).toHaveAttribute('aria-current','page');
+  await page.getByText('Въведи човек, роля и разрешени Обекти',{exact:true}).click();
   await page.getByLabel('Собствено име').fill('Мария');
   await page.getByLabel('Фамилно име').fill('Петрова');
   await page.getByLabel('Служебен имейл').fill('new@example.com');
@@ -91,6 +94,7 @@ test('zero organisation grants keep every service and disabled grant controls vi
   await mockSession(context,true,()=>{});
   await page.goto('/customers/users/');
   const detail=page.locator('.organisation-member-detail');
+  await page.getByRole('button',{name:/Права и услуги: Иван Иванов/}).click();
   await expect(detail.locator('[data-service-code]')).toHaveCount(5);
   await expect(detail.locator('[data-service-code="day_ahead"]')).toContainText('Не е одобрена за организацията');
   await expect(detail.locator('[data-service-code="visualisations"]')).toContainText('Не е одобрена за организацията');
@@ -106,6 +110,7 @@ test('a service failure does not hide approved members or the catalogue',async({
   await page.goto('/customers/users/');
   await expect(page.getByRole('button',{name:/Иван Иванов/})).toBeVisible();
   await expect(page.locator('.organisation-member-detail [data-service-code]')).toHaveCount(5);
+  await page.getByRole('button',{name:/Права и услуги: Иван Иванов/}).click();
   await expect(page.getByText('Правата за услуги не можаха да се проверят.',{exact:false})).toBeVisible();
 });
 
@@ -185,6 +190,7 @@ test('platform administrator can prepare a separate-realm invitation from the ap
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.screenshot({path:testInfo.outputPath('platform-invitation-mobile.png'),fullPage:true});
+  await page.getByText('Покани първия администратор',{exact:true}).click();
   await page.getByLabel('Име на организацията').fill('Fixture Company');
   await page.getByLabel('Кратък код (realm)').fill('fixture-co');
   await page.getByLabel('Имейл на първия администратор').fill('admin@example.com');
@@ -214,7 +220,7 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await expect(page.getByRole('region',{name:'Потребители на организацията'})).toBeVisible();
   const listBox=await page.locator('.organisation-members-list').boundingBox();
   const detailBox=await page.locator('.organisation-member-detail').boundingBox();
-  expect(detailBox!.x).toBeGreaterThan(listBox!.x+listBox!.width);
+  expect(detailBox!.y).toBeGreaterThan(listBox!.y+listBox!.height);
   await expect(page.getByRole('region',{name:'Администрация в OpenRemote'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-desktop.png'),fullPage:true});
@@ -229,5 +235,6 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await expect(page.getByRole('button',{name:'Отвори OpenRemote Manager'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('invitations-mobile.png'),fullPage:true});
 
+  await page.getByText('Въведи човек, роля и разрешени Обекти',{exact:true}).click();
   await expect(page.getByRole('button',{name:'Изпрати покана',exact:true})).toBeVisible();
 });

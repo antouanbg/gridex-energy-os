@@ -1026,7 +1026,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .invitation-record strong { color:#173f2e; }
 .invitation-record p { color:#607568; font-size:12px; }
 .invitation-record-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.organisation-members-layout { display:grid; grid-template-columns:minmax(230px, 1fr) minmax(0, 1.35fr); gap:20px; margin-top:20px; }
+.organisation-members-layout { display:grid; grid-template-columns:minmax(0, 1fr); gap:20px; margin-top:20px; }
 .organisation-members-list { min-width:0; display:flex; flex-direction:column; gap:9px; }
 .organisation-member-row { width:100%; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px; border:1px solid #dbe8df; border-radius:12px; background:#fff; color:#173f2e; text-align:left; cursor:pointer; }
 .organisation-member-row[aria-pressed="true"] { border-color:#42a779; background:#eff9f2; box-shadow:inset 3px 0 #24b56a; }
@@ -1200,7 +1200,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .invitation-page .invitation-record { border:0; border-top:1px solid var(--admin-line); border-radius:0; padding:14px 0; margin:0; }
 .invitation-page .member-invitation-history, .invitation-page .platform-invitation-history { min-width:0; }
 .invitation-page .organisation-members { padding:17px; border:1px solid var(--admin-line); border-radius:15px; background:#fff; }
-.invitation-page .organisation-members-layout { margin-top:14px; gap:14px; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); }
+.invitation-page .organisation-members-layout { margin-top:14px; gap:14px; grid-template-columns:minmax(0,1fr); }
 .invitation-page .organisation-members-layout .admin-panel { padding:14px; }
 #new-member-invitation, #approved-organisation-members, #organisation-services { scroll-margin-top:24px; }
 @media(max-width:760px) {
@@ -1212,4 +1212,27 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .invitation-page .admin-organisation-choice .admin-search { min-width:0; }
   .admin-organisation-choice .admin-status { margin-top:10px; }
   .invitation-page .admin-service-actions { width:100%; justify-content:flex-start; }
+}
+
+/* Approved five-column register: same information at desktop and phone widths. */
+.register-scroll {max-width:100%;overflow-x:auto;}
+.register-scroll table {width:100%;border-collapse:collapse;text-align:left;}
+.register-scroll th,.register-scroll td {padding:14px 12px;vertical-align:top;border-bottom:1px solid #dce9e2;}
+.register-scroll th {color:#48685c;font-size:13px;font-weight:700;}
+.register-scroll td small {display:block;margin-top:5px;color:#61766d;overflow-wrap:anywhere;}
+.member-register tr[aria-selected="true"] {background:#edf5ef;}
+.admin-identity {display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px;overflow-wrap:anywhere;}
+.admin-identity small {color:var(--admin-muted);}
+.admin-invite-form summary {cursor:pointer;font-weight:600;color:var(--admin-green);padding:12px 0;}
+.invitation-page .organisation-members-list.admin-panel {border:0;padding:0;background:transparent;}
+.invitation-page .organisation-member-detail.admin-panel {background:#f3f7f4;}
+.invitation-page .member-register {table-layout:fixed;}
+.invitation-page .member-register td {overflow-wrap:anywhere;}
+.organisation-member-detail summary {cursor:pointer;font-weight:700;color:#174d3b;padding:8px 0;}
+@media(max-width:760px){
+  .member-register thead {display:none;}
+  .member-register,.member-register tbody,.member-register tr,.member-register td {display:block;width:100%;}
+  .member-register tr {padding:12px 0;border-bottom:1px solid #dce9e2;}
+  .member-register td {border:0;padding:8px 12px;overflow-wrap:anywhere;}
+  .member-register td::before {content:attr(data-label);display:block;color:#61766d;font-size:12px;margin-bottom:4px;}
 }

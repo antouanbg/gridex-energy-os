@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 import { resolve } from "node:path";
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { sectionPaths } from './app/lib/routes';
+import { sectionPaths, legacyPaths } from './app/lib/routes';
 
 const release = process.env.GITHUB_SHA || execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 
@@ -17,7 +17,7 @@ export default defineConfig({
     closeBundle() {
       const root=resolve(import.meta.dirname,'dist-pages');
       const html=readFileSync(resolve(root,'index.html'),'utf8');
-      for(const path of Object.values(sectionPaths)) {
+      for(const path of new Set([...Object.values(sectionPaths),...Object.values(legacyPaths)])) {
         const demoDirectory=resolve(root,'./demo'+path);
         mkdirSync(demoDirectory,{recursive:true});
         writeFileSync(resolve(demoDirectory,'index.html'),html);

@@ -4,6 +4,8 @@ import { GridexApiError, type GridexApiClient, type PlatformOrganisation, type S
 import type { UiLanguage } from '../i18n/messages';
 import { serviceLabel } from '../lib/service-labels';
 import { adminServiceRows } from '../lib/admin-service-catalog';
+import { OrganisationMembers } from './organisation-members';
+import { ServiceRequestsAdmin } from './service-requests-admin';
 
 export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexApiClient; lang: UiLanguage; children?:ReactNode }) {
   const en = lang === 'en';
@@ -58,6 +60,8 @@ export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexAp
       {notice&&<p role="status">{notice}</p>}
     </section>
     {selected&&<PlatformServiceGrants key={selected.id} api={api} lang={lang} organisationId={selected.id}/>}
+    <ServiceRequestsAdmin api={api} lang={lang}/>
+    {selected&&<OrganisationMembers key={'members-'+selected.id} api={api} lang={lang} organisationId={selected.id} platform/>}
     {children}
     <section className="admin-panel invitation-history">
     <h3>{en ? 'Approved organisations and services' : 'Одобрени организации и услуги'}</h3>

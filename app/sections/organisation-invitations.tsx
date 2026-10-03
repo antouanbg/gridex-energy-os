@@ -4,6 +4,7 @@ import { GridexApiError, type CreatedOrganisationInvitation, type GridexApiClien
 import type { UiLanguage } from '../i18n/messages';
 
 import { OrganisationAccessAdmin } from './organisation-access';
+import { translate } from '../i18n/catalog';
 
 const copy = {
   bg: {
@@ -77,7 +78,7 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
     <div className="invitation-steps" aria-label={lang==='en'?'Invitation steps':'Стъпки на поканата'}><span><b>01</b>{lang==='en'?'Enter organisation':'Въведете организация'}</span><span><b>02</b>{lang==='en'?'Send invitation':'Изпратете покана'}</span><span><b>03</b>{lang==='en'?'Administrator signs in':'Администраторът влиза'}</span></div>
     {!enabled && <p className="invitation-status" role="status">{t.disabled}</p>}
     {notice && <p className="invitation-status" role="status">{notice}</p>}
-    <form onSubmit={submit} className="invitation-form">
+    <details className="admin-invite-form"><summary>{translate(lang,'users.inviteFirstAdmin')}</summary><form onSubmit={submit} className="invitation-form">
       <fieldset disabled={!enabled || busy}>
         <label>{t.name}<input required minLength={3} maxLength={120} autoComplete="organization" value={name} onChange={event => setName(event.target.value)}/></label>
         <label>{t.realm}<input required minLength={3} maxLength={31} pattern="[a-z][a-z0-9-]{2,30}" value={realm} onChange={event => setRealm(event.target.value.toLowerCase())}/><small>{lang==='en'?'Lowercase letters, numbers and hyphens; cannot be changed after invitation.':'Малки латински букви, цифри и тирета; не се променя след поканата.'}</small></label>
@@ -86,7 +87,7 @@ export function OrganisationInvitationAdmin({ api, lang }: { api: GridexApiClien
         <label>{lang==='en'?'Last name':'Фамилно име'}<input required autoComplete="family-name" maxLength={80} value={lastName} onChange={event=>setLastName(event.target.value)}/></label>
         <button type="submit" className="primary-btn">{busy ? t.sending : t.send}</button>
       </fieldset>
-    </form>
+    </form></details>
     </section><section className="admin-panel platform-invitation-history">
     <div className="invitation-history"><h3>{t.existing}</h3><span>{lang==='en'?'No access is granted before verified sign-in and backend confirmation.':'Няма достъп преди потвърден вход и проверка от сървъра.'}</span></div>
     <div className="admin-ledger-tools"><label className="admin-search">{lang==='en'?'Find an organisation or email':'Намери организация или имейл'}<input type="search" value={query} onChange={event=>{setQuery(event.target.value);setPage(0);}}/></label><label className="admin-search">{t.state}<select value={status} onChange={event=>{setStatus(event.target.value);setPage(0);}}><option value="all">{lang==='en'?'All':'Всички'}</option>{['accepted','sent','revoked'].map(value=><option key={value} value={value}>{value==='accepted'?t.accepted:value==='sent'?(lang==='en'?'Sent':'Изпратена'):(lang==='en'?'Revoked':'Отменена')}</option>)}</select></label></div>
