@@ -4,6 +4,7 @@ import type { GridexApiClient, GridexUser, ServiceCatalogItem, ServiceRequest } 
 import type { UiLanguage } from '../i18n/messages';
 import { documentationLink } from '../lib/documentation';
 import { serviceLabel } from '../lib/service-labels';
+import {sectionHref} from '../lib/routes';
 
 const stages: Record<string,{bg:string;en:string}> = {
   awaiting_platform:{bg:'Чака разрешение от администратора на платформата',en:'Awaiting platform administrator'},
@@ -79,18 +80,20 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
     {services.map(service=>{
       const item=requests.find(row=>row.organisationId===organisationId&&row.serviceCode===service.code&&row.state==='open')
         ||requests.find(row=>row.organisationId===organisationId&&row.serviceCode===service.code);
-      const enabled=granted.some(item=>item.code===service.code&&item.organisationId===organisationId);
+      const platform=user?.permissions.includes('platform:manage')===true;
+      const enabled=platform||granted.some(item=>item.code===service.code&&item.organisationId===organisationId);
       const pending=item?.state==='open'&&item.stage!=='active';
       return <div className="service-grant-row" key={service.code}>
         <span><strong>{serviceLabel(service.code,lang,service.description)}</strong>
           {service.code==='day_ahead'&&<small>{en?'Country: Bulgaria (BG) · one bidding zone':'Държава: България (BG) · една ценова зона'}</small>}
-          <small>{enabled?en?'Enabled':'Разрешена':item?stages[item.stage]?.[lang]:service.requestable?en?'May be requested':'Може да се заяви':en?'Coming soon':'Предстои'}</small>
+          <small>{!service.requestable?en?'Coming soon':'Предстои':enabled?en?'Enabled':'Разрешена':item?stages[item.stage]?.[lang]:en?'May be requested':'Може да се заяви'}</small>
           {item&&<small>{en?'Requested':'Заявена'}: {new Date(item.createdAt).toLocaleString(en?'en-GB':'bg-BG')}</small>}
           {item?.events.length&&<details><summary>{en?'Request history':'История на заявката'}</summary>
             <ul>{item.events.map((event,index)=><li key={`${event.at}-${index}`}>
               {eventLabels[event.action]?.[lang]||event.action} · {new Date(event.at).toLocaleString(en?'en-GB':'bg-BG')}{event.note?` · ${event.note}`:''}
             </li>)}</ul></details>}
         </span>
+        {enabled&&service.requestable&&<a className="secondary-btn" href={sectionHref(service.code==='day_ahead'?'market':'visualisations')}>{en?'Open':'Отвори'} →</a>}
         {service.requestable&&!enabled&&!pending&&organisationId&&<button type="button" className="secondary-btn" disabled={Boolean(busy)}
           onClick={()=>void request(service.code)}>{busy===service.code?en?'Sending…':'Изпращане…':en?'Request':'Заяви'}</button>}
       </div>;

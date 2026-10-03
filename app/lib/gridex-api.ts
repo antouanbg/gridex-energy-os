@@ -468,6 +468,9 @@ export class GridexApiClient {
   myServices(signal?: AbortSignal): Promise<{services:{code:string;organisationId:string}[]}> {
     return this.getJson('/api/v1/me/services', signal);
   }
+  navigation(signal?:AbortSignal):Promise<{realm:string;subject:string;items:{id:string;parentId:string|null;path:string;labelKey:string;sortOrder:number;state:string;visible:boolean}[]}> {
+    return this.getJson('/api/v1/me/navigation',signal);
+  }
   siteVisualisationHistory(siteId:string,signal?:AbortSignal):Promise<SiteVisualisationHistory> {
     return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/visualisations/history`,signal);
   }

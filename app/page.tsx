@@ -3,27 +3,25 @@
 import { lazy, Suspense, useEffect, useMemo, useState, useRef, type FormEvent } from "react";
 import { discoverGridexLoginRealms, requestInvitationResend, getGridexRuntimeConfig, GridexApiClient, GridexApiError, type GridexRuntimeConfig, type GridexSite, type GridexSiteSnapshot, type GridexUser } from "./lib/gridex-api";
 import { getGridexAccessToken, gridexLoginForEmail, gridexLogout, initialiseGridexAuth, hasGridexAuthCallback, pendingGridexLogin, GridexSessionExpiredError, type GridexAuthSession } from "./lib/gridex-auth";
-import { useT, type MessageKey, type UiLanguage } from "./i18n/messages";
+import { type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
 import { ProfileHelp } from './sections/profile-help';
 import { ServiceCatalog } from './sections/service-catalog';
 import { documentationLink } from './lib/documentation';
 import { readRoute, sectionHref } from './lib/routes';
+import {navItems,parentSection,navigationLabel,ancestors} from './lib/navigation';
+import {useEnergyInventory,EnergyInventoryView} from './sections/energy-inventory';
+import {InfrastructureCatalogue} from './sections/infrastructure-catalogue';
+import {useNavigation} from './lib/use-navigation';
+import {translate} from './i18n/catalog';
 import { forgetSession, releaseId, previousRelease } from './lib/session-policy';
 import {clearGridexLoginIntent,clearGridexSession,logoutSignalKey} from './lib/gridex-auth';
 import type { BatteryCostSettings, DataMode } from "./sections/types";
 
-const navItems = [
-  ["overview", "⌂"], ["customers", "◎"], ["members", "♙"], ["sites", "◇"], ["assets", "▦"], ["battery", "▣"], ["loads", "ϟ"],
-  ["market", "↗"], ["settlement", "¤"], ["balance", "≋"], ["automation", "⌘"], ["schedule", "▤"],
-  ["devices", "⊞"], ["supported", "✓"], ["alarms", "△"],
-  ["reports", "▥"], ["settings", "⚙"], ["plans", "★"], ["about", "○"],
-] as const;
-const parentSection:Record<string,string>={members:'customers',assets:'sites',battery:'sites',loads:'sites',visualisations:'sites',settlement:'market',balance:'market',schedule:'automation',supported:'devices',plans:'settings'};
 
 const mobilePrimaryNav = new Set(["overview", "battery", "market", "automation"]);
-const liveViews = new Set(["overview", "sites", "devices", "visualisations", "members", "market", "profile", "login", "about", "help"]);
+const liveViews = new Set(["overview", "sites", "devices", "visualisations", "members", "market", "profile", "login", "about", "help","services","weather","forecast","reports","modes","settings","market-settings","assets","battery","inverter","evse","loads"]);
 
 function showDemoAfterExpiredSession() {
   forgetSession();
@@ -108,7 +106,6 @@ const SupportedDevices = lazy(() => import("./sections/supported").then(module =
 const Devices = lazy(() => import("./sections/devices").then(module => ({ default: module.Devices })));
 const Alarms = lazy(() => import("./sections/alarms").then(module => ({ default: module.Alarms })));
 const ReportsCenter = lazy(() => import("./sections/reports").then(module => ({ default: module.ReportsCenter })));
-const SettingsHub = lazy(() => import("./sections/settings").then(module => ({ default: module.SettingsHub })));
 const SubscriptionPlans = lazy(() => import("./sections/plans").then(module => ({ default: module.SubscriptionPlans })));
 const About = lazy(() => import("./sections/about").then(module => ({ default: module.About })));
 
@@ -159,7 +156,6 @@ export default function Home() {
   const [lang,setLang] = useState<"bg"|"en">(
     () => typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "bg",
   );
-  const tKey = useT(lang);
   useEffect(()=>{
     if(window.location.pathname.startsWith('/en'))return;
     // Client-only preference is read after hydration to preserve the server HTML.
@@ -174,6 +170,7 @@ export default function Home() {
   const [sessionUser,setSessionUser] = useState<DemoUser|null>(null);
   const [accountIdentity,setAccountIdentity] = useState<GridexUser|null>(null);
   const [enabledServices,setEnabledServices] = useState<{subject:string;codes:string[]}|null>(null);
+  const [serviceCheckFailed,setServiceCheckFailed] = useState(false);
   const [accountMenuOpen,setAccountMenuOpen] = useState(false);
   const [backendState, setBackendState] = useState<BackendState>(
     () => runtimeConfig.mode === "demo" ? "demo" : "checking",
@@ -193,12 +190,16 @@ export default function Home() {
   const [liveSnapshot,setLiveSnapshot] = useState<GridexSiteSnapshot|null>(null);
   // Demo is only for confirmed anonymous visitors, never an API-error fallback.
   const dataMode:DataMode = runtimeConfig.mode === 'demo' ? 'demo' : 'live';
+  const navigation=useNavigation(apiClient,accountIdentity?.realm||'',accountIdentity?.subject||'',dataMode==='live'&&authState==='authenticated'&&backendState==='online');
+  const renderedNav=dataMode==='demo'?navItems:[...navItems].filter(([id])=>navigation.result?.items.some(item=>item.id===id&&item.visible)??['overview','profile','help','about'].includes(id)).sort((a,b)=>(navigation.result?.items.find(item=>item.id===a[0])?.sortOrder??0)-(navigation.result?.items.find(item=>item.id===b[0])?.sortOrder??0));
+  const energyInventory=useEnergyInventory(apiClient,liveSites,`${accountIdentity?.realm}:${accountIdentity?.subject}`,dataMode==='live'&&authState==='authenticated'&&backendState==='online'&&sitesStatus==='ready');
   useEffect(()=>{
     if(dataMode!=='live'||authState!=='authenticated'||!accountIdentity){return;}
     const abort=new AbortController();
     apiClient.myServices(abort.signal).then(result=>{
+      if(!abort.signal.aborted)setServiceCheckFailed(false);
       if(!abort.signal.aborted)setEnabledServices({subject:accountIdentity.subject,codes:result.services.map(service=>service.code)});
-    }).catch(()=>{if(!abort.signal.aborted)setEnabledServices({subject:accountIdentity.subject,codes:[]});});
+    }).catch(()=>{if(!abort.signal.aborted){setEnabledServices(null);setServiceCheckFailed(true);}});
     return()=>abort.abort();
   },[apiClient,dataMode,authState,accountIdentity]);
   useEffect(()=>{
@@ -578,7 +579,7 @@ export default function Home() {
   const canManagePeople=accountIdentity?.permissions.includes('platform:manage')===true
     || accountIdentity?.memberships?.some(item=>item.role==='administrator')===true;
   const administrationDenied=dataMode==='live'&&authState==='authenticated'&&!canManagePeople
-    &&(view==='customers'||view==='members');
+    &&['customers','members','plans','market-settings','settlement','balance'].includes(view);
   const platformAdmin=accountIdentity?.permissions.includes('platform:manage')===true;
   const marketEnabled=platformAdmin||(enabledServices!==null
     &&enabledServices.subject===accountIdentity?.subject
@@ -587,7 +588,7 @@ export default function Home() {
     &&enabledServices.subject===accountIdentity?.subject
     &&enabledServices.codes.includes('day_ahead')&&enabledServices.codes.includes('visualisations'));
   const marketDenied=dataMode==='live'&&authState==='authenticated'&&!marketEnabled
-    &&['market','settlement','balance'].includes(view);
+    &&view==='market';
 
   return (
     <main className="app-shell" data-mode={dataMode}>
@@ -596,16 +597,17 @@ export default function Home() {
           <span>GX</span><div>GRIDEX<small>ENERGY OS</small></div>
         </button>
         <nav ref={navigationRef} id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
-          {navItems.map(([id, icon]) => {
+          {renderedNav.map(([id, icon]) => {
             if(id==='members'&&(dataMode!=='live'||!canManagePeople))return null;
-            if(id==='customers'&&dataMode==='live'&&!canManagePeople)return null;
-            if(dataMode==='live'&&['market','settlement','balance'].includes(id)&&!marketEnabled)return null;
+            if(dataMode==='live'&&['plans','market-settings','settlement','balance'].includes(id)&&!canManagePeople)return null;
+            if(dataMode==='live'&&['assets','battery','inverter','evse','loads'].includes(id)
+              &&!energyInventory.items.some(item=>id==='assets'||item.type===id))return null;
             const hasDeviceWarning=dataMode==='live'&&authState==='authenticated'&&backendState==='online'&&deviceWarning?.siteId===selectedSiteId&&deviceWarning.warning;
             const badge=dataMode==='live'?(id==='devices'&&hasDeviceWarning?'!':''):id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";
             const tone=id==="battery"?"amber":id==="automation"?"green":"red";
             const mobilePrimary=mobilePrimaryNav.has(id);
-            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo'||browseAsDemoFromLogin)} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={id==='devices'&&hasDeviceWarning?(lang==='en'?'Devices — heartbeat warning':'Устройства — предупреждение: липсва heartbeat'):tKey(`nav.${id}` as MessageKey)} className={`${view === id ? "active" : ""} ${parentSection[view]===id?'active-parent':''} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''} ${parentSection[id]&&parentSection[navItems[navItems.findIndex(item=>item[0]===id)+1]?.[0]]!==parentSection[id]?'nav-child-last':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
-              <i>{icon}</i><span>{tKey(`nav.${id}` as MessageKey)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
+            return <a key={id} href={sectionHref(id,selectedSiteId,dataMode==='demo'||browseAsDemoFromLogin)} data-view-id={id} data-parent={parentSection[id]} aria-current={view===id?'page':undefined} title={navigationLabel(id,lang)} className={`${view === id ? "active" : ""} ${ancestors(view).includes(id)?'active-parent':''} ${mobilePrimary ? "mobile-primary" : ""} ${parentSection[id]?'nav-child':''} ${parentSection[id]&&parentSection[navItems[navItems.findIndex(item=>item[0]===id)+1]?.[0]]!==parentSection[id]?'nav-child-last':''}`} onClick={event => {if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(id);}}}>
+              <i>{icon}</i><span>{navigationLabel(id,lang)}</span>{badge&&<em className={`nav-badge ${tone}`}>{badge}</em>}
             </a>;
           })}
           <a data-testid="mode-link" href={dataMode==='demo'?liveReturnPath:'/demo/'} onClick={()=>{
@@ -644,8 +646,8 @@ export default function Home() {
           <div>
             <div role="navigation" aria-label={lang==='en'?'Breadcrumb':'Път до страницата'}>
               <h1 className="page-breadcrumb" data-testid="page-title">
-                {parentSection[view]&&<><a href={sectionHref(parentSection[view],selectedSiteId,dataMode==='demo'||browseAsDemoFromLogin)} onClick={event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(parentSection[view]);}}}>{tKey(`nav.${parentSection[view]}` as MessageKey)}</a><span className="breadcrumb-separator" aria-hidden="true">→</span></>}
-                <span aria-current="page">{view==='not-found'?(lang==='en'?'Page not found':'Страницата не е намерена'):view==='help'?(lang==='en'?'Documentation':'Документация'):tKey(`nav.${view}` as MessageKey)}</span>
+                {ancestors(view).map(parent=><span key={parent}><a href={sectionHref(parent,selectedSiteId,dataMode==='demo'||browseAsDemoFromLogin)} onClick={event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();navigate(parent);}}}>{navigationLabel(parent,lang)}</a><span className="breadcrumb-separator" aria-hidden="true">→</span></span>)}
+                <span aria-current="page">{view==='not-found'?(lang==='en'?'Page not found':'Страницата не е намерена'):navigationLabel(view,lang)}</span>
               </h1>
             </div>
             <p className="eyebrow page-site-context" data-testid="page-eyebrow">{dataMode==='live'?(liveSites.find(item=>item.id===selectedSiteId)?.name??'GrideX'):(lang==='bg'?'Соларен парк Изток':site)}</p>
@@ -666,30 +668,36 @@ export default function Home() {
         {integrationError&&dataMode==="live"&&!['profile','help','about','login'].includes(view)&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
+          {dataMode==='live'&&navigation.error&&<section className="integration-warning" role="alert">{translate(lang,'access.unavailable')}</section>}
+          {dataMode==='live'&&serviceCheckFailed&&view==='market'&&<section className="integration-warning" role="alert">{translate(lang,'access.unavailable')}</section>}
           <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:marketDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Service unavailable':'Услугата не е достъпна'}</h2><p>{lang==='en'?'This service has not been enabled for your account.':'Тази услуга не е разрешена за Вашия акаунт.'}</p></section>:administrationDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Administrator access required':'Нужни са администраторски права'}</h2><p>{lang==='en'?'The Users and invitations section is available only to organisation or platform administrators. Your permitted Sites and Devices remain available for viewing.':'Разделът за клиенти и покани е само за администратори на организация или на платформата. Разрешените Ви Обекти и Устройства остават достъпни за преглед.'}</p></section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} allowCreate={view==='sites'} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:marketDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Service unavailable':'Услугата не е достъпна'}</h2><p>{translate(lang,serviceCheckFailed?'access.unavailable':'access.serviceNotGranted')}</p></section>:administrationDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Administrator access required':'Нужни са администраторски права'}</h2><p>{lang==='en'?'The Users and invitations section is available only to organisation or platform administrators. Your permitted Sites and Devices remain available for viewing.':'Разделът за клиенти и покани е само за администратори на организация или на платформата. Разрешените Ви Обекти и Устройства остават достъпни за преглед.'}</p></section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} allowCreate={view==='sites'} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
         {view === "visualisations" && (dataMode==='live'
           ? <SiteVisualisations key={selectedSiteId} api={apiClient} siteId={selectedSiteId} siteName={liveSites.find(item=>item.id===selectedSiteId)?.name||''} lang={lang}/>
           : <section className="card"><h2>{lang==='en'?'Site visualisations':'Визуализации на Обект'}</h2><p>{lang==='en'?'This screen uses real OpenRemote measurements after sign-in.':'Този екран използва реални измервания от OpenRemote след вход.'}</p></section>)}
-        {view === "assets" && (
+        {dataMode==='live'&&['assets','battery','inverter','evse','loads'].includes(view)&&<EnergyInventoryView state={energyInventory} sites={liveSites} view={view} lang={lang}/>}
+        {dataMode==='demo'&&['inverter','evse'].includes(view)&&<Assets navigate={navigate} notify={notify} lang={lang}/>}
+        {view === "assets" && dataMode==='demo' && (
           <Assets navigate={navigate} notify={notify} lang={lang}/>
         )}
-        {view === "battery" && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
+        {view === "battery" && dataMode==='demo' && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "schedule" && <Schedule notify={notify} lang={lang}/>}
         {view === "market" && (dataMode === 'live' ? <LiveMarket api={apiClient} lang={lang} platformAdmin={platformAdmin} grafanaEnabled={grafanaEnabled}/> : <Market lang={lang} notify={notify}/>)}
         {view === "settlement" && <Settlement notify={notify} lang={lang}/>}
         {view === "automation" && <Automation notify={notify} site={site} lang={lang} batteryCost={batteryCost}/>}
-        {view === "loads" && <FlexibleLoads notify={notify} lang={lang}/>}
+        {view === "loads" && dataMode==='demo' && <FlexibleLoads notify={notify} lang={lang}/>}
         {view === "balance" && <Balance notify={notify} lang={lang}/>}
         {view === "supported" && <SupportedDevices lang={lang}/>}
         {view === "devices" && <Devices notify={notify} lang={lang}/>}
         {view === "alarms" && <Alarms notify={notify} lang={lang}/>}
-        {view === "reports" && <ReportsCenter notify={notify} lang={lang} batteryCost={batteryCost}/>}
-        {view === "settings" && <SettingsHub notify={notify} lang={lang} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
+        {view === "reports" && (dataMode==='demo'?<ReportsCenter notify={notify} lang={lang} batteryCost={batteryCost}/>:<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>)}
+        {['weather','forecast'].includes(view)&&<section className="card"><h2>{navigationLabel(view,lang)}</h2><p>{lang==='en'?'Coming soon. This service is not activated by an access grant.':'Предстои. Разрешение за достъп не активира невнедрена услуга.'}</p></section>}
+        {['settings','modes','market-settings'].includes(view)&&<section className="sites-grid">{navItems.filter(([id])=>parentSection[id]===view).filter(([id])=>dataMode==='demo'||!['members','plans','market-settings','settlement','balance'].includes(id)||canManagePeople).map(([id])=><article className="card site-card" key={id}><h2>{navigationLabel(id,lang)}</h2><a className="secondary-btn" href={sectionHref(id,selectedSiteId,dataMode==='demo')} onClick={event=>{if(!event.metaKey&&!event.ctrlKey){event.preventDefault();navigate(id);}}}>{lang==='en'?'Open':'Отвори'} →</a></article>)}</section>}
+        {view==='services'&&(dataMode==='live'?<ServiceCatalog api={apiClient} lang={lang}/>:<section className="sites-grid">{['market','visualisations','reports','weather','forecast'].map(id=><article className="card site-card" key={id}><h2>{navigationLabel(id,lang)}</h2><a href={sectionHref(id,'',true)} className="secondary-btn" onClick={event=>{event.preventDefault();navigate(id);}}>{lang==='en'?'View demo':'Разгледай демо'}</a></article>)}</section>)}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify} api={apiClient} live={dataMode==='live'} email={sessionUser?.email}/>}
         {view === "help" && <ProfileHelp lang={lang} live={dataMode==='live'}/>}
@@ -698,6 +706,7 @@ export default function Home() {
         {view === "members" && dataMode==='live' && authState==='authenticated' && <Invitations key={`${accountIdentity?.realm}:${accountIdentity?.subject}`} api={apiClient} lang={lang} mode="manage" identity={accountIdentity}/>}
         {view === "login" && (loginSuccess?<section className="login-success-screen" role="status"><span aria-hidden="true">✓</span><h2>{lang==='en'?'Sign-in successful':'Входът е успешен'}</h2><p>{lang==='en'?'Opening your overview…':'Отваряме началния екран…'}</p></section>:<LoginPage lang={lang} user={sessionUser} config={runtimeConfig} onSignIn={signIn} onSignOut={signOut} navigate={navigate} backendState={backendState} authState={authState} error={integrationError} customerRealm={runtimeConfig.realm!=="gridex"&&new URLSearchParams(window.location.search).has('realm')}/>)}
             </>}
+            {view==='devices'&&(dataMode==='demo'||backendState==='online')&&<InfrastructureCatalogue lang={lang}/>}
           </div>
         </Suspense>
       </section>
@@ -837,7 +846,6 @@ function UserProfile({lang,user,api,live,navigate,signOut}:{lang:UiLanguage;user
         <button className="profile-action subtle" type="button" onClick={()=>navigate('sites')}>{t('Моите обекти','My Sites')} <span aria-hidden="true">→</span></button>
       </article>
       {live&&<HeartbeatEmailOptIn api={api} lang={lang} helpHref={helpHref}/>}
-      {live&&<ServiceCatalog api={api} lang={lang}/>}
       <article className="card profile-panel profile-session-panel">
         <div className="profile-panel-heading"><div><span className="profile-kicker">04 / {t('СИГУРНОСТ','SECURITY')}</span><h3>{t('Сесия','Session')}</h3></div><a href={`${helpHref}#session`} aria-label={t('Обяснение за сесията','Session explained')}>?</a></div>
         <div className="profile-session-state"><span className="live-dot"/><div><strong>{t('Влезли сте в портала','Signed in to the portal')}</strong><small>{t('Изход прекратява тази сесия в браузъра.','Sign out ends this browser session.')}</small></div></div>

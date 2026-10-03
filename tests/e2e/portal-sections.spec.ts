@@ -6,7 +6,7 @@ test.beforeEach(async({page})=>{
 
 const sections = [
   "overview",
-  "customers",
+  "services",
   "sites",
   "assets",
   "battery",
@@ -16,7 +16,12 @@ const sections = [
   "automation",
   "loads",
   "balance",
-  "supported",
+  "inverter",
+  "evse",
+  "weather",
+  "forecast",
+  "modes",
+  "market-settings",
   "devices",
   "alarms",
   "reports",
@@ -56,7 +61,7 @@ for (const width of phoneWidths) {
   });
 }
 
-test("all 18 sections render through the lazy module boundary", async ({ page }) => {
+test("all approved demo sections render through the lazy module boundary", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("/");

@@ -1,5 +1,43 @@
 # Current task
 
+## 2026-10-03 — owner-approved dynamic matrix and localization
+
+The owner approved database-backed navigation metadata, reusing existing
+service grants and OpenRemote authority. Supersedes the older blanket hold.
+AGENTS now records required navigation, access-state feedback and BG/EN i18n.
+Implementation is IN PROGRESS: no navigation migration applied or live
+release verified. Do not report the old static menus as dynamic.
+Next: versioned schema/seed + authenticated effective-navigation endpoint,
+frontend consumption, denied/unavailable feedback, translation-key parity
+and realm/role/direct-URL/cache-invalidation tests before deployment.
+
+Одобрено е динамично меню от базата с преизползване на правата и OpenRemote.
+Правилата са в AGENTS. Реализацията продължава; миграцията и живото внедряване
+НЕ са потвърдени. Старите бележки за общо изчакване са исторически.
+
+Matrix draft / Чернова: [service, device, role and menu correspondence](docs/FOUNDATIONAL_ACCESS_MATRIX_PROPOSAL.md)
+now includes the owner-selected SmartElectroSystem PDF, page references and EN/BG
+candidate tables. No new service/device is activated. Pending owner approval;
+application implementation remains paused. / Включени са посоченият PDF,
+страници и таблици с кандидати на EN/BG. Няма активирана нова услуга/устройство;
+изчаква одобрение, реализацията остава спряна.
+
+## 2026-10-02 — access matrix is foundational; layout implementation on hold
+
+Latest owner instruction: specify and approve the complete existing-menu/action
+access matrix BEFORE implementing the approved five-column member table.
+Design approval remains valid, but does not authorise unresolved permission rules.
+No application/permission/schema/navigation edits were made before interruption.
+See HANDOFF and AGENTS foundational matrix entry. Next: verify existing guards,
+present unresolved role/Site/service/menu decisions, obtain explicit approval.
+Local documentation only; no release or deployment.
+
+Български: първо пълна матрица за съществуващите менюта/действия и одобрение,
+после одобрената таблица. Матрицата е основополагаща. Дизайнът остава одобрен,
+но не разрешава неуточнени права. Преди прекъсването няма промени на приложението,
+правата, схемата или навигацията. Следва проверка на текущите ограничения и
+представяне на неяснотите за изрично одобрение. Само локален запис, без внедряване.
+
 ## 2026-10-02 — remove in-session account switching
 
 Owner explicitly removed Switch account/user. The account menu now retains

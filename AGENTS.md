@@ -1,5 +1,108 @@
 # GrideX Energy OS — Working Rules
 
+## Approved dynamic navigation, access feedback and i18n — 2026-10-03
+
+This owner-approved contract supersedes older navigation names and the matrix
+implementation hold ONLY within the approved scope. Follow
+`docs/NAVIGATION_CONTRACT_2026_10_03.md` in the frontend repository.
+
+- OpenRemote remains authoritative for identity, inventory and Site access.
+  Reuse PostgreSQL service catalogue, organisation/member grants and requests.
+  Add versioned navigation metadata and requirement references, not a second
+  inventory or independently maintained copy of Site permissions.
+- Backend computes navigation for the verified realm + subject + organisation.
+  Every API action independently enforces permissions. Visibility is not authority.
+  Discard cached access/menu data on logout or identity/organisation change.
+- Distinguish missing permission (denied), pending request, coming soon,
+  missing infrastructure/inventory, and failed/unavailable verification.
+  Explain each to the user in the selected language. Never silently fail,
+  show a blank screen, substitute demo data, or label a database/API outage
+  as a confirmed missing grant. Only offer request/retry actions already approved.
+  No automatic email for every denial is authorised by this instruction.
+- UI labels/help references use stable translation keys; API errors expose
+  stable safe reason codes, not raw SQL, internals or another tenant's data.
+  BG and EN are mandatory in the same change. Use separate locale resources,
+  BCP 47 locale tags and Intl for dates/numbers/units. Add languages through
+  locale registration and matching resources, not binary BG/EN conditionals.
+  Test key parity, fallback, interpolation, formats and both locales.
+  Docusaurus retains its native i18n. Browser machine translation is not a
+  substitute. No new localization SaaS or automatic external translation.
+- Required hierarchy: Overview; Sites; Energy assets (Battery, Inverter,
+  Charging station, Consumer/load); Infrastructure (ONE page); Services
+  (Day-ahead, Graphs, Analysis, Meteorology, Forecasting); Mode (Logic, Schedule,
+  Alarm); Settings (Users, Plan/subscription, Market [Tariff/settlement,
+  Balancing], Profile [Documentation]); About us.
+- Users is ONE administrative page. Personal service requests/approvals are
+  in Services. Admins can grant without a request. Organisation grant alone
+  never grants all members. Super admin has no self-approval requirement.
+  Preserve approved five-column member register and mobile detail expansion.
+  Do not invent unresolved tariff fields, balancing/alarm write permissions.
+- Migrations, seeds, tests and BG/EN documentation are versioned in Git.
+  Record source-ready, published, migrated, deployed and verified separately.
+
+Български: това е одобреното правило, не доказателство за внедряване.
+Менюто се изчислява от backend за проверения потребител и организация;
+OpenRemote остава източник за самоличност, инвентар и достъп до Обекти.
+PostgreSQL пази каталога/разрешенията за услуги и версионираната структура
+на менюто. Не създавай втори регистър на инвентара или дублирани права.
+При липсващо право уведомявай в интерфейса; при непроверим достъп съобщавай
+„Не успяхме да проверим достъпа“, не „Нямате права“. Отказ, чакаща заявка,
+предстояща услуга и липсваща инфраструктура са различни състояния.
+Не добавяй автоматични имейли за всеки отказ. Всички нови текстове са
+в общ i18n каталог с BG/EN ключове; нов език се добавя с ресурси и регистрация.
+Датите, числата и единиците използват Intl; Docusaurus пази собствената си i18n.
+Разделите са точно по одобрения договор: Преглед; Обекти; Енергийни активи;
+Инфраструктура; Услуги; Режим; Настройки; За нас. „Настройки → Потребители“
+управлява организациите/хората/поканите/Обектите/услугите. Личните заявки са
+в „Услуги“. Всяко отклонение по логика/екрани изисква ново одобрение.
+
+
+## Owner-approved navigation implementation — 2026-10-03
+
+The owner now authorises implementing the revised hierarchy and established
+member/service/Site workflows. Follow `docs/NAVIGATION_CONTRACT_2026_10_03.md`;
+it supersedes older menu names/grouping and the blanket implementation hold.
+Unresolved permissions and unimplemented integrations remain gated. Approval of
+this reorganisation is not approval to invent financial forms, drivers or grants.
+
+Собственикът разреши реализацията на новата структура и уточнените процеси.
+Водещ е `docs/NAVIGATION_CONTRACT_2026_10_03.md`, който заменя старите имена/
+групиране и общото изчакване. Неуточнените права/интеграции остават ограничени.
+Не измисляй финансови форми, драйвери или разрешения.
+
+## Foundational access matrix / Основополагаща матрица на достъпа — 2026-10-02
+
+Latest owner decision supersedes the earlier instruction to implement the approved
+member-table layout immediately: pause that implementation until the complete
+access matrix is specified and explicitly approved. The matrix is the foundational
+contract for signed-in rendering and backend authorisation, not a decorative UI
+table. Map each EXISTING menu/submenu and action to the verified identity,
+organisation, membership role, OpenRemote Site scope, organisation service/zone
+grant and individual service grant. Distinguish menu visibility, read access and
+write actions, including denied, pending and unavailable prerequisites. Displaying
+a control is never a grant; hiding it never substitutes for backend enforcement.
+Do not invent menu items to describe actions: commissioning is NOT an approved
+navigation section. Keep the approved common design and five columns (name/email,
+role, Sites, services, actions), with permissions/menu details collapsed and mobile
+reflow, as the visual reference; approval of that design does not approve an
+unfinished permission matrix. First inventory existing behaviour and unresolved
+choices, obtain owner approval of the matrix, then implement the approved screens
+against it with role-specific tests and matching BG/EN documentation.
+
+Последното решение на собственика отменя незабавното внедряване на одобрената
+таблица: реализацията изчаква пълна спецификация и изрично одобрение на матрицата.
+Тя е ОСНОВОПОЛАГАЩ договор за визуализация след вход и backend защита, не само
+таблица в интерфейса. За всеки СЪЩЕСТВУВАЩ раздел/подраздел и действие посочи
+проверените самоличност, организация, роля, OpenRemote Обекти, организационно
+право за услуга/зона и лично право за услуга. Разграничавай видимост, четене и
+промяна, включително отказ, чакащи и непроверени предпоставки. Видим бутон не
+дава право; скрит бутон не замества backend проверка. Не измисляй меню за действие:
+„Комисиониране“ НЕ е одобрен раздел. Одобреният общ дизайн и петте колони
+(име/имейл, роля, Обекти, услуги, действия), разгъването на права/менюта и мобилното
+оформление остават визуален образец, но не одобряват непълна матрица. Първо опиши
+реалното поведение и неяснотите, получи одобрение на матрицата, после внедри
+екраните точно по нея с тестове по роли и съответстваща BG/EN документация.
+
 ## Account changes require logout / Друг акаунт само след изход — 2026-10-02
 
 Owner removed Switch account/user from the portal. Do not restore an
