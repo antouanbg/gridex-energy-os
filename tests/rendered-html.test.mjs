@@ -202,7 +202,7 @@ test("loads the approved portal sections through split frontend modules", async 
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const lazyImports = page.match(/lazy\(\(\) => import\(["']\.\/sections\//g) ?? [];
 
-  assert.equal(lazyImports.length, 22);
+  assert.equal(lazyImports.length, 21);
   assert.match(page, /sections\/live-sites/);
   assert.match(page, /sections\/live-market/);
   assert.match(page, /Suspense/);

@@ -1,4 +1,5 @@
 // Every section has a stable URL. Site identifiers are context, never authority.
+import catalogue from './navigation-catalog.json' with {type:'json'};
 export const legacyPaths: Record<string, string> = {
   overview: '/', customers: '/customers/', members: '/customers/users/', sites: '/sites/', assets: '/assets/',
   visualisations: '/visualisations/',
@@ -9,12 +10,8 @@ export const legacyPaths: Record<string, string> = {
   plans: '/settings/subscription/', about: '/about/', profile: '/profile/', login: '/login/', help: '/help/',
 };
 export const sectionPaths: Record<string,string>={...legacyPaths,
-  members:'/settings/users/',customers:'/settings/users/',profile:'/settings/profile/',help:'/settings/profile/documentation/',
-  services:'/services/',market:'/services/day-ahead/',visualisations:'/services/visualisations/',reports:'/services/analysis/',
-  weather:'/services/weather/',forecast:'/services/forecast/',devices:'/infrastructure/',supported:'/infrastructure/catalogue/',
-  battery:'/assets/battery/',inverter:'/assets/inverter/',evse:'/assets/charging-station/',loads:'/assets/loads/',
-  modes:'/mode/',automation:'/mode/logic/',schedule:'/mode/schedule/',alarms:'/mode/alarm/',
-  'market-settings':'/settings/market/',settlement:'/settings/market/tariff/',balance:'/settings/market/balancing/'};
+  ...Object.fromEntries(catalogue.map(row=>[row.id,row.path])),
+  customers:'/settings/users/',supported:'/infrastructure/catalogue/'};
 const siteViews = new Set(['assets', 'battery','inverter','evse', 'schedule', 'automation', 'loads', 'devices', 'visualisations']);
 export function sectionHref(view: string, siteId = '', demo = false): string {
   const path = sectionPaths[view === 'gateway' ? 'devices' : view] || '/';

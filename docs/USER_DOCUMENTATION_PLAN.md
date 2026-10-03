@@ -1,5 +1,11 @@
 # User documentation coverage / Покритие на потребителската документация
 
+2026-10-04: Demo guide /demo-navigation/ and /en/demo-navigation/ covers all
+27 database menu entries, category separation and demo/live boundaries.
+Every Demo page links to it. Public metadata snapshot is verified by
+scripts/check-navigation-catalog.mjs before release; no personal data exported.
+БГ: обща помощ за всички демо раздели, съпоставени с базата, без клиентски данни.
+
 2026-10-02: the BG/EN organisations guide is updated for the approved
 member editor, separate tabs, visible catalogue without grants, organisation
 request/cancellation, immediate individual grants and queued-versus-delivered

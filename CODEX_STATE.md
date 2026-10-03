@@ -1,5 +1,35 @@
 # Current task
 
+## 2026-10-04 — demo follows database matrix / Демо по базата
+
+Owner explicitly requested every Demo page to follow the approved database
+order/matrix. Source: current Phase3 decisions and navigation_catalog revision 1,
+27 public metadata rows, read-only checked. No new permissions or backend writes.
+app/lib/navigation-catalog.json is a versioned public presentation snapshot:
+no users, organisations, grants or inventory. check-navigation-catalog.mjs must
+match the database before release; updating the DB alone does not update the
+static public demo until the snapshot is reviewed and the frontend republished.
+Routes, order, parents and demo landing links share this catalogue.
+Separated inverter/charger lists; meters and connectivity stay in Infrastructure;
+sample charts move to Services. Sites show sample assets/infrastructure/services.
+Users in Demo is explanatory only, never a real invitation or grant form.
+BG/EN guide: /demo-navigation/. Verified: 27 DB rows match; 86 browser tests,
+29 unit/render tests, TypeScript and lint pass (4 existing image warnings).
+Docs BG/EN build and local proxy checks pass. Release pending GitHub checks.
+Do not infer completed live modules from this demo work.
+Regression discoveries: legacy Demo hid Users while the landing card linked to
+it; now shows its explanatory screen. Test JSON imports require type attributes.
+First typecheck caught obsolete demo comparisons in the live-only branch; fixed.
+Regression coverage: all 27 pages x BG/EN x mobile/desktop, hierarchy/links/help,
+no private API calls or page errors. Corrected balancing-card desktop overflow,
+duplicate infrastructure catalogue and stale 26-entry mobile test expectation.
+The CommonJS render test loader now supports the JSON catalogue import.
+БГ: одобрена е корекция на всички демо страници по каталога на базата.
+Публичното копие съдържа само структура; няма клиентски данни или права.
+Подредбата и адресите са общи, а всяка страница има БГ/EN помощ.
+Незавършените реални услуги остават означени, без измислени интеграции.
+Промяна в базата изисква сверяване на копието и нова публикация на демото.
+
 ## Current release — 2026-10-03 / Текущо внедряване
 
 Supersedes earlier “not deployed” notes below. Approved three-role Users screens

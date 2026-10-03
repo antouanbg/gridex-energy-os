@@ -13,6 +13,7 @@ import { readRoute, sectionHref } from './lib/routes';
 import {navItems,parentSection,navigationLabel,ancestors} from './lib/navigation';
 import {useEnergyInventory,EnergyInventoryView} from './sections/energy-inventory';
 import {InfrastructureCatalogue} from './sections/infrastructure-catalogue';
+import {DemoAssetInventory,DemoInfrastructure,DemoSectionLinks} from './sections/demo-inventory';
 import {useNavigation} from './lib/use-navigation';
 import {translate} from './i18n/catalog';
 import { forgetSession, releaseId, previousRelease } from './lib/session-policy';
@@ -93,7 +94,6 @@ const Customers = lazy(() => import("./sections/customers").then(module => ({ de
 const Sites = lazy(() => import("./sections/sites").then(module => ({ default: module.Sites })));
 const LiveSites = lazy(() => import("./sections/live-sites").then(module => ({ default: module.LiveSites })));
 const SiteVisualisations = lazy(() => import("./sections/site-visualisations").then(module => ({ default: module.SiteVisualisations })));
-const Assets = lazy(() => import("./sections/assets").then(module => ({ default: module.Assets })));
 const Battery = lazy(() => import("./sections/battery").then(module => ({ default: module.Battery })));
 const Schedule = lazy(() => import("./sections/schedule").then(module => ({ default: module.Schedule })));
 const Market = lazy(() => import("./sections/market").then(module => ({ default: module.Market })));
@@ -574,7 +574,7 @@ export default function Home() {
     }
   };
 
-  const pageDocumentation = documentationLink(view, lang);
+  const pageDocumentation = dataMode==='demo'?documentationLink('demo',lang):documentationLink(view, lang);
   const documentationHome = documentationLink('help', lang).href;
   const canManagePeople=accountIdentity?.permissions.includes('platform:manage')===true
     || accountIdentity?.memberships?.some(item=>item.role==='administrator')===true;
@@ -598,7 +598,7 @@ export default function Home() {
         </button>
         <nav ref={navigationRef} id="main-navigation" aria-label={lang==="en"?"Main navigation":"Основна навигация"}>
           {renderedNav.map(([id, icon]) => {
-            if(id==='members'&&(dataMode!=='live'||!canManagePeople))return null;
+            if(id==='members'&&dataMode==='live'&&!canManagePeople)return null;
             if(dataMode==='live'&&['plans','market-settings','settlement','balance'].includes(id)&&!canManagePeople)return null;
             if(dataMode==='live'&&!browseAsDemoFromLogin&&['assets','battery','inverter','evse','loads'].includes(id)
               &&!energyInventory.items.some(item=>id==='assets'||item.type===id))return null;
@@ -678,11 +678,11 @@ export default function Home() {
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
         {view === "visualisations" && (dataMode==='live'
           ? <SiteVisualisations key={selectedSiteId} api={apiClient} siteId={selectedSiteId} siteName={liveSites.find(item=>item.id===selectedSiteId)?.name||''} lang={lang}/>
-          : <section className="card"><h2>{lang==='en'?'Site visualisations':'Визуализации на Обект'}</h2><p>{lang==='en'?'This screen uses real OpenRemote measurements after sign-in.':'Този екран използва реални измервания от OpenRemote след вход.'}</p></section>)}
+          : <><p>{translate(lang,'demo.graphNote')}</p><Devices notify={notify} lang={lang} historyOnly/></>)}
         {dataMode==='live'&&['assets','battery','inverter','evse','loads'].includes(view)&&<EnergyInventoryView state={energyInventory} sites={liveSites} view={view} lang={lang}/>}
-        {dataMode==='demo'&&['inverter','evse'].includes(view)&&<Assets navigate={navigate} notify={notify} lang={lang}/>}
+        {dataMode==='demo'&&['inverter','evse'].includes(view)&&<DemoAssetInventory view={view} lang={lang}/>}
         {view === "assets" && dataMode==='demo' && (
-          <Assets navigate={navigate} notify={notify} lang={lang}/>
+          <DemoAssetInventory lang={lang}/>
         )}
         {view === "battery" && dataMode==='demo' && <Battery auto={auto} setAuto={setAuto} notify={notify} lang={lang} resolveNotice={()=>setBatteryNotice(false)} batteryCost={batteryCost} setBatteryCost={setBatteryCost}/>}
         {view === "schedule" && <Schedule notify={notify} lang={lang}/>}
@@ -692,12 +692,13 @@ export default function Home() {
         {view === "loads" && dataMode==='demo' && <FlexibleLoads notify={notify} lang={lang}/>}
         {view === "balance" && <Balance notify={notify} lang={lang}/>}
         {view === "supported" && <SupportedDevices lang={lang}/>}
-        {view === "devices" && <Devices notify={notify} lang={lang}/>}
+        {view === "devices" && <DemoInfrastructure lang={lang}/>}
         {view === "alarms" && <Alarms notify={notify} lang={lang}/>}
         {view === "reports" && (dataMode==='demo'?<ReportsCenter notify={notify} lang={lang} batteryCost={batteryCost}/>:<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>)}
         {['weather','forecast'].includes(view)&&<section className="card"><h2>{navigationLabel(view,lang)}</h2><p>{lang==='en'?'Coming soon. This service is not activated by an access grant.':'Предстои. Разрешение за достъп не активира невнедрена услуга.'}</p></section>}
-        {['settings','modes','market-settings'].includes(view)&&<section className="sites-grid">{navItems.filter(([id])=>parentSection[id]===view).filter(([id])=>dataMode==='demo'||!['members','plans','market-settings','settlement','balance'].includes(id)||canManagePeople).map(([id])=><article className="card site-card" key={id}><h2>{navigationLabel(id,lang)}</h2><a className="secondary-btn" href={sectionHref(id,selectedSiteId,dataMode==='demo')} onClick={event=>{if(!event.metaKey&&!event.ctrlKey){event.preventDefault();navigate(id);}}}>{lang==='en'?'Open':'Отвори'} →</a></article>)}</section>}
-        {view==='services'&&(dataMode==='live'?<ServiceCatalog api={apiClient} lang={lang}/>:<section className="sites-grid">{['market','visualisations','reports','weather','forecast'].map(id=><article className="card site-card" key={id}><h2>{navigationLabel(id,lang)}</h2><a href={sectionHref(id,'',true)} className="secondary-btn" onClick={event=>{event.preventDefault();navigate(id);}}>{lang==='en'?'View demo':'Разгледай демо'}</a></article>)}</section>)}
+        {['settings','modes','market-settings'].includes(view)&&dataMode==='demo'&&<DemoSectionLinks view={view} lang={lang}/>}
+        {['settings','modes','market-settings'].includes(view)&&dataMode==='live'&&<section className="sites-grid">{navItems.filter(([id])=>parentSection[id]===view).filter(([id])=>!['members','plans','market-settings','settlement','balance'].includes(id)||canManagePeople).map(([id])=><article className="card site-card" key={id}><h2>{navigationLabel(id,lang)}</h2><a className="secondary-btn" href={sectionHref(id,selectedSiteId,false)} onClick={event=>{if(!event.metaKey&&!event.ctrlKey){event.preventDefault();navigate(id);}}}>{lang==='en'?'Open':'Отвори'} →</a></article>)}</section>}
+        {view==='services'&&(dataMode==='live'?<ServiceCatalog api={apiClient} lang={lang}/>:<DemoSectionLinks view="services" lang={lang}/>)}
         {view === "plans" && <SubscriptionPlans notify={notify} lang={lang}/>}
         {view === "about" && <About lang={lang} notify={notify} api={apiClient} live={dataMode==='live'} email={sessionUser?.email}/>}
         {view === "help" && <ProfileHelp lang={lang} live={dataMode==='live'}/>}
