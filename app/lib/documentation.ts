@@ -3,6 +3,7 @@ import type { UiLanguage } from '../i18n/messages';
 const DOCS_ORIGIN = 'https://doc.gridex.tech';
 const readyGuides: Record<string, string> = {
   help: '/',
+  demo: '/demo-navigation/',
   login: '/organisations-and-access/',
   members: '/organisations-and-access/',
   visualisations: '/organisations-and-access/#site-visualisations',

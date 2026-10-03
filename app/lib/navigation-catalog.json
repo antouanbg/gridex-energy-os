@@ -1,0 +1,245 @@
+[
+  {
+    "id": "overview",
+    "parent_id": null,
+    "path": "/",
+    "label_key": "nav.overview",
+    "sort_order": 0,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "sites",
+    "parent_id": null,
+    "path": "/sites/",
+    "label_key": "nav.sites",
+    "sort_order": 1,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "assets",
+    "parent_id": null,
+    "path": "/assets/",
+    "label_key": "nav.assets",
+    "sort_order": 2,
+    "requirement": "inventory",
+    "revision": 1
+  },
+  {
+    "id": "battery",
+    "parent_id": "assets",
+    "path": "/assets/battery/",
+    "label_key": "nav.battery",
+    "sort_order": 3,
+    "requirement": "inventory",
+    "revision": 1
+  },
+  {
+    "id": "inverter",
+    "parent_id": "assets",
+    "path": "/assets/inverter/",
+    "label_key": "nav.inverter",
+    "sort_order": 4,
+    "requirement": "inventory",
+    "revision": 1
+  },
+  {
+    "id": "evse",
+    "parent_id": "assets",
+    "path": "/assets/charging-station/",
+    "label_key": "nav.evse",
+    "sort_order": 5,
+    "requirement": "inventory",
+    "revision": 1
+  },
+  {
+    "id": "loads",
+    "parent_id": "assets",
+    "path": "/assets/loads/",
+    "label_key": "nav.loads",
+    "sort_order": 6,
+    "requirement": "inventory",
+    "revision": 1
+  },
+  {
+    "id": "devices",
+    "parent_id": null,
+    "path": "/infrastructure/",
+    "label_key": "nav.devices",
+    "sort_order": 7,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "services",
+    "parent_id": null,
+    "path": "/services/",
+    "label_key": "nav.services",
+    "sort_order": 8,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "market",
+    "parent_id": "services",
+    "path": "/services/day-ahead/",
+    "label_key": "nav.market",
+    "sort_order": 9,
+    "requirement": "service",
+    "revision": 1
+  },
+  {
+    "id": "visualisations",
+    "parent_id": "services",
+    "path": "/services/visualisations/",
+    "label_key": "nav.visualisations",
+    "sort_order": 10,
+    "requirement": "service",
+    "revision": 1
+  },
+  {
+    "id": "reports",
+    "parent_id": "services",
+    "path": "/services/analysis/",
+    "label_key": "nav.reports",
+    "sort_order": 11,
+    "requirement": "coming_soon",
+    "revision": 1
+  },
+  {
+    "id": "weather",
+    "parent_id": "services",
+    "path": "/services/weather/",
+    "label_key": "nav.weather",
+    "sort_order": 12,
+    "requirement": "coming_soon",
+    "revision": 1
+  },
+  {
+    "id": "forecast",
+    "parent_id": "services",
+    "path": "/services/forecast/",
+    "label_key": "nav.forecast",
+    "sort_order": 13,
+    "requirement": "coming_soon",
+    "revision": 1
+  },
+  {
+    "id": "modes",
+    "parent_id": null,
+    "path": "/mode/",
+    "label_key": "nav.modes",
+    "sort_order": 14,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "automation",
+    "parent_id": "modes",
+    "path": "/mode/logic/",
+    "label_key": "nav.automation",
+    "sort_order": 15,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "schedule",
+    "parent_id": "modes",
+    "path": "/mode/schedule/",
+    "label_key": "nav.schedule",
+    "sort_order": 16,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "alarms",
+    "parent_id": "modes",
+    "path": "/mode/alarm/",
+    "label_key": "nav.alarms",
+    "sort_order": 17,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "settings",
+    "parent_id": null,
+    "path": "/settings/",
+    "label_key": "nav.settings",
+    "sort_order": 18,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "members",
+    "parent_id": "settings",
+    "path": "/settings/users/",
+    "label_key": "nav.members",
+    "sort_order": 19,
+    "requirement": "admin",
+    "revision": 1
+  },
+  {
+    "id": "plans",
+    "parent_id": "settings",
+    "path": "/settings/subscription/",
+    "label_key": "nav.plans",
+    "sort_order": 20,
+    "requirement": "admin",
+    "revision": 1
+  },
+  {
+    "id": "market-settings",
+    "parent_id": "settings",
+    "path": "/settings/market/",
+    "label_key": "nav.market-settings",
+    "sort_order": 21,
+    "requirement": "admin",
+    "revision": 1
+  },
+  {
+    "id": "settlement",
+    "parent_id": "market-settings",
+    "path": "/settings/market/tariff/",
+    "label_key": "nav.settlement",
+    "sort_order": 22,
+    "requirement": "admin",
+    "revision": 1
+  },
+  {
+    "id": "balance",
+    "parent_id": "market-settings",
+    "path": "/settings/market/balancing/",
+    "label_key": "nav.balance",
+    "sort_order": 23,
+    "requirement": "admin",
+    "revision": 1
+  },
+  {
+    "id": "profile",
+    "parent_id": "settings",
+    "path": "/settings/profile/",
+    "label_key": "nav.profile",
+    "sort_order": 24,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "help",
+    "parent_id": "profile",
+    "path": "/settings/profile/documentation/",
+    "label_key": "nav.help",
+    "sort_order": 25,
+    "requirement": "public",
+    "revision": 1
+  },
+  {
+    "id": "about",
+    "parent_id": null,
+    "path": "/about/",
+    "label_key": "nav.about",
+    "sort_order": 26,
+    "requirement": "public",
+    "revision": 1
+  }
+]

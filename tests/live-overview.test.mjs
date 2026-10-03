@@ -16,6 +16,7 @@ function load(file) {
     if (name === './shared') return load('../app/sections/shared.tsx');
     if (name === '../lib/currency') return load('../app/lib/currency.ts');
     if (name === '../lib/routes') return load('../app/lib/routes.ts');
+    if (name === './navigation-catalog.json') return {default:JSON.parse(fs.readFileSync(new URL('../app/lib/navigation-catalog.json',import.meta.url),'utf8'))};
     return require(name);
   });
   return exports;

@@ -69,6 +69,14 @@
   .device-access textarea { min-height:150px; resize:vertical; font-family:monospace; }
   .device-access .primary-btn { justify-self:start; }
 }
+
+/* Demo matrix: eligibility descriptions must not overflow the narrow side column. */
+.app-shell[data-mode="demo"] .energy-register { margin:14px 0; }
+.app-shell[data-mode="demo"] .energy-register>p { margin:12px 0; line-height:1.6; color:#61766d; }
+.app-shell[data-mode="demo"] .infrastructure-catalogue { padding:21px; margin:14px 0; }
+.app-shell[data-mode="demo"] .infrastructure-catalogue summary { cursor:pointer; font-weight:700; }
+.app-shell[data-mode="demo"] .balancing-policy .eligibility-checks { grid-column:1 / -1; min-width:0; }
+.app-shell[data-mode="demo"] .eligibility-checks .check-row { min-width:0; overflow-wrap:anywhere; }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--cream); color:var(--ink); font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.45; }
 button { font:inherit; }
