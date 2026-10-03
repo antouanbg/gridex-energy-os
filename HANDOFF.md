@@ -1,4 +1,22 @@
 # Frontend login handoff
+
+## Current release — 2026-10-03 / Текущо внедряване
+
+Supersedes earlier “not deployed” notes below. Approved three-role Users screens
+merged in energy-os PR #105 (52321e6); Pages deployment 37151980982 succeeded.
+Public https://gridex.tech/release.json confirmed the exact merge SHA.
+Backend PR #98 (160191f) deployed API-only with backup, healthy; no new migration.
+82 browser tests, 29 frontend tests, typecheck/build, and GitHub CI passed.
+API: 148 pass/1 skip. Read-only live probe confirms both organisations,
+five-service catalogue, member counts 1/2, OpenRemote links and realm denial.
+No real grants or emails changed in tests. Real-account acceptance is pending.
+Regression: server-render test counted only double-quoted lazy imports and an
+obsolete count; corrected to both quote styles and the 22 current modules.
+Mobile access error now has icon/text grid cells instead of a narrow text cell.
+Canonical BG/EN docs: /approved-users-screens/ and /en/approved-users-screens/.
+БГ: одобрените екрани и личното Отмени/Спри са публикувани. Обектите, услугите
+и ролите остават отделни права. Публикуването е проверено; тестът с реалните
+три акаунта не се представя като вече приключен.
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## 2026-10-03 — three Users screens approved / три одобрени екрана
