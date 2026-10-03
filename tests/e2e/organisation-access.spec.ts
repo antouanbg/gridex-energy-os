@@ -26,6 +26,30 @@ async function session(page:Page,platform:boolean, state:{suspended:boolean;stat
   });
 }
 const initial=()=>({suspended:false,status:'active',revision:0,mailState:'',operationId:null as string|null,writes:0});
+
+test('approved platform layout shares organisation selection with read-only roster',async({page},info)=>{
+  await session(page,true,initial());
+  const first='11111111-1111-4111-8111-111111111111',second='22222222-2222-4222-8222-222222222222';
+  await page.route('https://api.example.invalid/api/v1/platform/organisations',r=>r.fulfill({json:{organisations:[first,second].map((id,i)=>({id,name:'Organisation '+(i+1),realm:'org'+i,status:'active',revision:0}))}}));
+  await page.route('**/platform/organisations/*/members*',r=>{
+    const id=new URL(r.request().url()).pathname.split('/')[5];
+    return r.fulfill({json:{members:[{subject:id,email:(id===first?'first':'second')+'@example.com',firstName:'Test',lastName:id===first?'First':'Second',role:'viewer',allSites:false,siteIds:[],verifiedSiteIds:[],services:[]}],sites:[],nextOffset:null,total:1}});
+  });
+  await page.goto('/settings/users/');
+  const sections=['.admin-organisation-choice','.platform-service-workspace>.service-grants','.platform-service-workspace>[aria-label="Заявки за услуги"]','.platform-service-workspace>.organisation-members','.invitation-platform','.platform-invitation-history'];
+  const positions=[];
+  for(const selector of sections){await expect(page.locator(selector)).toBeVisible();positions.push((await page.locator(selector).boundingBox())!.y);}
+  expect(positions).toEqual([...positions].sort((a,b)=>a-b));
+  await expect(page.locator('.member-register')).toContainText('first@example.com');
+  await page.locator('.admin-organisation-choice select').selectOption(second);
+  await expect(page.locator('.member-register')).toContainText('second@example.com');
+  await expect(page.locator('.member-register')).not.toContainText('first@example.com');
+  await expect(page.locator('.member-register th')).toHaveCount(5);
+  await page.screenshot({path:info.outputPath('approved-platform-desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('approved-platform-mobile.png'),fullPage:true});
+});
 for(const en of [false,true]) {
   test(`platform suspend, delivery and restore ${en?'EN':'BG'}`,async({page},info)=>{
     if(en)await page.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
