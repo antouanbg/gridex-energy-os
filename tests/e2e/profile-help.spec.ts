@@ -22,7 +22,8 @@ test('profile explains and persists email preference; help is reachable on deskt
       }
       return route.fulfill({json:{enabled,email:'owner@example.com',scope:'all_events'}});
     }
-    if(path.endsWith('/me'))return route.fulfill({json:{subject:'owner',email:'owner@example.com',name:'Owner',roles:['administrator'],permissions:[],memberships:[]}});
+    if(path.endsWith('/me'))return route.fulfill({json:{subject:'owner',realm:'gridex',email:'owner@example.com',name:'Owner',roles:['administrator'],permissions:[],memberships:[]}});
+    if(path.endsWith('/me/navigation'))return route.fulfill({json:{subject:'owner',realm:'gridex',items:[]}});
     if(path.endsWith('/sites'))return route.fulfill({json:{sites:[{id:'lab',name:'Lab'}]}});
     return route.fulfill({status:503,json:{error:'unavailable'}});
   });
@@ -39,7 +40,7 @@ test('profile explains and persists email preference; help is reachable on deskt
   await page.reload();
   await expect(preference).toBeChecked();
   await page.getByRole('link',{name:/Как работят известията/}).click();
-  await expect(page).toHaveURL(/\/help\/#email-notifications$/);
+  await expect(page).toHaveURL(/\/settings\/profile\/documentation\/#email-notifications$/);
   await expect(page.getByRole('heading',{name:'Какво прави отметката'})).toBeVisible();
   await page.setViewportSize({width:390,height:844});
   await page.goto('/profile/');

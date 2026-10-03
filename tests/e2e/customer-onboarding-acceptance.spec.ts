@@ -41,6 +41,7 @@ test('verified first administrator completes the matching invitation on sign-in 
     }
     if (url.pathname === '/api/v1/me/invitations') return route.fulfill({ json: { invitations: [] } });
     if (url.pathname === '/api/v1/sites') return route.fulfill({ json: { sites: [] } });
+    if (url.pathname === '/api/v1/me/navigation') return route.fulfill({json:{subject:'customer-subject',realm:'novacom',items:[{id:'members',visible:accepted,sortOrder:1}]}});
     return route.fulfill({ status: 503, json: { error: 'unavailable' } });
   });
 

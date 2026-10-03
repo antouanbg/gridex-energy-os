@@ -191,7 +191,7 @@ export default function Home() {
   // Demo is only for confirmed anonymous visitors, never an API-error fallback.
   const dataMode:DataMode = runtimeConfig.mode === 'demo' ? 'demo' : 'live';
   const navigation=useNavigation(apiClient,accountIdentity?.realm||'',accountIdentity?.subject||'',dataMode==='live'&&authState==='authenticated'&&backendState==='online');
-  const renderedNav=dataMode==='demo'?navItems:[...navItems].filter(([id])=>navigation.result?.items.some(item=>item.id===id&&item.visible)??['overview','profile','help','about'].includes(id)).sort((a,b)=>(navigation.result?.items.find(item=>item.id===a[0])?.sortOrder??0)-(navigation.result?.items.find(item=>item.id===b[0])?.sortOrder??0));
+  const renderedNav=(dataMode==='demo'||(view==='login'&&!accountIdentity&&authState==='anonymous'))?navItems:[...navItems].filter(([id])=>navigation.result?.items.some(item=>item.id===id&&item.visible)??['overview','sites','devices','profile','help','about'].includes(id)).sort((a,b)=>(navigation.result?.items.find(item=>item.id===a[0])?.sortOrder??0)-(navigation.result?.items.find(item=>item.id===b[0])?.sortOrder??0));
   const energyInventory=useEnergyInventory(apiClient,liveSites,`${accountIdentity?.realm}:${accountIdentity?.subject}`,dataMode==='live'&&authState==='authenticated'&&backendState==='online'&&sitesStatus==='ready');
   useEffect(()=>{
     if(dataMode!=='live'||authState!=='authenticated'||!accountIdentity){return;}
@@ -600,7 +600,7 @@ export default function Home() {
           {renderedNav.map(([id, icon]) => {
             if(id==='members'&&(dataMode!=='live'||!canManagePeople))return null;
             if(dataMode==='live'&&['plans','market-settings','settlement','balance'].includes(id)&&!canManagePeople)return null;
-            if(dataMode==='live'&&['assets','battery','inverter','evse','loads'].includes(id)
+            if(dataMode==='live'&&!browseAsDemoFromLogin&&['assets','battery','inverter','evse','loads'].includes(id)
               &&!energyInventory.items.some(item=>id==='assets'||item.type===id))return null;
             const hasDeviceWarning=dataMode==='live'&&authState==='authenticated'&&backendState==='online'&&deviceWarning?.siteId===selectedSiteId&&deviceWarning.warning;
             const badge=dataMode==='live'?(id==='devices'&&hasDeviceWarning?'!':''):id==="battery"?(batteryNotice?"1":""):id==="automation"?"2":id==="alarms"?"3":"";

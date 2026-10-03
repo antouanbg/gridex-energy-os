@@ -150,6 +150,7 @@ test('organisation admin sees unavailable services but may grant only approved s
   await page.goto('/customers/users/');
   await expect(page.getByRole('heading',{name:'Одобрени потребители и услуги'})).toBeVisible();
   const detail=page.locator('.organisation-member-detail');
+  await detail.locator('summary').click();
   await expect(detail.locator('[data-service-code="day_ahead"]')).toContainText('Не е одобрена за организацията');
   await expect(detail.locator('[data-service-code="day_ahead"]').getByRole('button',{name:'Разреши и уведоми'})).toBeDisabled();
   await detail.locator('[data-service-code="visualisations"]').getByRole('button',{name:'Разреши и уведоми'}).click();

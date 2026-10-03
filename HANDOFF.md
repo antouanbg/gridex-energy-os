@@ -1,4 +1,5 @@
 # Frontend login handoff
+Repository / GitHub: `antouanbg/gridex-energy-os`
 
 ## 2026-10-03 implementation checkpoint / проверка на реализацията
 
@@ -9,19 +10,36 @@ order/visibility; known route/component mapping remains in source. Asset presenc
 still comes from authorised inventory requests, not new local inventory records.
 Keyed BG/EN navigation resources and the five-column member register are implemented.
 Database migration dry-run succeeded with ROLLBACK (27 rows); not yet applied.
-Backend suite: 142 pass, 1 skip before extra HTTP test; all four navigation
+Backend suite: 144 tests, 143 pass, 1 skip, zero failures. All four navigation
 unit/HTTP tests pass. Frontend TypeScript/build pass, eight invitation/member
 tests pass; demo checks pass at 360/390/430, new route tests at 390/1440 pass.
-Full 79-browser regression suite running at this checkpoint.
+Full browser regression rerun: 79 passed, zero failures.
 Docusaurus BG/EN typecheck/build pass. Live migration/API/frontend acceptance
 still pending. Older inline translations and remaining view integration are
 NOT claimed fully migrated. Do not call this a completed production rollout.
 
 БГ: има работещ локален каталог/API и петколонна таблица; тестовете по-горе
-са проверени. Пробата на миграцията е върната назад. Пълният браузърен набор,
-живото внедряване и приемането остават отделни стъпки. Не разширявай права
+са проверени. Пробата на миграцията е върната назад. Всички 79 браузърни теста
+минават; живото внедряване и приемането остават отделни стъпки. Не разширявай права
 и не представяй неприключените екрани/преводи като готови.
-Repository / GitHub: `antouanbg/gridex-energy-os`
+
+Follow-up regression evidence: initial full browser run 57/79, next 74/79.
+Failures exposed a real navigation-shell regression when catalogue verification
+failed and stale test expectations for renamed routes/collapsed member details.
+Fixed safe shell links and anonymous-only demo navigation; last nine targeted
+tests pass, including all five remaining failures. Full rerun passed all 79 tests.
+БГ: отстранено е скриване на основните връзки при непроверим каталог и показване
+на демо навигация след неуспешна проверка на вход. Пълният набор е успешен.
+
+Publication: frontend PR #105, backend PR #96, documentation PR #48.
+Live deployment is blocked pending explicit owner approval for migration 023
+and gridex-api restart. The execution reviewer rejected the combined merge/live
+operation before execution; no live migration or restart occurred. Keep frontend
+deployment behind the backend schema/API rollout. Browser fixtures are not proof
+of production role acceptance; some screenshots intentionally show unavailable
+dependencies. Full legacy i18n conversion remains outstanding.
+БГ: чака се изрично одобрение за миграция 023 и рестарт само на gridex-api.
+Не представяй Git публикацията и локалните тестове като живо внедряване.
 
 ## 2026-10-03 — approved dynamic navigation / динамична навигация
 

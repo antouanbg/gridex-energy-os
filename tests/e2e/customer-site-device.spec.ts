@@ -53,7 +53,7 @@ for(const [size,viewport] of [['desktop',{width:1365,height:850}],['mobile',{wid
     await page.getByLabel('Име на Обекта').fill('Customer Site');
     await page.getByLabel('Часова зона').fill('Europe/Sofia');
     await page.getByRole('button',{name:'Създай Обект'}).click();
-    await expect(page).toHaveURL(new RegExp(`/sites/${siteId}/devices/`));
+    await expect(page).toHaveURL(new RegExp(`/sites/${siteId}/infrastructure/`));
     await expect(page.getByRole('button',{name:'Добави устройство'})).toBeVisible();
     if(size==='mobile')expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
     await page.getByLabel('Име',{exact:true}).fill('ROCK One');

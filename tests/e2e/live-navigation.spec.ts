@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {navItems} from '../../app/lib/navigation';
 
 test('authenticated navigation, transient refresh outage, recovery and real expiry',async({page},testInfo)=>{
   test.setTimeout(100000);
@@ -30,7 +31,10 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await page.route('https://api.example.invalid/**',route=>{
     const path=new URL(route.request().url()).pathname;
     if(path==='/api/v1/auth/login-realm')return route.fulfill({json:{realms:['gridex']}});
-    if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',roles:['administrator'],permissions:['site:read','hardware:manage'],memberships:[{organisationId:'test-org',role:'administrator',allSites:true}]}});
+    if(path==='/api/v1/me')return route.fulfill({json:{subject:'test-user',realm:'gridex',roles:['administrator'],permissions:['site:read','hardware:manage'],memberships:[{organisationId:'test-org',role:'administrator',allSites:true}]}});
+    if(path==='/api/v1/me/navigation')return route.fulfill({json:{subject:'test-user',realm:'gridex',items:navItems.map(([id],sortOrder)=>({id,sortOrder,visible:true,state:'available'}))}});
+    if(path==='/api/v1/me/services')return route.fulfill({json:{services:[]}});
+    if(path.endsWith('/devices'))return route.fulfill({json:{items:[]}});
     if(path==='/api/v1/sites')return route.fulfill({json:{sites:[{id:'test-site',name:'Test Lab',organisationId:'test-org'}]}});
     if(path.endsWith('/snapshot'))return route.fulfill({status:503,json:{error:'unavailable'}});
     if(path.endsWith('/device-heartbeats')) {
@@ -48,17 +52,17 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await page.locator('.login-submit').click();
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
   await expect(page.locator('.demo-mode-notice')).toHaveCount(0);
-  await expect(page.locator('[data-view-id="market"]')).toHaveCount(0);
+  await expect(page.locator('[data-view-id="market"]')).toHaveCount(1);
   await expect(page.locator('[data-view-id="devices"]')).not.toHaveAttribute('data-provisioning-required');
   await expect(page.locator('[data-view-id="gateway"]')).toHaveCount(0);
-  for(const view of ['sites','devices','overview','customers','assets','battery','schedule','automation','loads','supported','alarms','reports','settings','plans','about']) {
+  for(const view of ['sites','devices','overview','schedule','automation','alarms','reports','settings','plans','about']) {
     await page.locator(`[data-view-id="${view}"]`).click();
     await expect(page.getByTestId('section-'+view)).toBeVisible();
     await expect(page.locator('.app-shell')).toHaveAttribute('data-mode','live');
     await expect(page.getByTestId('page-eyebrow')).not.toContainText('6 ОБЕКТА');
     await expect(page.locator('.nav-badge')).toHaveCount(0);
     await expect(page.getByTestId('section-'+view)).not.toContainText('248.6');
-    if(!['sites','devices','overview','about'].includes(view)) {
+    if(!['sites','devices','overview','about','settings'].includes(view)) {
       await expect(page.getByRole('heading',{name:'Този раздел очаква провизиране на реални данни'})).toBeVisible();
     }
   }
@@ -85,8 +89,8 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   await expect(page.getByText('Не е необходим повторен provisioning.',{exact:false})).toBeVisible();
   await page.getByLabel('Устройство',{exact:true}).selectOption('esp');
   await expect(page.getByText('ESP32: Modbus TCP през ROCK Pi; DHCP резервация.',{exact:true})).toBeVisible();
-  await page.locator('[data-view-id="assets"]').click();
-  await page.getByRole('button',{name:'Отвори регистрираните устройства',exact:true}).click();
+  await expect(page.locator('[data-view-id="assets"]')).toHaveCount(0);
+  await page.locator('[data-view-id="devices"]').click();
   await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ESP32');
   await expect(page.locator('.device-provisioning')).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('provisioning-desktop.png'),fullPage:true});
