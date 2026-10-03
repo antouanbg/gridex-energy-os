@@ -668,7 +668,7 @@ export default function Home() {
         {integrationError&&dataMode==="live"&&!['profile','help','about','login'].includes(view)&&<section className="integration-warning" role="alert"><i>!</i><span>{integrationError}</span></section>}
 
         <Suspense fallback={<SectionLoading view={view} lang={lang}/>}>
-          {dataMode==='live'&&navigation.error&&<section className="integration-warning" role="alert">{translate(lang,'access.unavailable')}</section>}
+          {dataMode==='live'&&navigation.error&&<section className="integration-warning" role="alert"><i aria-hidden="true">!</i><div>{translate(lang,'access.unavailable')}</div></section>}
           {dataMode==='live'&&serviceCheckFailed&&view==='market'&&<section className="integration-warning" role="alert">{translate(lang,'access.unavailable')}</section>}
           <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
