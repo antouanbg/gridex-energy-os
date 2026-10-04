@@ -1,5 +1,18 @@
 # Frontend login handoff
 
+## 2026-10-04 — public presentation privacy
+
+Owner approved removing personal owner credits and project repository URLs
+from BG/EN public portal and help. Open-source/MIT description stays; enquiry
+form and permissions remain unchanged. Project-source links removed from
+the public device catalogue; third-party references/licences retained.
+No account changes, Git history rewriting or repository visibility changes.
+Public repositories and previously cached content remain discoverable elsewhere.
+Regression: BG/EN About/catalogue browser checks and generated bundle scans.
+БГ: премахнати публични лични споменавания и адреси на проектния код.
+„Отворен код/MIT“ остава; няма промени на акаунти и права. Историята на Git
+и правните бележки не са променяни. Публикуването се проследява в PR.
+
 ## 2026-10-04 — demo follows database matrix / Демо по базата
 
 Owner explicitly requested every Demo page to follow the approved database
