@@ -1,5 +1,14 @@
 # Current task
 
+## 2026-10-04 — public presentation privacy
+
+BG/EN About no longer names the owner or links project repositories; public
+catalogue project-source links removed. Open-source/MIT and required third-party
+attribution remain. No account/permission changes or Git history rewriting.
+Generated public bundles scanned; regression tests cover About/catalogue.
+БГ: премахнати лични споменавания и проектни адреси от публичния интерфейс.
+Историческите Git записи и видимостта на хранилищата остават непроменени.
+
 ## 2026-10-04 — demo follows database matrix / Демо по базата
 
 Owner explicitly requested every Demo page to follow the approved database

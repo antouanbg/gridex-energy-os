@@ -13,10 +13,9 @@ export type SupportedDeviceDriver = {
   scopeEn: string;
   modelsBg: string;
   modelsEn: string;
-  sourceUrl: string;
+  sourceUrl?: string;
 };
 
-const gridexRepository = "https://github.com/antouanbg/gridex-energy-os";
 const referenceRepository = "https://github.com/ai-republic/bms-to-inverter/tree/main";
 const openGivBridgeDocument = "https://github.com/open-giv/bms-analysis/blob/main/docs/08-bridge-implementation.md";
 const solarmanDocumentation = "https://github.com/davidrapan/ha-solarman/wiki/Documentation";
@@ -72,7 +71,6 @@ export const supportedDeviceDrivers: SupportedDeviceDriver[] = [
     scopeEn: "Full telemetry and power control with readiness gate, SOC, dynamic BMS limits, atomic energy counters and heartbeat safe state.",
     modelsBg: "Потвърдено за 261 kWh кабинета, Modbus TCP порт 3200, Unit ID 1 и директни адреси без offset.",
     modelsEn: "Confirmed for the 261 kWh cabinet, Modbus TCP port 3200, Unit ID 1 and direct register addresses without offset.",
-    sourceUrl: `${gridexRepository}/tree/main/edge/rock-pi-e/src`,
   },
 
   solarmanReference("Deye","deye_string / deye_hybrid / deye_p3 / deye_micro","inverter",["Modbus RTU","Solarman logger"],"Three-phase, single-phase, string, hybrid and microinverter families listed upstream."),
@@ -107,7 +105,6 @@ export const supportedDeviceDrivers: SupportedDeviceDriver[] = [
     scopeEn: "P/Q command ×10, positive for discharge, negative for charge, operational prerequisites and heartbeat 5301/5302.",
     modelsBg: "Профилът е част от интеграцията на Suntech 261 и използва factory BMS charge/discharge limits.",
     modelsEn: "The profile is part of the Suntech 261 integration and uses the factory BMS charge/discharge limits.",
-    sourceUrl: `${gridexRepository}/tree/main/edge/rock-pi-e/src`,
   },
   {
     id: "gridex-bcq-261",
@@ -121,7 +118,6 @@ export const supportedDeviceDrivers: SupportedDeviceDriver[] = [
     scopeEn: "SOC, state, alarms, DC energy counters and dynamic charge/discharge limits.",
     modelsBg: "Регистровата карта е налична; остава commissioning проверка с реалния кабинет и firmware.",
     modelsEn: "The register map is available; commissioning validation with the physical cabinet and firmware remains required.",
-    sourceUrl: `${gridexRepository}/tree/main/edge/rock-pi-e/src`,
   },
 
   {

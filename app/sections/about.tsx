@@ -119,9 +119,8 @@ export function About({lang,notify,api,live,email}:{lang:UiLanguage;notify:(v:st
 
     <section className="card github-project-card">
       <div className="github-project-mark">&lt;/&gt;</div>
-      <div className="github-project-copy"><p>OPEN SOURCE · MIT LICENSE</p><h2>GrideX Energy OS</h2><span>{t("Публичен open-source EMS проект, създаден от Antouan. Кодът и техническата архитектура са достъпни в GitHub за преглед, развитие и нови интеграции.","A public open-source EMS project created by Antouan. The code and technical architecture are available on GitHub for review, development and new integrations.")}</span></div>
-      <div className="github-project-points"><span>✓ {t("Публичен изходен код","Public source code")}</span><span>✓ OpenRemote + GrideX Edge</span><span>✓ {t("Един ценови модел по публикация и GitHub код на Антуан Ангелов","One price-forecast model based on Antuan Angelov’s publication and GitHub code")}</span></div>
-      <div className="github-project-actions"><a href="https://github.com/antouanbg/gridex-energy-os" target="_blank" rel="noreferrer">GitHub repository ↗</a><a href="https://github.com/antouanbg/Compiled-IBEX-Day-Ahead-Price-Dataset" target="_blank" rel="noreferrer">{t("Модел и код за IBEX прогноза ↗","IBEX forecast model & code ↗")}</a><a href="https://github.com/antouanbg/gridex-energy-os/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License ↗</a></div>
+      <div className="github-project-copy"><p>OPEN SOURCE · MIT LICENSE</p><h2>GrideX Energy OS</h2><span>{t("EMS платформа с отворен код за управление на енергията и интеграция на свързана инфраструктура.","An open-source EMS platform for energy management and connected infrastructure integration.")}</span></div>
+      <div className="github-project-points"><span>✓ {t("Отворен код","Open source")}</span><span>✓ OpenRemote + GrideX Edge</span></div>
     </section>
   </div>;
 }
