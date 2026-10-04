@@ -9,6 +9,10 @@ the public device catalogue; third-party references/licences retained.
 No account changes, Git history rewriting or repository visibility changes.
 Public repositories and previously cached content remain discoverable elsewhere.
 Regression: BG/EN About/catalogue browser checks and generated bundle scans.
+Test incident: synthetic /en/demo path under production auto config enters the
+live shell; privacy regression now exercises the actual persisted BG/EN choice
+on /demo routes. EN-prefixed demo auto-mode routing needs a separate correction;
+no authentication behavior was changed in this privacy task.
 БГ: премахнати публични лични споменавания и адреси на проектния код.
 „Отворен код/MIT“ остава; няма промени на акаунти и права. Историята на Git
 и правните бележки не са променяни. Публикуването се проследява в PR.
