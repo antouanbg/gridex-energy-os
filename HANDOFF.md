@@ -26,23 +26,6 @@ no authentication behavior was changed in this privacy task.
 „Отворен код/MIT“ остава; няма промени на акаунти и права. Историята на Git
 и правните бележки не са променяни. Публикуването се проследява в PR.
 
-## 2026-10-04 — public presentation privacy
-
-Owner approved removing personal owner credits and project repository URLs
-from BG/EN public portal and help. Open-source/MIT description stays; enquiry
-form and permissions remain unchanged. Project-source links removed from
-the public device catalogue; third-party references/licences retained.
-No account changes, Git history rewriting or repository visibility changes.
-Public repositories and previously cached content remain discoverable elsewhere.
-Regression: BG/EN About/catalogue browser checks and generated bundle scans.
-Test incident: synthetic /en/demo path under production auto config enters the
-live shell; privacy regression now exercises the actual persisted BG/EN choice
-on /demo routes. EN-prefixed demo auto-mode routing needs a separate correction;
-no authentication behavior was changed in this privacy task.
-БГ: премахнати публични лични споменавания и адреси на проектния код.
-„Отворен код/MIT“ остава; няма промени на акаунти и права. Историята на Git
-и правните бележки не са променяни. Публикуването се проследява в PR.
-
 ## 2026-10-04 — demo follows database matrix / Демо по базата
 
 Owner explicitly requested every Demo page to follow the approved database
