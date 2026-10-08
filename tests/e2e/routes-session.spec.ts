@@ -25,7 +25,7 @@ test('deep link and refresh restore SSO; expiry and restart show Demo until expl
     const path=new URL(r.request().url()).pathname;
     if(path.endsWith('/auth/login-realm'))return r.fulfill({json:{realms:['gridex']}});
     if(serverRestart&&forceLogins<2)return r.fulfill({status:401,json:{error:'reauthentication_required'}});
-    if(path.endsWith('/me'))return r.fulfill({json:{subject:'owner',realm:'gridex',roles:['administrator'],permissions:[],memberships:[]}});
+    if(path.endsWith('/me'))return r.fulfill({json:{subject:'owner',realm:'gridex',roles:['administrator'],permissions:[],memberships:[{organisationId:'org',role:'administrator',allSites:true}]}});
     if(path.endsWith('/me/navigation'))return r.fulfill({json:{subject:'owner',realm:'gridex',items:['overview','sites','devices','market','profile','help'].map((id,sortOrder)=>({id,sortOrder,visible:true}))}});
     if(path.endsWith('/devices'))return r.fulfill({json:{items:[]}});
     if(path.endsWith('/me/services'))return r.fulfill({json:{services:[{code:'day_ahead'}]}});
@@ -69,7 +69,7 @@ test('deep link and refresh restore SSO; expiry and restart show Demo until expl
   await expect(page.getByRole('heading',{name:'Входът е успешен'})).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByTestId('section-overview')).toBeVisible();
-  await expect(page.locator('.profile small')).toHaveText('Администратор');
+  await expect(page.locator('.profile small')).toHaveText('Администратор на организация');
   expect(forceLogins).toBe(1);
   serverRestart=true;
   await page.goto('/sites/lab/devices/');
@@ -79,7 +79,7 @@ test('deep link and refresh restore SSO; expiry and restart show Demo until expl
   await page.locator('.demo-sign-in').click();
   await page.getByLabel('Имейл',{exact:true}).fill('owner@example.invalid');
   await page.locator('.login-submit').click();
-  await expect(page.locator('.profile small')).toHaveText('Администратор');
+  await expect(page.locator('.profile small')).toHaveText('Администратор на организация');
   expect(forceLogins).toBe(2);
   await page.goto('/sites/lab/devices/');
   await expect(page.getByRole('heading',{name:'ROCK',exact:true})).toBeVisible();

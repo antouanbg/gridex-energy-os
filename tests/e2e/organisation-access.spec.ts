@@ -6,7 +6,7 @@ async function session(page:Page,platform:boolean, state:{suspended:boolean;stat
   await page.route('https://auth.example.invalid/**',r=>{
     const url=new URL(r.request().url());
     if(url.pathname.endsWith('/auth')){nonce=url.searchParams.get('nonce')!;return r.fulfill({status:302,headers:{location:url.searchParams.get('redirect_uri')+'#code=fixture&state='+url.searchParams.get('state')}});}
-    const now=Math.floor(Date.now()/1000),claims={sub:'owner',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce};
+    const now=Math.floor(Date.now()/1000),claims={sub:'owner',email:'member@example.com',iss:'https://auth.example.invalid/auth/realms/gridex',aud:'gridex-portal',iat:now,exp:now+600,nonce};
     return r.fulfill({json:{access_token:jwt(claims),id_token:jwt(claims),refresh_token:jwt(claims),expires_in:600,token_type:'Bearer'}});
   });
   await page.route('https://api.example.invalid/**',r=>{
@@ -26,6 +26,39 @@ async function session(page:Page,platform:boolean, state:{suspended:boolean;stat
   });
 }
 const initial=()=>({suspended:false,status:'active',revision:0,mailState:'',operationId:null as string|null,writes:0});
+
+for(const lang of ['bg','en'])for(const role of ['administrator','viewer']){
+  test('audit identity and mobile form '+lang+' '+role,async({page},info)=>{
+    if(lang==='en')await page.addInitScript(()=>localStorage.setItem('gridex.ui-language','en'));
+    await session(page,false,initial());
+    await page.route('https://api.example.invalid/api/v1/me',r=>r.fulfill({json:{
+      subject:'owner',email:'member@example.com',name:'Test Member',realm:'gridex',
+      roles:[role],permissions:[],memberships:[{organisationId:'org',organisationName:'Test Organisation',role,allSites:role==='administrator'}]
+    }}));
+    await page.setViewportSize({width:390,height:844});
+    await page.goto('/settings/users/');
+    if(role==='viewer'){
+      await expect(page.getByRole('heading',{name:lang==='en'?'This section is for administrators':'Този раздел е за администратори'})).toBeVisible();
+      await expect(page.getByRole('link',{name:lang==='en'?'Go to my services':'Към моите услуги'})).toBeVisible();
+      await expect(page.locator('main')).toContainText('member@example.com');
+      await expect(page.locator('main')).toContainText(lang==='en'?'Viewer':'Наблюдател');
+      await expect(page.locator('.invitation-page')).toHaveCount(0);
+    }else{
+      await expect(page.locator('.admin-identity')).toContainText(lang==='en'?'Organisation administrator':'Администратор на организация');
+      await expect(page.locator('.admin-organisation-name')).toHaveText('Test Organisation');
+      await page.goto('/sites/');
+      const form=page.locator('.site-create-form');
+      await expect(form).toBeVisible();
+      for(const field of await form.locator('input').all()){
+        expect((await field.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+        expect(await field.evaluate(el=>getComputedStyle(el).borderTopStyle)).toBe('solid');
+      }
+      await expect(page.getByRole('link',{name:lang==='en'?'Help with Sites and access':'Помощ за Обекти и права'})).toHaveAttribute('href',new RegExp(lang==='en'?'/en/':'doc.gridex.tech/'));
+    }
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(391);
+    await page.screenshot({path:info.outputPath('audit-'+role+'-'+lang+'.png'),fullPage:true});
+  });
+}
 
 test('approved platform layout shares organisation selection with read-only roster',async({page},info)=>{
   await session(page,true,initial());
@@ -150,7 +183,7 @@ test('platform service catalogue separates approved, available and future; remov
   await page.screenshot({path:info.outputPath('platform-services-mobile.png'),fullPage:true});
 });
 
-test('organisation admin sees unavailable services but may grant only approved services to members',async({page})=>{
+test('organisation admin sees unavailable services but may grant only approved services to members',async({page},info)=>{
   await session(page,false,initial());
   const organisationId='11111111-1111-4111-8111-111111111111';
   let memberWrites=0;
@@ -173,6 +206,7 @@ test('organisation admin sees unavailable services but may grant only approved s
   await page.route(new RegExp(`^https://api\\.example\\.invalid/api/v1/organisations/${organisationId}/members(?:\\?.*)?$`),route=>route.fulfill({json:{members:[{subject:'viewer',email:'viewer@example.invalid',firstName:'Иван',lastName:'Иванов',role:'viewer',allSites:false,siteIds:[],verifiedSiteIds:[],services:[],lastLoginAt:null}],sites:[],nextOffset:null,total:1}}));
   await page.goto('/customers/users/');
   await expect(page.getByRole('heading',{name:'Одобрени потребители и услуги'})).toBeVisible();
+  await page.screenshot({path:info.outputPath('organisation-admin-desktop.png'),fullPage:true});
   const detail=page.locator('.organisation-member-detail');
   await detail.locator('summary').click();
   await expect(detail.locator('[data-service-code="day_ahead"]')).toContainText('Не е одобрена за организацията');
@@ -184,4 +218,5 @@ test('organisation admin sees unavailable services but may grant only approved s
   await expect(detail.locator('[data-service-code="day_ahead"]').getByRole('button',{name:'Разреши и уведоми'})).toBeDisabled();
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('organisation-admin-mobile.png'),fullPage:true});
 });

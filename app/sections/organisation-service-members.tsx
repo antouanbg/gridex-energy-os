@@ -55,7 +55,7 @@ export function OrganisationServiceMembers({api,lang,organisationId,subject,onMe
       <a className="profile-inline-help" href={documentationLink('members',lang).href+'#additional-services'} target="_blank" rel="noopener noreferrer">{en?'Help':'Помощ'} ↗</a></div>}
     {error&&<div className="admin-feedback error" role="alert">{error} <button type="button" className="secondary-btn" onClick={()=>setRefreshKey(key=>key+1)}>{en?'Refresh status':'Опресни статуса'}</button></div>}
     {notice&&<p className="admin-feedback" role="status">{notice}</p>}
-    <section className="admin-panel"><div className="admin-section-heading"><h3>{en?'Available services':'Налични услуги'}</h3><button className="secondary-btn" type="button" disabled={Boolean(busy)} onClick={()=>setRefreshKey(key=>key+1)}>{en?'Refresh':'Опресни'}</button></div>
+    <section className="admin-panel"><div className="admin-section-heading"><h3>{en?'Services for the organisation':'Услуги за организацията'}</h3><button className="secondary-btn" type="button" disabled={Boolean(busy)} onClick={()=>setRefreshKey(key=>key+1)}>{en?'Refresh':'Опресни'}</button></div>
       {adminServiceRows(services).map(service=>{
         const ready=organisationServiceReady(service),verified=services!==null&&requests!==null;
         const pending=requests?.find(item=>item.serviceCode===service.code&&item.requestScope==='organisation'&&item.state==='open'&&item.stage==='awaiting_platform');
@@ -64,8 +64,8 @@ export function OrganisationServiceMembers({api,lang,organisationId,subject,onMe
           <small>{!service.requestable?(en?'Visible in the catalogue; requests will be available later.':'Видима в каталога; заявяването предстои.'):!verified?(error?(en?'Status could not be checked':'Статусът не е проверен'):(en?'Checking status…':'Проверяваме статуса…')):ready?(en?'Approved for the organisation. Grant access to selected members.':'Одобрена за организацията. Разрешете я за избраните хора.'):pending?(en?'Request sent to the platform administrator.':'Заявката е изпратена към супер администратора.'):(en?'Not approved for the organisation.':'Не е одобрена за организацията.')}</small></div>
           <div className="admin-service-actions"><span className={`admin-status ${pending?'waiting':''}`}>{!service.requestable?(en?'Coming soon':'Предстои'):ready?(en?'Approved':'Одобрена'):pending?(en?'Awaiting decision':'Чака решение'):(en?'Not approved':'Не е одобрена')}</span>
             {!ready&&<button type="button" className={pending?'secondary-btn':'primary-btn'} disabled={!service.requestable||!verified||Boolean(busy)||Boolean(pending&&!ownPending)}
-              onClick={()=>void request(service,ownPending?pending:undefined)}>{busy===service.code?(en?'Working…':'Обработка…'):!service.requestable?(en?'Coming soon':'Предстои'):pending?(en?'Cancel request':'Отмени заявката'):(en?'Request':'Заяви')}</button>}
-            {ready&&onMembers&&<button type="button" className="secondary-btn" onClick={onMembers}>{en?'Manage members':'Разреши на потребител'}</button>}</div>
+              onClick={()=>void request(service,ownPending?pending:undefined)}>{busy===service.code?(en?'Working…':'Обработка…'):!service.requestable?(en?'Coming soon':'Предстои'):pending?(en?'Cancel request':'Отмени заявката'):(en?'Request from super administrator':'Заяви към супер админа')}</button>}
+            {ready&&onMembers&&<button type="button" className="secondary-btn" onClick={onMembers}>{en?'Manage members':'Управлявай хората'}</button>}</div>
         </div>;
       })}
     </section>

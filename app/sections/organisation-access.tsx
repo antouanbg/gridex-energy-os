@@ -17,6 +17,7 @@ export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexAp
   const [selectedId,setSelectedId]=useState('');
   const [query,setQuery]=useState('');
   const [page,setPage]=useState(0);
+  const [serviceRevision,setServiceRevision]=useState(0);
   const labels: Record<string, string> = en ? {
     active: 'Active', suspended: 'Suspended', pending: 'Pending', applied: 'Verified', sending: 'Delivery unknown — do not resend',
     unknown: 'Delivery unknown — do not resend', queued: 'Queued; delivery unconfirmed', delivered: 'Delivered', failed: 'Delivery failed', not_required: 'No email required',
@@ -54,12 +55,15 @@ export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexAp
   const currentPage=Math.min(page,pages-1);
   return <div className="platform-service-workspace" data-no-translate>
     <section className="admin-panel"><h3>{en?'Approved organisation':'Одобрена организация'}</h3>
+      <div className="admin-selection-grid">
       <div className="admin-organisation-choice"><label className="admin-search">{en?'Organisation':'Организация'}<select value={selected?.id||''} onChange={event=>setSelectedId(event.target.value)}><option value="" disabled>{en?'Choose an active organisation':'Изберете активна организация'}</option>{active.map(item=><option value={item.id} key={item.id}>{item.name} · {labels.active}</option>)}</select></label>{selected&&<span className="admin-status">{labels.active}</span>}</div>
+      {selected&&<OrganisationAdministrators key={'administrators-'+selected.id} api={api} lang={lang} organisationId={selected.id}/>}
+      </div>
       {!loaded&&!notice&&<p role="status">{en?'Loading organisations…':'Зареждане на организациите…'}</p>}
       {loaded&&!active.length&&<p>{en?'No approved customer organisations.':'Няма одобрени клиентски организации.'}</p>}
       {notice&&<p role="status">{notice}</p>}
     </section>
-    {selected&&<PlatformServiceGrants key={selected.id} api={api} lang={lang} organisationId={selected.id}/>}
+    {selected&&<PlatformServiceGrants key={selected.id} api={api} lang={lang} organisationId={selected.id} onChanged={()=>setServiceRevision(value=>value+1)}/>}
     <ServiceRequestsAdmin api={api} lang={lang}/>
     {selected&&<OrganisationMembers key={'members-'+selected.id} api={api} lang={lang} organisationId={selected.id} platform/>}
     {children}
@@ -71,6 +75,7 @@ export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexAp
     {loaded&&!filtered.length&&<p>{en?'No organisations match this filter.':'Няма организации за този филтър.'}</p>}
     {filtered.slice(currentPage*10,currentPage*10+10).map(item => <article className="invitation-record" key={item.id}>
       <strong>{item.name}</strong><p>{labels[item.status]}{item.operationState ? ` · ${labels[item.operationState]}` : ''}</p>
+      {item.status==='active'&&<OrganisationServiceSummary api={api} lang={lang} organisationId={item.id} revision={serviceRevision}/>}
       {item.status === 'active' && <button type="button" className="secondary-btn" onClick={()=>{setSelectedId(item.id);document.querySelector('.platform-service-workspace')?.scrollIntoView({behavior:'smooth',block:'start'});}}>{en?'View service permissions':'Виж правата за услуги'}</button>}
       {item.mailState && <p>{en ? 'Suspension email' : 'Имейл за спиране'}: {labels[item.mailState]}</p>}
       {item.operationState === 'pending'
@@ -93,7 +98,44 @@ export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexAp
   </div>;
 }
 
-function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;lang:UiLanguage;organisationId:string}) {
+function OrganisationAdministrators({api,lang,organisationId}:{api:GridexApiClient;lang:UiLanguage;organisationId:string}) {
+  const [emails,setEmails]=useState<string[]|null>(null);
+  const [failed,setFailed]=useState(false);
+  useEffect(()=>{
+    const abort=new AbortController();
+    void (async()=>{
+      let offset=0;
+      const found=new Set<string>();
+      for(;;){
+        const result=await api.organisationMembers(organisationId,offset,true,abort.signal);
+        if(abort.signal.aborted)return;
+        for(const member of result.members)if(member.role==='administrator'&&member.email)found.add(member.email);
+        if(result.nextOffset===null||result.nextOffset===undefined)break;
+        if(result.nextOffset<=offset)throw new Error('Invalid member pagination');
+        offset=result.nextOffset;
+      }
+      if(!abort.signal.aborted)setEmails([...found]);
+    })().catch(()=>{if(!abort.signal.aborted)setFailed(true);});
+    return()=>abort.abort();
+  },[api,organisationId]);
+  return <div className="admin-selected-administrators"><small>{lang==='en'?'Organisation administrator':'Администратор на организация'}</small><p>{emails?.length?emails.join(' · '):lang==='en'?(failed?'Administrator could not be verified':emails?'No verified administrator email':'Checking administrator…'):(failed?'Администраторът не можа да се провери':emails?'Няма проверен имейл на администратор':'Проверяваме администратора…')}</p></div>;
+}
+
+function OrganisationServiceSummary({api,lang,organisationId,revision}:{api:GridexApiClient;lang:UiLanguage;organisationId:string;revision:number}) {
+  const [services,setServices]=useState<ServiceGrant[]|null>(null);
+  const [failed,setFailed]=useState(false);
+  useEffect(()=>{
+    const abort=new AbortController();
+    void api.platformOrganisationServices(organisationId,abort.signal).then(result=>{
+      if(!abort.signal.aborted){setServices(result.services);setFailed(false);}
+    }).catch(()=>{if(!abort.signal.aborted){setServices(null);setFailed(true);}});
+    return()=>abort.abort();
+  },[api,organisationId,revision]);
+  if(!services)return <p role="status">{lang==='en'?(failed?'Service permissions unavailable':'Checking services…'):(failed?'Правата за услуги са недостъпни':'Проверяваме услугите…')}</p>;
+  return <div className="admin-service-summary">{adminServiceRows(services).filter(service=>service.requestable).map(service=><span className="admin-status" key={service.code}>{serviceLabel(service.code,lang)} · {service.enabled?(lang==='en'?'Approved':'Разрешена'):(lang==='en'?'Not approved':'Не е разрешена')}</span>)}</div>;
+}
+
+function PlatformServiceGrants({api,lang,organisationId,onChanged}: {api:GridexApiClient;lang:UiLanguage;organisationId:string;onChanged:()=>void}) {
   const en=lang==='en';
   const [services,setServices]=useState<ServiceGrant[]|null>(null);
   const [busy,setBusy]=useState(false);
@@ -112,6 +154,7 @@ function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;l
     try{
       await api.setPlatformOrganisationService(organisationId,service.code,!service.enabled);
       setServices((await api.platformOrganisationServices(organisationId)).services);
+      onChanged();
       setNotice(service.enabled
         ?en?'Organisation access removed. Previous member grants will not return automatically.':'Достъпът за организацията е отнет. Предишните права на потребителите няма да се върнат автоматично.'
         :en?'Organisation service enabled. Its administrator must grant each member separately.':'Услугата е разрешена за организацията. Нейният администратор трябва отделно да разреши всеки потребител.');
@@ -126,7 +169,7 @@ function PlatformServiceGrants({api,lang,organisationId}: {api:GridexApiClient;l
       <div><strong>{serviceLabel(service.code,lang)}{service.code==='day_ahead'?(en?' · Bulgaria / BG':' · България / BG'):''}</strong>
         <small>{!service.requestable?(en?'Shown in the catalogue; not yet requestable':'Показана в каталога; още не е заявяема'):!services?(error?(en?'Permissions unavailable':'Правата не са проверени'):(en?'Checking permissions…':'Проверяваме правата…')):service.enabled?(en?'Approved; members require separate permission':'Разрешена; потребителите се разрешават отделно'):(en?'Not approved for the organisation':'Не е разрешена за организацията')}</small></div>
       <div className="admin-service-actions"><span className="admin-status">{!service.requestable?(en?'Coming soon':'Предстои'):!services?(error?(en?'Unavailable':'Недостъпна'):(en?'Checking':'Проверяваме')):service.enabled?(en?'Approved':'Разрешена'):(en?'Not approved':'Не е разрешена')}</span>
-        {service.requestable&&<button type="button" className={!service.enabled&&service.code==='day_ahead'?'primary-btn':'secondary-btn'} disabled={busy||!services} onClick={()=>service.enabled?setConfirmCode(service.code):void toggle(service)}>{service.enabled?(en?'Remove':'Отнеми'):(en?'Grant and notify':'Разреши и уведоми')}</button>}</div>
+        {!service.requestable&&<button type="button" className="secondary-btn" disabled>{en?'Not active':'Не е активна'}</button>}{service.requestable&&<button type="button" className={!service.enabled&&service.code==='day_ahead'?'primary-btn':'secondary-btn'} disabled={busy||!services} onClick={()=>service.enabled?setConfirmCode(service.code):void toggle(service)}>{service.enabled?(en?'Remove':'Отнеми'):(en?'Grant and notify':'Разреши и уведоми')}</button>}</div>
       {confirmCode===service.code&&<div role="group" aria-label={en?'Confirm service removal':'Потвърди отнемането на услугата'}>
         <p>{en?'Remove this service for the organisation and all its members? Previous member permissions will not return automatically.':'Да се отнеме ли услугата за организацията и всички нейни потребители? Старите лични разрешения няма да се върнат автоматично.'}</p>
         <button type="button" className="primary-btn" disabled={busy} onClick={()=>void toggle(service)}>{en?'Confirm removal':'Потвърди отнемането'}</button>

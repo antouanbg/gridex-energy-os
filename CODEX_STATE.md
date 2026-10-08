@@ -1,5 +1,12 @@
 # Current task
 
+## 2026-10-08 — approved-template audit correction
+
+Source changes follow the canonical three-role template, not a new design.
+See docs/LIVE_AUDIT_2026_10_08.md for F01–F07, tests and live read-only evidence.
+No real grants, account changes or inventory writes. Not deployed or owner-accepted.
+БГ: корекции по одобрените макети; публикация и външно приемане се водят отделно.
+
 ## 2026-10-04 — public presentation privacy
 
 BG/EN About no longer names the owner or links project repositories; public

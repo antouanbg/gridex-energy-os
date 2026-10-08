@@ -25,8 +25,8 @@ function memberName(member:OrganisationMember,en:boolean) {
     : member.email || (en?'Name and email unavailable':'Име и имейл липсват');
 }
 
-export function OrganisationMembers({api,lang,organisationId,platform=false,onOrganisationServices}: {
-  api:GridexApiClient;lang:UiLanguage;organisationId:string;platform?:boolean;onOrganisationServices?:()=>void
+export function OrganisationMembers({api,lang,organisationId,platform=false,onOrganisationServices,currentSubject}: {
+  api:GridexApiClient;lang:UiLanguage;organisationId:string;platform?:boolean;onOrganisationServices?:()=>void;currentSubject?:string
 }) {
   const en=lang==='en';
   const [page,setPage]=useState<OrganisationMembersPage|null>(null);
@@ -106,12 +106,12 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
         {!loading&&page&&!members.length&&<p>{en?'No members match this search.':'Няма потребители за този избор.'}</p>}
         <div className="register-scroll"><table className="member-register"><thead><tr>{[en?'Name / email':'Име / имейл',en?'Role':'Роля',en?'Sites':'Обекти',en?'Services':'Услуги',en?'Actions':'Действия'].map(label=><th key={label}>{label}</th>)}</tr></thead><tbody>
           {members.map(member=><tr key={member.subject} aria-selected={selected===member.subject}>
-            <td data-label={en?'Name / email':'Име / имейл'}><strong>{member.firstName&&member.lastName?memberName(member,en):translate(lang,'users.namesMissing')}</strong><small>{member.email||member.subject}</small></td>
+            <td data-label={en?'Name / email':'Име / имейл'}><strong>{member.firstName&&member.lastName?memberName(member,en):translate(lang,'users.namesMissing')}</strong><small>{member.email||member.subject}</small>{member.subject===currentSubject&&<span className="admin-status">{translate(lang,'users.you')}</span>}</td>
             <td data-label={en?'Role':'Роля'}>{roleNames[member.role]?.[lang]||member.role}</td>
             <td data-label={en?'Sites':'Обекти'}>{member.allSites?(en?'All organisation Sites':'Всички Обекти на организацията'):member.siteIds.map(siteName).join(', ')||(en?'None assigned':'Няма разрешени')}</td>
             <td data-label={en?'Services':'Услуги'}>{member.services.map(code=>serviceLabel(code,lang)).join(', ')||(en?'None granted':'Няма разрешени')}</td>
             <td data-label={en?'Actions':'Действия'}><button type="button" className="secondary-btn" disabled={busy||loading} aria-label={(en?'Access details: ':'Права и услуги: ')+memberName(member,en)} aria-pressed={selected===member.subject}
-              onClick={()=>{setSelected(member.subject);setDetailsOpen(true);setRole(member.role);setSiteIds(member.siteIds);setReviewing(false);setNotice('');}}>{en?'Access details':'Права и услуги'}</button></td>
+              onClick={()=>{setSelected(member.subject);setDetailsOpen(true);setRole(member.role);setSiteIds(member.siteIds);setReviewing(false);setNotice('');}}>{member.subject===currentSubject?translate(lang,'users.myServices'):(en?'Access details':'Права и услуги')}</button></td>
           </tr>)}
         </tbody></table></div>
         {page&&<div className="admin-pagination"><span>{members.length?`${offset+1}–${offset+members.length}${page.total?` / ${page.total}`:''}`:'0'}</span>

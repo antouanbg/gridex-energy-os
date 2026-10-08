@@ -108,7 +108,8 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
   return <div className="invitation-page" data-no-translate>
     {mode==='manage'&&<header className="invitation-hero card">
       <div><span className="profile-kicker">GRIDEX · {lang==='en'?'ACCESS CONTROL':'УПРАВЛЕНИЕ НА ДОСТЪПА'}</span>
-        <h2>{organisationAdmin?(lang==='en'?'Services for the organisation':'Услуги за организацията'):(lang==='en'?'Services for organisations':'Услуги за организации')}</h2>
+        <h2>{translate(lang,'users.title')}</h2>
+        {!platform&&<p className="admin-organisation-name">{admins.map(admin=>admin.organisationName||me?.realm).filter(Boolean).join(' · ')}</p>}
         <p>{platform?(lang==='en'?'Manage approved organisations and their separate service permissions.':'Управлявайте одобрените организации и отделните им услуги.'):(lang==='en'?'Manage the people, roles, Sites and services in your organisation.':'Управлявайте хората, ролите, Обектите и услугите във Вашата организация.')}</p>
         <div className="admin-identity"><span className="admin-status">{platform?(lang==='en'?'Platform administrator':'Супер администратор'):(lang==='en'?'Organisation administrator':'Администратор на организация')}</span><span>{me?.email}</span><small>{me?.name||translate(lang,'users.namesMissing')}</small></div></div>
       <div className="admin-header-actions">{organisationAdmin&&<a className="secondary-btn" href="#new-member-invitation">{lang==='en'?'+ Invite member':'+ Покани потребител'}</a>}
@@ -195,7 +196,7 @@ export function Invitations({ api, lang, mode = 'accept', identity }: { api: Gri
         <div className="admin-pagination"><span>{currentInvitationPage+1} / {invitationPages}</span><div><button type="button" className="secondary-btn" disabled={currentInvitationPage===0} onClick={()=>setInvitationPage(value=>Math.max(0,value-1))}>{lang==='en'?'Previous':'Назад'}</button><button type="button" className="secondary-btn" disabled={currentInvitationPage>=invitationPages-1} onClick={()=>setInvitationPage(value=>value+1)}>{lang==='en'?'Next':'Напред'}</button></div></div>
       </section>}
     {organisationAdmin&&<div id="approved-organisation-members">
-      {admins.map(admin=><OrganisationMembers key={`members-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId} onOrganisationServices={()=>document.getElementById('organisation-services')?.scrollIntoView({behavior:'smooth',block:'start'})}/>)}</div>}
+      {admins.map(admin=><OrganisationMembers key={`members-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId} currentSubject={me?.subject} onOrganisationServices={()=>document.getElementById('organisation-services')?.scrollIntoView({behavior:'smooth',block:'start'})}/>)}</div>}
     {organisationAdmin&&<div className="admin-service-decisions">{admins.map(admin=><ServiceRequestsAdmin key={`requests-${admin.organisationId}`} api={api} lang={lang} organisationId={admin.organisationId}/>)}</div>}
     {mode==='manage'&&(platform||organisationAdmin)&&<section className="card invitation-panel admin-manager-footer" aria-label={lang==='en'?'OpenRemote administration':'Администрация в OpenRemote'}>
       <div><span className="profile-kicker">OPENREMOTE · {lang==='en'?'READ ONLY':'САМО ЧЕТЕНЕ'}</span><h2>{lang==='en'?'OpenRemote Manager':'OpenRemote Manager'}</h2>

@@ -16,7 +16,7 @@ for(const loss of ['site','identity'] as const)test(`session rechecks roles and 
   });
   await page.route('https://api.example.invalid/**',r=>{
     const path=new URL(r.request().url()).pathname;
-    if(path.endsWith('/me'))return !allowed&&loss==='identity'?r.fulfill({status:403,json:{error:'forbidden'}}):r.fulfill({json:{subject:'owner',roles:[role],permissions:[],memberships:[]}});
+    if(path.endsWith('/me'))return !allowed&&loss==='identity'?r.fulfill({status:403,json:{error:'forbidden'}}):r.fulfill({json:{subject:'owner',roles:[role],permissions:[],memberships:[{organisationId:'org',role,allSites:role==='administrator'}]}});
     if(path.endsWith('/sites'))return r.fulfill({json:{sites:allowed?[{id:'lab',name:'Private Lab'}]:[]}});
     if(path.endsWith('/hardware'))return r.fulfill({json:{inventorySource:'openremote',gateways:[{id:'rock',name:'Private ROCK',hardwareModel:'rock-pi-e',role:'controller',ports:[]}],devices:[]}});
     if(path.endsWith('/device-heartbeats'))return r.fulfill({json:{items:[]}});
@@ -25,14 +25,14 @@ for(const loss of ['site','identity'] as const)test(`session rechecks roles and 
   });
   await page.goto('/sites/lab/devices/');
   await expect(page.getByRole('heading',{name:'Private ROCK',exact:true})).toBeVisible();
-  await expect(page.locator('.profile small')).toHaveText('Администратор');
-  role='customer';
+  await expect(page.locator('.profile small')).toHaveText('Администратор на организация');
+  role='viewer';
   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
-  await expect(page.locator('.profile small')).toHaveText('Клиент');
+  await expect(page.locator('.profile small')).toHaveText('Наблюдател');
   allowed=false;
   await page.evaluate(()=>window.dispatchEvent(new Event('online')));
   if(loss==='identity')await expect(page.locator('.quick-sign-in')).toBeVisible();
-  else await expect(page.locator('.profile small')).toHaveText('Клиент');
+  else await expect(page.locator('.profile small')).toHaveText('Наблюдател');
   await expect(page.getByRole('heading',{name:'Private ROCK',exact:true})).toHaveCount(0);
   await expect(page.locator('.app-shell')).toHaveAttribute('data-mode',loss==='identity'?'demo':'live');
   if(loss==='identity')await expect(page).toHaveURL(/\/demo\/$/);
@@ -62,13 +62,13 @@ test('a temporary API failure clears without manual refresh or losing the signed
   });
   await page.goto('/overview/');
   await expect(page.getByText('Проверката на сесията временно е недостъпна.',{exact:false})).toBeVisible();
-  await expect(page.locator('.profile small')).toHaveText('Клиент',{timeout:10000});
+  await expect(page.locator('.profile small')).toHaveText('Наблюдател',{timeout:10000});
   await expect(page.getByText('Проверката на сесията временно е недостъпна.',{exact:false})).toHaveCount(0);
   failResume=true;
   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
   await expect(page.getByText('Проверката на сесията временно е недостъпна.',{exact:false})).toBeVisible();
   await page.locator('[data-view-id="overview"]').click();
-  await expect(page.locator('.profile small')).toHaveText('Клиент');
+  await expect(page.locator('.profile small')).toHaveText('Наблюдател');
   failResume=false;
   await page.evaluate(()=>window.dispatchEvent(new Event('online')));
   await expect(page.getByText('Проверката на сесията временно е недостъпна.',{exact:false})).toHaveCount(0);
