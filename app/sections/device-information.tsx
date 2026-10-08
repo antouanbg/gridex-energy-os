@@ -5,6 +5,7 @@ import type {FormEvent} from 'react';
 import type { DeviceHeartbeat, GridexApiClient, GridexHardwareTopology, RockTelemetryResponse } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { DeviceSetupWizard } from './device-setup';
+import {telemetryRows,telemetryValue} from '../lib/telemetry-presentation';
 
 export function DeviceInformation({ api, siteId, lang, configure = false, canCommission = false }: { api: GridexApiClient; siteId: string; lang: UiLanguage; configure?: boolean; canCommission?: boolean }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
@@ -141,12 +142,12 @@ export function DeviceInformation({ api, siteId, lang, configure = false, canCom
 function RockTelemetryCard({ telemetry, error, lang }: { telemetry: RockTelemetryResponse | null; error: boolean; lang: UiLanguage }) {
   const t = (bg: string, en: string) => lang === 'en' ? en : bg;
   const labels: Record<string, string> = { cpuTemperatureC: t('Температура на процесора', 'CPU temperature'), uptimeSeconds: t('Време на работа', 'Uptime'), load1: t('Натоварване (1 мин.)', 'Load (1 min)'), memoryAvailableBytes: t('Свободна памет', 'Available memory'), storageDataFreeBytes: t('Свободно дисково пространство', 'Free storage'), journalSizeBytes: t('Размер на telemetry journal', 'Telemetry journal size') };
-  const unitLabels: Record<string, string> = { Cel: '°C', s: 's', load: '', bytes: 'B' };
+  const rows=telemetryRows(telemetry?.items||[]);
   return <article className="telemetry-card" data-no-translate>
     <h3>{t('Телеметрия на ROCK Pi', 'ROCK Pi telemetry')}</h3>
     <p>{error ? t('Телеметрията още не е достъпна.', 'Telemetry is not available yet.') : telemetry?.items.length ? t('Последните записани измервания от OpenRemote.', 'Latest measurements recorded in OpenRemote.') : t('Очаква се първото измерване.', 'Waiting for the first measurement.')}</p>
     <dl>
-      {telemetry?.items.map(item => { const point = item.points.reduce<(typeof item.points)[number] | undefined>((latest, current) => !latest || current.x > latest.x ? current : latest, undefined); return <span key={item.metric}><dt>{labels[item.metric] || item.metric}</dt><dd>{point ? `${point.y.toFixed(item.unit === 'bytes' || item.unit === 's' ? 0 : 1)} ${unitLabels[item.unit] || item.unit}` : '—'}</dd></span>; })}
+      {rows.map(item => { const point = item.points.reduce<(typeof item.points)[number] | undefined>((latest, current) => !latest || current.x > latest.x ? current : latest, undefined); return <span key={JSON.stringify([item.assetId,item.metric,item.unit])}><dt>{labels[item.metric] || item.metric}{rows.filter(row=>row.metric===item.metric).length>1&&<small> · {item.assetId}</small>}</dt><dd>{point ? telemetryValue(point.y,item.unit,lang==='en'?'en-GB':'bg-BG') : '—'}</dd></span>; })}
     </dl>
     <small>{t('Другите системни показатели се записват по разрешения sensor profile и ще се добавят към този екран без Grafana.', 'Other system metrics are stored by the approved sensor profile and will appear here without Grafana.')}</small>
   </article>;

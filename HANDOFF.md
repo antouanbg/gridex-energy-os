@@ -1,5 +1,27 @@
 # Frontend login handoff
+
+## 2026-10-08 — remaining report corrections, source-ready
+
+N1 now uses existing verified hardware and same-organisation personal grants;
+no invented assets, rights or measurements. D6 deduplicates exact telemetry
+sources, retains distinct sensors, formats values and supplies BG/EN help for
+Overview/Profile/Plan. Browser console resources are explained, not deleted.
+95 local tests pass; final Site summary mobile check additionally verifies no
+foreign service grant appears. No rollout or real-account acceptance claimed.
+Diagnostic scope is approved and recorded in AGENTS, but its new cross-tenant
+approval/expiry/revocation workflow remains unimplemented, requiring full screen
+and API specification before activation. API/proxy rollout is still separate.
+БГ: останалите поправки са в кода; няма нови реални права или клиентски данни.
+Локалните тестове не са външно приемане. Диагностичната политика е одобрена,
+но новият процес още не е реализиран. Предстоят публикуване и външен повторен тест.
 Repository / GitHub: `antouanbg/gridex-energy-os`
+
+## 2026-10-08 — second external audit / Втори външен одит
+
+See docs/EXTERNAL_AUDIT_FOLLOWUP_2026_10_08.md for D1–D6 and N1 traceability.
+13 evidence images reviewed. Corrections are source-only until separately
+published and externally retested. BG: снимките са прегледани; поправките
+още не са внедрени, реалното повторно приемане остава отворено.
 
 ## 2026-10-08 — external audit corrections deployed; acceptance open
 

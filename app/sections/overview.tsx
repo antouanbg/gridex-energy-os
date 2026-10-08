@@ -65,7 +65,7 @@ function EnergyFlowVisual({lang,dataMode,snapshot}:{lang:UiLanguage;dataMode:Dat
       <FlowAsset className="flow-load" icon="⌂" label={t("Консумация","Site load")} value={values.load} unit="kW" note={t("Текущ товар на обекта","Current site demand")} state={t("КОНСУМАТОР","LOAD")}/>
 
       <FlowLane className="lane-battery" value={`${values.battery} kW`} tone="battery"/>
-      <FlowAsset className="flow-battery" icon="▣" label={t("Батерия","Battery")} value={hasLiveSnapshot&&snapshot?.battery?.socPct!=null?`${snapshot.battery.socPct.toFixed(1)}%`:hasLiveSnapshot?"—":"72%"} unit="SOC" note={hasLiveSnapshot?`${values.battery} kW · ${snapshot?.quality}`:gridCharge?t("Заряд от мрежата · ниска цена","Grid charge · low price"):t("Заряд от PV излишък","Charging from PV surplus")} state={hasLiveSnapshot?batteryState:t("ЗАРЕЖДА","CHARGING")}/>
+      <FlowAsset className="flow-battery" icon="▣" label={t("Батерия","Battery")} value={hasLiveSnapshot&&snapshot?.battery?.socPct!=null?`${snapshot.battery.socPct.toFixed(1)}%`:hasLiveSnapshot?"—":"72%"} unit="SOC" note={hasLiveSnapshot?`${values.battery} kW · ${snapshot?.quality==="GOOD"?t("Проверени данни","Verified data"):snapshot?.quality==="STALE"?t("Остарели данни","Stale data"):t("Няма валидни данни","No valid data")}`:gridCharge?t("Заряд от мрежата · ниска цена","Grid charge · low price"):t("Заряд от PV излишък","Charging from PV surplus")} state={hasLiveSnapshot?batteryState:t("ЗАРЕЖДА","CHARGING")}/>
 
       <FlowLane className="lane-grid-out" value={`${values.gridOut} kW`} tone="grid" active={!gridCharge}/>
       <FlowAsset className="flow-grid-out" icon="↗" label={t("Износ към мрежата","Grid export")} value={values.gridOut} unit="kW" note={gridCharge?t("Износът е спрян","Export disabled"):t("Продажба на излишъка","Selling surplus")} state={gridCharge?t("ИЗКЛЮЧЕН","OFF"):t("ИЗНОС","EXPORT")} active={!gridCharge}/>
@@ -122,7 +122,7 @@ export function Overview({ auto, setAuto, navigate, notify, lang, dataMode, snap
   const t=(bg:string,en:string)=>lang==="en"?en:bg;
   const isLive=dataMode==="live";
   const batterySoc=isLive&&snapshot?.battery?.socPct!=null?snapshot.battery.socPct.toFixed(1):isLive?"—":"72";
-  if(isLive&&!snapshot)return <section className="card config-card" role="status"><h2>{t('Очаква реални данни','Awaiting real data')}</h2><p>{t('За прегледа са необходими избран обект, конфигурирани устройства и получена телеметрия. Ако устройствата вече са настроени, провери връзката им — не е нужно повторно провизиране.','The overview requires a selected site, configured devices and received telemetry. If devices are already configured, check their connection; do not provision them again.')}</p><button className="primary-btn" onClick={()=>navigate('devices')}>{t('Към устройства','Go to devices')}</button></section>;
+  if(isLive&&!snapshot)return <section className="card config-card" role="status"><h2>{t('Очаква реални данни','Awaiting real data')}</h2><p>{t('За прегледа са необходими избран обект, конфигурирани устройства и получена телеметрия. Ако устройствата вече са настроени, провери връзката им — не е нужно повторно провизиране.','The overview requires a selected site, configured devices and received telemetry. If devices are already configured, check their connection; do not provision them again.')}</p><button className="primary-btn" onClick={()=>navigate('devices')}>{t('Към инфраструктурата','Go to infrastructure')}</button></section>;
   return <>
     {isLive&&<div className="status-strip">
       <span><i className="live-dot"/>{dataMode==="live"?t("Свързано с OpenRemote","Connected to OpenRemote"):t("Представителни демо данни","Representative demo data")}</span>
@@ -135,12 +135,12 @@ export function Overview({ auto, setAuto, navigate, notify, lang, dataMode, snap
         <EnergyFlowVisual lang={lang} dataMode={dataMode} snapshot={snapshot}/>
       </article>
       <aside className="summary card">
-        <PanelTitle eyebrow={t("ДНЕШЕН РЕЗУЛТАТ","TODAY'S RESULT")} title={isLive?new Date().toLocaleDateString(lang==="en"?"en-GB":"bg-BG"):"21 август 2026"} action={<button disabled={isLive} onClick={() => notify("Отчетът е подготвен за изтегляне")}>•••</button>}/>
-        <div className="profit"><span>{t("Нетен резултат","Net result")}</span><strong>{isLive?"—":"+942.11 €"}</strong><small>{isLive?t("Очаква economics endpoint","Awaiting economics endpoint"):"↑ 18.4% спрямо прогнозата"}</small></div>
+        <PanelTitle eyebrow={t("ДНЕШЕН РЕЗУЛТАТ","TODAY'S RESULT")} title={isLive?new Date().toLocaleDateString(lang==="en"?"en-GB":"bg-BG"):new Intl.DateTimeFormat(lang==="en"?"en-GB":"bg-BG",{day:"numeric",month:"long",year:"numeric"}).format(new Date(2026,7,21))} action={<button disabled={isLive} onClick={() => notify("Отчетът е подготвен за изтегляне")}>•••</button>}/>
+        <div className="profit"><span>{t("Нетен резултат","Net result")}</span><strong>{isLive?"—":"+942.11 €"}</strong><small>{isLive?t("Очаква economics endpoint","Awaiting economics endpoint"):t("↑ 18.4% спрямо прогнозата","↑ 18.4% above forecast")}</small></div>
         <div className="summary-row"><span>{t("Спестени разходи","Avoided costs")}<small>{t("Собствено потребление","Self-consumption")}</small></span><b>{isLive?"—":"349.83 €"}</b></div>
         <div className="summary-row"><span>{t("Приход от продажба","Export revenue")}<small>{t("Енергия към мрежата","Energy exported")}</small></span><b>{isLive?"—":"663.04 €"}</b></div>
         <div className="summary-row"><span>{t("Разход за покупка","Import cost")}<small>{t("Енергия от мрежата","Energy imported")}</small></span><b className="negative">{isLive?"—":"−70.76 €"}</b></div>
-        <button className="details" onClick={() => navigate("balance")}>Виж подробен отчет →</button>
+        <button className="details" onClick={() => navigate("balance")}>{t("Виж подробен отчет","View detailed report")} →</button>
       </aside>
     </section>
     <LossProtectionPanel lang={lang} dataMode={dataMode} snapshot={snapshot}/>

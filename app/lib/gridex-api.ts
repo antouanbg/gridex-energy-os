@@ -471,8 +471,13 @@ export class GridexApiClient {
   navigation(signal?:AbortSignal):Promise<{realm:string;subject:string;items:{id:string;parentId:string|null;path:string;labelKey:string;sortOrder:number;state:string;visible:boolean}[]}> {
     return this.getJson('/api/v1/me/navigation',signal);
   }
-  siteVisualisationHistory(siteId:string,signal?:AbortSignal):Promise<SiteVisualisationHistory> {
-    return this.getJson(`/api/v1/sites/${encodeURIComponent(siteId)}/visualisations/history`,signal);
+  async siteVisualisationHistory(siteId:string,signal?:AbortSignal):Promise<SiteVisualisationHistory> {
+    const response=await this.authorizedFetch(`/api/v1/sites/${encodeURIComponent(siteId)}/visualisations/history`,{signal,cache:'no-store'});
+    if(!response.ok){
+      const body=await response.json().catch(()=>({}));
+      throw new GridexApiError('Site history unavailable',response.status,typeof body.error==='string'?body.error:undefined);
+    }
+    return response.json();
   }
   serviceCatalog(signal?: AbortSignal): Promise<{services:ServiceCatalogItem[]}> {
     return this.getJson('/api/v1/me/service-catalog', signal);

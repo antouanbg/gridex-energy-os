@@ -13,6 +13,10 @@ function load(file) {
   }).outputText;
   const exports = {};
   new Function('exports', 'require', code)(exports, name => {
+    if (name === './site-summary') return load('../app/sections/site-summary.tsx');
+    if (name === '../lib/service-labels') return load('../app/lib/service-labels.ts');
+    if (name === '../i18n/catalog') return load('../app/i18n/catalog.ts');
+    if (/^\.\/locales\/(bg|en)\.json$/.test(name)) return {default:JSON.parse(fs.readFileSync(new URL('../app/i18n/'+name,import.meta.url),'utf8'))};
     if (name === './shared') return load('../app/sections/shared.tsx');
     if (name === '../lib/currency') return load('../app/lib/currency.ts');
     if (name === '../lib/routes') return load('../app/lib/routes.ts');

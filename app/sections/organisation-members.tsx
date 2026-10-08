@@ -111,7 +111,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
             <td data-label={en?'Sites':'Обекти'}>{member.allSites?(en?'All organisation Sites':'Всички Обекти на организацията'):member.siteIds.map(siteName).join(', ')||(en?'None assigned':'Няма разрешени')}</td>
             <td data-label={en?'Services':'Услуги'}>{member.services.map(code=>serviceLabel(code,lang)).join(', ')||(en?'None granted':'Няма разрешени')}</td>
             <td data-label={en?'Actions':'Действия'}><button type="button" className="secondary-btn" disabled={busy||loading} aria-label={(en?'Access details: ':'Права и услуги: ')+memberName(member,en)} aria-pressed={selected===member.subject}
-              onClick={()=>{setSelected(member.subject);setDetailsOpen(true);setRole(member.role);setSiteIds(member.siteIds);setReviewing(false);setNotice('');}}>{member.subject===currentSubject?translate(lang,'users.myServices'):(en?'Access details':'Права и услуги')}</button></td>
+              onClick={()=>{setSelected(member.subject);setDetailsOpen(true);setRole(member.role);setSiteIds(member.siteIds);setReviewing(false);setNotice('');}}>{platform?translate(lang,'users.viewAccess'):member.subject===currentSubject?translate(lang,'users.myServices'):(en?'Access details':'Права и услуги')}</button></td>
           </tr>)}
         </tbody></table></div>
         {page&&<div className="admin-pagination"><span>{members.length?`${offset+1}–${offset+members.length}${page.total?` / ${page.total}`:''}`:'0'}</span>
@@ -124,7 +124,10 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
         {current&&<><h3>{memberName(current,en)}</h3>
           <div className="admin-member-meta"><div><span>{en?'Email':'Имейл'}</span><strong>{current.email||current.subject}</strong></div>
             <div><span>{en?'Last sign-in':'Последен вход'}</span><strong>{current.lastLoginAt?new Date(current.lastLoginAt).toLocaleString(en?'en-GB':'bg-BG'):(en?'Not recorded':'Няма запис')}</strong></div></div>
-          <label>{en?'Role in organisation':'Роля в организацията'}<select value={role} disabled={platform||current.role==='administrator'||busy||loading}
+          {platform?<div className="admin-effective-rights"><p>{translate(lang,'users.personalGrantsByOrgAdmin')}</p><dl>
+            <dt>{en?'Role in organisation':'Роля в организацията'}</dt><dd>{roleNames[current.role]?.[lang]||current.role}</dd>
+            <dt>{en?'Assigned Sites':'Разрешени Обекти'}</dt><dd>{current.allSites?(en?'All organisation Sites':'Всички Обекти на организацията'):current.siteIds.map(siteName).join(', ')||(en?'None assigned':'Няма разрешени')}</dd>
+          </dl></div>:<><label>{en?'Role in organisation':'Роля в организацията'}<select value={role} disabled={current.role==='administrator'||busy||loading}
             onChange={event=>{setRole(event.target.value);setReviewing(false);}}>
             {current.role==='administrator'&&<option value="administrator">{roleNames.administrator[lang]}</option>}
             {editableRoles.map(item=><option key={item} value={item}>{roleNames[item][lang]}</option>)}</select></label>
@@ -132,7 +135,7 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
             {!page?.sites.length&&<p>{en?'No Sites have been created.':'Още няма създадени Обекти.'}</p>}
             <div className="admin-site-options">{page?.sites.map(site=><label key={site.id}><input type="checkbox" checked={siteIds.includes(site.id)}
               onChange={event=>{setSiteIds(ids=>event.target.checked?[...ids,site.id]:ids.filter(id=>id!==site.id));setReviewing(false);}}/>{site.name}</label>)}</div>
-          </fieldset>
+          </fieldset></>}
           {current.siteIds.some(id=>!current.verifiedSiteIds.includes(id))&&<p role="alert" className="organisation-member-warning">{en?'Some assigned Sites have no verified access link.':'За част от Обектите няма потвърдена връзка за достъп.'}</p>}
           <div className="admin-effective-rights"><strong>{en?'Effective role permissions':'Права според ролята'}</strong><p>{roleRights[role]?.[lang]} {siteIds.length?`${en?'Sites':'Обекти'}: ${siteIds.map(siteName).join(', ')}.`:(en?'No Site access.':'Без достъп до Обекти.')}</p>
             <a href={`${documentationLink('members',lang).href}#rights-matrix`} target="_blank" rel="noopener noreferrer">{en?'Permission matrix':'Матрица на правата'} ↗</a></div>
@@ -147,9 +150,9 @@ export function OrganisationMembers({api,lang,organisationId,platform=false,onOr
               const ready=organisationServiceReady(service),enabled=current.services.includes(service.code),verified=services!==null&&!serviceError;
               return <div className="admin-service-row" key={service.code} data-service-code={service.code}><div><strong>{serviceLabel(service.code,lang)}{service.code==='day_ahead'?' · BG':''}</strong>
                 <small>{!service.requestable?(en?'Coming soon':'Предстои'):!verified?(serviceError?(en?'Permissions unavailable':'Правата не са проверени'):(en?'Checking permissions…':'Проверяваме правата…')):!ready?(en?'Not approved for the organisation':'Не е одобрена за организацията'):enabled?(en?'Enabled for this person':'Разрешена за този човек'):(en?'Approved for the organisation; not enabled for this person':'Одобрена за организацията; не е разрешена за този човек')}</small></div>
-                <div className="admin-service-actions"><button type="button" className={enabled?'secondary-btn':'primary-btn'} disabled={platform||busy||loading||!verified||!service.requestable||!ready}
+                {!platform&&<div className="admin-service-actions"><button type="button" className={enabled?'secondary-btn':'primary-btn'} disabled={busy||loading||!verified||!service.requestable||!ready}
                   onClick={()=>void toggleService(service)}>{!service.requestable?(en?'Coming soon':'Предстои'):enabled?(en?'Remove access':'Отнеми достъпа'):(en?'Grant and notify':'Разреши и уведоми')}</button>
-                  {!platform&&verified&&service.requestable&&!ready&&onOrganisationServices&&<button type="button" className="secondary-btn" onClick={onOrganisationServices}>{en?'Organisation request':'Заяви за организацията'}</button>}</div>
+                  {verified&&service.requestable&&!ready&&onOrganisationServices&&<button type="button" className="secondary-btn" onClick={onOrganisationServices}>{en?'Organisation request':'Заяви за организацията'}</button>}</div>}
               </div>;
             })}
           </div></>}

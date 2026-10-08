@@ -68,7 +68,9 @@ test('authenticated navigation, transient refresh outage, recovery and real expi
   }
   await page.locator('[data-view-id="sites"]').click();
   await expect(page.getByRole('heading',{name:'Test Lab'})).toBeVisible();
-  await page.getByRole('button',{name:'Устройства →',exact:true}).click();
+  await expect(page.locator('.site-summary')).toContainText('Test ROCK Pi');
+  await expect(page.locator('.site-summary')).toContainText('Няма лично разрешени услуги.');
+  await page.getByRole('button',{name:'Инфраструктура →',exact:true}).click();
   await expect(page.getByTestId('section-devices')).toBeVisible();
   await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ROCK Pi');
   await expect(page.getByRole('region',{name:'Внесени устройства'})).toContainText('Test ESP32');

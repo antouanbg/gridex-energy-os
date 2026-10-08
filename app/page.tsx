@@ -751,8 +751,8 @@ function LiveModulePending({view,lang,onDevices}:{view:string;lang:UiLanguage;on
     <h2>{t("Този раздел очаква провизиране на реални данни","This section requires provisioning of real data")}</h2>
     <span>{t("За да се използва, трябва да бъдат свързани съответните източници на данни и да бъде завършена интеграцията с backend. Само регистрацията на устройство не активира всички раздели. Входът Ви остава активен; примерни стойности не се показват.","To use this section, the relevant data sources must be configured and the backend integration completed. Registering a device alone does not activate every section. You remain signed in; sample values are never displayed.")}</span>
     <code>{endpoints[view]??"/api/v1"}</code>
-    <p>{t('Регистрираните ROCK Pi и ESP32 са в раздел „Устройства“, не в енергийните активи.','Registered ROCK Pi and ESP32 units are under Devices, not energy assets.')}</p>
-    <button type="button" className="primary-btn" onClick={onDevices}>{t('Отвори регистрираните устройства','Open registered devices')}</button>
+    <p>{t('Регистрираните ROCK Pi и ESP32 са в раздел „Инфраструктура“, не в енергийните активи.','Registered ROCK Pi and ESP32 units are under Infrastructure, not energy assets.')}</p>
+    <button type="button" className="primary-btn" onClick={onDevices}>{t('Отвори инфраструктурата','Open infrastructure')}</button>
     <small>{t("Договорът и всички полета са описани в docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md","The contract and all fields are documented in docs/integration/FRONTEND_BACKEND_IMPLEMENTATION_PLAN.md")}</small>
   </section>;
 }
