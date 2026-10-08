@@ -77,7 +77,7 @@ test('signed-in member can edit the reply address while retaining verified accou
   await context.route('https://api.example.invalid/**', route => {
     const path = new URL(route.request().url()).pathname;
     if (path === '/api/v1/auth/login-realm') return route.fulfill({ json: { realms: ['gridex'] } });
-    if (path === '/api/v1/me') return route.fulfill({ json: { subject: 'owner', email: 'owner@example.invalid', name: 'Owner', roles: ['administrator'], permissions: [], memberships: [] } });
+    if (path === '/api/v1/me') return route.fulfill({ json: { subject: 'owner', email: 'owner@example.invalid', name: 'Owner', roles: ['administrator'], permissions: [], memberships: [{organisationId:'own',role:'administrator',allSites:true}] } });
     if (path === '/api/v1/sites') return route.fulfill({ json: { sites: [] } });
     if (path === '/api/v1/contact/challenge') return route.fulfill({ json: { id: 'one-time', left: 4, right: 5, expiresInSeconds: 600 } });
     if (path === '/api/v1/contact/inquiries') {
@@ -91,7 +91,7 @@ test('signed-in member can edit the reply address while retaining verified accou
   await page.locator('.demo-sign-in').click();
   await page.getByLabel('Имейл', { exact: true }).fill('owner@example.invalid');
   await page.locator('.login-submit').click();
-  await expect(page.locator('.profile small')).toHaveText('Администратор');
+  await expect(page.locator('.profile small')).toHaveText('Администратор на организация');
   await page.goto('/about/');
   const form = page.locator('#contact-enquiry');
   const reply = form.getByRole('textbox', { name: 'Имейл за отговор' });

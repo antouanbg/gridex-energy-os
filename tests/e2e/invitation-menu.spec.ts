@@ -128,11 +128,11 @@ test('organisation administrator requests a service without granting it and canc
   const catalogue=page.locator('.organisation-service-workspace');
   await expect(catalogue.locator('[data-service-code]')).toHaveCount(5);
   const price=catalogue.locator('[data-service-code="day_ahead"]');
-  await price.getByRole('button',{name:'Заяви',exact:true}).click();
+  await price.getByRole('button',{name:'Заяви към супер админа',exact:true}).click();
   await expect(price.getByRole('button',{name:'Отмени заявката'})).toBeVisible();
   expect(submissions).toBe(1);
   await price.getByRole('button',{name:'Отмени заявката'}).click();
-  await expect(price.getByRole('button',{name:'Заяви',exact:true})).toBeVisible();
+  await expect(price.getByRole('button',{name:'Заяви към супер админа',exact:true})).toBeVisible();
   expect(cancellations).toBe(1);
   await expect(price).toContainText('Не е одобрена за организацията');
 });
@@ -143,7 +143,7 @@ test('non-admin has no invitation submenu and cannot use its direct URL',async({
   await expect(page.locator('[data-view-id="members"]')).toHaveCount(0);
   await expect(page.locator('[data-view-id="customers"]')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Изпрати покана'})).toHaveCount(0);
-  await expect(page.getByText('Нужни са администраторски права')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Този раздел е за администратори'})).toBeVisible();
   await page.goto('/sites/');
   await expect(page.locator('[data-view-id="sites"]')).toBeVisible();
 });
@@ -213,9 +213,9 @@ test('invitation page keeps the approved look, documentation link and mobile vie
   await expect(page.locator('.organisation-service-workspace [data-service-code]')).toHaveCount(5);
   expect(await page.locator('.organisation-service-workspace .admin-panel').first().evaluate(el=>{
     const s=getComputedStyle(el);return {background:s.backgroundColor,radius:s.borderRadius,padding:s.padding};
-  })).toEqual({background:'rgb(255, 255, 255)',radius:'15px',padding:'17px'});
-  await expect(page.locator('.organisation-service-workspace [data-service-code="day_ahead"]').getByRole('button',{name:'Заяви',exact:true})).toBeEnabled();
-  expect(await page.locator('.organisation-service-workspace .primary-btn').first().evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(11, 66, 48)');
+  })).toEqual({background:'rgb(255, 255, 255)',radius:'16px',padding:'20px'});
+  await expect(page.locator('.organisation-service-workspace [data-service-code="day_ahead"]').getByRole('button',{name:'Заяви към супер админа',exact:true})).toBeEnabled();
+  expect(await page.locator('.organisation-service-workspace .primary-btn').first().evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(12, 68, 51)');
   await expect(page.locator('.page-help-link')).toHaveAttribute('href','https://doc.gridex.tech/organisations-and-access/');
   await expect(page.getByRole('region',{name:'Потребители на организацията'})).toBeVisible();
   const listBox=await page.locator('.organisation-members-list').boundingBox();

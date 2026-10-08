@@ -1172,7 +1172,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .platform-service-workspace { display:grid; gap:16px; min-width:0; }
 .admin-service-summary { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 12px; }
 .invitation-page .invitation-hero { background:none; border:0; box-shadow:none; padding:0; border-radius:0; align-items:start; }
-.invitation-page .invitation-hero h2 { color:var(--admin-ink); font-size:24px; letter-spacing:0; margin:0 0 5px; }
+.invitation-page .invitation-hero h2 { color:var(--admin-ink); font-size:27px; letter-spacing:0; margin:0 0 5px; }
 .invitation-page .invitation-hero p, .invitation-page .admin-role-caption { color:var(--admin-muted); }
 .invitation-page .invitation-hero .profile-kicker, .invitation-page .invitation-panel-mark,
 .invitation-page .invitation-steps, .invitation-page .invitation-panel>.profile-kicker { display:none; }
@@ -1181,7 +1181,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   padding:20px; border:1px solid var(--admin-line); border-radius:16px; background:#fff; box-shadow:none;
 }
 .invitation-page .invitation-panel h2, .invitation-page .admin-section-heading h2,
-.invitation-page h3, .service-catalog h3 { font-size:16px; letter-spacing:0; margin:0 0 7px; color:var(--admin-ink); }
+.invitation-page h3, .service-catalog h3 { font-size:18px; letter-spacing:0; margin:0 0 7px; color:var(--admin-ink); }
 .invitation-page .invitation-history { display:block; margin:0; }
 .invitation-page .invitation-panel-head p { margin:0 0 14px; }
 .invitation-page .admin-service-row, .service-catalog .service-grant-row {
@@ -1258,6 +1258,8 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .invitation-page .organisation-members-list.admin-panel {border:0;padding:0;background:transparent;}
 .invitation-page .organisation-member-detail.admin-panel {background:#f3f7f4;}
 .invitation-page .member-register {table-layout:fixed;}
+.invitation-page .member-register th:first-child {width:29%;}
+.invitation-page .member-register th:last-child {width:18%;}
 .invitation-page .member-register td {overflow-wrap:anywhere;}
 .organisation-member-detail summary {cursor:pointer;font-weight:700;color:#174d3b;padding:8px 0;}
 @media(max-width:760px){
