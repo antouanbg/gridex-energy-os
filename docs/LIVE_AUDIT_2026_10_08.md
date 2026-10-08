@@ -36,7 +36,20 @@ None are marked accessRestrictedRead. No attribute visibility was broadened.
 A real restricted-user response is still needed to establish the exact Manager
 rendering cause; do not call it fixed or create duplicate resources.
 
-Status: source corrections tested, not deployed. No rights, inventory or mail
+Publication: frontend PR #109; backend PR #100 merged as e90c1b6, API restart
+awaits explicit owner approval. Docs PR #53 merged as 23a120b and deployed with
+deploy-local.sh; local proxy BG/EN and CSS/JS MIME checks pass. Browser verified
+UTF-8 Cyrillic in the canonical reference. External VPN acceptance remains open.
+Docs dependency audit reports 47 findings (15 moderate, 16 high, 16 critical)
+in the build toolchain; no blind upgrades applied. Track separately from UI fixes.
+Frontend render/API unit checks: 29 passed after adding the documentation helper
+to the test loader. Full browser suite remains the release gate; older tests
+must use canonical membership roles, not generic Administrator/Customer labels.
+Full local run: 93/94 passed with four workers; the stalled-login retry test
+failed once and passed unchanged in isolation (2.3s). Record as intermittent,
+not a proven production authentication defect or a silently skipped check.
+
+Status: frontend source corrections under final CI, not yet deployed. No rights, inventory or mail
 changed. Fixture tests are not real-account acceptance. After publication the
 external three-role test must be repeated, including separately authorised
 reversible write tests. Preserve original audit privately, not in public help.
