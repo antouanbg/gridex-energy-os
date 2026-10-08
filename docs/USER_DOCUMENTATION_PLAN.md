@@ -1,5 +1,11 @@
 # User documentation coverage / Покритие на потребителската документация
 
+2026-10-08: BG/EN navigation guide now covers Overview, Profile, Plan, Site
+inventory/service summaries and telemetry source distinction. Direct help anchors
+replace the corresponding unfinished-help destinations. Source ready, not deployed.
+БГ: добавена помощ за Преглед, Профил, План, обобщението на Обектите и различните
+телеметрични източници; връзките водят до точните секции. Още не е внедрено.
+
 2026-10-04: Demo guide /demo-navigation/ and /en/demo-navigation/ covers all
 27 database menu entries, category separation and demo/live boundaries.
 Every Demo page links to it. Public metadata snapshot is verified by

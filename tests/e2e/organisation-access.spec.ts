@@ -40,6 +40,9 @@ for(const lang of ['bg','en'])for(const role of ['administrator','viewer']){
     if(role==='viewer'){
       await expect(page.getByRole('heading',{name:lang==='en'?'This section is for administrators':'Този раздел е за администратори'})).toBeVisible();
       await expect(page.getByRole('link',{name:lang==='en'?'Go to my services':'Към моите услуги'})).toBeVisible();
+      const paragraph=await page.locator('.config-card > p').boundingBox();
+      const action=await page.locator('.config-card > a.primary-btn').boundingBox();
+      expect(action!.y).toBeGreaterThanOrEqual(paragraph!.y+paragraph!.height+12);
       await expect(page.locator('main')).toContainText('member@example.com');
       await expect(page.locator('main')).toContainText(lang==='en'?'Viewer':'Наблюдател');
       await expect(page.locator('.invitation-page')).toHaveCount(0);
@@ -78,6 +81,10 @@ test('approved platform layout shares organisation selection with read-only rost
   await expect(page.locator('.member-register')).toContainText('second@example.com');
   await expect(page.locator('.member-register')).not.toContainText('first@example.com');
   await expect(page.locator('.member-register th')).toHaveCount(5);
+  await expect(page.locator('.member-register button')).toHaveText(['Преглед']);
+  await page.locator('.member-register button').click();
+  await expect(page.locator('.organisation-member-detail')).toContainText('Личните услуги се предоставят от администратора');
+  await expect(page.locator('.organisation-member-detail input, .organisation-member-detail select, .organisation-member-detail .admin-service-actions')).toHaveCount(0);
   await page.screenshot({path:info.outputPath('approved-platform-desktop.png'),fullPage:true});
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -179,6 +186,10 @@ test('platform service catalogue separates approved, available and future; remov
   await page.getByRole('button',{name:'Потвърди отнемането'}).click();
   expect(writes).toBe(2);
   await page.setViewportSize({width:390,height:844});
+  for(const row of await page.locator('.organisation-market-zones .service-grant-row').all()){
+    expect((await row.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expect(row).toHaveCSS('display','flex');
+  }
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.screenshot({path:info.outputPath('platform-services-mobile.png'),fullPage:true});
 });

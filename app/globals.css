@@ -1266,6 +1266,18 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .invitation-page .member-register th:last-child {width:18%;}
 .invitation-page .member-register td {overflow-wrap:anywhere;}
 .organisation-member-detail summary {cursor:pointer;font-weight:700;color:#174d3b;padding:8px 0;}
+.organisation-market-zones {display:grid;gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid #dbe7df;}
+.organisation-market-zones h4 {font-size:16px;font-weight:700;margin:0;}
+.organisation-market-zones p {margin:0;line-height:1.6;}
+.organisation-market-zones .service-grant-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:10px 12px;border:1px solid #dbe7df;border-radius:10px;background:#f3f7f4;}
+.organisation-market-zones input {flex:0 0 20px;width:20px;height:20px;accent-color:#0b4936;}
+.organisation-market-zones span {min-width:0;overflow-wrap:anywhere;}
+.config-card > a.primary-btn {display:inline-flex;align-items:center;min-height:44px;margin-top:16px;}
+.admin-effective-rights dd {margin:4px 0 14px;overflow-wrap:anywhere;}
+.site-summary {margin:0 18px 16px;padding:14px;border:1px solid #dbe7df;border-radius:12px;background:#f3f7f4;overflow-wrap:anywhere;}
+.site-summary strong {display:block;font-size:13px;color:#174d3b;}
+.site-summary p {margin:5px 0 12px!important;padding:0!important;font-size:14px;line-height:1.5;}
+.site-summary small {display:block;font-size:12px;line-height:1.5;color:#657970;}
 @media(max-width:760px){
   .member-register thead {display:none;}
   .member-register,.member-register tbody,.member-register tr,.member-register td {display:block;width:100%;}

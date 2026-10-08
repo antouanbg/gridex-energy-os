@@ -4,6 +4,9 @@ const DOCS_ORIGIN = 'https://doc.gridex.tech';
 const readyGuides: Record<string, string> = {
   help: '/',
   demo: '/demo-navigation/',
+  overview: '/navigation-and-permissions/#overview',
+  profile: '/navigation-and-permissions/#profile',
+  plans: '/navigation-and-permissions/#plans',
   login: '/organisations-and-access/',
   members: '/organisations-and-access/',
   visualisations: '/organisations-and-access/#site-visualisations',

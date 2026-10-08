@@ -1,5 +1,21 @@
 # Current task
 
+## 2026-10-08 — Claude audit follow-up (source only)
+
+All 13 private evidence screenshots reviewed. Owner confirmed platform charts
+only for already-authorised Sites, never automatic access to other organisations.
+Chart entitlement fix preserves OpenRemote Site/measurement gates. Platform
+roster is read-only; organisation editor unchanged. Country rows and viewer
+mobile spacing corrected. Manager route fixes await approved API/proxy rollout
+and external browser acceptance. No real rights, inventory or mail changes.
+N1 Site summaries and D6 help/telemetry presentation now have source corrections;
+deployment and external acceptance remain open. Duplicate metric rows merge
+only identical sources, never different sensors. Browser console assets remain
+untouched and are explained in BG/EN help.
+Owner confirmed customer diagnostic access: selected Sites, read-only, expiry,
+immediate organisation-admin revocation and audit. Workflow/screens not deployed.
+БГ: поправките са в кода, не са внедрени; не обявявайте целия одит за приключен.
+
 ## 2026-10-08 — approved-template audit correction
 
 Source changes follow the canonical three-role template, not a new design.

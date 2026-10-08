@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { GridexApiError, type GridexApiClient, type SiteVisualisationHistory } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { sectionHref } from '../lib/routes';
+import { translate } from '../i18n/catalog';
 
 const metrics: Record<string,{bg:string;en:string}> = {
   cpuTemperatureC:{bg:'Температура на ROCK Pi',en:'ROCK Pi temperature'},
@@ -49,7 +50,7 @@ export function SiteVisualisations({api,siteId,siteName,lang}:{api:GridexApiClie
   const en=lang==='en';
   const [history,setHistory]=useState<SiteVisualisationHistory|null>(null);
   const [selected,setSelected]=useState('');
-  const [state,setState]=useState<'loading'|'ready'|'denied'|'error'>('loading');
+  const [state,setState]=useState<'loading'|'ready'|'denied'|'site-denied'|'error'>('loading');
   const [revision,setRevision]=useState(0);
   useEffect(()=>{
     if(!siteId)return;
@@ -59,7 +60,8 @@ export function SiteVisualisations({api,siteId,siteName,lang}:{api:GridexApiClie
       setHistory(result);const first=result.items.find(item=>item.points.length)||result.items[0];
       setSelected(first?`${first.assetId}:${first.metric}`:'');
       setState('ready');
-    }).catch(error=>{if(!abort.signal.aborted)setState(error instanceof GridexApiError&&error.status===403?'denied':'error');});
+    }).catch(error=>{if(!abort.signal.aborted)setState(error instanceof GridexApiError&&error.status===403
+      ?error.code==='service_not_enabled'?'denied':'site-denied':'error');});
     return()=>abort.abort();
   },[api,siteId,revision]);
   if(!siteId)return <section className="card live-market-empty"><h2>{en?'Select a Site':'Изберете Обект'}</h2>
@@ -77,8 +79,9 @@ export function SiteVisualisations({api,siteId,siteName,lang}:{api:GridexApiClie
     </section>
     {state==='loading'&&<section className="card live-market-empty" role="status">{en?'Loading measurements…':'Зареждане на измерванията…'}</section>}
     {state==='denied'&&<section className="card live-market-empty" role="status"><h3>{en?'Visualisations are not enabled':'Визуализациите не са разрешени'}</h3>
-      <p>{en?'Request the service in Profile. Your organisation and user grants must both be active.':
-        'Заявете услугата в Профил. Нужни са активни права за организацията и за Вашия акаунт.'}</p></section>}
+      <p>{translate(lang,'graphs.serviceDenied')}</p></section>}
+    {state==='site-denied'&&<section className="card live-market-empty" role="status"><h3>{translate(lang,'graphs.siteDenied')}</h3>
+      <p>{translate(lang,'graphs.siteDeniedHelp')}</p></section>}
     {state==='error'&&<section className="card live-market-empty" role="alert"><h3>{en?'Measurements could not be loaded':'Измерванията не могат да се заредят'}</h3>
       <p>{en?'No stored values are replaced with demo data.':'Не заменяме записаните стойности с демо данни.'}</p>
       <button type="button" className="secondary-btn" onClick={()=>{setHistory(null);setState('loading');setRevision(value=>value+1);}}>{en?'Try again':'Опитайте отново'}</button></section>}

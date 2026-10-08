@@ -4,6 +4,7 @@ import type { GridexApiClient,GridexSite } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { sectionHref } from '../lib/routes';
 import { documentationLink } from '../lib/documentation';
+import { SiteSummary } from './site-summary';
 
 export function LiveSites({sites,status,onSelect,onCreated,organisations=[],api,lang,allowCreate=true}:{sites:GridexSite[];status:'loading'|'ready'|'error';onSelect:(site:GridexSite)=>void;onCreated:(site:GridexSite)=>void;organisations?:{organisationId:string;role:string;allSites:boolean}[];api:GridexApiClient;lang:UiLanguage;allowCreate?:boolean}) {
   const t=(bg:string,en:string)=>lang==='en'?en:bg;
@@ -32,8 +33,9 @@ export function LiveSites({sites,status,onSelect,onCreated,organisations=[],api,
     {!sites.length&&<section className="card">{adminOrganisations.length?(allowCreate?t('Организацията още няма Обект. Създайте първия по-долу.','This organisation has no Site yet. Create the first one below.'):t('Още няма Обект. Създайте го от раздел „Обекти“.','No Site yet. Create one under Sites.')):t('Към акаунта няма достъпни обекти. Администраторът трябва да ти даде достъп.','No sites are available to this account. Ask an administrator to grant access.')}</section>}
     {!!sites.length&&<section className="sites-grid">{sites.map(site=><article className="site-card card" key={site.id}>
     <h2>{site.name}</h2>
+    <SiteSummary key={`${site.id}:${site.organisationId}`} api={api} site={site} lang={lang}/>
     <p>{t('Обект от твоя акаунт. Свързаността на устройствата се проверява отделно.','Site from your account. Device connectivity is verified separately.')}</p>
-    <button type="button" className="primary-btn" onClick={()=>onSelect(site)}>{t('Устройства','Devices')} →</button>
+    <button type="button" className="primary-btn" onClick={()=>onSelect(site)}>{t('Инфраструктура','Infrastructure')} →</button>
     <a className="secondary-btn" href={sectionHref('visualisations',site.id)} onClick={event=>{
       if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       event.preventDefault();window.history.pushState({},'',sectionHref('visualisations',site.id));

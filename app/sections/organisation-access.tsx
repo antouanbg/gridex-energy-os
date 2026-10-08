@@ -200,7 +200,7 @@ function OrganisationMarketZones({api,lang,organisationId}:{api:GridexApiClient;
     } catch {setError(en?'Country permission not confirmed. Reload before retrying.':'Правото за държавата не е потвърдено. Обновете преди нов опит.');}
     finally {setBusy(false);}
   }
-  return <div className="service-grants">
+  return <div className="organisation-market-zones">
     <h4>{en?'Day-ahead countries for this organisation':'Държави „ден напред“ за организацията'}</h4>
     <p>{en?'Grant a collected zone explicitly. This does not enable any user; BG charts also require individual grants for Prices and Visualisations.':
       'Разрешете изрично събирана зона. Това не включва потребител; BG графиките изискват и лични права за Цени и Графики.'}</p>
