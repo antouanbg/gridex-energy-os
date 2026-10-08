@@ -1,11 +1,16 @@
 # Frontend login handoff
 Repository / GitHub: `antouanbg/gridex-energy-os`
 
-## 2026-10-08 — external audit corrections in progress
+## 2026-10-08 — external audit corrections deployed; acceptance open
 
 Owner approved correcting all reported deviations against the existing templates.
 Traceability and open acceptance: [live audit](docs/LIVE_AUDIT_2026_10_08.md).
-No new authority, real grants, inventory or mail changes. Not yet deployed.
+PR #109 merged as 5e9fbd1. CI: 94 browser tests passed; 29 render/API checks.
+Pages run 37730991784 succeeded; public release.json confirmed that exact SHA.
+Docs PR #53 deployed (23a120b), evidence in docs PR #54. Backend PR #100 merged
+(e90c1b6); runtime API restart awaits explicit owner approval. Real-account
+external acceptance and F07 restricted-user Manager detail remain open.
+No new authority, real grants, inventory or mail changes.
 БГ: поправки по външния отчет и одобрените макети; без нова логика/права.
 Проследяването на дефектите и неприключилите проверки е в свързания документ.
 

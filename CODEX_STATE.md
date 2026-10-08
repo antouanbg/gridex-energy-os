@@ -4,7 +4,9 @@
 
 Source changes follow the canonical three-role template, not a new design.
 See docs/LIVE_AUDIT_2026_10_08.md for F01–F07, tests and live read-only evidence.
-No real grants, account changes or inventory writes. Not deployed or owner-accepted.
+Frontend PR #109 deployed as 5e9fbd1; public release.json verified, CI 94/94.
+Docs deployed. Backend name-display change merged but restart awaits approval.
+No real grants, account changes or inventory writes. Not owner-accepted.
 БГ: корекции по одобрените макети; публикация и външно приемане се водят отделно.
 
 ## 2026-10-04 — public presentation privacy

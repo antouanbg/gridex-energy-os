@@ -49,7 +49,10 @@ Full local run: 93/94 passed with four workers; the stalled-login retry test
 failed once and passed unchanged in isolation (2.3s). Record as intermittent,
 not a proven production authentication defect or a silently skipped check.
 
-Status: frontend source corrections under final CI, not yet deployed. No rights, inventory or mail
+Final CI run 37730547035: 94/94 passed, including stalled-login retry.
+PR #109 merged as 5e9fbd1; Pages run 37730991784 succeeded and public release.json
+returned the exact full commit. Frontend deployed; real-account acceptance open.
+Status: frontend and documentation deployed; API restart awaits approval. No rights, inventory or mail
 changed. Fixture tests are not real-account acceptance. After publication the
 external three-role test must be repeated, including separately authorised
 reversible write tests. Preserve original audit privately, not in public help.
