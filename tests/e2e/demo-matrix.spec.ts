@@ -3,7 +3,7 @@ import catalogue from '../../app/lib/navigation-catalog.json' with {type:'json'}
 import bg from '../../app/i18n/locales/bg.json' with {type:'json'};
 import en from '../../app/i18n/locales/en.json' with {type:'json'};
 
-for(const lang of ['bg','en'] as const)for(const width of [390,1440]){
+for(const lang of ['bg','en'] as const)for(const width of [390,1024,1440]){
   test('demo database matrix '+lang+' '+width,async({page},info)=>{
     test.setTimeout(90000);
     await page.setViewportSize({width,height:900});

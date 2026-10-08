@@ -1,4 +1,13 @@
 # Frontend login handoff
+Repository / GitHub: `antouanbg/gridex-energy-os`
+
+## 2026-10-08 — external audit corrections in progress
+
+Owner approved correcting all reported deviations against the existing templates.
+Traceability and open acceptance: [live audit](docs/LIVE_AUDIT_2026_10_08.md).
+No new authority, real grants, inventory or mail changes. Not yet deployed.
+БГ: поправки по външния отчет и одобрените макети; без нова логика/права.
+Проследяването на дефектите и неприключилите проверки е в свързания документ.
 
 ## 2026-10-04 — public presentation privacy
 

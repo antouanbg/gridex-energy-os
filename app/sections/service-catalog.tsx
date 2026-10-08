@@ -6,6 +6,7 @@ import { documentationLink } from '../lib/documentation';
 import { serviceLabel } from '../lib/service-labels';
 import {sectionHref} from '../lib/routes';
 import {translate} from '../i18n/catalog';
+import {approvedServiceCodes} from '../lib/admin-service-catalog';
 
 const stages: Record<string,{bg:string;en:string}> = {
   awaiting_platform:{bg:'Чака разрешение от администратора на платформата',en:'Awaiting platform administrator'},
@@ -91,7 +92,7 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
         {user.memberships.map(m=><option key={m.organisationId} value={m.organisationId}>{m.organisationId}</option>)}
       </select></label>}
     {!loading&&!organisationId&&<p>{en?'An active organisation is required.':'Нужна е активна организация.'}</p>}
-    {services.map(service=>{
+    {[...services].sort((a,b)=>approvedServiceCodes.indexOf(a.code as typeof approvedServiceCodes[number])-approvedServiceCodes.indexOf(b.code as typeof approvedServiceCodes[number])).map(service=>{
       const item=requests.find(row=>row.organisationId===organisationId&&row.serviceCode===service.code&&row.state==='open')
         ||requests.find(row=>row.organisationId===organisationId&&row.serviceCode===service.code);
       const platform=user?.permissions.includes('platform:manage')===true;

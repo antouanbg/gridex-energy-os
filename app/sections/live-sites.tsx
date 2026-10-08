@@ -3,6 +3,7 @@ import type {FormEvent} from 'react';
 import type { GridexApiClient,GridexSite } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { sectionHref } from '../lib/routes';
+import { documentationLink } from '../lib/documentation';
 
 export function LiveSites({sites,status,onSelect,onCreated,organisations=[],api,lang,allowCreate=true}:{sites:GridexSite[];status:'loading'|'ready'|'error';onSelect:(site:GridexSite)=>void;onCreated:(site:GridexSite)=>void;organisations?:{organisationId:string;role:string;allSites:boolean}[];api:GridexApiClient;lang:UiLanguage;allowCreate?:boolean}) {
   const t=(bg:string,en:string)=>lang==='en'?en:bg;
@@ -42,8 +43,8 @@ export function LiveSites({sites,status,onSelect,onCreated,organisations=[],api,
     {allowCreate&&!!adminOrganisations.length&&<section className="card config-card device-provisioning device-access">
       <h2>{t('Нов Обект','New Site')}</h2>
       <p>{t('Само администратор на организация може да създаде Обект. Той се записва първо в OpenRemote; устройствата се добавят отделно.','Only an organisation administrator can create a Site. It is recorded in OpenRemote first; devices are added separately.')}</p>
-      <p><a href="https://doc.gridex.tech/organisations-and-access/#sites-and-devices" target="_blank" rel="noopener noreferrer">{t('Помощ за Обекти и права','Help with Sites and access')} ↗</a></p>
-      <form onSubmit={create}>
+      <p><a href={`${documentationLink('members',lang).href}#sites-and-devices`} target="_blank" rel="noopener noreferrer">{t('Помощ за Обекти и права','Help with Sites and access')} ↗</a></p>
+      <form className="site-create-form" onSubmit={create}>
         {adminOrganisations.length>1&&<label>{t('Организация','Organisation')}<select value={organisationId} onChange={event=>setOrganisationId(event.target.value)}>{adminOrganisations.map(item=><option key={item.organisationId} value={item.organisationId}>{item.organisationId}</option>)}</select></label>}
         <label>{t('Име на Обекта','Site name')}<input required maxLength={120} value={name} onChange={event=>setName(event.target.value)}/></label>
         <label>{t('Часова зона','Time zone')}<input required maxLength={80} value={timezone} onChange={event=>setTimezone(event.target.value)}/></label>

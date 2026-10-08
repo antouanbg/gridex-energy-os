@@ -7,6 +7,7 @@ import { type UiLanguage } from "./i18n/messages";
 import { bgnToEur } from "./lib/currency";
 import { TranslationSuggestion } from './sections/translation-suggestion';
 import { ProfileHelp } from './sections/profile-help';
+import { identityRole } from './lib/identity-role';
 import { ServiceCatalog } from './sections/service-catalog';
 import { documentationLink } from './lib/documentation';
 import { readRoute, sectionHref } from './lib/routes';
@@ -53,7 +54,7 @@ function initials(name:string):string {
   return name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()).join("") || "GX";
 }
 
-function sessionToUser(session:GridexAuthSession):DemoUser {
+function sessionToUser(session:GridexAuthSession,identity:GridexUser):DemoUser {
   const normalisedRoles=session.roles.map(item=>item.toLowerCase());
   const role=normalisedRoles.some(item=>item.includes("admin"))
     ? ["Администратор","Administrator","admin"] as const
@@ -68,8 +69,8 @@ function sessionToUser(session:GridexAuthSession):DemoUser {
     initialsBg:initials(session.name),
     initialsEn:initials(session.name),
     email:session.email,
-    roleBg:role[0],
-    roleEn:role[1],
+    roleBg:identityRole(identity,'bg'),
+    roleEn:identityRole(identity,'en'),
     roleId:role[2],
   };
 }
@@ -330,7 +331,7 @@ export default function Home() {
         setIntegrationError(document.documentElement.lang==='en'?'Identity mismatch. Sign in again.':'Несъответствие на профила. Влезте отново.');
         return;
       }
-      const user=sessionToUser({ ...session, email:membershipIdentity.email||session.email, name:membershipIdentity.name||session.name, roles: membershipIdentity.roles });
+      const user=sessionToUser({ ...session, email:membershipIdentity.email||session.email, name:membershipIdentity.name||session.name, roles: membershipIdentity.roles }, membershipIdentity);
       verifiedIdentity.current={subject:membershipIdentity.subject,realm:membershipIdentity.realm||runtimeConfig.realm,email:user.email,name:user.nameEn};
       clearGridexLoginIntent();
       setSessionUser(user);setAccountIdentity(membershipIdentity);setAuthState('authenticated');
@@ -481,7 +482,7 @@ export default function Home() {
         if(!email){expireSession();return;}
         const name=identity.name||verifiedIdentity.current?.name||email;
         verifiedIdentity.current={subject:identity.subject,realm:identity.realm||verifiedIdentity.current?.realm,email,name};
-        setSessionUser(sessionToUser({subject:identity.subject,email,name,preferredUsername:identity.preferredUsername||'',roles:identity.roles}));
+        setSessionUser(sessionToUser({subject:identity.subject,email,name,preferredUsername:identity.preferredUsername||'',roles:identity.roles},identity));
         setAccountIdentity(identity);
         setLiveSites(current=>JSON.stringify(current)===JSON.stringify(sites)?current:sites);
         setSitesStatus('ready');setSessionCheckError(false);
@@ -672,7 +673,7 @@ export default function Home() {
           {dataMode==='live'&&serviceCheckFailed&&view==='market'&&<section className="integration-warning" role="alert">{translate(lang,'access.unavailable')}</section>}
           <div key={sessionUser?.roleId??'anonymous'} className="portal-view" data-testid={"section-"+view} data-view={view}>
             {view==='devices'&&<section className="card config-card" data-no-translate><strong>{dataMode==='live'?(lang==='en'?'LIVE · Account data':'LIVE · Данни от акаунта'):(lang==='en'?'DEMO · Sample devices':'DEMO · Примерни устройства')}</strong><p>{lang==='en'?'Device connectivity is shown separately. A signed-in session does not confirm a heartbeat.':'Свързаността на устройствата се показва отделно. Активната сесия не потвърждава heartbeat.'}</p></section>}
-        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:marketDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Service unavailable':'Услугата не е достъпна'}</h2><p>{translate(lang,serviceCheckFailed?'access.unavailable':'access.serviceNotGranted')}</p></section>:administrationDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Administrator access required':'Нужни са администраторски права'}</h2><p>{lang==='en'?'The Users and invitations section is available only to organisation or platform administrators. Your permitted Sites and Devices remain available for viewing.':'Разделът за клиенти и покани е само за администратори на организация или на платформата. Разрешените Ви Обекти и Устройства остават достъпни за преглед.'}</p></section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} allowCreate={view==='sites'} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
+        {view==='not-found'?<section className="card"><h2>{lang==='en'?'Page not found':'Страницата не е намерена'}</h2><a href={sectionHref('overview')}>{lang==='en'?'Home':'Начало'}</a></section>:dataMode==='live'&&backendState!=='online'&&view!=='login'&&view!=='about'&&view!=='help'?<section className="card config-card" role="status"><h2>{authState==='checking'?(lang==='en'?'Checking your session…':'Проверка на сесията…'):(lang==='en'?'Account data is unavailable':'Данните от акаунта са недостъпни')}</h2><p>{lang==='en'?'No demo data is shown while identity or API access is being verified.':'Не показваме демо данни, докато се проверяват сесията и достъпът до API.'}</p>{authState!=='checking'&&<button className="primary-btn" onClick={openLogin}>{lang==='en'?'Check sign-in':'Провери входа'}</button>}</section>:marketDenied?<section className="card config-card" role="status"><h2>{lang==='en'?'Service unavailable':'Услугата не е достъпна'}</h2><p>{translate(lang,serviceCheckFailed?'access.unavailable':'access.serviceNotGranted')}</p></section>:administrationDenied?<section className="card config-card" role="status"><div className="admin-identity"><span className="admin-status">{accountIdentity&&identityRole(accountIdentity,lang)}</span><span>{accountIdentity?.email}</span><small>{accountIdentity?.name||translate(lang,'users.namesMissing')}</small></div><h2>{translate(lang,'users.adminOnly')}</h2><p>{translate(lang,'users.deniedExplanation')}</p><a className="primary-btn" href={sectionHref('services')}>{translate(lang,'users.goToMyServices')}</a></section>:dataMode==='live'&&(view==='sites'||((view==='devices'||view==='gateway')&&!selectedSiteId))?<LiveSites sites={liveSites} status={sitesStatus} lang={lang} api={apiClient} allowCreate={view==='sites'} organisations={accountIdentity?.memberships||[]} onCreated={item=>{setLiveSites(current=>[...current,item]);setSelectedSiteId(item.id);setSite(item.name);navigate('devices',item.id);}} onSelect={item=>{setSelectedSiteId(item.id);setSite(item.name);setLiveSnapshot(null);navigate('devices',item.id);}}/>:dataMode==="live"&&(view==='devices'||view==='gateway')?<DeviceInformation key={selectedSiteId} configure={view==='devices'&&accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&['administrator','integrator'].includes(m.role))===true} canCommission={accountIdentity?.memberships?.some(m=>m.organisationId===liveSites.find(s=>s.id===selectedSiteId)?.organisationId&&m.role==='administrator')===true} api={apiClient} siteId={selectedSiteId} lang={lang}/>:dataMode==="live"&&!liveViews.has(view)?<LiveModulePending view={view} lang={lang} onDevices={()=>navigate('devices')}/>:<>
         {view === "overview" && <Overview auto={auto} setAuto={setAuto} navigate={navigate} notify={notify} lang={lang} dataMode={dataMode} snapshot={liveSnapshot}/>}
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}

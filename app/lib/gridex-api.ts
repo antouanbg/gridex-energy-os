@@ -35,7 +35,7 @@ export type GridexUser = {
   preferredUsername?: string;
   roles: string[];
   permissions: string[];
-  memberships?: { organisationId: string; role: string; allSites: boolean }[];
+  memberships?: { organisationId: string; organisationName?: string; role: string; allSites: boolean }[];
 };
 
 export type GridexInvitation = { id: string; organisationId: string; role: string; siteIds: string[]; expiresAt: string };

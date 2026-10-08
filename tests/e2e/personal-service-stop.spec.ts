@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-for(const lang of ['bg','en'] as const)test('personal cancel and stop persist through refresh '+lang,async({page,context})=>{
+for(const lang of ['bg','en'] as const)test('personal cancel and stop persist through refresh '+lang,async({page,context},info)=>{
   let nonce='';let granted=true;let state='open';let stopped=0;let cancelled=0;
   const org='11111111-1111-4111-8111-111111111111';
   const jwt=(c:object)=>[Buffer.from('{}').toString('base64url'),Buffer.from(JSON.stringify(c)).toString('base64url'),'test'].join('.');
@@ -36,4 +36,7 @@ for(const lang of ['bg','en'] as const)test('personal cancel and stop persist th
   await expect(page.getByRole('button',{name:lang==='bg'?'Заяви':'Request',exact:true})).toHaveCount(2);
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  const row=page.locator('.service-catalog .service-grant-row').first();
+  expect(await row.locator('strong').evaluate(el=>getComputedStyle(el).display)).toBe('block');
+  await page.screenshot({path:info.outputPath('personal-services-mobile-'+lang+'.png'),fullPage:true});
 });

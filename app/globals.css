@@ -1166,10 +1166,11 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 /* Canonical three-role template: one visible service-first administration page.
    Scope is deliberate: no portal navigation or ordinary-user workflow changes. */
 .invitation-page, .service-catalog {
-  --admin-ink:#18382c; --admin-muted:#63776d; --admin-line:#dce8df;
-  --admin-green:#0b4230; --admin-soft:#eaf4ed; color:var(--admin-ink);
+  --admin-ink:#193f34; --admin-muted:#63776d; --admin-line:#dbe7df;
+  --admin-green:#0c4433; --admin-soft:#eaf4ec; color:var(--admin-ink);
 }
 .platform-service-workspace { display:grid; gap:16px; min-width:0; }
+.admin-service-summary { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 12px; }
 .invitation-page .invitation-hero { background:none; border:0; box-shadow:none; padding:0; border-radius:0; align-items:start; }
 .invitation-page .invitation-hero h2 { color:var(--admin-ink); font-size:24px; letter-spacing:0; margin:0 0 5px; }
 .invitation-page .invitation-hero p, .invitation-page .admin-role-caption { color:var(--admin-muted); }
@@ -1177,7 +1178,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .invitation-page .invitation-steps, .invitation-page .invitation-panel>.profile-kicker { display:none; }
 .invitation-page .invitation-hero .profile-action { background:white; border-color:var(--admin-line); color:var(--admin-ink); }
 .invitation-page .admin-panel, .invitation-page .invitation-panel, .service-catalog {
-  padding:17px; border:1px solid var(--admin-line); border-radius:15px; background:#fff; box-shadow:none;
+  padding:20px; border:1px solid var(--admin-line); border-radius:16px; background:#fff; box-shadow:none;
 }
 .invitation-page .invitation-panel h2, .invitation-page .admin-section-heading h2,
 .invitation-page h3, .service-catalog h3 { font-size:16px; letter-spacing:0; margin:0 0 7px; color:var(--admin-ink); }
@@ -1192,6 +1193,26 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 .service-catalog .primary-btn, .service-catalog .secondary-btn {
   min-height:40px; padding:9px 13px; border-radius:10px; font-size:12px; font-weight:700; box-shadow:none;
 }
+.service-catalog .service-grant-row { display:flex; align-items:center; flex-wrap:wrap; }
+.service-catalog .service-grant-row>span { flex:1 1 260px; min-width:0; }
+.service-catalog .service-grant-row strong,.service-catalog .service-grant-row small { display:block; overflow-wrap:anywhere; }
+.service-catalog .service-grant-row small { margin-top:6px; }
+.service-catalog .service-grant-row>div { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.service-catalog .service-grant-row>div>p { flex-basis:100%; }
+.service-catalog .service-grant-row .secondary-btn { display:inline-flex; align-items:center; justify-content:center; }
+.site-create-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:20px; }
+.site-create-form label { display:grid; gap:8px; min-width:0; color:#53685c; font-size:14px; font-weight:600; }
+.site-create-form input,.site-create-form select { width:100%; min-width:0; border:1px solid #d5e0d8; border-radius:9px; padding:12px; background:#fff; color:#31473d; font:inherit; min-height:44px; }
+.site-create-form input:focus-visible,.site-create-form select:focus-visible { outline:2px solid #24b56a; outline-offset:3px; }
+.site-create-form>button { grid-column:1/-1; justify-self:start; }
+@media(max-width:760px){
+  .service-catalog .service-grant-row>span { flex-basis:100%; }
+  .service-catalog .primary-btn,.service-catalog .secondary-btn { min-height:44px; }
+  .site-create-form { grid-template-columns:minmax(0,1fr); }
+  .site-create-form input,.site-create-form select { font-size:16px; }
+}
+/* At 1024px the full sidebar leaves less than the flow diagram's minimum. */
+@media(min-width:681px) and (max-width:1200px){.hero-grid { grid-template-columns:minmax(0,1fr); }}
 .invitation-page .primary-btn, .service-catalog .primary-btn { background:var(--admin-green); border:1px solid var(--admin-green); color:#f4faef; }
 .invitation-page .secondary-btn, .service-catalog .secondary-btn { background:#fff; border:1px solid var(--admin-line); color:var(--admin-ink); text-decoration:none; }
 .invitation-page button:disabled { cursor:not-allowed; opacity:.55; }
@@ -1219,7 +1240,9 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
   .invitation-page .admin-ledger-tools { grid-template-columns:1fr; }
   .invitation-page .admin-organisation-choice .admin-search { min-width:0; }
   .admin-organisation-choice .admin-status { margin-top:10px; }
-  .invitation-page .admin-service-actions { width:100%; justify-content:flex-start; }
+  .invitation-page .admin-service-actions { width:100%; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; }
+  .invitation-page .admin-service-actions .admin-status { border-radius:9px; }
+  .invitation-page .primary-btn,.invitation-page .secondary-btn { min-height:44px; }
 }
 
 /* Approved five-column register: same information at desktop and phone widths. */
@@ -1240,7 +1263,7 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 @media(max-width:760px){
   .member-register thead {display:none;}
   .member-register,.member-register tbody,.member-register tr,.member-register td {display:block;width:100%;}
-  .member-register tr {padding:12px 0;border-bottom:1px solid #dce9e2;}
+  .member-register tr {padding:12px 0;border:1px solid #dbe7df;border-radius:12px;margin:12px 0;}
   .member-register td {border:0;padding:8px 12px;overflow-wrap:anywhere;}
   .member-register td::before {content:attr(data-label);display:block;color:#61766d;font-size:12px;margin-bottom:4px;}
 }
