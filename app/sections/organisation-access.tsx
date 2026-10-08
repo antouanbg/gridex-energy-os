@@ -55,8 +55,10 @@ export function OrganisationAccessAdmin({ api, lang, children }: { api: GridexAp
   const currentPage=Math.min(page,pages-1);
   return <div className="platform-service-workspace" data-no-translate>
     <section className="admin-panel"><h3>{en?'Approved organisation':'Одобрена организация'}</h3>
+      <div className="admin-selection-grid">
       <div className="admin-organisation-choice"><label className="admin-search">{en?'Organisation':'Организация'}<select value={selected?.id||''} onChange={event=>setSelectedId(event.target.value)}><option value="" disabled>{en?'Choose an active organisation':'Изберете активна организация'}</option>{active.map(item=><option value={item.id} key={item.id}>{item.name} · {labels.active}</option>)}</select></label>{selected&&<span className="admin-status">{labels.active}</span>}</div>
       {selected&&<OrganisationAdministrators key={'administrators-'+selected.id} api={api} lang={lang} organisationId={selected.id}/>}
+      </div>
       {!loaded&&!notice&&<p role="status">{en?'Loading organisations…':'Зареждане на организациите…'}</p>}
       {loaded&&!active.length&&<p>{en?'No approved customer organisations.':'Няма одобрени клиентски организации.'}</p>}
       {notice&&<p role="status">{notice}</p>}

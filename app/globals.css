@@ -1171,6 +1171,10 @@ h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
 }
 .platform-service-workspace { display:grid; gap:16px; min-width:0; }
 .admin-service-summary { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 12px; }
+.admin-selection-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
+.admin-selected-administrators { min-width:0; overflow-wrap:anywhere; padding-top:14px; }
+.admin-selected-administrators p { margin:6px 0; }
+@media(max-width:680px){.admin-selection-grid{grid-template-columns:minmax(0,1fr);gap:0}.admin-selected-administrators{padding-top:0}}
 .invitation-page .invitation-hero { background:none; border:0; box-shadow:none; padding:0; border-radius:0; align-items:start; }
 .invitation-page .invitation-hero h2 { color:var(--admin-ink); font-size:27px; letter-spacing:0; margin:0 0 5px; }
 .invitation-page .invitation-hero p, .invitation-page .admin-role-caption { color:var(--admin-muted); }
