@@ -33,6 +33,17 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
   const [error,setError]=useState('');
   const [notice,setNotice]=useState('');
   const [loading,setLoading]=useState(true);
+  const [organisationGrants,setOrganisationGrants]=useState<{id:string;identity:GridexUser|null;codes:string[]}|null>(null);
+  const isAdmin=user?.memberships?.some(m=>m.organisationId===organisationId&&m.role==='administrator')===true;
+  useEffect(()=>{
+    const abort=new AbortController();
+    if(isAdmin&&organisationId&&!user?.permissions.includes('platform:manage')){
+      void api.organisationServices(organisationId,abort.signal).then(result=>{
+        if(!abort.signal.aborted)setOrganisationGrants({id:organisationId,identity:user,codes:result.services.filter(s=>s.enabled).map(s=>s.code)});
+      }).catch(()=>{if(!abort.signal.aborted)setOrganisationGrants(null);});
+    }
+    return()=>abort.abort();
+  },[api,organisationId,isAdmin,user]);
   async function refresh(){
     const [identity,catalog,pending,enabled]=await Promise.all([
       api.me(),api.serviceCatalog(),api.myServiceRequests(),api.myServices(),
@@ -98,10 +109,12 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
       const platform=user?.permissions.includes('platform:manage')===true;
       const enabled=platform||granted.some(item=>item.code===service.code&&item.organisationId===organisationId);
       const pending=item?.state==='open'&&item.stage!=='active';
+      const organisationKnown=organisationGrants?.id===organisationId&&organisationGrants.identity===user;
+      const selfGrant=!platform&&isAdmin&&organisationKnown&&organisationGrants.codes.includes(service.code)&&!enabled;
       return <div className="service-grant-row" key={service.code}>
         <span><strong>{serviceLabel(service.code,lang,service.description)}</strong>
           {service.code==='day_ahead'&&<small>{en?'Country: Bulgaria (BG) · one bidding zone':'Държава: България (BG) · една ценова зона'}</small>}
-          <small>{!service.requestable?en?'Coming soon':'Предстои':enabled?en?'Enabled':'Разрешена':item?.stage==='cancelled'?translate(lang,'services.cancelled'):item?.stage==='revoked'?translate(lang,'services.stopped'):item?stages[item.stage]?.[lang]:en?'May be requested':'Може да се заяви'}</small>
+          <small>{!service.requestable?en?'Coming soon':'Предстои':enabled?translate(lang,'access.personalApproved'):selfGrant?translate(lang,'access.orgOnly'):isAdmin&&!platform&&!organisationKnown?translate(lang,'access.checkFailed'):item?.stage==='cancelled'?translate(lang,'services.cancelled'):item?.stage==='revoked'?translate(lang,'services.stopped'):pending?stages[item!.stage]?.[lang]:en?'May be requested':'Може да се заяви'}</small>
           {item&&<small>{en?'Requested':'Заявена'}: {new Date(item.createdAt).toLocaleString(en?'en-GB':'bg-BG')}</small>}
           {item?.events.length&&<details><summary>{en?'Request history':'История на заявката'}</summary>
             <ul>{item.events.map((event,index)=><li key={`${event.at}-${index}`}>
@@ -116,7 +129,8 @@ export function ServiceCatalog({api,lang}:{api:GridexApiClient;lang:UiLanguage})
             :<button type="button" className="secondary-btn" disabled={Boolean(busy)} onClick={()=>setStopConfirm(service.code)}>{translate(lang,'services.stop')}</button>}
         </div>}
         {!platform&&!enabled&&pending&&item&&<button type="button" className="secondary-btn" disabled={Boolean(busy)} onClick={()=>void remove(service.code,item.id)}>{translate(lang,'services.cancel')}</button>}
-        {service.requestable&&!enabled&&!pending&&organisationId&&<button type="button" className="secondary-btn" disabled={Boolean(busy)}
+        {selfGrant&&service.requestable&&<a className="secondary-btn" href={sectionHref('members')}>{translate(lang,'access.selfGrant')}</a>}
+        {service.requestable&&!enabled&&!selfGrant&&!pending&&organisationId&&(!isAdmin||organisationKnown)&&<button type="button" className="secondary-btn" disabled={Boolean(busy)}
           onClick={()=>void request(service.code)}>{busy===service.code?en?'Sending…':'Изпращане…':en?'Request':'Заяви'}</button>}
       </div>;
     })}

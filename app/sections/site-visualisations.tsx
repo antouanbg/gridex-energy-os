@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { GridexApiError, type GridexApiClient, type SiteVisualisationHistory } from '../lib/gridex-api';
+import { GridexApiError, type GridexApiClient, type SiteVisualisationHistory, type ServiceAccessDetails, type GridexUser } from '../lib/gridex-api';
 import type { UiLanguage } from '../i18n/messages';
 import { sectionHref } from '../lib/routes';
 import { translate } from '../i18n/catalog';
@@ -46,12 +46,15 @@ function Chart({points,unit,lang}:{points:{x:number;y:number}[];unit:string;lang
   </div>;
 }
 
-export function SiteVisualisations({api,siteId,siteName,lang}:{api:GridexApiClient;siteId:string;siteName:string;lang:UiLanguage}){
+export function SiteVisualisations({api,siteId,siteName,organisationId,lang}:{api:GridexApiClient;siteId:string;siteName:string;organisationId?:string;lang:UiLanguage}){
   const en=lang==='en';
   const [history,setHistory]=useState<SiteVisualisationHistory|null>(null);
   const [selected,setSelected]=useState('');
   const [state,setState]=useState<'loading'|'ready'|'denied'|'site-denied'|'error'>('loading');
   const [revision,setRevision]=useState(0);
+  const [access,setAccess]=useState<ServiceAccessDetails>();
+  const [identity,setIdentity]=useState<GridexUser|null>(null);
+  const [pending,setPending]=useState(false);
   useEffect(()=>{
     if(!siteId)return;
     const abort=new AbortController();
@@ -60,10 +63,20 @@ export function SiteVisualisations({api,siteId,siteName,lang}:{api:GridexApiClie
       setHistory(result);const first=result.items.find(item=>item.points.length)||result.items[0];
       setSelected(first?`${first.assetId}:${first.metric}`:'');
       setState('ready');
-    }).catch(error=>{if(!abort.signal.aborted)setState(error instanceof GridexApiError&&error.status===403
-      ?error.code==='service_not_enabled'?'denied':'site-denied':'error');});
+    }).catch(error=>{
+      if(abort.signal.aborted)return;
+      setState(error instanceof GridexApiError&&error.status===403
+        ?error.code==='service_not_enabled'?'denied':'site-denied':'error');
+      if(error instanceof GridexApiError&&error.code==='service_not_enabled'){
+        setAccess(error.details);
+        void api.me(abort.signal).then(result=>{if(!abort.signal.aborted)setIdentity(result);}).catch(()=>{});
+        void api.myServiceRequests(abort.signal).then(result=>{
+          if(!abort.signal.aborted)setPending(result.requests.some(r=>r.organisationId===organisationId&&r.serviceCode==='visualisations'&&r.state==='open'&&r.stage!=='active'));
+        }).catch(()=>{});
+      }
+    });
     return()=>abort.abort();
-  },[api,siteId,revision]);
+  },[api,siteId,organisationId,revision]);
   if(!siteId)return <section className="card live-market-empty"><h2>{en?'Select a Site':'Изберете Обект'}</h2>
     <p>{en?'Charts require a Site you are allowed to view.':'Графиките изискват Обект, до който имате достъп.'}</p>
     <a className="secondary-btn" href={sectionHref('sites')}>{en?'My Sites':'Моите обекти'} →</a></section>;
@@ -79,7 +92,16 @@ export function SiteVisualisations({api,siteId,siteName,lang}:{api:GridexApiClie
     </section>
     {state==='loading'&&<section className="card live-market-empty" role="status">{en?'Loading measurements…':'Зареждане на измерванията…'}</section>}
     {state==='denied'&&<section className="card live-market-empty" role="status"><h3>{en?'Visualisations are not enabled':'Визуализациите не са разрешени'}</h3>
-      <p>{translate(lang,'graphs.serviceDenied')}</p></section>}
+      <p>{translate(lang,'graphs.serviceDenied')}</p>
+      {pending&&<p>{translate(lang,'access.pendingApproval')}</p>}
+      {access?<><p>{translate(lang,access.organisationEnabled?'access.orgApproved':'access.orgDenied')}</p>
+        <p>{translate(lang,access.memberEnabled?'access.personalApproved':'access.personalDenied')}</p></>
+        :<p>{translate(lang,'access.checkFailed')}</p>}
+      {identity&&!identity.permissions.includes('platform:manage')&&(
+        identity.memberships?.some(m=>m.organisationId===organisationId&&m.role==='administrator')
+          ?access?.organisationEnabled&&!access.memberEnabled&&<a className="secondary-btn" href={sectionHref('members')}>{translate(lang,'access.selfGrant')}</a>
+          :<a className="secondary-btn" href={sectionHref('services')}>{translate(lang,'access.requestService')}</a>)}
+      </section>}
     {state==='site-denied'&&<section className="card live-market-empty" role="status"><h3>{translate(lang,'graphs.siteDenied')}</h3>
       <p>{translate(lang,'graphs.siteDeniedHelp')}</p></section>}
     {state==='error'&&<section className="card live-market-empty" role="alert"><h3>{en?'Measurements could not be loaded':'Измерванията не могат да се заредят'}</h3>

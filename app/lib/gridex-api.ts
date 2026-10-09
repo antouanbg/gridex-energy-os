@@ -266,8 +266,9 @@ export type GridexAlarm = {
   createdAt: string;
 };
 
+export type ServiceAccessDetails = {missing: 'member'|'organisation'; organisationEnabled:boolean; memberEnabled:boolean};
 export class GridexApiError extends Error {
-  constructor(message: string, public readonly status: number, public readonly code?: string) {
+  constructor(message: string, public readonly status: number, public readonly code?: string, public readonly details?:ServiceAccessDetails) {
     super(message);
     this.name = "GridexApiError";
   }
@@ -475,7 +476,11 @@ export class GridexApiClient {
     const response=await this.authorizedFetch(`/api/v1/sites/${encodeURIComponent(siteId)}/visualisations/history`,{signal,cache:'no-store'});
     if(!response.ok){
       const body=await response.json().catch(()=>({}));
-      throw new GridexApiError('Site history unavailable',response.status,typeof body.error==='string'?body.error:undefined);
+      const d=body.details;
+      const details=body.error==='service_not_enabled'&&d&&(d.missing==='member'||d.missing==='organisation')
+        &&typeof d.organisationEnabled==='boolean'&&typeof d.memberEnabled==='boolean'
+        ?{missing:d.missing,organisationEnabled:d.organisationEnabled,memberEnabled:d.memberEnabled}:undefined;
+      throw new GridexApiError('Site history unavailable',response.status,typeof body.error==='string'?body.error:undefined,details);
     }
     return response.json();
   }

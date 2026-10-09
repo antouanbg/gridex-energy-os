@@ -678,7 +678,7 @@ export default function Home() {
         {view === "customers" && <Customers navigate={navigate} notify={notify} lang={lang}/>}
         {view === "sites" && <Sites setSite={setSite} navigate={navigate} lang={lang}/>}
         {view === "visualisations" && (dataMode==='live'
-          ? <SiteVisualisations key={selectedSiteId} api={apiClient} siteId={selectedSiteId} siteName={liveSites.find(item=>item.id===selectedSiteId)?.name||''} lang={lang}/>
+          ? <SiteVisualisations key={selectedSiteId} api={apiClient} siteId={selectedSiteId} organisationId={liveSites.find(item=>item.id===selectedSiteId)?.organisationId} siteName={liveSites.find(item=>item.id===selectedSiteId)?.name||''} lang={lang}/>
           : <><p>{translate(lang,'demo.graphNote')}</p><Devices notify={notify} lang={lang} historyOnly/></>)}
         {dataMode==='live'&&['assets','battery','inverter','evse','loads'].includes(view)&&<EnergyInventoryView state={energyInventory} sites={liveSites} view={view} lang={lang}/>}
         {dataMode==='demo'&&['inverter','evse'].includes(view)&&<DemoAssetInventory view={view} lang={lang}/>}

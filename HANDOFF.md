@@ -1,5 +1,18 @@
 # Frontend login handoff
 
+## 2026-10-09 — service approval clarity (review only)
+
+Owner-approved scope: preserve organisation + member grants; distinguish their
+status in the catalogue and Site graphs. Organisation admin with organisation
+approval but no personal grant follows Settings → Users → own row → My services;
+ordinary member uses Services requests. No platform self-approval or broader Site access.
+Backend supplies safe missing-level details only after verified membership;
+foreign Site checks remain earlier and disclose no service status.
+BG/EN documentation describes the same distinction. Existing approved layout is retained.
+Backend entitlement tests and 12 BG/EN desktop/mobile fixture browser cases pass.
+No real grants, invitations, migration, restart or deployment were performed.
+PR review only; real three-account acceptance remains pending after authorised publication.
+
 ## 2026-10-08 — remaining report corrections, source-ready
 
 N1 now uses existing verified hardware and same-organisation personal grants;

@@ -39,7 +39,7 @@ test('Site visualisations retain their URL and show only measured history on des
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.route('**/visualisations/history',route=>route.fulfill({status:403,json:{error:'service_not_enabled'}}));
   await page.reload();
-  await expect(page.getByText('Заявете услугата в „Услуги“. Нужни са активни права за организацията и за Вашия акаунт.')).toBeVisible();
+  await expect(page.getByText('Нужни са активни права за организацията и за Вашия акаунт.')).toBeVisible();
   await page.route('**/visualisations/history',route=>route.fulfill({status:403,json:{error:'permission_denied'}}));
   await page.reload();
   await expect(page.getByRole('heading',{name:'Няма потвърден достъп до измерванията на Обекта'})).toBeVisible();
