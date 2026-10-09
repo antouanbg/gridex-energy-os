@@ -1,5 +1,28 @@
 # Frontend login handoff
 
+## 2026-10-09 — service-status rollout authorised and deployed
+
+Supersedes review-only status below. Owner requested deployment. Backend PR105
+merged; API-only backup/rollout succeeded with unchanged effective environment.
+Running service-entitlements SHA256 matches source (91402a18f281fbf200a28aaf3ba041ce3af0d9190d6aec5e62d6429b4c58d8d2).
+Frontend PR112 merged; public release.json is 99a027d109afd580d1afd8da83ae025ae9134f79.
+Docs PR56 merged; deploy-local.sh completed BG/EN and CSS/JS MIME checks.
+Only gridex-api and docs-site were recreated; no grants, mail or migration.
+Local auth regression passes; normal-DNS public auth checks fail from this Mac
+(VPN/external route not established). Forced-local trusted TLS: master 404,
+anonymous Manager 401. External three-account browser acceptance remains OPEN.
+Plan/subscription is excluded from liveViews and has only a demo implementation;
+do not enable fake commercial plans. Owner asked about it; a scoped informational
+replacement has been proposed and is awaiting approval.
+Docs npm ci reports 47 dependency advisories (15 moderate/16 high/16 critical).
+No forced dependency upgrades: separate triage required; successful build is
+not a security clearance. Existing prior dirty worktrees were preserved.
+
+БГ: внедрени са поправката за статуса и помощта; без промяна на реални права.
+Външният тест с трите роли остава отворен. План/абонамент още няма реална
+реализация; предложен е информационен екран, чака одобрение. Зависимостите
+на документацията изискват отделна проверка на докладваните уязвимости.
+
 ## 2026-10-09 — service approval clarity (review only)
 
 Owner-approved scope: preserve organisation + member grants; distinguish their
